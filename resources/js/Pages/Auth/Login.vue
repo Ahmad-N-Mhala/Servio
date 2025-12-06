@@ -40,8 +40,7 @@
                 <p class="mt-3 text-lg text-gray-600">Sign in to access your restaurant dashboard</p>
             </div>
 
-            <form method="POST" action="/en/login" class="bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 md:p-10 border border-white/50 transition-all duration-300">
-                <input type="hidden" name="_token" :value="csrfToken">
+            <form @submit.prevent="submit" class="bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 md:p-10 border border-white/50 transition-all duration-300">
                 
                 <div v-if="form.errors.email" class="mb-6 p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl animate-shake">
                     <div class="flex items-start gap-3">
@@ -102,7 +101,7 @@
                         />
                         <span class="ml-2 text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Remember me</span>
                     </label>
-                    <a href="#" class="text-sm font-semibold text-primary hover:text-primary-hover transition-colors">Forgot password?</a>
+                    <Link :href="route('password.request')" class="text-sm font-semibold text-primary hover:text-primary-hover transition-colors">Forgot password?</Link>
                 </div>
 
                 <button
@@ -124,9 +123,11 @@
 </template>
 
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import Logo from '@/Components/Logo.vue';
+
+const route = (window as any).route;
 
 const form = useForm({
     email: '',
@@ -142,10 +143,35 @@ const clearErrors = () => {
     form.clearErrors();
 };
 
-const csrfToken = computed(() => {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute('content') : '';
-});
+const submit = () => {
+    console.log('Submit function called!');
+    console.log('Form data:', { email: form.email, password: form.password, remember: form.remember });
+    
+    // Get the current URL path to extract locale
+    const currentPath = window.location.pathname;
+    // Extract locale from path (e.g., /en/login -> en)
+    const match = currentPath.match(/^\/([a-z]{2})\//);
+    const locale = match ? match[1] : 'en';
+    const loginUrl = `/${locale}/login`;
+    
+    console.log('Login URL:', loginUrl);
+    
+    form.post(loginUrl, {
+        preserveScroll: true,
+        onStart: () => {
+            console.log('Form submission started');
+        },
+        onSuccess: () => {
+            console.log('Form submission successful');
+        },
+        onError: () => {
+            console.error('Login failed', form.errors);
+        },
+        onFinish: () => {
+            console.log('Form submission finished');
+        }
+    });
+};
 </script>
 
 <style scoped>

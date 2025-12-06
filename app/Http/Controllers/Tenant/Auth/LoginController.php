@@ -19,27 +19,16 @@ class LoginController extends Controller
 
     public function store(Request $request)
     {
-        \Log::info('Login attempt received', [
-            'email' => $request->email,
-            'remember' => $request->boolean('remember'),
-            'tenant_id' => tenancy()->tenant?->id,
-        ]);
-
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        \Log::info('Credentials validated, attempting authentication');
-
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            \Log::info('Authentication successful', ['user_id' => Auth::id()]);
             $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard'));
         }
-
-        \Log::warning('Authentication failed for email: ' . $request->email);
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',

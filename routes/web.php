@@ -52,6 +52,7 @@ foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $propertie
             'localizationRedirect',
             'localeViewPath',
             \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
+            \App\Http\Middleware\InitializeTenancyByDomainOrFail::class,
         ],
     ], function () {
         Route::get('/', function () {
@@ -62,6 +63,11 @@ foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $propertie
         Route::post('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'store'])->name('login.store');
 
         Route::post('/logout', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'destroy'])->name('logout');
+
+        Route::get('/forgot-password', [\App\Http\Controllers\Tenant\Auth\PasswordResetLinkController::class, 'create'])->name('password.request');
+        Route::post('/forgot-password', [\App\Http\Controllers\Tenant\Auth\PasswordResetLinkController::class, 'store'])->name('password.email');
+        Route::get('/reset-password/{token}', [\App\Http\Controllers\Tenant\Auth\NewPasswordController::class, 'create'])->name('password.reset');
+        Route::post('/reset-password', [\App\Http\Controllers\Tenant\Auth\NewPasswordController::class, 'store'])->name('password.store');
 
         Route::middleware(['auth'])->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
