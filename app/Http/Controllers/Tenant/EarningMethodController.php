@@ -12,16 +12,44 @@ use Inertia\Response;
 
 class EarningMethodController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $restaurant = \App\Models\Restaurant::first();
 
-        $methods = EarningMethod::where('restaurant_id', $restaurant->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = EarningMethod::where('restaurant_id', $restaurant->id);
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%" . strtolower($search) . "%"])
+                    ->orWhere('type', 'ilike', "%{$search}%")
+                    ->orWhereRaw('CAST(points AS TEXT) ilike ?', ["%{$search}%"]);
+            });
+        }
+
+        // Sort
+        $sortField = $request->input('sort_field', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        $allowedSorts = ['name', 'type', 'points', 'is_active', 'created_at'];
+        if (in_array($sortField, $allowedSorts)) {
+            if ($sortField === 'name') {
+                // Sort by English name by default for JSON column
+                $query->orderByRaw("name->>'en' " . $sortDirection);
+            } else {
+                $query->orderBy($sortField, $sortDirection);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $methods = $query->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Loyalty/EarningMethods', [
             'methods' => $methods,
+            'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
 

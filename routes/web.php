@@ -98,6 +98,11 @@ foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $propertie
                 Route::put('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'update'])->name('update');
                 Route::delete('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'destroy'])->name('destroy');
             });
+
+            Route::prefix('kitchen')->name('kitchen.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\KitchenController::class, 'index'])->name('index');
+                Route::put('/{order}/status', [\App\Http\Controllers\Tenant\KitchenController::class, 'updateStatus'])->name('status.update');
+            });
         });
     });
 }

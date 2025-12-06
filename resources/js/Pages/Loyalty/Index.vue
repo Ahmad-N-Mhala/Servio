@@ -105,6 +105,7 @@
                     <h2 class="text-lg font-bold text-gray-900">Loyalty Members</h2>
                     <div class="relative">
                         <input 
+                            v-model="params.search"
                             type="text" 
                             placeholder="Search members..." 
                             class="pl-10 pr-4 py-2 rounded-xl border-gray-200 focus:border-primary focus:ring-primary text-sm"
@@ -119,10 +120,50 @@
                     <table class="w-full">
                         <thead class="bg-gray-50/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points Balance</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
+                                <th 
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('name')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Customer
+                                        <span v-if="params.sort_field === 'name'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
+                                </th>
+                                <th 
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('phone')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Contact
+                                        <span v-if="params.sort_field === 'phone'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
+                                </th>
+                                <th 
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('points_balance')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Points Balance
+                                        <span v-if="params.sort_field === 'points_balance'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
+                                </th>
+                                <th 
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('total_spent')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Total Spent
+                                        <span v-if="params.sort_field === 'total_spent'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -159,7 +200,7 @@
                     </table>
                 </div>
                 
-                <Pagination :links="customers.links" />
+                <Pagination :meta="paginationMeta" />
             </div>
         </div>
 
@@ -307,24 +348,73 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+// @ts-ignore
+import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     customers: any;
     rewards: any[];
     menuItems: any[];
-}>();
+    filters?: {
+        search?: string;
+        sort_field?: string;
+        sort_direction?: string;
+    };
+}>(), {
+    customers: () => ({ data: [] }),
+    rewards: () => [],
+    menuItems: () => [],
+    filters: () => ({})
+});
 
 const { locale } = useI18n();
 const route = (window as any).route;
 const showRewardModal = ref(false);
+
+const params = ref({
+    search: props.filters?.search || '',
+    sort_field: props.filters?.sort_field || 'total_spent',
+    sort_direction: props.filters?.sort_direction || 'desc'
+});
+
+const paginationMeta = computed(() => {
+    return {
+        current_page: props.customers.current_page,
+        last_page: props.customers.last_page,
+        per_page: props.customers.per_page,
+        total: props.customers.total,
+        from: props.customers.from,
+        to: props.customers.to
+    };
+});
+
+watch(
+    () => params.value.search,
+    debounce((value: string) => {
+        router.get(route('loyalty.index'), { ...params.value, search: value }, {
+            preserveState: true,
+            replace: true
+        });
+    }, 300)
+);
+
+const sort = (field: string) => {
+    params.value.sort_field = field;
+    params.value.sort_direction = params.value.sort_direction === 'asc' ? 'desc' : 'asc';
+    
+    router.get(route('loyalty.index'), params.value, {
+        preserveState: true,
+        replace: true
+    });
+};
 
 const rewardTypes = [
     { value: 'discount_percentage', label: 'Percentage Discount' },

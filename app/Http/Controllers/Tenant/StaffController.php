@@ -20,10 +20,40 @@ class StaffController extends Controller
     {
         $restaurant = Restaurant::first();
 
-        $staff = Staff::with('user')
-            ->where('restaurant_id', $restaurant->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10)
+        // Staff Query
+        $staffQuery = Staff::with('user')
+            ->where('restaurant_id', $restaurant->id);
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $staffQuery->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%");
+            })->orWhere('role', 'ilike', "%{$search}%");
+        }
+
+        // Sort
+        $sortField = $request->input('sort_field', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        $allowedSorts = ['role', 'is_active', 'joined_at', 'created_at'];
+
+        if (in_array($sortField, $allowedSorts)) {
+            $staffQuery->orderBy($sortField, $sortDirection);
+        } elseif ($sortField === 'name') {
+            $staffQuery->join('users', 'staff.user_id', '=', 'users.id')
+                ->orderBy('users.name', $sortDirection)
+                ->select('staff.*'); // Avoid column collision
+        } elseif ($sortField === 'email') {
+            $staffQuery->join('users', 'staff.user_id', '=', 'users.id')
+                ->orderBy('users.email', $sortDirection)
+                ->select('staff.*');
+        } else {
+            $staffQuery->orderBy('created_at', 'desc');
+        }
+
+        $staff = $staffQuery->paginate(10)
             ->through(function ($staff) {
                 return [
                     'id' => $staff->id,
@@ -33,11 +63,13 @@ class StaffController extends Controller
                     'is_active' => $staff->is_active,
                     'joined_at' => $staff->joined_at?->format('Y-m-d'),
                 ];
-            });
+            })
+            ->withQueryString();
 
         return Inertia::render('Staff/Manage', [
             'staff' => $staff,
             'roles' => ['owner', 'manager', 'waiter', 'chef'],
+            'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
 

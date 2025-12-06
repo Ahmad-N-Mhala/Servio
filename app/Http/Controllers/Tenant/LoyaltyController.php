@@ -19,14 +19,43 @@ class LoyaltyController extends Controller
     ) {
     }
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $restaurant = \App\Models\Restaurant::first();
 
-        $customers = Customer::where('restaurant_id', $restaurant->id)
-            ->with('loyaltyPoints')
-            ->orderBy('total_spent', 'desc')
-            ->paginate(10);
+        // Customers Query
+        $customersQuery = Customer::where('restaurant_id', $restaurant->id)
+            ->with('loyaltyPoints');
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $customersQuery->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('phone', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%");
+            });
+        }
+
+        // Sort
+        $sortField = $request->input('sort_field', 'total_spent');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        $allowedSorts = ['name', 'phone', 'total_spent', 'created_at'];
+
+        if (in_array($sortField, $allowedSorts)) {
+            $customersQuery->orderBy($sortField, $sortDirection);
+        } elseif ($sortField === 'points_balance') {
+            // Sort by related loyalty points balance
+            $customersQuery->leftJoin('loyalty_points', 'customers.id', '=', 'loyalty_points.customer_id')
+                ->orderBy('loyalty_points.balance', $sortDirection)
+                ->select('customers.*');
+        } else {
+            $customersQuery->orderBy('total_spent', 'desc');
+        }
+
+        $customers = $customersQuery->paginate(10)
+            ->withQueryString();
 
         $rewards = Reward::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
@@ -42,6 +71,7 @@ class LoyaltyController extends Controller
             'customers' => $customers,
             'rewards' => $rewards,
             'menuItems' => $menuItems,
+            'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
 

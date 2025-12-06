@@ -7,14 +7,29 @@
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Staff Management</h1>
                     <p class="mt-1 text-gray-500 dark:text-gray-400">Manage your restaurant team and permissions</p>
                 </div>
-                <Button variant="primary" size="md" @click="openAddModal">
-                    <template #icon>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                        </svg>
-                    </template>
-                    Add Staff Member
-                </Button>
+                <div class="flex gap-4 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:flex-none">
+                        <input 
+                            v-model="params.search"
+                            type="text" 
+                            placeholder="Search staff..." 
+                            class="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
+                        >
+                        <div class="absolute left-3 top-2.5 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <Button variant="primary" size="md" @click="openAddModal">
+                        <template #icon>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                        </template>
+                        Add Staff Member
+                    </Button>
+                </div>
             </div>
 
             <!-- Stats Cards -->
@@ -81,20 +96,65 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Name
+                                <th 
+                                    scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('name')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Name
+                                        <span v-if="params.sort_field === 'name'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Email
+                                <th 
+                                    scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('email')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Email
+                                        <span v-if="params.sort_field === 'email'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Role
+                                <th 
+                                    scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('role')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Role
+                                        <span v-if="params.sort_field === 'role'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Status
+                                <th 
+                                    scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('is_active')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Status
+                                        <span v-if="params.sort_field === 'is_active'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Joined
+                                <th 
+                                    scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    @click="sort('joined_at')"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        Joined
+                                        <span v-if="params.sort_field === 'joined_at'">
+                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
+                                        </span>
+                                    </div>
                                 </th>
                                 <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                     Actions
@@ -215,8 +275,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
+// @ts-ignore
+import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
@@ -253,9 +315,15 @@ interface PaginatedStaff {
 const props = withDefaults(defineProps<{
     staff?: PaginatedStaff;
     roles?: string[];
+    filters?: {
+        search?: string;
+        sort_field?: string;
+        sort_direction?: string;
+    };
 }>(), {
     staff: () => ({ data: [] }),
-    roles: () => ['owner', 'manager', 'waiter', 'chef']
+    roles: () => ['owner', 'manager', 'waiter', 'chef'],
+    filters: () => ({})
 });
 
 const page = usePage();
@@ -263,6 +331,32 @@ const isRtl = computed(() => page.props.isRtl as boolean);
 const route = (window as any).route;
 
 const showAddModal = ref(false);
+
+const params = ref({
+    search: props.filters?.search || '',
+    sort_field: props.filters?.sort_field || 'created_at',
+    sort_direction: props.filters?.sort_direction || 'desc'
+});
+
+watch(
+    () => params.value.search,
+    debounce((value: string) => {
+        router.get(route('staff.index'), { ...params.value, search: value }, {
+            preserveState: true,
+            replace: true
+        });
+    }, 300)
+);
+
+const sort = (field: string) => {
+    params.value.sort_field = field;
+    params.value.sort_direction = params.value.sort_direction === 'asc' ? 'desc' : 'asc';
+    
+    router.get(route('staff.index'), params.value, {
+        preserveState: true,
+        replace: true
+    });
+};
 
 const form = useForm({
     name: '',
