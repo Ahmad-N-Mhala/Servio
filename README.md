@@ -3,7 +3,7 @@
 A comprehensive, scalable SaaS platform for restaurant management built with Laravel 11, Vue 3, Inertia.js, and TypeScript. Features multi-tenancy, internationalization (i18n), RTL support, subscription management, and role-based access control.
 
 ## 🚀 Tech Stack
-
+daoud 
 ### Backend
 - **Laravel 11** - PHP framework
 - **PostgreSQL** - Primary database (central + tenant databases)
