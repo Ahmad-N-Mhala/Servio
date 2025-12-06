@@ -1,0 +1,194 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules for RestaurFy
+
+You are an expert in Laravel, PHP, and related web development technologies.
+
+## General Guidelines
+- Be concise and direct - provide actual code snippets, not high-level explanations or pseudocode
+- Treat me as an expert developer - skip basic explanations, tutorials, or "how-to" overviews unless explicitly requested
+- Anticipate needs and suggest proactive solutions, such as scalability patterns for multi-tenant SaaS, integration ideas for payment gateways (e.g., UAE-specific like Tabby/Tamara, or global like Stripe), or performance optimizations for high-traffic restaurant dashboards
+- Value good arguments over conventional wisdom - justify recommendations with evidence, like benchmarks showing Laravel's Horizon outperforming basic queues for background jobs in subscription processing
+- Use modern best practices and consider new technologies - prioritize Laravel 11+ features, PHP 8.3+, and emerging tools like Livewire v3 for reactive components or Filament for admin panels
+- Focus on robustness and scalability from the start - suggest patterns like event sourcing for audit logs, microservices readiness via Laravel Octane, or containerization with Docker for deployment
+- Ensure global compliance and localization awareness - design for i18n/l10n from the outset; flag needs for data privacy (e.g., GDPR, UAE PDPL, CCPA), multi-language support (starting with English/Arabic, extensible to all), RTL UI for right-to-left languages, currency/date/timezone handling per locale
+- For project-specific context: RestaurFy is a multi-tenant SaaS web app for restaurant management, launching initially in UAE but with full internationalization; each tenant (restaurant) has isolated data, subscription-based access, admin dashboards for owners, and role-based permissions for staff (e.g., using Spatie Permissions package); support multiple locales, currencies (e.g., AED priority, but global like USD/EUR), and cultural adaptations
+
+## Technology Stack Decisions
+- Backend: Laravel (chosen for your comfort level, robust ecosystem for SaaS, built-in features like authentication, queues, multi-tenancy via packages like tenancy/tenancy or Stancl/Tenancy, and native i18n support with lang files; scalable with proper architecture, e.g., horizontal scaling via AWS or Azure in global regions)
+- Frontend: Vue.js with Inertia.js for seamless SPA integration with Laravel (robust, reactive, and scalable; supports i18n via vue-i18n; alternatives like React were considered but Vue aligns better with Laravel's ecosystem for faster development)
+- Database: PostgreSQL (for advanced querying in multi-tenant setups, JSONB for flexible menu/item storage with translatable fields; scalable with read replicas; supports Unicode for all languages)
+- Other: Redis for caching/sessions/queues (scalability, including localized cache keys), Stripe/PayPal for global subscriptions (with UAE gateways), Docker/Kubernetes for deployment, PHPUnit/Pest for testing, ESLint/Prettier for JS, PHP CS Fixer for PHP; use Laravel's localization middleware and packages like mcamara/laravel-localization for URL-based locale switching
+- If pivoting: Suggest Node.js/NestJS only if real-time features (e.g., live order tracking) dominate, but stick to Laravel for now as it's the best fit for a comprehensive, subscription-based web app with i18n
+
+## Code Style
+#PHP/Laravel
+
+- Follow Laravel's coding standards and PHP CS Fixer rules strictly
+- Use strict types (declare(strict_types=1;)) in all files
+- Prefer Eloquent over raw SQL for database interactions, but use query builder for complex joins; store translatable fields in JSON columns or separate translation tables (e.g., via Spatie/Translatable)
+- Write clean, maintainable code with single responsibility principle (SRP) - e.g., separate controllers for tenant onboarding vs. order management; include locale-aware logic in services
+- Prefer explicit over implicit - e.g., type-hint all dependencies, avoid magic methods unless in traits; explicitly set locale in requests
+- Use meaningful names: e.g., $restaurantSubscription instead of $sub; prefix translatable vars like $menuItemTranslation
+- Add PHPDoc comments for public methods; inline comments only for non-obvious logic like custom tenant scoping or locale fallback
+- Use Laravel's built-ins: Policies for authorization, Form Requests for validation (with localized error messages), Jobs for async tasks; leverage __() helper for all strings
+
+#JavaScript/Vue
+
+- Follow ESLint (with Vue plugin) and Prettier rules strictly
+- Use TypeScript for all Vue components and scripts for type safety in scalable apps
+- Write functional, composable code - prefer Composition API over Options API; integrate vue-i18n for reactive translations
+- Prefer explicit props/emits over implicit $attrs; handle RTL via CSS (dir="rtl") and libraries like vuetify-rtl
+- Meaningful names: e.g., restaurantDashboardComponent instead of dash
+- Comments only for complex reactivity, Pinia store logic, or i18n integrations
+
+## Git Workflow
+- Write clear, descriptive commit messages following Conventional Commits (e.g., feat: add multi-tenant subscription model with i18n support)
+- Keep commits focused and atomic - one feature/fix per commit, e.g., separate database migrations from controller logic or lang file updates
+- Use feature branches (e.g., feat/internationalization) and pull requests for main; never force push to protected branches
+- Integrate CI/CD early (e.g., GitHub Actions for testing/linting on PRs, including locale validation)
+- Tag releases semantically (e.g., v1.0.0 for UAE launch, v1.1.0 for additional locales)
+
+## File Organization
+- Follow Laravel's default structure but extend for multi-tenancy and i18n: e.g., app/Tenants/ for tenant-specific models/controllers; lang/en/ and lang/ar/ for translations
+- Group related files: e.g., resources/js/components/Restaurant/ for Vue components by domain (Dashboard, Orders, Staff); include locale-specific styles in resources/css/
+- Consistent naming: PascalCase for classes/components (RestaurantOwner.php, StaffPermissions.vue), snake_case for migrations/files (create_restaurant_tables.php); use locale codes in lang files (messages.php)
+- Separate concerns: Backend API routes in routes/api.php (with locale prefix), web routes for Inertia in routes/web.php; domain-driven folders like app/Domains/Subscriptions/
+- Use namespaces appropriately: e.g., App\Domains\Restaurant\Actions\CreateOrder; store translations in resources/lang/
+
+## Error Handling
+- Handle errors explicitly at all levels - use try-catch in controllers/jobs, global exception handler for uncaught
+- Provide meaningful, localized error messages - e.g., trans('errors.subscription_expired') with fallback; log details with context (e.g., tenant ID, locale)
+- Don't silently fail - always return appropriate HTTP status (422 for validation, 403 for permissions); render localized views for errors
+- Use Laravel's validation and exception rendering; custom exceptions for project-specific errors (e.g., TenantNotFoundException) with translatable messages
+- Monitor with tools like Sentry or Laravel Telescope for production scalability, including locale-specific error tracking
+
+## Performance
+- Consider implications early - e.g., eager load relationships in Eloquent for dashboard queries, cache frequently accessed data (e.g., menu items via Redis with locale keys like 'menu:en:tenant1')
+- Optimize when necessary but prioritize readability - e.g., use indexing on database columns for order searches, lazy-load translations
+- Profile before optimizing - suggest tools like Blackfire or Xdebug for bottlenecks in subscription billing, staff permission checks, or locale switching
+- Scale horizontally: Design for stateless APIs, use queues for heavy tasks like report generation; optimize for global CDNs for static assets like lang files
+
+## Testing
+- Write tests for critical functionality - e.g., unit tests for subscription logic, feature tests for dashboard permissions, browser tests for Vue interactions via Dusk; include i18n tests for multiple locales
+- Keep tests simple and focused - one assertion per test, use factories for seeding; mock locales in tests
+- Test edge cases: e.g., expired subscriptions, concurrent staff updates, tenant switching, RTL rendering, non-Latin character handling
+- Aim for 80%+ coverage on core domains (orders, inventory, analytics); use Pest for expressive syntax; test translation fallbacks
+- Integrate with CI: Run tests on every push/PR, including locale-specific suites
+
+##Security
+
+- Follow OWASP best practices - sanitize inputs, use prepared statements (built-in via Eloquent); validate locale inputs to prevent injection
+- Implement multi-tenancy isolation - e.g., scope all queries to current tenant, prevent cross-tenant data leaks
+- Role-based access: Use Spatie/Permissions for fine-grained roles (owner, manager, waiter) with policy enforcement
+- Subscriptions: Secure payment handling via webhooks; store minimal sensitive data; handle multi-currency securely
+- Global-specific: Ensure HTTPS, data encryption at rest (e.g., via AWS RDS), consent for user data per region (e.g., EU GDPR); support UTF-8 everywhere for all languages
+
+## Documentation
+- Keep code self-documenting through clear naming and structure
+- Update inline docs/PHPDoc when code changes; use OpenAPI/Swagger for API endpoints with locale parameters
+- Don't create external docs (README, wikis) unless requested - focus on code comments for complex areas like multi-tenant middleware or i18n setup
+- For onboarding: Suggest a basic README with setup instructions (e.g., composer install, npm install, tenancy setup, locale configuration)
+
+##Deployment and Scalability
+
+- Design for cloud (e.g., AWS global regions, starting UAE) - use Envoyer or Vapor for zero-downtime deploys
+- Containerize with Docker; orchestrate with Kubernetes for high scale; include locale env vars
+- Monitor scalability: Suggest Prometheus/Grafana for metrics, auto-scaling groups for traffic spikes (e.g., dinner rush orders); track locale usage for optimization
+- Backup strategy: Automated database backups, tenant data export features; ensure backups handle Unicode data
+# Cursor Rules for RestoFy
+
+## General Guidelines
+- Be concise and direct - provide actual code snippets, not high-level explanations or pseudocode
+- Treat me as an expert developer - skip basic explanations, tutorials, or "how-to" overviews unless explicitly requested
+- Anticipate needs and suggest proactive solutions, such as scalability patterns for multi-tenant SaaS, integration ideas for payment gateways (e.g., UAE-specific like Tabby/Tamara, or global like Stripe), or performance optimizations for high-traffic restaurant dashboards
+- Value good arguments over conventional wisdom - justify recommendations with evidence, like benchmarks showing Laravel's Horizon outperforming basic queues for background jobs in subscription processing
+- Use modern best practices and consider new technologies - prioritize Laravel 11+ features, PHP 8.3+, and emerging tools like Livewire v3 for reactive components or Filament for admin panels
+- Focus on robustness and scalability from the start - suggest patterns like event sourcing for audit logs, microservices readiness via Laravel Octane, or containerization with Docker for deployment
+- Ensure global compliance and localization awareness - design for i18n/l10n from the outset; flag needs for data privacy (e.g., GDPR, UAE PDPL, CCPA), multi-language support (starting with English/Arabic, extensible to all), RTL UI for right-to-left languages, currency/date/timezone handling per locale
+- For project-specific context: RestaurFy is a multi-tenant SaaS web app for restaurant management, launching initially in UAE but with full internationalization; each tenant (restaurant) has isolated data, subscription-based access, admin dashboards for owners, and role-based permissions for staff (e.g., using Spatie Permissions package); support multiple locales, currencies (e.g., AED priority, but global like USD/EUR), and cultural adaptations
+
+## Technology Stack Decisions
+- Backend: Laravel (chosen for your comfort level, robust ecosystem for SaaS, built-in features like authentication, queues, multi-tenancy via packages like tenancy/tenancy or Stancl/Tenancy, and native i18n support with lang files; scalable with proper architecture, e.g., horizontal scaling via AWS or Azure in global regions)
+- Frontend: Vue.js with Inertia.js for seamless SPA integration with Laravel (robust, reactive, and scalable; supports i18n via vue-i18n; alternatives like React were considered but Vue aligns better with Laravel's ecosystem for faster development)
+- Database: PostgreSQL (for advanced querying in multi-tenant setups, JSONB for flexible menu/item storage with translatable fields; scalable with read replicas; supports Unicode for all languages)
+- Other: Redis for caching/sessions/queues (scalability, including localized cache keys), Stripe/PayPal for global subscriptions (with UAE gateways), Docker/Kubernetes for deployment, PHPUnit/Pest for testing, ESLint/Prettier for JS, PHP CS Fixer for PHP; use Laravel's localization middleware and packages like mcamara/laravel-localization for URL-based locale switching
+- If pivoting: Suggest Node.js/NestJS only if real-time features (e.g., live order tracking) dominate, but stick to Laravel for now as it's the best fit for a comprehensive, subscription-based web app with i18n
+
+## Code Style
+#PHP/Laravel
+
+- Follow Laravel's coding standards and PHP CS Fixer rules strictly
+- Use strict types (declare(strict_types=1;)) in all files
+- Prefer Eloquent over raw SQL for database interactions, but use query builder for complex joins; store translatable fields in JSON columns or separate translation tables (e.g., via Spatie/Translatable)
+- Write clean, maintainable code with single responsibility principle (SRP) - e.g., separate controllers for tenant onboarding vs. order management; include locale-aware logic in services
+- Prefer explicit over implicit - e.g., type-hint all dependencies, avoid magic methods unless in traits; explicitly set locale in requests
+- Use meaningful names: e.g., $restaurantSubscription instead of $sub; prefix translatable vars like $menuItemTranslation
+- Add PHPDoc comments for public methods; inline comments only for non-obvious logic like custom tenant scoping or locale fallback
+- Use Laravel's built-ins: Policies for authorization, Form Requests for validation (with localized error messages), Jobs for async tasks; leverage __() helper for all strings
+
+#JavaScript/Vue
+
+- Follow ESLint (with Vue plugin) and Prettier rules strictly
+- Use TypeScript for all Vue components and scripts for type safety in scalable apps
+- Write functional, composable code - prefer Composition API over Options API; integrate vue-i18n for reactive translations
+- Prefer explicit props/emits over implicit $attrs; handle RTL via CSS (dir="rtl") and libraries like vuetify-rtl
+- Meaningful names: e.g., restaurantDashboardComponent instead of dash
+- Comments only for complex reactivity, Pinia store logic, or i18n integrations
+
+## Git Workflow
+- Write clear, descriptive commit messages following Conventional Commits (e.g., feat: add multi-tenant subscription model with i18n support)
+- Keep commits focused and atomic - one feature/fix per commit, e.g., separate database migrations from controller logic or lang file updates
+- Use feature branches (e.g., feat/internationalization) and pull requests for main; never force push to protected branches
+- Integrate CI/CD early (e.g., GitHub Actions for testing/linting on PRs, including locale validation)
+- Tag releases semantically (e.g., v1.0.0 for UAE launch, v1.1.0 for additional locales)
+
+## File Organization
+- Follow Laravel's default structure but extend for multi-tenancy and i18n: e.g., app/Tenants/ for tenant-specific models/controllers; lang/en/ and lang/ar/ for translations
+- Group related files: e.g., resources/js/components/Restaurant/ for Vue components by domain (Dashboard, Orders, Staff); include locale-specific styles in resources/css/
+- Consistent naming: PascalCase for classes/components (RestaurantOwner.php, StaffPermissions.vue), snake_case for migrations/files (create_restaurant_tables.php); use locale codes in lang files (messages.php)
+- Separate concerns: Backend API routes in routes/api.php (with locale prefix), web routes for Inertia in routes/web.php; domain-driven folders like app/Domains/Subscriptions/
+- Use namespaces appropriately: e.g., App\Domains\Restaurant\Actions\CreateOrder; store translations in resources/lang/
+
+## Error Handling
+- Handle errors explicitly at all levels - use try-catch in controllers/jobs, global exception handler for uncaught
+- Provide meaningful, localized error messages - e.g., trans('errors.subscription_expired') with fallback; log details with context (e.g., tenant ID, locale)
+- Don't silently fail - always return appropriate HTTP status (422 for validation, 403 for permissions); render localized views for errors
+- Use Laravel's validation and exception rendering; custom exceptions for project-specific errors (e.g., TenantNotFoundException) with translatable messages
+- Monitor with tools like Sentry or Laravel Telescope for production scalability, including locale-specific error tracking
+
+## Performance
+- Consider implications early - e.g., eager load relationships in Eloquent for dashboard queries, cache frequently accessed data (e.g., menu items via Redis with locale keys like 'menu:en:tenant1')
+- Optimize when necessary but prioritize readability - e.g., use indexing on database columns for order searches, lazy-load translations
+- Profile before optimizing - suggest tools like Blackfire or Xdebug for bottlenecks in subscription billing, staff permission checks, or locale switching
+- Scale horizontally: Design for stateless APIs, use queues for heavy tasks like report generation; optimize for global CDNs for static assets like lang files
+
+## Testing
+- Write tests for critical functionality - e.g., unit tests for subscription logic, feature tests for dashboard permissions, browser tests for Vue interactions via Dusk; include i18n tests for multiple locales
+- Keep tests simple and focused - one assertion per test, use factories for seeding; mock locales in tests
+- Test edge cases: e.g., expired subscriptions, concurrent staff updates, tenant switching, RTL rendering, non-Latin character handling
+- Aim for 80%+ coverage on core domains (orders, inventory, analytics); use Pest for expressive syntax; test translation fallbacks
+- Integrate with CI: Run tests on every push/PR, including locale-specific suites
+
+##Security
+
+- Follow OWASP best practices - sanitize inputs, use prepared statements (built-in via Eloquent); validate locale inputs to prevent injection
+- Implement multi-tenancy isolation - e.g., scope all queries to current tenant, prevent cross-tenant data leaks
+- Role-based access: Use Spatie/Permissions for fine-grained roles (owner, manager, waiter) with policy enforcement
+- Subscriptions: Secure payment handling via webhooks; store minimal sensitive data; handle multi-currency securely
+- Global-specific: Ensure HTTPS, data encryption at rest (e.g., via AWS RDS), consent for user data per region (e.g., EU GDPR); support UTF-8 everywhere for all languages
+
+## Documentation
+- Keep code self-documenting through clear naming and structure
+- Update inline docs/PHPDoc when code changes; use OpenAPI/Swagger for API endpoints with locale parameters
+- Don't create external docs (README, wikis) unless requested - focus on code comments for complex areas like multi-tenant middleware or i18n setup
+- For onboarding: Suggest a basic README with setup instructions (e.g., composer install, npm install, tenancy setup, locale configuration)
+
+##Deployment and Scalability
+
+- Design for cloud (e.g., AWS global regions, starting UAE) - use Envoyer or Vapor for zero-downtime deploys
+- Containerize with Docker; orchestrate with Kubernetes for high scale; include locale env vars
+- Monitor scalability: Suggest Prometheus/Grafana for metrics, auto-scaling groups for traffic spikes (e.g., dinner rush orders); track locale usage for optimization
+- Backup strategy: Automated database backups, tenant data export features; ensure backups handle Unicode data

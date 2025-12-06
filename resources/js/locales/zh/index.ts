@@ -1,0 +1,50 @@
+export default {
+    dashboard: {
+        welcome: '欢迎使用 RestaurFy',
+        subtitle: '管理您的餐厅运营',
+        total_orders: '总订单',
+        today_orders: '今日订单',
+        revenue: '收入',
+        active_staff: '活跃员工',
+        recent_activity: '最近活动',
+        no_activity: '没有最近的活动',
+    },
+    auth: {
+        login: '登录',
+        logout: '登出',
+        register: '注册',
+        email: '电子邮件',
+        password: '密码',
+        remember: '记住我',
+        forgot_password: '忘记密码？',
+    },
+    validation: {
+        required: '此字段为必填项',
+        email: '请输入有效的电子邮件',
+        min: '此字段至少需要 :min 个字符',
+        confirmed: '密码不匹配',
+    },
+    menu: {
+        title: '菜单',
+        categories: '类别',
+        items: '项目',
+        add_item: '添加项目',
+        edit_item: '编辑项目',
+    },
+    orders: {
+        title: '订单',
+        new_order: '新订单',
+        status: '状态',
+        pending: '待处理',
+        processing: '处理中',
+        completed: '已完成',
+        cancelled: '已取消',
+    },
+    onboarding: {
+        title: '开始',
+        subdomain: '子域名',
+        choose_plan: '选择计划',
+        payment_failed: '付款失败。请重试。',
+    },
+};
+

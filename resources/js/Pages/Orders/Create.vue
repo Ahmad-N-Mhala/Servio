@@ -1,0 +1,516 @@
+<template>
+    <MainLayout>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="flex items-center gap-4 mb-8">
+                <Link :href="route('orders.index')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </Link>
+                <h1 class="text-3xl font-bold text-gray-900">New Order</h1>
+            </div>
+
+            <form @submit.prevent="createOrder" class="space-y-8">
+                <!-- Customer Details Card -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div class="p-2 bg-primary/10 rounded-lg">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        Customer Details
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                            <input 
+                                v-model="form.customer_phone"
+                                type="tel"
+                                placeholder="+971-50-1234567"
+                                required
+                                @blur="lookupCustomer"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            />
+                        </div>
+                        <Input 
+                            v-model="form.customer_name"
+                            label="Customer Name"
+                            type="text"
+                            placeholder="Optional"
+                            :error="form.errors.customer_name"
+                        />
+                    </div>
+                    
+                    <!-- Customer Loyalty Points Display -->
+                    <div v-if="selectedCustomer" class="mt-4 p-4 bg-gradient-to-r from-primary/10 to-purple-100 rounded-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Loyalty Member</p>
+                                    <p class="font-bold text-gray-900">{{ selectedCustomer.name || 'Customer' }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-600">Available Points</p>
+                                <p class="text-2xl font-bold text-primary">{{ selectedCustomer.loyalty_points }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Items Card -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div class="p-2 bg-primary/10 rounded-lg">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        Menu Items
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        <div v-for="category in categoriesList" :key="category.id">
+                            <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                                {{ getLocaleName(category.name) }}
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div 
+                                    v-for="item in category.items" 
+                                    :key="item.id"
+                                    class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
+                                >
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-900">{{ getLocaleName(item.name) }}</p>
+                                        <p class="text-sm font-semibold text-primary">{{ currencyCode }} {{ item.price.toFixed(2) }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-3 ml-4">
+                                        <button 
+                                            type="button"
+                                            @click="removeItem(item)"
+                                            :disabled="!getQty(item.id)"
+                                            class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                            </svg>
+                                        </button>
+                                        <span class="w-8 text-center font-bold text-lg">{{ getQty(item.id) }}</span>
+                                        <button 
+                                            type="button"
+                                            @click="addItem(item)"
+                                            class="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white hover:bg-primary-hover transition-colors"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loyalty Rewards Redemption Card -->
+                <div v-if="availableRewards.length > 0" class="glass-card rounded-2xl p-6 border-2 border-purple-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                            </svg>
+                        </div>
+                        Redeem Loyalty Rewards
+                        <span v-if="selectedCustomer" class="ml-auto text-sm font-normal text-gray-500">
+                            {{ selectedCustomer.loyalty_points }} points available
+                        </span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div 
+                            v-for="reward in availableRewards" 
+                            :key="reward.id"
+                            @click="toggleReward(reward)"
+                            :class="[
+                                'p-4 rounded-xl border-2 cursor-pointer transition-all',
+                                selectedReward?.id === reward.id 
+                                    ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200' 
+                                    : canRedeemReward(reward) 
+                                        ? 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50/50' 
+                                        : 'border-gray-200 bg-gray-100 opacity-60 cursor-not-allowed'
+                            ]"
+                        >
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900">{{ getLocaleName(reward.name) }}</h4>
+                                    <p class="text-sm text-gray-500 mt-1">{{ reward.description || getRewardTypeLabel(reward) }}</p>
+                                </div>
+                                <div v-if="selectedReward?.id === reward.id" class="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span :class="['px-2 py-1 rounded-full text-xs font-semibold', 
+                                    canRedeemReward(reward) ? 'bg-purple-100 text-purple-700' : 'bg-gray-200 text-gray-600']">
+                                    {{ reward.points_required }} points
+                                </span>
+                                <span class="text-sm font-semibold text-green-600">
+                                    {{ getRewardValue(reward) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p v-if="!selectedCustomer" class="mt-4 text-sm text-amber-600 bg-amber-50 p-3 rounded-xl">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Enter customer phone to check loyalty points and redeem rewards
+                    </p>
+                </div>
+
+                <!-- Order Summary Card -->
+                <div v-if="cart.length > 0" class="glass-card rounded-2xl p-6 border-2 border-primary/20">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div class="p-2 bg-primary/10 rounded-lg">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        Order Summary
+                    </h3>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div 
+                            v-for="item in cart" 
+                            :key="item.id" 
+                            class="flex justify-between items-center py-2 border-b border-gray-100"
+                        >
+                            <div>
+                                <span class="font-medium">{{ item.name }}</span>
+                                <span class="text-gray-500 ml-2">× {{ item.qty }}</span>
+                            </div>
+                            <span class="font-semibold">{{ currencyCode }} {{ (item.price * item.qty).toFixed(2) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 pt-3 border-t-2 border-gray-200">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal</span>
+                            <span>{{ currencyCode }} {{ subtotal.toFixed(2) }}</span>
+                        </div>
+                        
+                        <!-- Reward Discount -->
+                        <div v-if="selectedReward && discountAmount > 0" class="flex justify-between text-green-600">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                </svg>
+                                Reward Discount
+                            </span>
+                            <span>-{{ currencyCode }} {{ discountAmount.toFixed(2) }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between text-gray-500">
+                            <span>Tax (5%)</span>
+                            <span>{{ currencyCode }} {{ tax.toFixed(2) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xl font-bold text-primary pt-2">
+                            <span>Total</span>
+                            <span>{{ currencyCode }} {{ total.toFixed(2) }}</span>
+                        </div>
+                        
+                        <!-- Points to be used -->
+                        <div v-if="selectedReward" class="mt-3 p-3 bg-purple-50 rounded-xl">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-purple-700">Points to redeem:</span>
+                                <span class="font-bold text-purple-700">{{ selectedReward.points_required }} points</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="glass-card rounded-2xl p-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Special Instructions (optional)</label>
+                    <textarea 
+                        v-model="form.notes"
+                        rows="3"
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4"
+                        placeholder="Any special requests or instructions..."
+                    ></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex gap-4">
+                    <Link :href="route('orders.index')" class="flex-1">
+                        <Button type="button" variant="secondary" block size="lg">
+                            Cancel
+                        </Button>
+                    </Link>
+                    <div class="flex-1">
+                        <Button 
+                            type="submit" 
+                            block 
+                            size="lg"
+                            :loading="form.processing"
+                            :disabled="cart.length === 0 || !form.customer_phone"
+                        >
+                            Create Order
+                        </Button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </MainLayout>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import { useForm, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import MainLayout from '@/Layouts/MainLayout.vue';
+import Button from '@/Components/Button.vue';
+import Input from '@/Components/Input.vue';
+
+interface MenuItem {
+    id: number;
+    name: Record<string, string> | string;
+    price: number;
+}
+
+interface Category {
+    id: number;
+    name: Record<string, string> | string;
+    items: MenuItem[];
+}
+
+interface CartItem {
+    id: number;
+    name: string;
+    price: number;
+    qty: number;
+}
+
+interface Customer {
+    id: number;
+    name: string | null;
+    phone: string;
+    email: string | null;
+    loyalty_points: number;
+}
+
+interface Reward {
+    id: number;
+    name: Record<string, string> | string;
+    description: string | null;
+    points_required: number;
+    reward_type: 'discount_percentage' | 'discount_fixed' | 'free_item' | 'cashback';
+    discount_value: number | null;
+}
+
+const props = withDefaults(defineProps<{
+    menuCategories?: Category[];
+    customers?: Customer[];
+    rewards?: Reward[];
+    currency?: string;
+}>(), {
+    menuCategories: () => [],
+    customers: () => [],
+    rewards: () => [],
+    currency: 'AED'
+});
+
+const { locale } = useI18n();
+const route = (window as any).route;
+
+// Computed
+const categoriesList = computed(() => props.menuCategories || []);
+const currencyCode = computed(() => props.currency || 'AED');
+const availableRewards = computed(() => props.rewards || []);
+
+// State
+const cart = ref<CartItem[]>([]);
+const selectedCustomer = ref<Customer | null>(null);
+const selectedReward = ref<Reward | null>(null);
+
+// Form
+const form = useForm({
+    customer_phone: '',
+    customer_name: '',
+    customer_id: null as number | null,
+    items: [] as { menu_item_id: number; quantity: number; unit_price: number }[],
+    subtotal: 0,
+    discount: 0,
+    tax: 0,
+    total: 0,
+    notes: '',
+    reward_id: null as number | null
+});
+
+// Customer lookup
+const lookupCustomer = () => {
+    if (!form.customer_phone) {
+        selectedCustomer.value = null;
+        return;
+    }
+    
+    const phone = form.customer_phone.replace(/\D/g, '');
+    const customer = props.customers?.find(c => 
+        c.phone?.replace(/\D/g, '').includes(phone) || phone.includes(c.phone?.replace(/\D/g, '') || '')
+    );
+    
+    if (customer) {
+        selectedCustomer.value = customer;
+        form.customer_name = customer.name || '';
+        form.customer_id = customer.id;
+    } else {
+        selectedCustomer.value = null;
+        form.customer_id = null;
+    }
+};
+
+// Watch phone changes for auto-lookup
+watch(() => form.customer_phone, (newPhone) => {
+    if (newPhone && newPhone.length >= 7) {
+        lookupCustomer();
+    }
+});
+
+// Helpers
+const getLocaleName = (name: Record<string, string> | string): string => {
+    if (typeof name === 'string') return name;
+    return name[locale.value] || name['en'] || 'Unknown';
+};
+
+const getQty = (itemId: number): number => {
+    const item = cart.value.find(i => i.id === itemId);
+    return item?.qty || 0;
+};
+
+const addItem = (item: MenuItem) => {
+    const existing = cart.value.find(i => i.id === item.id);
+    if (existing) {
+        existing.qty++;
+    } else {
+        cart.value.push({
+            id: item.id,
+            name: getLocaleName(item.name),
+            price: item.price,
+            qty: 1
+        });
+    }
+};
+
+const removeItem = (item: MenuItem) => {
+    const idx = cart.value.findIndex(i => i.id === item.id);
+    if (idx !== -1) {
+        if (cart.value[idx].qty > 1) {
+            cart.value[idx].qty--;
+        } else {
+            cart.value.splice(idx, 1);
+        }
+    }
+};
+
+// Reward helpers
+const canRedeemReward = (reward: Reward): boolean => {
+    if (!selectedCustomer.value) return false;
+    return selectedCustomer.value.loyalty_points >= reward.points_required;
+};
+
+const toggleReward = (reward: Reward) => {
+    if (!canRedeemReward(reward)) return;
+    
+    if (selectedReward.value?.id === reward.id) {
+        selectedReward.value = null;
+    } else {
+        selectedReward.value = reward;
+    }
+};
+
+const getRewardTypeLabel = (reward: Reward): string => {
+    switch (reward.reward_type) {
+        case 'discount_percentage':
+            return `${reward.discount_value}% off your order`;
+        case 'discount_fixed':
+            return `${currencyCode.value} ${reward.discount_value} off`;
+        case 'free_item':
+            return 'Free item';
+        case 'cashback':
+            return `${reward.discount_value}% cashback`;
+        default:
+            return '';
+    }
+};
+
+const getRewardValue = (reward: Reward): string => {
+    switch (reward.reward_type) {
+        case 'discount_percentage':
+            return `-${reward.discount_value}%`;
+        case 'discount_fixed':
+            return `-${currencyCode.value} ${reward.discount_value}`;
+        case 'free_item':
+            return 'FREE';
+        case 'cashback':
+            return `${reward.discount_value}% back`;
+        default:
+            return '';
+    }
+};
+
+// Calculations
+const subtotal = computed(() => 
+    cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0)
+);
+
+const discountAmount = computed(() => {
+    if (!selectedReward.value) return 0;
+    
+    switch (selectedReward.value.reward_type) {
+        case 'discount_percentage':
+            return subtotal.value * ((selectedReward.value.discount_value || 0) / 100);
+        case 'discount_fixed':
+            return Math.min(selectedReward.value.discount_value || 0, subtotal.value);
+        default:
+            return 0;
+    }
+});
+
+const afterDiscount = computed(() => Math.max(0, subtotal.value - discountAmount.value));
+
+const tax = computed(() => afterDiscount.value * 0.05);
+
+const total = computed(() => afterDiscount.value + tax.value);
+
+const createOrder = () => {
+    form.items = cart.value.map(item => ({
+        menu_item_id: item.id,
+        quantity: item.qty,
+        unit_price: item.price
+    }));
+    form.subtotal = subtotal.value;
+    form.discount = discountAmount.value;
+    form.tax = tax.value;
+    form.total = total.value;
+    form.reward_id = selectedReward.value?.id || null;
+
+    form.post(route('orders.store'), {
+        onSuccess: () => {
+            cart.value = [];
+            selectedReward.value = null;
+            selectedCustomer.value = null;
+            form.reset();
+        }
+    });
+};
+</script>

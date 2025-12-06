@@ -1,0 +1,50 @@
+export default {
+    dashboard: {
+        welcome: 'Bienvenue sur RestaurFy',
+        subtitle: 'Gérez les opérations de votre restaurant',
+        total_orders: 'Commandes totales',
+        today_orders: 'Commandes d\'aujourd\'hui',
+        revenue: 'Revenus',
+        active_staff: 'Personnel actif',
+        recent_activity: 'Activité récente',
+        no_activity: 'Aucune activité récente',
+    },
+    auth: {
+        login: 'Connexion',
+        logout: 'Déconnexion',
+        register: 'S\'inscrire',
+        email: 'Email',
+        password: 'Mot de passe',
+        remember: 'Se souvenir de moi',
+        forgot_password: 'Mot de passe oublié?',
+    },
+    validation: {
+        required: 'Ce champ est requis',
+        email: 'Veuillez entrer un email valide',
+        min: 'Ce champ doit contenir au moins :min caractères',
+        confirmed: 'Les mots de passe ne correspondent pas',
+    },
+    menu: {
+        title: 'Menu',
+        categories: 'Catégories',
+        items: 'Articles',
+        add_item: 'Ajouter un article',
+        edit_item: 'Modifier l\'article',
+    },
+    orders: {
+        title: 'Commandes',
+        new_order: 'Nouvelle commande',
+        status: 'Statut',
+        pending: 'En attente',
+        processing: 'En cours',
+        completed: 'Terminé',
+        cancelled: 'Annulé',
+    },
+    onboarding: {
+        title: 'Commencer',
+        subdomain: 'Sous-domaine',
+        choose_plan: 'Choisir un plan',
+        payment_failed: 'Le paiement a échoué. Veuillez réessayer.',
+    },
+};
+
