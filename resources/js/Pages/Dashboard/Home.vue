@@ -73,6 +73,11 @@
                 <ChartCard title="Top Menu Items" height="300px">
                     <canvas ref="topItemsChartCanvas"></canvas>
                 </ChartCard>
+
+                <!-- Avg Completion Time -->
+                <ChartCard title="Avg Completion Time (Minutes)" height="300px">
+                    <canvas ref="completionTimeChartCanvas"></canvas>
+                </ChartCard>
             </div>
 
             <!-- Recent Orders Table -->
@@ -130,17 +135,20 @@ const revenueChart = computed(() => page.props.revenue_chart as any[]);
 const statusDistribution = computed(() => page.props.status_distribution as any[]);
 const peakHours = computed(() => page.props.peak_hours as any[]);
 const topMenuItems = computed(() => page.props.top_menu_items as any[]);
+const avgCompletionTime = computed(() => page.props.avg_completion_time as any[]);
 const dateRange = computed(() => page.props.date_range as any);
 
 const revenueChartCanvas = ref<HTMLCanvasElement | null>(null);
 const statusChartCanvas = ref<HTMLCanvasElement | null>(null);
 const peakHoursChartCanvas = ref<HTMLCanvasElement | null>(null);
 const topItemsChartCanvas = ref<HTMLCanvasElement | null>(null);
+const completionTimeChartCanvas = ref<HTMLCanvasElement | null>(null);
 
 let revenueChartInstance: Chart | null = null;
 let statusChartInstance: Chart | null = null;
 let peakHoursChartInstance: Chart | null = null;
 let topItemsChartInstance: Chart | null = null;
+let completionTimeChartInstance: Chart | null = null;
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AE', {
@@ -332,17 +340,59 @@ const initTopItemsChart = () => {
     });
 };
 
+const initCompletionTimeChart = () => {
+    if (!completionTimeChartCanvas.value) return;
+    
+    if (completionTimeChartInstance) {
+        completionTimeChartInstance.destroy();
+    }
+
+    const ctx = completionTimeChartCanvas.value.getContext('2d');
+    if (!ctx) return;
+
+    completionTimeChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: avgCompletionTime.value.map((item: any) => item.date),
+            datasets: [{
+                label: 'Avg Minutes',
+                data: avgCompletionTime.value.map((item: any) => item.minutes),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
+};
+
 onMounted(() => {
     initRevenueChart();
     initStatusChart();
     initPeakHoursChart();
     initTopItemsChart();
+    initCompletionTimeChart();
 });
 
-watch([revenueChart, statusDistribution, peakHours, topMenuItems], () => {
+watch([revenueChart, statusDistribution, peakHours, topMenuItems, avgCompletionTime], () => {
     initRevenueChart();
     initStatusChart();
     initPeakHoursChart();
     initTopItemsChart();
+    initCompletionTimeChart();
 });
 </script>

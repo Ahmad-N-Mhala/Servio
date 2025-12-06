@@ -38,6 +38,14 @@ class OrderController extends Controller
             });
         }
 
+        // Date Range
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->input('end_date'));
+        }
+
         // Sort
         $sortField = $request->input('sort_field', 'created_at');
         $sortDirection = $request->input('sort_direction', 'desc');
@@ -56,13 +64,19 @@ class OrderController extends Controller
         return Inertia::render('Orders/Live', [
             'orders' => $orders,
             'currency' => $restaurant->currency ?? 'AED',
-            'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
+            'filters' => $request->only(['search', 'sort_field', 'sort_direction', 'start_date', 'end_date']),
         ]);
     }
 
     public function create(): Response
     {
         $restaurant = \App\Models\Restaurant::first();
+
+        // Get available tables
+        $tables = \App\Models\Table::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'occupied') // Optional: only show available tables? Or allow any? Let's allow all for now but maybe indicate status
+            ->orderBy('name')
+            ->get();
 
         // Get menu categories with items for order creation
         $menuCategories = \App\Models\MenuCategory::where('restaurant_id', $restaurant->id)
@@ -125,6 +139,7 @@ class OrderController extends Controller
             'menuCategories' => $menuCategories,
             'customers' => $customers,
             'rewards' => $rewards,
+            'tables' => $tables,
             'currency' => $restaurant->currency ?? 'AED',
         ]);
     }
@@ -134,6 +149,8 @@ class OrderController extends Controller
         $validated = $request->validate([
             'customer_phone' => ['required', 'string'],
             'customer_name' => ['nullable', 'string'],
+            'type' => ['required', 'in:dine_in,takeaway'],
+            'table_id' => ['nullable', 'exists:restaurant_tables,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.menu_item_id' => ['required', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -145,6 +162,14 @@ class OrderController extends Controller
         ]);
 
         $restaurant = \App\Models\Restaurant::first();
+
+        // Update table status if dine-in
+        if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
+            $table = \App\Models\Table::find($validated['table_id']);
+            if ($table) {
+                $table->update(['status' => 'occupied']);
+            }
+        }
 
         // Find or create customer
         $customer = $this->loyaltyService->findOrCreateCustomer(
@@ -159,6 +184,8 @@ class OrderController extends Controller
             'customer_id' => $customer->id,
             'order_number' => 'ORD-' . strtoupper(Str::random(8)),
             'status' => 'pending',
+            'type' => $validated['type'],
+            'table_id' => $validated['table_id'] ?? null,
             'subtotal' => $validated['subtotal'],
             'tax' => $validated['tax'] ?? 0,
             'total' => $validated['total'],

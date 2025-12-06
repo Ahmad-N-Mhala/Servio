@@ -141,11 +141,33 @@ class DashboardController extends Controller
             'status_distribution' => $statusDistribution,
             'peak_hours' => $peakHours,
             'top_menu_items' => $topMenuItems,
+            'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
             'date_range' => [
                 'start_date' => is_string($startDate) ? $startDate : $startDate->format('Y-m-d'),
                 'end_date' => is_string($endDate) ? $endDate : $endDate->format('Y-m-d'),
             ],
         ]);
+    }
+
+    private function getAverageCompletionTimeChart($restaurantId, $startDate, $endDate)
+    {
+        return Order::where('restaurant_id', $restaurantId)
+            ->where('status', 'completed')
+            ->whereNotNull('completed_at')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('AVG(EXTRACT(EPOCH FROM (completed_at - created_at))/60) as avg_minutes')
+            )
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'minutes' => round((float) $item->avg_minutes, 1),
+                ];
+            });
     }
 }
 

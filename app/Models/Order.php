@@ -26,6 +26,8 @@ class Order extends Model
         'customer_name',
         'customer_phone',
         'notes',
+        'type',
+        'table_id',
         'points_earned',
         'points_redeemed',
         'completed_at',
@@ -65,5 +67,10 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function table(): BelongsTo
+    {
+        return $this->belongsTo(Table::class);
     }
 }

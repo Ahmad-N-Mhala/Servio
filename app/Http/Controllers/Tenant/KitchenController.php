@@ -26,14 +26,14 @@ class KitchenController extends Controller
         // Ordered by FIFO (First In, First Out)
         $orders = Order::where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'processing'])
-            ->with(['items.menuItem', 'customer'])
+            ->with(['items.menuItem', 'customer', 'table'])
             ->orderBy('created_at', 'asc')
             ->get();
 
         // Also fetch recently completed orders (last 10)
         $completedOrders = Order::where('restaurant_id', $restaurant->id)
             ->where('status', 'completed')
-            ->with(['items.menuItem', 'customer'])
+            ->with(['items.menuItem', 'customer', 'table'])
             ->orderBy('completed_at', 'desc')
             ->limit(10)
             ->get();

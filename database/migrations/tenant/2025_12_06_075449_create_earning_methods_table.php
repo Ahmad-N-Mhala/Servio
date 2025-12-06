@@ -10,16 +10,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('earning_methods', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('restaurant_id')->constrained()->cascadeOnDelete();
-            $table->json('name');
-            $table->string('description')->nullable();
-            $table->string('type'); // order_total, signup, referral, review
-            $table->integer('points');
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('earning_methods')) {
+            Schema::create('earning_methods', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('restaurant_id')->constrained()->cascadeOnDelete();
+                $table->json('name');
+                $table->string('description')->nullable();
+                $table->string('type'); // order_total, signup, referral, review
+                $table->integer('points');
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

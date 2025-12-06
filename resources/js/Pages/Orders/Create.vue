@@ -65,6 +65,53 @@
                     </div>
                 </div>
 
+                <!-- Order Type Selection -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        Order Type
+                    </h3>
+                    <div class="flex gap-4 mb-6">
+                        <label class="flex-1 cursor-pointer group">
+                            <input type="radio" v-model="form.type" value="dine_in" class="peer sr-only">
+                            <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
+                                <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.704 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
+                                </svg>
+                                <span class="font-semibold text-gray-700 peer-checked:text-primary">Dine In</span>
+                            </div>
+                        </label>
+                        <label class="flex-1 cursor-pointer group">
+                            <input type="radio" v-model="form.type" value="takeaway" class="peer sr-only">
+                            <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
+                                <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                                <span class="font-semibold text-gray-700 peer-checked:text-primary">Takeaway</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div v-if="form.type === 'dine_in'" class="animate-fade-in-up">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Table *</label>
+                        <select 
+                            v-model="form.table_id" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition-colors"
+                            required
+                        >
+                            <option value="null" disabled>Choose a table...</option>
+                            <option v-for="table in tablesList" :key="table.id" :value="table.id">
+                                {{ table.name }} ({{ table.capacity }} seats) - {{ table.location || 'Main' }}{{ table.status === 'reserved' ? ' [RESERVED]' : '' }}
+                            </option>
+                        </select>
+                        <p v-if="form.errors.table_id" class="mt-1 text-sm text-red-600">{{ form.errors.table_id }}</p>
+                    </div>
+                </div>
+
                 <!-- Menu Items Card -->
                 <div class="glass-card rounded-2xl p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -318,15 +365,25 @@ interface Reward {
     discount_value: number | null;
 }
 
+interface Table {
+    id: number;
+    name: string;
+    capacity: number;
+    status: string;
+    location: string | null;
+}
+
 const props = withDefaults(defineProps<{
     menuCategories?: Category[];
     customers?: Customer[];
     rewards?: Reward[];
+    tables?: Table[];
     currency?: string;
 }>(), {
     menuCategories: () => [],
     customers: () => [],
     rewards: () => [],
+    tables: () => [],
     currency: 'AED'
 });
 
@@ -337,6 +394,7 @@ const route = (window as any).route;
 const categoriesList = computed(() => props.menuCategories || []);
 const currencyCode = computed(() => props.currency || 'AED');
 const availableRewards = computed(() => props.rewards || []);
+const tablesList = computed(() => props.tables || []);
 
 // State
 const cart = ref<CartItem[]>([]);
@@ -348,6 +406,8 @@ const form = useForm({
     customer_phone: '',
     customer_name: '',
     customer_id: null as number | null,
+    type: 'dine_in',
+    table_id: null as number | null,
     items: [] as { menu_item_id: number; quantity: number; unit_price: number }[],
     subtotal: 0,
     discount: 0,
@@ -502,7 +562,11 @@ const createOrder = () => {
     form.discount = discountAmount.value;
     form.tax = tax.value;
     form.total = total.value;
+    form.total = total.value;
     form.reward_id = selectedReward.value?.id || null;
+    if (form.type === 'takeaway') {
+        form.table_id = null;
+    }
 
     form.post(route('orders.store'), {
         onSuccess: () => {

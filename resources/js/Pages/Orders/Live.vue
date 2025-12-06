@@ -17,6 +17,7 @@
                             </svg>
                         </div>
                     </div>
+                    
                     <Link :href="route('orders.create')">
                         <Button>
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,6 +28,13 @@
                     </Link>
                 </div>
             </div>
+            
+            <DateRangePicker
+                :initial-start-date="params.start_date"
+                :initial-end-date="params.end_date"
+                @update="onDateRangeUpdate"
+                class="mb-6"
+            />
             
             <div class="glass-card rounded-2xl overflow-hidden">
                 <!-- Empty State -->
@@ -108,6 +116,12 @@
                                         </span>
                                     </div>
                                 </th>
+                                <th 
+                                    scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                                >
+                                    Duration
+                                </th>
                                 <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                     Actions
                                 </th>
@@ -136,6 +150,9 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ formatDate(order.created_at) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ calculateDuration(order.created_at, order.completed_at) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
@@ -184,6 +201,7 @@ import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Pagination from '@/Components/Pagination.vue';
+import DateRangePicker from '@/Components/DateRangePicker.vue';
 
 interface Order {
     id: number;
@@ -193,6 +211,7 @@ interface Order {
     status: string;
     total: number;
     created_at: string;
+    completed_at?: string;
 }
 
 interface PaginatedOrders {
@@ -220,6 +239,8 @@ const props = withDefaults(defineProps<{
         search?: string;
         sort_field?: string;
         sort_direction?: string;
+        start_date?: string;
+        end_date?: string;
     };
 }>(), {
     orders: () => ({ data: [] }),
@@ -230,17 +251,25 @@ const props = withDefaults(defineProps<{
 const params = ref({
     search: props.filters?.search || '',
     sort_field: props.filters?.sort_field || 'created_at',
-    sort_direction: props.filters?.sort_direction || 'desc'
+    sort_direction: props.filters?.sort_direction || 'desc',
+    start_date: props.filters?.start_date || '',
+    end_date: props.filters?.end_date || ''
 });
 
+const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
+    params.value.start_date = range.startDate;
+    params.value.end_date = range.endDate;
+};
+
 watch(
-    () => params.value.search,
-    debounce((value: string) => {
-        router.get(route('orders.index'), { ...params.value, search: value }, {
+    () => params.value,
+    debounce((value: any) => {
+        router.get(route('orders.index'), { ...value }, {
             preserveState: true,
             replace: true
         });
-    }, 300)
+    }, 300),
+    { deep: true }
 );
 
 const sort = (field: string) => {
@@ -299,6 +328,22 @@ const formatDate = (dateStr: string | null | undefined): string => {
     } catch {
         return '-';
     }
+};
+
+const calculateDuration = (created: string, completed?: string): string => {
+    if (!completed) return 'In Progress';
+    
+    const start = new Date(created).getTime();
+    const end = new Date(completed).getTime();
+    const diff = end - start;
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
 };
 
 const getStatusClass = (status: string | null | undefined): string => {

@@ -117,6 +117,28 @@
                     </Link>
 
                     <Link 
+                        :href="route('tables.index')" 
+                        :class="[
+                            'group flex items-center px-4 py-3 rounded-xl transition-all duration-200 menu-item-hover',
+                            $page.url.includes('/tables') 
+                                ? 'menu-item-active text-primary font-semibold' 
+                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
+                        ]"
+                    >
+                        <div :class="[
+                            'p-2 rounded-lg mr-3 transition-all duration-200',
+                            $page.url.includes('/tables') 
+                                ? 'bg-primary/10 text-primary' 
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
+                        ]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <span>Tables</span>
+                    </Link>
+
+                    <Link 
                         :href="route('staff.index')" 
                         :class="[
                             'group flex items-center px-4 py-3 rounded-xl transition-all duration-200 menu-item-hover',
@@ -158,6 +180,28 @@
                             </svg>
                         </div>
                         <span>Kitchen</span>
+                    </Link>
+
+                    <Link 
+                        :href="route('pos.index')" 
+                        :class="[
+                            'group flex items-center px-4 py-3 rounded-xl transition-all duration-200 menu-item-hover',
+                            $page.url.includes('/pos') 
+                                ? 'menu-item-active text-primary font-semibold' 
+                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
+                        ]"
+                    >
+                        <div :class="[
+                            'p-2 rounded-lg mr-3 transition-all duration-200',
+                            $page.url.includes('/pos') 
+                                ? 'bg-primary/10 text-primary' 
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
+                        ]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 36v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span>POS</span>
                     </Link>
 
                     <Link 

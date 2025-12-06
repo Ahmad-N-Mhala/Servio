@@ -13,6 +13,8 @@ Route::get('/login', function () {
     return redirect()->route('login');
 });
 
+require base_path('routes/tenant_api.php');
+
 foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $properties) {
     // Central Domain Routes
     Route::group([
@@ -81,7 +83,10 @@ foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $propertie
                 Route::put('/{order}/status', [\App\Http\Controllers\Tenant\OrderController::class, 'updateStatus'])->name('status.update');
             });
 
+            Route::resource('tables', \App\Http\Controllers\Tenant\TableController::class);
+
             Route::prefix('loyalty')->name('loyalty.')->group(function () {
+                Route::resource('loyalty', \App\Http\Controllers\Tenant\LoyaltyController::class);
                 Route::get('/', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'index'])->name('index');
                 Route::get('/customers/{customer}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'showCustomer'])->name('customers.show');
                 Route::post('/rewards', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'storeReward'])->name('rewards.store');
@@ -101,7 +106,11 @@ foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $propertie
 
             Route::prefix('kitchen')->name('kitchen.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\KitchenController::class, 'index'])->name('index');
-                Route::put('/{order}/status', [\App\Http\Controllers\Tenant\KitchenController::class, 'updateStatus'])->name('status.update');
+            });
+
+            Route::prefix('pos')->name('pos.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\POSController::class, 'index'])->name('index');
+                Route::post('/{order}/settle', [\App\Http\Controllers\Tenant\POSController::class, 'settle'])->name('settle');
             });
         });
     });
