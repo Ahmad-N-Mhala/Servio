@@ -157,7 +157,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="relative inline-block text-left">
                                         <button 
-                                            @click="toggleDropdown(order.id)"
+                                            @click.stop="toggleDropdown(order.id)"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium shadow-sm"
                                         >
                                             Actions
@@ -241,7 +241,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 // @ts-ignore
 import debounce from 'lodash/debounce';
@@ -314,10 +314,14 @@ const closeDropdown = () => {
     openDropdown.value = null;
 };
 
-// Add click listener to close dropdown when clicking outside
-if (typeof window !== 'undefined') {
-    window.addEventListener('click', closeDropdown);
-}
+// Add and remove click listener using Vue lifecycle hooks
+onMounted(() => {
+    document.addEventListener('click', closeDropdown);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdown);
+});
 
 const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
     params.value.start_date = range.startDate;

@@ -17574,3 +17574,24 @@ Did you mean one of these?
 [2025-12-07 08:00:41] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
 [2025-12-07 08:00:41] local.INFO: Tenant initialized successfully: ahmadtest  
 [2025-12-07 08:00:41] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:05:46] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:05:46] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:05:46] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:05:51] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:05:51] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:05:51] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:06:31] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:06:31] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:06:31] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:07:37] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:07:37] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:07:37] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:07:49] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:07:49] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:07:49] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:07:50] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:07:50] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:07:50] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
+[2025-12-07 08:09:37] local.INFO: Attempting to resolve tenant for domain: ahmadtest.localhost  
+[2025-12-07 08:09:37] local.INFO: Tenant initialized successfully: ahmadtest  
+[2025-12-07 08:09:37] local.INFO: Database bootstrapper completed for tenant: ahmadtest  
