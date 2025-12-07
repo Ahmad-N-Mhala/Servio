@@ -24,6 +24,7 @@ class OrderController extends Controller
         $restaurant = \App\Models\Restaurant::first();
 
         $query = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted')
             ->with(['customer']);
 
         // Search
@@ -211,7 +212,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,processing,completed,cancelled'],
+            'status' => ['required', 'in:pending,processing,completed,cancelled,deleted'],
         ]);
 
         $oldStatus = $order->status;
@@ -225,7 +226,16 @@ class OrderController extends Controller
             $this->loyaltyService->processOrderPoints($order);
         }
 
+        // Reverse loyalty points if order is deleted
+        if ($validated['status'] === 'deleted' && $order->points_earned > 0) {
+            // Reverse points if they were earned
+            $customer = $order->customer;
+            if ($customer) {
+                $customer->decrement('loyalty_points', $order->points_earned);
+                $order->update(['points_earned' => 0]);
+            }
+        }
+
         return redirect()->back()->with('message', __('orders.status_updated'));
     }
 }
-

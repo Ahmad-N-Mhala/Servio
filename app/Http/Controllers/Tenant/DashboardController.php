@@ -25,10 +25,12 @@ class DashboardController extends Controller
 
         // Get real statistics with date filtering
         $totalOrders = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
         $todayOrders = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted')
             ->whereDate('created_at', today())
             ->count();
 
@@ -44,6 +46,7 @@ class DashboardController extends Controller
         // Recent orders
         $recentOrders = Order::with(['items', 'customer'])
             ->where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'desc')
             ->limit(5)
@@ -79,6 +82,7 @@ class DashboardController extends Controller
 
         // Order status distribution
         $statusDistribution = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
@@ -92,6 +96,7 @@ class DashboardController extends Controller
 
         // Peak hours analysis (hourly order counts)
         $peakHours = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(
                 DB::raw('EXTRACT(HOUR FROM created_at) as hour'),
@@ -112,6 +117,7 @@ class DashboardController extends Controller
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
             ->where('orders.restaurant_id', $restaurant->id)
+            ->where('orders.status', '!=', 'deleted')
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->select(
                 'menu_items.id',
