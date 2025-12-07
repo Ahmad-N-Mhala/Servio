@@ -155,47 +155,75 @@
                                     {{ calculateDuration(order.created_at, order.completed_at) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end gap-2">
-                                        <!-- Process Button - Show for pending orders -->
+                                    <div class="relative inline-block text-left">
                                         <button 
-                                            v-if="order.status === 'pending'"
-                                            @click="updateStatus(order.id, 'processing')"
-                                            class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-xs"
-                                            title="Mark as processing"
+                                            @click="toggleDropdown(order.id)"
+                                            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium shadow-sm"
                                         >
-                                            Process
-                                        </button>
-                                        
-                                        <!-- Complete Button - Show for processing orders -->
-                                        <button 
-                                            v-if="order.status === 'processing'"
-                                            @click="updateStatus(order.id, 'completed')"
-                                            class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-xs"
-                                            title="Mark as completed"
-                                        >
-                                            Complete
-                                        </button>
-                                        
-                                        <!-- Cancel Button - Show for pending and processing orders -->
-                                        <button 
-                                            v-if="order.status === 'pending' || order.status === 'processing'"
-                                            @click="confirmAction(order.id, 'cancelled', 'Are you sure you want to cancel this order?')"
-                                            class="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors font-medium text-xs"
-                                            title="Cancel order"
-                                        >
-                                            Cancel
-                                        </button>
-                                        
-                                        <!-- Delete Button - Show for all orders -->
-                                        <button 
-                                            @click="confirmAction(order.id, 'deleted', 'Are you sure you want to delete this order? This action will exclude it from all calculations.')"
-                                            class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-xs"
-                                            title="Delete order"
-                                        >
+                                            Actions
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
+                                        
+                                        <!-- Dropdown Menu -->
+                                        <div 
+                                            v-if="openDropdown === order.id"
+                                            @click.stop
+                                            class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 overflow-hidden"
+                                        >
+                                            <div class="py-1">
+                                                <!-- Process Action -->
+                                                <button 
+                                                    v-if="order.status === 'pending'"
+                                                    @click="handleAction(order.id, 'processing')"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-blue-700 hover:bg-blue-50 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                    </svg>
+                                                    Mark as Processing
+                                                </button>
+                                                
+                                                <!-- Complete Action -->
+                                                <button 
+                                                    v-if="order.status === 'processing'"
+                                                    @click="handleAction(order.id, 'completed')"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-green-700 hover:bg-green-50 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Mark as Completed
+                                                </button>
+                                                
+                                                <!-- Cancel Action -->
+                                                <button 
+                                                    v-if="order.status === 'pending' || order.status === 'processing'"
+                                                    @click="handleAction(order.id, 'cancelled', 'Are you sure you want to cancel this order?')"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Cancel Order
+                                                </button>
+                                                
+                                                <!-- Divider before delete -->
+                                                <div class="border-t border-gray-100 my-1"></div>
+                                                
+                                                <!-- Delete Action -->
+                                                <button 
+                                                    @click="handleAction(order.id, 'deleted', 'Are you sure you want to delete this order? This action will exclude it from all calculations.')"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    Delete Order
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -274,6 +302,22 @@ const params = ref({
     start_date: props.filters?.start_date || '',
     end_date: props.filters?.end_date || ''
 });
+
+const openDropdown = ref<number | null>(null);
+
+const toggleDropdown = (orderId: number) => {
+    openDropdown.value = openDropdown.value === orderId ? null : orderId;
+};
+
+// Close dropdown when clicking outside
+const closeDropdown = () => {
+    openDropdown.value = null;
+};
+
+// Add click listener to close dropdown when clicking outside
+if (typeof window !== 'undefined') {
+    window.addEventListener('click', closeDropdown);
+}
 
 const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
     params.value.start_date = range.startDate;
@@ -380,8 +424,17 @@ const updateStatus = (orderId: number, status: string) => {
     router.put(route('orders.status.update', orderId), { status });
 };
 
-const confirmAction = (orderId: number, status: string, message: string) => {
-    if (confirm(message)) {
+const handleAction = (orderId: number, status: string, confirmMessage?: string) => {
+    // Close the dropdown
+    openDropdown.value = null;
+    
+    // If there's a confirmation message, show it
+    if (confirmMessage) {
+        if (confirm(confirmMessage)) {
+            updateStatus(orderId, status);
+        }
+    } else {
+        // No confirmation needed, just update
         updateStatus(orderId, status);
     }
 };
