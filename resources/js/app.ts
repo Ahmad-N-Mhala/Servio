@@ -1,4 +1,5 @@
 import '../css/app.css';
+// Rebuild trigger 2
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
@@ -37,6 +38,28 @@ const i18n = createI18n({
         zh,
     },
 });
+
+// Dark mode detection and setup
+function setupDarkMode() {
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function updateDarkMode(e: MediaQueryListEvent | MediaQueryList) {
+        if (e.matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }
+
+    // Set initial dark mode state
+    updateDarkMode(darkModeMediaQuery);
+
+    // Listen for changes in color scheme preference
+    darkModeMediaQuery.addEventListener('change', updateDarkMode);
+}
+
+// Initialize dark mode
+setupDarkMode();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -40,6 +40,7 @@
                             required
                             autofocus
                             class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': form.errors.email }"
                             placeholder="Enter your email"
                         />
                     </div>

@@ -3,96 +3,65 @@
 @tailwind utilities;
 
 /* ========================================
-   Force Light Mode - Override Browser Dark Mode
+   Dark Mode Support
    ======================================== */
+:root {
+    color-scheme: light dark;
+}
+
+/* Light mode defaults */
+html {
+    background-color: #f9fafb;
+    color: #1f2937;
+}
+
+/* Dark mode */
+html.dark {
+    background-color: #111827;
+    color: #f3f4f6;
+}
+
+/* Ensure smooth transitions between modes */
 html,
 body {
-    color-scheme: light !important;
-    background-color: #ffffff !important;
-    color: #1f2937 !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Force light backgrounds on all major elements */
-body,
-#app,
-main,
-div,
-section,
-article,
-aside,
-header,
-footer,
-nav {
-    background-color: inherit;
-    color: inherit;
-}
-
-/* Ensure text is always dark and readable */
-* {
-    color-scheme: light !important;
-}
-
-p,
-span,
-a,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-label,
-button {
-    color: inherit !important;
-}
-
-/* Override any auto dark mode styling */
+/* Form inputs dark mode support */
 @media (prefers-color-scheme: dark) {
-
-    html,
-    body {
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
+    html:not(.light) {
+        background-color: #111827;
+        color: #f3f4f6;
     }
 
-    /* Ensure inputs remain visible */
-    input,
-    textarea,
-    select {
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-        border-color: #d1d5db !important;
+    html:not(.light) input,
+    html:not(.light) textarea,
+    html:not(.light) select {
+        background-color: #1f2937;
+        color: #f3f4f6;
+        border-color: #374151;
     }
 
-    /* Cards and containers */
-    .bg-white,
-    [class*="bg-white"] {
-        background-color: #ffffff !important;
-    }
-
-    /* Text colors */
-    .text-gray-900,
-    .text-gray-800,
-    .text-gray-700,
-    .text-gray-600 {
-        color: #1f2937 !important;
+    html:not(.light) input::placeholder,
+    html:not(.light) textarea::placeholder {
+        color: #6b7280;
     }
 }
 
-/* Ensure form elements are visible */
-input,
-textarea,
-select,
-button {
-    background-color: #ffffff;
-    color: #1f2937;
-    border-color: #d1d5db;
+/* Explicit dark mode class */
+html.dark input,
+html.dark textarea,
+html.dark select {
+    background-color: #1f2937;
+    color: #f3f4f6;
+    border-color: #374151;
 }
 
-input::placeholder,
-textarea::placeholder {
-    color: #9ca3af !important;
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #6b7280;
 }
+
 
 
 /* ========================================

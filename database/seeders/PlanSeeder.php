@@ -64,7 +64,7 @@ class PlanSeeder extends Seeder
         ];
 
         foreach ($plans as $plan) {
-            Plan::create($plan);
+            Plan::updateOrCreate(['slug' => $plan['slug']], $plan);
         }
     }
 }

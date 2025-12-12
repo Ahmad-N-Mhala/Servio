@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict MJOtHoSl94Yzh9GTWqkoT2rzWr22J0GZkubaXRNDVLWClwXL7zA1GJtXxVMptm7
+\restrict Mtjfeqy85BpX5b2Itv8wtq5y4rOz1xipBK7jlI9f8aftUZNTYeKDg5BsB1X6nyN
 
 -- Dumped from database version 14.20 (Homebrew)
 -- Dumped by pg_dump version 14.20 (Homebrew)
@@ -18,6 +18,133 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE ONLY public.staff DROP CONSTRAINT staff_user_id_foreign;
+ALTER TABLE ONLY public.staff DROP CONSTRAINT staff_restaurant_id_foreign;
+ALTER TABLE ONLY public.role_has_permissions DROP CONSTRAINT role_has_permissions_role_id_foreign;
+ALTER TABLE ONLY public.role_has_permissions DROP CONSTRAINT role_has_permissions_permission_id_foreign;
+ALTER TABLE ONLY public.rewards DROP CONSTRAINT rewards_restaurant_id_foreign;
+ALTER TABLE ONLY public.rewards DROP CONSTRAINT rewards_menu_item_id_foreign;
+ALTER TABLE ONLY public.reward_redemptions DROP CONSTRAINT reward_redemptions_reward_id_foreign;
+ALTER TABLE ONLY public.reward_redemptions DROP CONSTRAINT reward_redemptions_order_id_foreign;
+ALTER TABLE ONLY public.reward_redemptions DROP CONSTRAINT reward_redemptions_customer_id_foreign;
+ALTER TABLE ONLY public.restaurant_tables DROP CONSTRAINT restaurant_tables_restaurant_id_foreign;
+ALTER TABLE ONLY public.point_transactions DROP CONSTRAINT point_transactions_reward_redemption_id_foreign;
+ALTER TABLE ONLY public.point_transactions DROP CONSTRAINT point_transactions_order_id_foreign;
+ALTER TABLE ONLY public.point_transactions DROP CONSTRAINT point_transactions_customer_id_foreign;
+ALTER TABLE ONLY public.payments DROP CONSTRAINT payments_subscription_id_foreign;
+ALTER TABLE ONLY public.orders DROP CONSTRAINT orders_table_id_foreign;
+ALTER TABLE ONLY public.orders DROP CONSTRAINT orders_restaurant_id_foreign;
+ALTER TABLE ONLY public.orders DROP CONSTRAINT orders_customer_id_foreign;
+ALTER TABLE ONLY public.order_items DROP CONSTRAINT order_items_order_id_foreign;
+ALTER TABLE ONLY public.order_items DROP CONSTRAINT order_items_menu_item_id_foreign;
+ALTER TABLE ONLY public.model_has_roles DROP CONSTRAINT model_has_roles_role_id_foreign;
+ALTER TABLE ONLY public.model_has_permissions DROP CONSTRAINT model_has_permissions_permission_id_foreign;
+ALTER TABLE ONLY public.menu_items DROP CONSTRAINT menu_items_restaurant_id_foreign;
+ALTER TABLE ONLY public.menu_items DROP CONSTRAINT menu_items_menu_category_id_foreign;
+ALTER TABLE ONLY public.menu_categories DROP CONSTRAINT menu_categories_restaurant_id_foreign;
+ALTER TABLE ONLY public.loyalty_points DROP CONSTRAINT loyalty_points_customer_id_foreign;
+ALTER TABLE ONLY public.earning_methods DROP CONSTRAINT earning_methods_restaurant_id_foreign;
+ALTER TABLE ONLY public.customers DROP CONSTRAINT customers_restaurant_id_foreign;
+DROP INDEX public.reward_redemptions_customer_id_status_index;
+DROP INDEX public.reward_redemptions_code_index;
+DROP INDEX public.point_transactions_expires_at_index;
+DROP INDEX public.point_transactions_customer_id_type_index;
+DROP INDEX public.model_has_roles_model_id_model_type_index;
+DROP INDEX public.model_has_permissions_model_id_model_type_index;
+DROP INDEX public.customers_phone_index;
+ALTER TABLE ONLY public.users DROP CONSTRAINT users_pkey;
+ALTER TABLE ONLY public.users DROP CONSTRAINT users_email_unique;
+ALTER TABLE ONLY public.subscriptions DROP CONSTRAINT subscriptions_stripe_subscription_id_unique;
+ALTER TABLE ONLY public.subscriptions DROP CONSTRAINT subscriptions_pkey;
+ALTER TABLE ONLY public.staff DROP CONSTRAINT staff_pkey;
+ALTER TABLE ONLY public.roles DROP CONSTRAINT roles_pkey;
+ALTER TABLE ONLY public.roles DROP CONSTRAINT roles_name_guard_name_unique;
+ALTER TABLE ONLY public.role_has_permissions DROP CONSTRAINT role_has_permissions_pkey;
+ALTER TABLE ONLY public.rewards DROP CONSTRAINT rewards_pkey;
+ALTER TABLE ONLY public.reward_redemptions DROP CONSTRAINT reward_redemptions_pkey;
+ALTER TABLE ONLY public.reward_redemptions DROP CONSTRAINT reward_redemptions_code_unique;
+ALTER TABLE ONLY public.restaurants DROP CONSTRAINT restaurants_slug_unique;
+ALTER TABLE ONLY public.restaurants DROP CONSTRAINT restaurants_pkey;
+ALTER TABLE ONLY public.restaurant_tables DROP CONSTRAINT restaurant_tables_pkey;
+ALTER TABLE ONLY public.point_transactions DROP CONSTRAINT point_transactions_pkey;
+ALTER TABLE ONLY public.permissions DROP CONSTRAINT permissions_pkey;
+ALTER TABLE ONLY public.permissions DROP CONSTRAINT permissions_name_guard_name_unique;
+ALTER TABLE ONLY public.payments DROP CONSTRAINT payments_stripe_payment_intent_id_unique;
+ALTER TABLE ONLY public.payments DROP CONSTRAINT payments_pkey;
+ALTER TABLE ONLY public.password_reset_tokens DROP CONSTRAINT password_reset_tokens_pkey;
+ALTER TABLE ONLY public.orders DROP CONSTRAINT orders_pkey;
+ALTER TABLE ONLY public.orders DROP CONSTRAINT orders_order_number_unique;
+ALTER TABLE ONLY public.order_items DROP CONSTRAINT order_items_pkey;
+ALTER TABLE ONLY public.model_has_roles DROP CONSTRAINT model_has_roles_pkey;
+ALTER TABLE ONLY public.model_has_permissions DROP CONSTRAINT model_has_permissions_pkey;
+ALTER TABLE ONLY public.migrations DROP CONSTRAINT migrations_pkey;
+ALTER TABLE ONLY public.menu_items DROP CONSTRAINT menu_items_pkey;
+ALTER TABLE ONLY public.menu_categories DROP CONSTRAINT menu_categories_pkey;
+ALTER TABLE ONLY public.loyalty_points DROP CONSTRAINT loyalty_points_pkey;
+ALTER TABLE ONLY public.earning_methods DROP CONSTRAINT earning_methods_pkey;
+ALTER TABLE ONLY public.customers DROP CONSTRAINT customers_restaurant_id_phone_unique;
+ALTER TABLE ONLY public.customers DROP CONSTRAINT customers_pkey;
+ALTER TABLE public.users ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.subscriptions ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.staff ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.roles ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.rewards ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.reward_redemptions ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.restaurants ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.restaurant_tables ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.point_transactions ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.permissions ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.payments ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.orders ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.order_items ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.migrations ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.menu_items ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.menu_categories ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.loyalty_points ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.earning_methods ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.customers ALTER COLUMN id DROP DEFAULT;
+DROP SEQUENCE public.users_id_seq;
+DROP TABLE public.users;
+DROP SEQUENCE public.subscriptions_id_seq;
+DROP TABLE public.subscriptions;
+DROP SEQUENCE public.staff_id_seq;
+DROP TABLE public.staff;
+DROP SEQUENCE public.roles_id_seq;
+DROP TABLE public.roles;
+DROP TABLE public.role_has_permissions;
+DROP SEQUENCE public.rewards_id_seq;
+DROP TABLE public.rewards;
+DROP SEQUENCE public.reward_redemptions_id_seq;
+DROP TABLE public.reward_redemptions;
+DROP SEQUENCE public.restaurants_id_seq;
+DROP TABLE public.restaurants;
+DROP SEQUENCE public.restaurant_tables_id_seq;
+DROP TABLE public.restaurant_tables;
+DROP SEQUENCE public.point_transactions_id_seq;
+DROP TABLE public.point_transactions;
+DROP SEQUENCE public.permissions_id_seq;
+DROP TABLE public.permissions;
+DROP SEQUENCE public.payments_id_seq;
+DROP TABLE public.payments;
+DROP TABLE public.password_reset_tokens;
+DROP SEQUENCE public.orders_id_seq;
+DROP TABLE public.orders;
+DROP SEQUENCE public.order_items_id_seq;
+DROP TABLE public.order_items;
+DROP TABLE public.model_has_roles;
+DROP TABLE public.model_has_permissions;
+DROP SEQUENCE public.migrations_id_seq;
+DROP TABLE public.migrations;
+DROP SEQUENCE public.menu_items_id_seq;
+DROP TABLE public.menu_items;
+DROP SEQUENCE public.menu_categories_id_seq;
+DROP TABLE public.menu_categories;
+DROP SEQUENCE public.loyalty_points_id_seq;
+DROP TABLE public.loyalty_points;
+DROP SEQUENCE public.earning_methods_id_seq;
+DROP TABLE public.earning_methods;
+DROP SEQUENCE public.customers_id_seq;
+DROP TABLE public.customers;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -384,6 +511,19 @@ ALTER TABLE public.orders_id_seq OWNER TO ahmadmhala;
 
 ALTER SEQUENCE public.orders_id_seq OWNED BY public.orders.id;
 
+
+--
+-- Name: password_reset_tokens; Type: TABLE; Schema: public; Owner: ahmadmhala
+--
+
+CREATE TABLE public.password_reset_tokens (
+    email character varying(191) NOT NULL,
+    token character varying(191) NOT NULL,
+    created_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.password_reset_tokens OWNER TO ahmadmhala;
 
 --
 -- Name: payments; Type: TABLE; Schema: public; Owner: ahmadmhala
@@ -986,8 +1126,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.customers (id, restaurant_id, phone, name, email, birthday, preferences, total_orders, total_spent, loyalty_tier, last_order_at, is_active, created_at, updated_at) FROM stdin;
-1	1	5550100	Jane Doe	jane@example.com	\N	\N	0	1500.00	silver	\N	t	2025-12-06 12:29:00	2025-12-06 12:29:00
-2	1	5550101	John Smith	john@example.com	\N	\N	0	5500.00	platinum	\N	t	2025-12-06 12:29:00	2025-12-06 12:29:00
 \.
 
 
@@ -1012,10 +1150,6 @@ COPY public.loyalty_points (id, customer_id, balance, total_earned, total_redeem
 --
 
 COPY public.menu_categories (id, restaurant_id, name, description, sort_order, is_active, created_at, updated_at) FROM stdin;
-1	1	{"en":"Appetizers","ar":"Appetizers"}	Delicious Appetizers	0	t	2025-12-06 12:29:00	2025-12-06 12:29:00
-2	1	{"en":"Main Course","ar":"Main Course"}	Delicious Main Course	1	t	2025-12-06 12:29:00	2025-12-06 12:29:00
-3	1	{"en":"Beverages","ar":"Beverages"}	Delicious Beverages	2	t	2025-12-06 12:29:00	2025-12-06 12:29:00
-4	1	{"en":"Desserts","ar":"Desserts"}	Delicious Desserts	3	t	2025-12-06 12:29:00	2025-12-06 12:29:00
 \.
 
 
@@ -1024,14 +1158,6 @@ COPY public.menu_categories (id, restaurant_id, name, description, sort_order, i
 --
 
 COPY public.menu_items (id, restaurant_id, menu_category_id, name, description, price, currency, image, is_available, sort_order, allergens, created_at, updated_at) FROM stdin;
-1	1	1	{"en":"Hummus","ar":"Hummus"}	Creamy chickpea dip with olive oil	15.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-2	1	1	{"en":"Fattoush","ar":"Fattoush"}	Mixed green salad with toasted bread	18.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-3	1	2	{"en":"Grilled Chicken","ar":"Grilled Chicken"}	Half chicken marinated and grilled	45.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-4	1	2	{"en":"Lamb Kabsa","ar":"Lamb Kabsa"}	Traditional rice dish with lamb	55.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-5	1	2	{"en":"Beef Burger","ar":"Beef Burger"}	Angus beef patty with cheese and fries	40.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-6	1	3	{"en":"Mint Lemonade","ar":"Mint Lemonade"}	Freshly squeezed lemon with mint	12.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-7	1	3	{"en":"Turkish Coffee","ar":"Turkish Coffee"}	Traditional strong coffee	10.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-8	1	4	{"en":"Kunafa","ar":"Kunafa"}	Sweet cheese pastry	25.00	AED	\N	t	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
 \.
 
 
@@ -1060,7 +1186,8 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 18	2025_12_06_082447_add_currency_amount_to_earning_methods_table	1
 19	2025_12_06_113916_create_restaurant_tables_table	1
 20	2025_12_06_113922_add_type_and_table_id_to_orders_table	1
-21	2025_12_06_164500_add_payment_status_to_orders_table	2
+21	2025_12_06_131636_create_password_reset_tokens_table	1
+22	2025_12_06_164500_add_payment_status_to_orders_table	1
 \.
 
 
@@ -1077,6 +1204,8 @@ COPY public.model_has_permissions (permission_id, model_type, model_id) FROM std
 --
 
 COPY public.model_has_roles (role_id, model_type, model_id) FROM stdin;
+2	App\\Models\\User	1
+1	App\\Models\\User	2
 \.
 
 
@@ -1085,27 +1214,6 @@ COPY public.model_has_roles (role_id, model_type, model_id) FROM stdin;
 --
 
 COPY public.order_items (id, order_id, menu_item_id, quantity, unit_price, total_price, notes, created_at, updated_at) FROM stdin;
-1	1	3	1	45.00	45.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-2	1	6	1	12.00	12.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-3	1	7	2	10.00	20.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-4	2	1	2	15.00	30.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-5	2	4	1	55.00	55.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-6	2	8	2	25.00	50.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-7	3	6	1	12.00	12.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-8	3	7	1	10.00	10.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-9	3	8	2	25.00	50.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-10	4	1	2	15.00	30.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-11	4	4	2	55.00	110.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-12	4	8	2	25.00	50.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-13	5	3	1	45.00	45.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-14	5	6	1	12.00	12.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-15	5	8	2	25.00	50.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-16	6	8	2	25.00	50.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-17	7	3	1	45.00	45.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-18	7	4	1	55.00	55.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-19	7	8	1	25.00	25.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-20	8	1	1	15.00	15.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
-21	8	4	2	55.00	110.00	\N	2025-12-06 12:29:00	2025-12-06 12:29:00
 \.
 
 
@@ -1114,14 +1222,14 @@ COPY public.order_items (id, order_id, menu_item_id, quantity, unit_price, total
 --
 
 COPY public.orders (id, restaurant_id, order_number, status, subtotal, tax, total, currency, customer_id, customer_name, customer_phone, points_earned, points_redeemed, notes, completed_at, created_at, updated_at, type, table_id, payment_status, payment_method) FROM stdin;
-1	1	ORD-53961	completed	77.00	3.85	80.85	AED	1	Jane Doe	5550100	0	0	\N	2025-11-29 12:29:00	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-2	1	ORD-10676	completed	135.00	6.75	141.75	AED	1	Jane Doe	5550100	0	0	\N	2025-12-01 12:29:00	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-3	1	ORD-25579	completed	72.00	3.60	75.60	AED	1	Jane Doe	5550100	0	0	\N	2025-12-04 12:29:00	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-4	1	ORD-36486	completed	190.00	9.50	199.50	AED	1	Jane Doe	5550100	0	0	\N	2025-12-06 12:29:00	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-5	1	ORD-16237	completed	107.00	5.35	112.35	AED	1	Jane Doe	5550100	0	0	\N	2025-12-02 12:29:00	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-6	1	ORD-KIT-6603	pending	50.00	2.50	52.50	AED	1	Jane Doe	5550100	0	0	\N	\N	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-7	1	ORD-KIT-8605	processing	125.00	6.25	131.25	AED	1	Jane Doe	5550100	0	0	\N	\N	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
-8	1	ORD-KIT-1635	processing	125.00	6.25	131.25	AED	1	Jane Doe	5550100	0	0	\N	\N	2025-12-06 12:29:00	2025-12-06 12:29:00	dine_in	1	unpaid	\N
+\.
+
+
+--
+-- Data for Name: password_reset_tokens; Type: TABLE DATA; Schema: public; Owner: ahmadmhala
+--
+
+COPY public.password_reset_tokens (email, token, created_at) FROM stdin;
 \.
 
 
@@ -1154,11 +1262,6 @@ COPY public.point_transactions (id, customer_id, order_id, reward_redemption_id,
 --
 
 COPY public.restaurant_tables (id, restaurant_id, name, capacity, status, location, created_at, updated_at) FROM stdin;
-1	1	T-1	4	available	\N	2025-12-06 12:13:16	2025-12-06 12:13:16
-2	1	T-2	4	available	Main Hall	2025-12-06 12:29:00	2025-12-06 12:29:00
-3	1	T-3	4	reserved	Main Hall	2025-12-06 12:29:00	2025-12-06 12:29:00
-4	1	T-4	6	available	Family Section	2025-12-06 12:29:00	2025-12-06 12:29:00
-5	1	T-5	2	occupied	Window	2025-12-06 12:29:00	2025-12-06 12:29:00
 \.
 
 
@@ -1167,7 +1270,7 @@ COPY public.restaurant_tables (id, restaurant_id, name, capacity, status, locati
 --
 
 COPY public.restaurants (id, name, slug, description, phone, email, address, city, country, currency, locale, settings, created_at, updated_at) FROM stdin;
-1	Ahmad Restaurant	ahmad-restaurant	\N	1234567890	contact@ahmadtest.com	\N	\N	\N	AED	en	\N	2025-12-06 12:11:42	2025-12-06 12:11:42
+1	Mhala	mhala	\N	0501234567	contact@mhala.com	Mhala Restaurant Location	\N	\N	AED	en	\N	2025-12-10 11:46:10	2025-12-10 11:46:10
 \.
 
 
@@ -1200,6 +1303,10 @@ COPY public.role_has_permissions (permission_id, role_id) FROM stdin;
 --
 
 COPY public.roles (id, name, guard_name, created_at, updated_at) FROM stdin;
+1	owner	web	2025-12-10 11:46:10	2025-12-10 11:46:10
+2	manager	web	2025-12-10 11:46:10	2025-12-10 11:46:10
+3	waiter	web	2025-12-10 11:46:10	2025-12-10 11:46:10
+4	chef	web	2025-12-10 11:46:10	2025-12-10 11:46:10
 \.
 
 
@@ -1208,6 +1315,7 @@ COPY public.roles (id, name, guard_name, created_at, updated_at) FROM stdin;
 --
 
 COPY public.staff (id, user_id, restaurant_id, role, is_active, invited_at, joined_at, created_at, updated_at) FROM stdin;
+1	2	1	owner	f	\N	2025-12-10 12:05:15	2025-12-10 12:05:15	2025-12-10 12:06:32
 \.
 
 
@@ -1224,7 +1332,8 @@ COPY public.subscriptions (id, stripe_subscription_id, stripe_customer_id, statu
 --
 
 COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM stdin;
-1	Ahmad Admin	admin@ahmadtest.com	\N	$2y$12$2wmQYAjF23pWGeZ7tI0Aj.nLwoVXlsCsk9P/wScgvVh0NL9p8Ps1u	\N	2025-12-06 12:08:31	2025-12-06 12:08:31
+1	Mhala Manager	manager@mhala.com	\N	$2y$12$LlMbZDPcz5lAsy5nLS2F0uIlhB9bYGzNpSRUR8XhNL.Ow5hh0/crq	\N	2025-12-10 11:46:10	2025-12-10 11:46:10
+2	ds	ew@f	\N	$2y$12$WXETSOXDJSo5/MKfo3Z99OzLaFDV6j3.RjcHrvV3WsJRSpdOqhY0S	\N	2025-12-10 12:05:15	2025-12-10 12:05:15
 \.
 
 
@@ -1232,7 +1341,7 @@ COPY public.users (id, name, email, email_verified_at, password, remember_token,
 -- Name: customers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.customers_id_seq', 2, true);
+SELECT pg_catalog.setval('public.customers_id_seq', 1, false);
 
 
 --
@@ -1253,35 +1362,35 @@ SELECT pg_catalog.setval('public.loyalty_points_id_seq', 1, false);
 -- Name: menu_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.menu_categories_id_seq', 4, true);
+SELECT pg_catalog.setval('public.menu_categories_id_seq', 1, false);
 
 
 --
 -- Name: menu_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.menu_items_id_seq', 8, true);
+SELECT pg_catalog.setval('public.menu_items_id_seq', 1, false);
 
 
 --
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 21, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 22, true);
 
 
 --
 -- Name: order_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.order_items_id_seq', 21, true);
+SELECT pg_catalog.setval('public.order_items_id_seq', 1, false);
 
 
 --
 -- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.orders_id_seq', 8, true);
+SELECT pg_catalog.setval('public.orders_id_seq', 1, false);
 
 
 --
@@ -1309,7 +1418,7 @@ SELECT pg_catalog.setval('public.point_transactions_id_seq', 1, false);
 -- Name: restaurant_tables_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.restaurant_tables_id_seq', 5, true);
+SELECT pg_catalog.setval('public.restaurant_tables_id_seq', 1, false);
 
 
 --
@@ -1337,14 +1446,14 @@ SELECT pg_catalog.setval('public.rewards_id_seq', 1, false);
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.roles_id_seq', 1, false);
+SELECT pg_catalog.setval('public.roles_id_seq', 4, true);
 
 
 --
 -- Name: staff_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.staff_id_seq', 1, false);
+SELECT pg_catalog.setval('public.staff_id_seq', 1, true);
 
 
 --
@@ -1358,7 +1467,7 @@ SELECT pg_catalog.setval('public.subscriptions_id_seq', 1, false);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ahmadmhala
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, true);
+SELECT pg_catalog.setval('public.users_id_seq', 2, true);
 
 
 --
@@ -1455,6 +1564,14 @@ ALTER TABLE ONLY public.orders
 
 ALTER TABLE ONLY public.orders
     ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: password_reset_tokens password_reset_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: ahmadmhala
+--
+
+ALTER TABLE ONLY public.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (email);
 
 
 --
@@ -1878,5 +1995,5 @@ ALTER TABLE ONLY public.staff
 -- PostgreSQL database dump complete
 --
 
-\unrestrict MJOtHoSl94Yzh9GTWqkoT2rzWr22J0GZkubaXRNDVLWClwXL7zA1GJtXxVMptm7
+\unrestrict Mtjfeqy85BpX5b2Itv8wtq5y4rOz1xipBK7jlI9f8aftUZNTYeKDg5BsB1X6nyN
 

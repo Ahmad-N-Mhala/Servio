@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\LoyaltyService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -236,6 +237,21 @@ class OrderController extends Controller
             }
         }
 
-        return redirect()->back()->with('message', __('orders.status_updated'));
+        return redirect()->route('orders.index')->with('message', __('orders.status_updated'));
+    }
+
+    public function generateBill(Order $order)
+    {
+        // Load relationships needed for the bill
+        $order->load(['customer', 'table', 'items.menuItem']);
+
+        // Generate PDF
+        $pdf = Pdf::loadView('bills.order', [
+            'order' => $order,
+            'tenant' => tenant(),
+        ]);
+
+        // Return PDF for display in browser
+        return $pdf->stream("bill-{$order->id}.pdf");
     }
 }

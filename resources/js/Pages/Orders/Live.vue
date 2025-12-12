@@ -2,14 +2,14 @@
     <MainLayout>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex items-center justify-between mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Orders</h1>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('orders.title') }}</h1>
                 <div class="flex gap-4">
                     <div class="relative">
                         <input 
                             v-model="params.search"
                             type="text" 
-                            placeholder="Search orders..." 
-                            class="w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
+                            :placeholder="$t('orders.search_orders')" 
+                            class="w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
                         >
                         <div class="absolute left-3 top-2.5 text-gray-400">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,7 +23,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            New Order
+                            {{ $t('orders.new_order') }}
                         </Button>
                     </Link>
                 </div>
@@ -39,30 +39,30 @@
             <div class="glass-card rounded-2xl overflow-hidden">
                 <!-- Empty State -->
                 <div v-if="ordersCount === 0" class="text-center py-16 px-6">
-                    <div class="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                     </div>
-                    <h4 class="text-lg font-semibold text-gray-700 mb-2">No orders yet</h4>
-                    <p class="text-gray-500 mb-6">Create your first order to get started</p>
+                    <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('orders.no_orders') }}</h4>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('orders.create_first_order') }}</p>
                     <Link :href="route('orders.create')">
-                        <Button>Create First Order</Button>
+                        <Button>{{ $t('orders.create_first_order') }}</Button>
                     </Link>
                 </div>
                 
                 <!-- Table -->
                 <div v-else>
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th 
                                     scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                     @click="sort('order_number')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Order #
+                                        {{ $t('orders.order_number') }}
                                         <span v-if="params.sort_field === 'order_number'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -74,7 +74,7 @@
                                     @click="sort('customer_name')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Customer
+                                        {{ $t('orders.customer') }}
                                         <span v-if="params.sort_field === 'customer_name'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -86,7 +86,7 @@
                                     @click="sort('status')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Status
+                                        {{ $t('orders.status') }}
                                         <span v-if="params.sort_field === 'status'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -98,7 +98,7 @@
                                     @click="sort('total')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Total
+                                        {{ $t('orders.total') }}
                                         <span v-if="params.sort_field === 'total'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -110,7 +110,7 @@
                                     @click="sort('created_at')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Date
+                                        {{ $t('orders.date') }}
                                         <span v-if="params.sort_field === 'created_at'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -120,47 +120,47 @@
                                     scope="col" 
                                     class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                                 >
-                                    Duration
+                                    {{ $t('orders.duration') }}
                                 </th>
                                 <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Actions
+                                    {{ $t('orders.actions') }}
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             <tr 
                                 v-for="order in ordersList" 
                                 :key="order.id"
-                                class="hover:bg-gray-50 transition-colors"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm font-bold text-gray-900">{{ order.order_number || 'N/A' }}</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-white">{{ order.order_number || 'N/A' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ order.customer_name || 'Guest' }}</div>
-                                    <div class="text-sm text-gray-500">{{ order.customer_phone || '-' }}</div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ order.customer_name || $t('orders.guest') }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ order.customer_phone || '-' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(order.status)]">
-                                        {{ order.status || 'pending' }}
+                                        {{ getStatusLabel(order.status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm font-bold text-primary">{{ currencyCode }} {{ formatMoney(order.total) }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ formatDate(order.created_at) }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ calculateDuration(order.created_at, order.completed_at) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="relative inline-block text-left">
                                         <button 
                                             @click.stop="toggleDropdown(order.id)"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium shadow-sm"
+                                            class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium shadow-sm"
                                         >
-                                            Actions
+                                            {{ $t('orders.actions') }}
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                             </svg>
@@ -170,57 +170,71 @@
                                         <div 
                                             v-if="openDropdown === order.id"
                                             @click.stop
-                                            class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 overflow-hidden"
+                                            class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 z-10 overflow-hidden"
                                         >
                                             <div class="py-1">
                                                 <!-- Process Action -->
                                                 <button 
                                                     v-if="order.status === 'pending'"
                                                     @click="handleAction(order.id, 'processing')"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-blue-700 hover:bg-blue-50 flex items-center gap-3 transition-colors"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 transition-colors"
                                                 >
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                                     </svg>
-                                                    Mark as Processing
+                                                    {{ $t('orders.mark_as_processing') }}
                                                 </button>
                                                 
                                                 <!-- Complete Action -->
                                                 <button 
                                                     v-if="order.status === 'processing'"
                                                     @click="handleAction(order.id, 'completed')"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-green-700 hover:bg-green-50 flex items-center gap-3 transition-colors"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-3 transition-colors"
                                                 >
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    Mark as Completed
+                                                    {{ $t('orders.mark_as_completed') }}
                                                 </button>
+                                                
+                                                <!-- View Bill Action -->
+                                                <a 
+                                                    v-if="order.status === 'completed'"
+                                                    :href="route('orders.bill', order.id)"
+                                                    target="_blank"
+                                                    @click="closeDropdown"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    {{ $t('orders.view_bill') }}
+                                                </a>
                                                 
                                                 <!-- Cancel Action -->
                                                 <button 
                                                     v-if="order.status === 'pending' || order.status === 'processing'"
-                                                    @click="handleAction(order.id, 'cancelled', 'Are you sure you want to cancel this order?')"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-3 transition-colors"
+                                                    @click="handleAction(order.id, 'cancelled', $t('orders.confirm_cancel'))"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-3 transition-colors"
                                                 >
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
-                                                    Cancel Order
+                                                    {{ $t('orders.cancel_order') }}
                                                 </button>
                                                 
                                                 <!-- Divider before delete -->
-                                                <div class="border-t border-gray-100 my-1"></div>
+                                                <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                                                 
                                                 <!-- Delete Action -->
                                                 <button 
-                                                    @click="handleAction(order.id, 'deleted', 'Are you sure you want to delete this order? This action will exclude it from all calculations.')"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                                                    @click="handleAction(order.id, 'deleted', $t('orders.confirm_delete'))"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
                                                 >
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
-                                                    Delete Order
+                                                    {{ $t('orders.delete_order') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -231,7 +245,7 @@
                     </table>
                     
                     <!-- Pagination -->
-                    <div class="border-t border-gray-200 bg-gray-50">
+                    <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                         <Pagination :meta="paginationMeta" />
                     </div>
                 </div>
@@ -243,12 +257,15 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Pagination from '@/Components/Pagination.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
+
+const { t } = useI18n();
 
 interface Order {
     id: number;
@@ -398,7 +415,7 @@ const formatDate = (dateStr: string | null | undefined): string => {
 };
 
 const calculateDuration = (created: string, completed?: string): string => {
-    if (!completed) return 'In Progress';
+    if (!completed) return t('orders.in_progress');
     
     const start = new Date(created).getTime();
     const end = new Date(completed).getTime();
@@ -411,6 +428,17 @@ const calculateDuration = (created: string, completed?: string): string => {
         return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
+};
+
+const getStatusLabel = (status: string | null | undefined): string => {
+    const statusMap: Record<string, string> = {
+        pending: t('orders.pending'),
+      processing: t('orders.processing'),
+        completed: t('orders.completed'),
+        cancelled: t('orders.cancelled'),
+        deleted: t('orders.deleted')
+    };
+    return statusMap[status || 'pending'] || status || t('orders.pending');
 };
 
 const getStatusClass = (status: string | null | undefined): string => {

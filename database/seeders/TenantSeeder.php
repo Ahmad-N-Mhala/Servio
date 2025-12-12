@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Restaurant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Plan;
 
 class TenantSeeder extends Seeder
 {
@@ -25,7 +26,8 @@ class TenantSeeder extends Seeder
         $this->command->info("Creating tenant: {$tenantId} ({$domain})");
 
         $tenant = Tenant::firstOrCreate(['id' => $tenantId], [
-            'plan_id' => 2, // Pro plan
+            'identifier' => $tenantId,
+            'plan_id' => Plan::where('slug', 'pro')->first()->id, // Pro plan
             'subscription_status' => 'active',
             'subscription_ends_at' => now()->addYear(),
         ]);
@@ -53,7 +55,7 @@ class TenantSeeder extends Seeder
 
         $this->command->info("Creating admin user...");
 
-        $user = User::firstOrCreate(['email' => $email], [
+        $user = User::on('tenant')->firstOrCreate(['email' => $email], [
             'name' => 'Demo Admin',
             'password' => Hash::make($password),
         ]);
@@ -65,7 +67,7 @@ class TenantSeeder extends Seeder
 
         $this->command->info("Creating restaurant...");
 
-        Restaurant::firstOrCreate(['slug' => 'demo-restaurant'], [
+        Restaurant::on('tenant')->firstOrCreate(['slug' => 'demo-restaurant'], [
             'name' => 'Demo Restaurant',
             'currency' => 'AED',
             'locale' => 'en',

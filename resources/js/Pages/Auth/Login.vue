@@ -1,35 +1,12 @@
 <template>
     <div class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-gray-50 to-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <!-- Error Notification - Top Right -->
-        <div v-if="hasErrors" class="fixed top-4 right-4 z-50 max-w-md animate-slide-in">
-            <div class="bg-red-50 border-l-4 border-red-500 rounded-lg shadow-2xl p-4">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <h3 class="text-sm font-bold text-red-800">Authentication Error</h3>
-                        <div class="mt-2 text-sm text-red-700">
-                            <p v-if="form.errors.email" class="font-medium">{{ form.errors.email }}</p>
-                            <p v-if="form.errors.password" class="font-medium mt-1">{{ form.errors.password }}</p>
-                            <div v-if="Object.keys(form.errors).length > 0" class="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded font-mono">
-                                <p class="font-semibold mb-1">Debug Info:</p>
-                                <p v-for="(error, key) in form.errors" :key="key">
-                                    {{ key }}: {{ error }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <button @click="clearErrors" class="ml-4 flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-600 hover:text-red-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+        
+        <Toast 
+            :message="toastMessage" 
+            :title="toastTitle" 
+            :type="toastType" 
+            :trigger="toastTrigger" 
+        />
 
         <div class="max-w-md w-full">
             <div class="text-center mb-10 flex flex-col items-center justify-center">
@@ -42,17 +19,6 @@
 
             <form @submit.prevent="submit" class="bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 md:p-10 border border-white/50 transition-all duration-300">
                 
-                <div v-if="form.errors.email" class="mb-6 p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl animate-shake">
-                    <div class="flex items-start gap-3">
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <p class="text-sm text-red-700 font-medium">{{ form.errors.email }}</p>
-                    </div>
-                </div>
-
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Email Address</label>
                     <div class="relative group">
@@ -67,8 +33,12 @@
                             v-model="form.email"
                             required
                             class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': form.errors.email }"
                             placeholder="you@example.com"
                         />
+                    </div>
+                    <div v-if="form.errors.email" class="text-red-500 text-sm mt-1 ml-1 animate-slide-in">
+                        {{ form.errors.email }}
                     </div>
                 </div>
 
@@ -86,8 +56,12 @@
                             v-model="form.password"
                             required
                             class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': form.errors.password }"
                             placeholder="••••••••"
                         />
+                    </div>
+                    <div v-if="form.errors.password" class="text-red-500 text-sm mt-1 ml-1 animate-slide-in">
+                        {{ form.errors.password }}
                     </div>
                 </div>
 
@@ -107,8 +81,10 @@
                 <button
                     type="submit"
                     class="w-full bg-gradient-to-r from-primary to-primary-hover text-white font-semibold py-3.5 px-6 rounded-xl hover:shadow-lg hover:shadow-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                    :disabled="form.processing"
                 >
-                    <span>Sign In</span>
+                    <span v-if="form.processing">Signing in...</span>
+                    <span v-else>Sign In</span>
                 </button>
 
                 <div class="mt-6 text-center">
@@ -124,8 +100,9 @@
 
 <script setup lang="ts">
 import { useForm, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { ref } from 'vue';
 import Logo from '@/Components/Logo.vue';
+import Toast from '@/Components/Toast.vue';
 
 const route = (window as any).route;
 
@@ -135,18 +112,12 @@ const form = useForm({
     remember: false,
 });
 
-const hasErrors = computed(() => {
-    return Object.keys(form.errors).length > 0;
-});
-
-const clearErrors = () => {
-    form.clearErrors();
-};
+const toastMessage = ref('');
+const toastTitle = ref('');
+const toastType = ref('info');
+const toastTrigger = ref(0);
 
 const submit = () => {
-    console.log('Submit function called!');
-    console.log('Form data:', { email: form.email, password: form.password, remember: form.remember });
-    
     // Get the current URL path to extract locale
     const currentPath = window.location.pathname;
     // Extract locale from path (e.g., /en/login -> en)
@@ -154,21 +125,37 @@ const submit = () => {
     const locale = match ? match[1] : 'en';
     const loginUrl = `/${locale}/login`;
     
-    console.log('Login URL:', loginUrl);
-    
     form.post(loginUrl, {
         preserveScroll: true,
-        onStart: () => {
-            console.log('Form submission started');
-        },
         onSuccess: () => {
-            console.log('Form submission successful');
+            // Success handle handled by redirect
         },
-        onError: () => {
-            console.error('Login failed', form.errors);
+        onError: (errors: any) => {
+            console.error('Login failed', errors);
+            toastTrigger.value++;
+            toastType.value = 'error';
+            toastTitle.value = 'Login Failed';
+            
+            if (errors.email) {
+                toastMessage.value = errors.email;
+            } else if (errors.password) {
+                toastMessage.value = errors.password;
+            } else {
+                toastMessage.value = 'Please check your credentials and try again.';
+            }
+
+            // If we have detailed errors, we can show them
+            if (Object.keys(errors).length > 0) {
+                 const errorList = Object.entries(errors).map(([key, msg]) => `${key}: ${msg}`).join(', ');
+                 // If it's just email/password validation, the above is fine. 
+                 // If generic error, show more info.
+                 if (!errors.email && !errors.password) {
+                     toastMessage.value = errorList;
+                 }
+            }
         },
         onFinish: () => {
-            console.log('Form submission finished');
+            form.reset('password');
         }
     });
 };

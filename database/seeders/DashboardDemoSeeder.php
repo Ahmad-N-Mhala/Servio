@@ -13,6 +13,8 @@ use App\Models\Restaurant;
 use App\Models\Staff;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class DashboardDemoSeeder extends Seeder
 {
@@ -21,6 +23,14 @@ class DashboardDemoSeeder extends Seeder
      */
     public function run(): void
     {
+        // Enforce the 'demo' database naming convention used in TenantSeeder
+        if (function_exists('tenant') && tenant()) {
+            config(['database.connections.tenant.database' => tenant('id')]);
+            DB::purge('tenant');
+            DB::reconnect('tenant');
+            DB::setDefaultConnection('tenant');
+        }
+
         $restaurant = Restaurant::first();
 
         if (!$restaurant) {
@@ -204,12 +214,20 @@ class DashboardDemoSeeder extends Seeder
         ];
 
         foreach ($staffMembers as $staffData) {
-            Staff::firstOrCreate(
-                ['restaurant_id' => $restaurant->id, 'email' => $staffData['email']],
+            $user = User::firstOrCreate(
+                ['email' => $staffData['email']],
                 [
                     'name' => $staffData['name'],
-                    'phone' => '+971-50-' . rand(1000000, 9999999),
+                    'password' => Hash::make('password'),
+                ]
+            );
+
+            Staff::firstOrCreate(
+                ['restaurant_id' => $restaurant->id, 'user_id' => $user->id],
+                [
+                    'role' => $staffData['role'],
                     'is_active' => true,
+                    'joined_at' => now(),
                 ]
             );
         }
