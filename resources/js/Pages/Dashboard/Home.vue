@@ -23,6 +23,8 @@
                     color="blue"
                     :trend="12"
                     subtitle="vs previous period"
+                    class="cursor-pointer"
+                    @click="fetchDetails('total_orders')"
                 />
                 
                 <StatsCard
@@ -32,6 +34,8 @@
                     color="green"
                     :trend="8"
                     subtitle="orders today"
+                    class="cursor-pointer"
+                    @click="fetchDetails('today_orders')"
                 />
                 
                 <StatsCard
@@ -41,6 +45,8 @@
                     color="yellow"
                     :trend="15"
                     subtitle="total revenue"
+                    class="cursor-pointer"
+                    @click="fetchDetails('revenue')"
                 />
                 
                 <StatsCard
@@ -49,6 +55,8 @@
                     icon="staff"
                     color="purple"
                     subtitle="team members"
+                    class="cursor-pointer"
+                    @click="fetchDetails('active_staff')"
                 />
             </div>
 
@@ -111,6 +119,54 @@
                 <p v-else class="text-gray-600 dark:text-gray-400">No recent orders</p>
             </Card>
         </div>
+
+        <!-- Details Modal -->
+        <Modal :show="showDetailsModal" @close="showDetailsModal = false">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ detailsTitle }}</h2>
+                
+                <div v-if="loadingDetails" class="flex justify-center py-8">
+                    <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                
+                <div v-else-if="detailsData.length > 0" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th v-for="col in detailsColumns" :key="col.key" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ col.label }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr v-for="(row, idx) in detailsData" :key="idx" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td v-for="col in detailsColumns" :key="col.key" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                    <template v-if="col.format === 'currency'">{{ formatCurrency(row[col.key]) }}</template>
+                                    <template v-else-if="col.format === 'status'">
+                                        <span :class="getStatusClass(row[col.key])" class="px-2 py-1 text-xs font-semibold rounded-full">
+                                            {{ row[col.key] }}
+                                        </span>
+                                    </template>
+                                     <template v-else-if="col.format === 'datetime'">{{ new Date(row[col.key]).toLocaleString() }}</template>
+                                    <template v-else>{{ row[col.key] }}</template>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <p v-else class="text-gray-500 dark:text-gray-400 text-center py-4">No details available.</p>
+                
+                 <div class="mt-6 flex justify-end">
+                    <button @click="showDetailsModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </Modal>
     </MainLayout>
 </template>
 
@@ -122,11 +178,14 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
 import StatsCard from '@/Components/StatsCard.vue';
 import ChartCard from '@/Components/ChartCard.vue';
+import Modal from '@/Components/Modal.vue';
 import Card from '@/Components/Card.vue';
+import axios from 'axios';
 
 Chart.register(...registerables);
 
 const page = usePage();
+const route = (window as any).route;
 
 const isRtl = computed(() => page.props.isRtl as boolean);
 const stats = computed(() => page.props.stats as any);
@@ -137,6 +196,38 @@ const peakHours = computed(() => page.props.peak_hours as any[]);
 const topMenuItems = computed(() => page.props.top_menu_items as any[]);
 const avgCompletionTime = computed(() => page.props.avg_completion_time as any[]);
 const dateRange = computed(() => page.props.date_range as any);
+
+const showDetailsModal = ref(false);
+const loadingDetails = ref(false);
+const detailsTitle = ref('');
+const detailsColumns = ref<any[]>([]);
+const detailsData = ref<any[]>([]);
+
+const fetchDetails = async (type: string, params: any = {}) => {
+    showDetailsModal.value = true;
+    loadingDetails.value = true;
+    detailsData.value = [];
+    
+    try {
+        const response = await axios.get(route('dashboard.details'), {
+            params: {
+                type,
+                start_date: dateRange.value.start_date,
+                end_date: dateRange.value.end_date,
+                ...params
+            }
+        });
+        
+        detailsTitle.value = response.data.title;
+        detailsColumns.value = response.data.columns;
+        detailsData.value = response.data.data;
+    } catch (error) {
+        console.error('Failed to fetch dashboard details', error);
+        detailsTitle.value = 'Error';
+    } finally {
+        loadingDetails.value = false;
+    }
+};
 
 const revenueChartCanvas = ref<HTMLCanvasElement | null>(null);
 const statusChartCanvas = ref<HTMLCanvasElement | null>(null);
@@ -215,6 +306,13 @@ const initRevenueChart = () => {
                     },
                 },
             },
+            onClick: (e: any, activeElements: any[]) => {
+                if (activeElements.length > 0) {
+                    const dataIndex = activeElements[0].index;
+                    const date = revenueChart.value[dataIndex].date;
+                    fetchDetails('revenue_chart_point', { date });
+                }
+            },
         },
     });
 };
@@ -251,6 +349,13 @@ const initStatusChart = () => {
                 legend: {
                     position: 'bottom',
                 },
+            },
+            onClick: (e: any, activeElements: any[]) => {
+                if (activeElements.length > 0) {
+                    const dataIndex = activeElements[0].index;
+                    const status = statusDistribution.value[dataIndex].status;
+                    fetchDetails('status_slice', { status });
+                }
             },
         },
     });

@@ -1,0 +1,588 @@
+<template>
+    <MainLayout>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Communication & Messaging</h1>
+                    <p class="mt-1 text-sm text-gray-500">Manage your SMS and Email credits and view logs.</p>
+                </div>
+                <div v-if="activeTab === 'templates'">
+                    <Button @click="openTemplateModal()" class="flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        New Automation Rule
+                    </Button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- SMS Balance -->
+                <div class="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">SMS</span>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">{{ balances.sms }}</h3>
+                        <p class="text-sm font-medium text-blue-100 opacity-90">SMS Credits</p>
+                    </div>
+                </div>
+
+                <!-- Email Balance -->
+                <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">Email</span>
+                        </div>
+                        <h3 class="text-4xl font-bold mb-1">{{ balances.email }}</h3>
+                        <p class="text-sm font-medium text-purple-100 opacity-90">Email Credits</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl w-fit">
+                <button 
+                    @click="activeTab = 'templates'"
+                    :class="[
+                        'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                        activeTab === 'templates' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                    ]"
+                >
+                    Automation Rules
+                </button>
+                <button 
+                    @click="activeTab = 'logs'"
+                    :class="[
+                        'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                        activeTab === 'logs' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                    ]"
+                >
+                    Communication Logs
+                </button>
+                <button 
+                    @click="activeTab = 'bundles'"
+                    :class="[
+                        'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                        activeTab === 'bundles' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                    ]"
+                >
+                    Buy Credits
+                </button>
+            </div>
+
+                <!-- Active Filter Indicator -->
+                <div v-if="params.template_id" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 animate-fade-in">
+                     <span class="text-sm font-medium">Filtering by rule logs</span>
+                     <button @click="clearTemplateFilter" class="hover:text-blue-900">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                         </svg>
+                     </button>
+                </div>
+            </div>
+
+            <!-- Templates / Automation Rules Section -->
+            <div v-if="activeTab === 'templates'" class="grid grid-cols-1 gap-6 animate-fade-in">
+                <div v-if="templates.length === 0" class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">No automation rules defined</h3>
+                    <p class="text-gray-500 mt-1 mb-4">Create rules to automatically send messages based on events.</p>
+                    <Button @click="openTemplateModal()">Create New Rule</Button>
+                </div>
+
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div 
+                        v-for="template in templates" 
+                        :key="template.id" 
+                        class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                    >
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex gap-1" v-if="template.channels && template.channels.length">
+                                    <div v-if="template.channels.includes('sms')" class="p-2 rounded-lg bg-blue-100" title="SMS Enabled">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                        </svg>
+                                    </div>
+                                    <div v-if="template.channels.includes('email')" class="p-2 rounded-lg bg-purple-100" title="Email Enabled">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div v-else class="p-2 rounded-lg bg-gray-100">
+                                    <!-- Fallback/Legacy -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+
+                                <div>
+                                    <h3 class="font-bold text-gray-900">{{ template.name }}</h3>
+                                    <span class="text-xs text-gray-500">{{ template.trigger_event.replace('_', ' ').toUpperCase() }}</span>
+                                </div>
+                            </div>
+                            <span :class="template.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" class="px-2 py-1 text-xs rounded-full font-medium">
+                                {{ template.is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                            <p class="text-sm text-gray-600 line-clamp-3 italic">"{{ template.content }}"</p>
+                        </div>
+
+                         <!-- Stats & Actions -->
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <button @click="showLogs(template)" class="flex items-center gap-1 hover:text-blue-600 transition-colors" title="View Logs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                <span class="underline">Sent: {{ template.logs_count || 0 }}</span>
+                            </button>
+                            <div class="flex gap-2">
+                                <button @click="openTemplateModal(template)" class="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+                                <button @click="deleteTemplate(template)" class="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Section -->
+            <div v-if="activeTab === 'logs'" class="glass-card rounded-2xl overflow-hidden animate-fade-in p-6">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <Input v-model="params.search" placeholder="Search logs..." type="search" />
+                    </div>
+                    <select v-model="params.type" class="rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]">
+                        <option value="">All Channels</option>
+                        <option value="sms">SMS</option>
+                        <option value="email">Email</option>
+                    </select>
+                    <select v-model="params.status" class="rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]">
+                        <option value="">All Statuses</option>
+                        <option value="sent">Sent</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                    <DateRangePicker @update="onDateRangeUpdate" />
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-gray-900 border-b border-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold">Date</th>
+                                <th class="px-4 py-3 font-semibold">Rule</th>
+                                <th class="px-4 py-3 font-semibold">Recipient</th>
+                                <th class="px-4 py-3 font-semibold">Message</th>
+                                <th class="px-4 py-3 font-semibold">Channel</th>
+                                <th class="px-4 py-3 font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <tr v-for="log in logs.data" :key="log.id" class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-4 py-3">{{ new Date(log.created_at).toLocaleString() }}</td>
+                                <td class="px-4 py-3">
+                                    <span v-if="log.template" class="text-blue-600 font-medium">{{ log.template.name }}</span>
+                                    <span v-else class="text-gray-400">-</span>
+                                </td>
+                                <td class="px-4 py-3">{{ log.recipient }}</td>
+                                <td class="px-4 py-3 truncate max-w-xs" :title="log.message">{{ log.message }}</td>
+                                <td class="px-4 py-3 uppercase text-xs font-bold">{{ log.type }}</td>
+                                <td class="px-4 py-3">
+                                    <span :class="log.status === 'sent' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'" class="px-2 py-1 rounded-full text-xs">
+                                        {{ log.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr v-if="logs.data.length === 0">
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">No logs found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4">
+                    <Pagination :links="logs.links" />
+                </div>
+            </div>
+
+            <!-- Bundles Section -->
+            <div v-if="activeTab === 'bundles'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
+                <div v-for="bundle in bundles" :key="bundle.id" class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all text-center">
+                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-if="bundle.type === 'sms'">
+                            <!-- SMS Icon -->
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-else>
+                            <!-- Email Icon -->
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">{{ bundle.name }}</h3>
+                    <div class="my-4">
+                        <span class="text-3xl font-bold text-gray-900">{{ bundle.currency }} {{ bundle.price }}</span>
+                    </div>
+                    <p class="text-gray-500 mb-6">{{ bundle.quantity }} {{ bundle.type.toUpperCase() }} Credits</p>
+                    <Button @click="purchase(bundle)" class="w-full justify-center">Purchase</Button>
+                </div>
+            </div>
+
+        <!-- Create/Edit Template Modal -->
+        <Modal :show="showTemplateModal" @close="closeTemplateModal" :title="editingTemplate ? 'Edit Automation Rule' : 'New Automation Rule'" size="lg">
+            <form @submit.prevent="submitTemplate" class="space-y-6">
+                <!-- Name -->
+                <Input 
+                    v-model="templateForm.name"
+                    label="Rule Name"
+                    placeholder="e.g. Welcome Message"
+                    required
+                    :error="templateForm.errors.name"
+                />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Trigger Event -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Trigger Event</label>
+                        <select 
+                            v-model="templateForm.trigger_event"
+                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                        >
+                            <option value="registration">Registration (New Customer)</option>
+                            <option value="order_created">Order Placed</option>
+                            <option value="order_completed">Order Completed</option>
+                            <option value="order_cancelled">Order Cancelled</option>
+                            <option value="birthday">Customer Birthday</option>
+                            <option value="churn_risk">Churn Risk (Inactive Customer)</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">When should this message be sent?</p>
+                    </div>
+
+                    <!-- Channels (Checkbox Group) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Channels</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" v-model="templateForm.channels" value="sms" class="text-primary focus:ring-primary rounded">
+                                <span class="text-sm">SMS</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" v-model="templateForm.channels" value="email" class="text-primary focus:ring-primary rounded">
+                                <span class="text-sm">Email</span>
+                            </label>
+                        </div>
+                        <p v-if="templateForm.channels.length === 0" class="text-xs text-red-500 mt-1">Select at least one.</p>
+                    </div>
+                </div>
+
+                <!-- Email Subject (only if email is selected) -->
+                <div v-if="templateForm.channels.includes('email')" class="animate-fade-in">
+                    <Input 
+                        v-model="templateForm.subject"
+                        label="Email Subject"
+                        placeholder="e.g. Welcome to RestoFy!"
+                        :required="templateForm.channels.includes('email')"
+                        :error="templateForm.errors.subject"
+                    />
+                </div>
+
+                <!-- Message Content -->
+                <div>
+                     <label class="block text-sm font-medium text-gray-700 mb-1">Message Content</label>
+                     <textarea 
+                         v-model="templateForm.content"
+                         rows="4"
+                         class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                         placeholder="Enter your message here..."
+                         required
+                     ></textarea>
+                     <p class="mt-1 text-xs text-gray-500">You can use simple text. Dynamic variables coming soon.</p>
+                </div>
+
+                <!-- Timing Configuration -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Timing Setup</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">When?</label>
+                            <select 
+                                v-model="templateForm.timing_type"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
+                            >
+                                <option value="immediately">Immediately</option>
+                                <option value="before">Before Event</option>
+                                <option value="after">After Event</option>
+                            </select>
+                        </div>
+                        <div v-if="templateForm.timing_type !== 'immediately'">
+                            <Input 
+                                v-model="templateForm.timing_days"
+                                label="Days"
+                                type="number"
+                                min="0"
+                                placeholder="1"
+                            />
+                        </div>
+                        <div v-if="templateForm.timing_type !== 'immediately'">
+                            <Input 
+                                v-model="templateForm.timing_time"
+                                label="At Time"
+                                type="time"
+                            />
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 italic" v-if="templateForm.timing_type === 'immediately'">
+                        Message will be sent as soon as the event occurs.
+                    </p>
+                    <p class="text-xs text-gray-500 mt-2 italic" v-else>
+                        Message will be sent {{ templateForm.timing_days }} days {{ templateForm.timing_type }} the event at {{ templateForm.timing_time }}.
+                    </p>
+                </div>
+
+                <!-- Conditions Area -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Conditions (Optional)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                            <Input 
+                                v-model="templateForm.conditions.min_order_amount"
+                                label="Min Order Amount"
+                                type="number"
+                                placeholder="0"
+                            />
+                         </div>
+                         <div>
+                            <Input 
+                                v-model="templateForm.conditions.min_orders_count"
+                                label="Min Orders Count"
+                                type="number"
+                                placeholder="0"
+                            />
+                         </div>
+                         <div v-if="templateForm.trigger_event === 'churn_risk'">
+                            <Input 
+                                v-model="templateForm.conditions.days_since_last_order"
+                                label="Days Since Last Order"
+                                type="number"
+                                placeholder="30"
+                            />
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Active Toggle -->
+                <div class="flex items-center mt-4">
+                    <input 
+                        type="checkbox" 
+                        v-model="templateForm.is_active"
+                        id="is_active"
+                        class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                    >
+                    <label for="is_active" class="ml-2 text-sm text-gray-700">Set Status to Active</label>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                    <Button type="button" variant="secondary" @click="closeTemplateModal">Cancel</Button>
+                    <Button type="submit" :loading="templateForm.processing">{{ editingTemplate ? 'Update Rule' : 'Create Rule' }}</Button>
+                </div>
+            </form>
+        </Modal>
+    </MainLayout>
+</template>
+
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { router, useForm } from '@inertiajs/vue3';
+// @ts-ignore
+import debounce from 'lodash/debounce';
+import MainLayout from '@/Layouts/MainLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
+import DateRangePicker from '@/Components/DateRangePicker.vue';
+import Modal from '@/Components/Modal.vue';
+import Button from '@/Components/Button.vue';
+import Input from '@/Components/Input.vue';
+
+const props = defineProps({
+    balances: {
+        type: Object,
+        default: () => ({ sms: 0, email: 0 })
+    },
+    logs: {
+        type: Object,
+        default: () => ({ data: [] })
+    },
+    bundles: {
+        type: Array,
+        default: () => []
+    },
+    templates: {
+        type: Array,
+        default: () => []
+    },
+    filters: {
+        type: Object,
+        default: () => ({})
+    }
+});
+
+const route = (window as any).route;
+// Initialize activeTab from params if available (e.g. redirected from showLogs)
+const activeTab = ref(props.filters.active_tab || 'templates');
+
+// --- Search & Filters ---
+const params = ref({
+    search: props.filters?.search || '',
+    type: props.filters?.type || '',
+    status: props.filters?.status || '',
+    date_from: props.filters?.date_from || '',
+    date_to: props.filters?.date_to || '',
+    // Clear template_id if switching tabs or filtered
+    template_id: props.filters?.template_id || '', 
+});
+
+const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
+    params.value.date_from = range.startDate;
+    params.value.date_to = range.endDate;
+};
+
+watch(
+    params,
+    debounce((value: any) => {
+        router.get(route('communication.index'), { ...value, active_tab: activeTab.value }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true
+        });
+    }, 300),
+    { deep: true }
+);
+
+// Watch tab change to clear relevant filters if needed
+watch(activeTab, (val) => {
+    if (val !== 'logs') {
+        // clear logs specific filters if leaving logs tab?
+        // For now, let's keep them persistent as per standard behavior
+    }
+});
+
+// --- Bundles ---
+const purchase = (bundle: any) => {
+    if (confirm(`Are you sure you want to purchase ${bundle.name} for ${bundle.currency} ${bundle.price}?`)) {
+        router.post(route('communication.bundles.purchase', bundle.id));
+    }
+};
+
+// --- Templates ---
+const showTemplateModal = ref(false);
+const editingTemplate = ref<any>(null);
+
+const templateForm = useForm({
+    name: '',
+    channels: [] as string[],
+    trigger_event: 'registration',
+    subject: '',
+    content: '',
+    conditions: {
+        min_order_amount: null as number | null,
+        min_orders_count: null as number | null,
+        days_since_last_order: null as number | null,
+        loyalty_tier: ''
+    },
+    is_active: true,
+    timing_type: 'immediately',
+    timing_days: 0,
+    timing_time: '12:00'
+});
+
+const openTemplateModal = (template: any = null) => {
+    if (template) {
+        editingTemplate.value = template;
+        templateForm.name = template.name;
+        // Fix: backend might send 'channels' or older 'channel' if we didn't migrate old data perfectly.
+        // But we did migration.
+        templateForm.channels = template.channels || (template.channel ? [template.channel] : []);
+        templateForm.trigger_event = template.trigger_event;
+        templateForm.subject = template.subject;
+        templateForm.content = template.content;
+        templateForm.conditions = {
+            min_order_amount: template.conditions?.min_order_amount || null,
+            min_orders_count: template.conditions?.min_orders_count || null,
+            days_since_last_order: template.conditions?.days_since_last_order || null,
+            loyalty_tier: template.conditions?.loyalty_tier || ''
+        };
+        templateForm.is_active = !!template.is_active;
+        templateForm.timing_type = template.timing_type || 'immediately';
+        templateForm.timing_days = template.timing_days || 0;
+        templateForm.timing_time = template.timing_time ? template.timing_time.substring(0, 5) : '12:00'; // Format H:i
+    } else {
+        editingTemplate.value = null;
+        templateForm.reset();
+        templateForm.clearErrors();
+        templateForm.channels = ['email']; // default
+        templateForm.timing_type = 'immediately';
+        templateForm.timing_days = 0;
+        templateForm.timing_time = '12:00';
+    }
+    showTemplateModal.value = true;
+};
+
+const closeTemplateModal = () => {
+    showTemplateModal.value = false;
+    templateForm.reset();
+    editingTemplate.value = null;
+};
+
+const submitTemplate = () => {
+    if (templateForm.channels.length === 0) {
+        alert('Please select at least one channel.');
+        return;
+    }
+    if (editingTemplate.value) {
+        templateForm.put(route('communication.templates.update', editingTemplate.value.id), {
+            onSuccess: () => closeTemplateModal()
+        });
+    } else {
+        templateForm.post(route('communication.templates.store'), {
+            onSuccess: () => closeTemplateModal()
+        });
+    }
+};
+
+const deleteTemplate = (template: any) => {
+    if (confirm('Are you sure you want to delete this rule?')) {
+        router.delete(route('communication.templates.destroy', template.id));
+    }
+};
+
+const showLogs = (template: any) => {
+    // Navigate to index but with template_id filter and active_tab=logs
+    router.get(route('communication.index'), {
+        template_id: template.id,
+        active_tab: 'logs'
+    });
+};
+
+const clearTemplateFilter = () => {
+    params.value.template_id = '';
+    router.get(route('communication.index'), { active_tab: 'logs' });
+};
+</script>

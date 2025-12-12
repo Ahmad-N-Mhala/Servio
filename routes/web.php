@@ -71,6 +71,7 @@ Route::group([
 
     Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/details', [DashboardController::class, 'getDetails'])->name('dashboard.details');
 
         Route::prefix('menu')->name('menu.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Tenant\MenuController::class, 'index'])->name('index');
@@ -118,6 +119,16 @@ Route::group([
         Route::prefix('pos')->name('pos.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Tenant\POSController::class, 'index'])->name('index');
             Route::post('/{order}/settle', [\App\Http\Controllers\Tenant\POSController::class, 'settle'])->name('settle');
+        });
+
+        Route::prefix('communication')->name('communication.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Tenant\CommunicationController::class, 'index'])->name('index');
+            Route::post('/bundles/{bundle}/purchase', [\App\Http\Controllers\Tenant\CommunicationController::class, 'purchaseBundle'])->name('bundles.purchase');
+
+            // Templates / Rules
+            Route::post('/templates', [\App\Http\Controllers\Tenant\CommunicationController::class, 'storeTemplate'])->name('templates.store');
+            Route::put('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'updateTemplate'])->name('templates.update');
+            Route::delete('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'destroyTemplate'])->name('templates.destroy');
         });
     });
 });

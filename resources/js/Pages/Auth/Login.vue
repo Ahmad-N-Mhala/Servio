@@ -132,7 +132,8 @@ const submit = () => {
         },
         onError: (errors: any) => {
             console.error('Login failed', errors);
-            toastTrigger.value++;
+            
+            // Set message and type first
             toastType.value = 'error';
             toastTitle.value = 'Login Failed';
             
@@ -141,21 +142,20 @@ const submit = () => {
             } else if (errors.password) {
                 toastMessage.value = errors.password;
             } else {
-                toastMessage.value = 'Please check your credentials and try again.';
+                toastMessage.value = 'Wrong credentials provided.';
             }
 
-            // If we have detailed errors, we can show them
-            if (Object.keys(errors).length > 0) {
-                 const errorList = Object.entries(errors).map(([key, msg]) => `${key}: ${msg}`).join(', ');
-                 // If it's just email/password validation, the above is fine. 
-                 // If generic error, show more info.
-                 if (!errors.email && !errors.password) {
-                     toastMessage.value = errorList;
-                 }
-            }
+            // Then trigger the toast
+            // Use setTimeout to ensure reactivity propagation if needed, 
+            // though usually Vue handles this batching correctly. 
+            // We just ensure 'message' is set in the state before 'trigger' changes.
+            toastTrigger.value++;
+            
+            // Also reset password
+            form.reset('password');
         },
         onFinish: () => {
-            form.reset('password');
+             // onFinish is called after success or error
         }
     });
 };

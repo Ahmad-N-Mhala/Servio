@@ -25,6 +25,8 @@ class Restaurant extends Model
         'currency',
         'locale',
         'settings',
+        'sms_balance',
+        'email_balance',
     ];
 
     protected $casts = [

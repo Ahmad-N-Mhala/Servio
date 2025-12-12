@@ -1,5 +1,11 @@
-<template>
+    <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 gradient-mesh">
+        <Toast 
+            :message="toastMessage" 
+            :title="toastTitle" 
+            :type="toastType" 
+            :trigger="toastTrigger" 
+        />
         <!-- Sidebar -->
         <aside 
             class="fixed inset-y-0 z-50 glass-sidebar shadow-lifted transform transition-all duration-300 ease-in-out lg:translate-x-0" 
@@ -25,272 +31,314 @@
             </div>
             
             <!-- Navigation -->
-            <nav class="mt-6 px-3 space-y-1">
-                <!-- Main Menu Section -->
-                <div class="mb-6">
-                    <p v-if="!isSidebarCollapsed" class="px-4 mb-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                        Main Menu
-                    </p>
-                    
-                    <Link 
+            <nav class="mt-4 px-2 space-y-4">
+                <!-- General Section -->
+                <div>
+                    <div class="px-3 mb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider" v-if="!isSidebarCollapsed">
+                        General
+                    </div>
+                     <Link 
                         :href="route('dashboard')" 
                         :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
+                            'group flex items-center rounded-lg transition-all duration-200',
+                            isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                             $page.url.includes('/dashboard') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
+                                ? 'bg-primary/10 text-primary font-medium' 
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                         ]"
                         :title="isSidebarCollapsed ? $t('nav.dashboard') : ''"
                     >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/dashboard') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.dashboard') }}</span>
-                        <div v-if="$page.url.includes('/dashboard')" class="ml-auto">
-                            <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                        </div>
-                    </Link>
-                    
-                    <Link 
-                        :href="route('orders.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/orders') && !$page.url.includes('/orders/create')
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.orders') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/orders') && !$page.url.includes('/orders/create')
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.orders') }}</span>
-                    </Link>
-                    
-                    <Link 
-                        :href="route('orders.create')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/orders/create')
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.new_order') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/orders/create')
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.new_order') }}</span>
+                        <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                        <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.dashboard') }}</span>
                     </Link>
                 </div>
 
-                <!-- Management Section -->
-                <div class="mb-6">
-                    <p v-if="!isSidebarCollapsed" class="px-4 mb-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                        {{ $t('nav.management') }}
-                    </p>
-
-                    <Link 
-                        :href="route('menu.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/menu') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.menu') : ''"
+                <!-- Operations Section -->
+                <div>
+                     <div 
+                        @click="toggleMenu('operations')"
+                        class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
+                        v-if="!isSidebarCollapsed"
                     >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/menu') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">Operations</span>
+                        <svg 
+                            class="w-3 h-3 text-gray-400 transition-transform duration-200" 
+                            :class="openMenus['operations'] ? 'rotate-180' : ''"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+
+                    <div v-show="isSidebarCollapsed || openMenus['operations']" class="space-y-0.5">
+                        <!-- Sub-Group: Orders -->
+                        <div class="space-y-0.5">
+                             <button 
+                                @click="toggleMenu('operations.orders')"
+                                :class="[
+                                    'w-full group flex items-center rounded-lg transition-all duration-200',
+                                    isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
+                                    ($page.url.includes('/orders') || $page.url.includes('/kitchen')) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                ]"
+                            >
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">Orders</span>
+                                </div>
+                                <svg 
+                                    v-if="!isSidebarCollapsed"
+                                    class="w-2.5 h-2.5 text-gray-400 transition-transform duration-200" 
+                                    :class="openMenus['operations.orders'] ? 'rotate-180' : ''"
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Sub-Sub Items: Orders -->
+                             <div v-show="openMenus['operations.orders'] && !isSidebarCollapsed" class="pl-9 space-y-0.5">
+                                <Link 
+                                    :href="route('orders.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/orders') && !$page.url.includes('create')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    All Orders
+                                </Link>
+                                <Link 
+                                    :href="route('orders.create')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/orders/create')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    New Order
+                                </Link>
+                                 <Link 
+                                    :href="route('kitchen.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/kitchen')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                    </svg>
+                                    Kitchen View
+                                </Link>
+                            </div>
                         </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.menu') }}</span>
-                    </Link>
 
-                    <Link 
-                        :href="route('tables.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/tables') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.tables') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/tables') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.tables') }}</span>
-                    </Link>
-
-                    <Link 
-                        :href="route('staff.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/staff') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.staff') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/staff') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.staff') }}</span>
-                    </Link>
-
-                    <Link 
-                        :href="route('kitchen.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/kitchen') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.kitchen') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/kitchen') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.kitchen') }}</span>
-                    </Link>
-
-                    <Link 
-                        :href="route('pos.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/pos') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.pos') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/pos') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- POS -->
+                        <Link 
+                            :href="route('pos.index')" 
+                           :class="[
+                                'group flex items-center rounded-lg transition-all duration-200',
+                                isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
+                                $page.url.includes('/pos') 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                            ]"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 36v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.pos') }}</span>
-                    </Link>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.pos') }}</span>
+                        </Link>
+                    </div>
+                </div>
 
-                    <Link 
-                        :href="route('loyalty.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/loyalty') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.loyalty') : ''"
+                <!-- Management Section -->
+                <div>
+                     <div 
+                        @click="toggleMenu('management')"
+                        class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
+                        v-if="!isSidebarCollapsed"
                     >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/loyalty') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.loyalty') }}</span>
-                    </Link>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">{{ $t('nav.management') }}</span>
+                        <svg 
+                            class="w-3 h-3 text-gray-400 transition-transform duration-200" 
+                            :class="openMenus['management'] ? 'rotate-180' : ''"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
 
-                    <Link 
-                        :href="route('loyalty.earning-methods.index')" 
-                        :class="[
-                            'group flex items-center rounded-xl transition-all duration-200 menu-item-hover',
-                            isSidebarCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3',
-                            $page.url.includes('/earning-methods') 
-                                ? 'menu-item-active text-primary font-semibold' 
-                                : 'text-gray-600 dark:text-gray-300 hover:text-primary'
-                        ]"
-                        :title="isSidebarCollapsed ? $t('nav.earning_methods') : ''"
-                    >
-                        <div :class="[
-                            'p-2 rounded-lg transition-all duration-200',
-                            isSidebarCollapsed ? '' : 'mr-3',
-                            $page.url.includes('/earning-methods') 
-                                ? 'bg-primary/10 text-primary' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary'
-                        ]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                    <div v-show="isSidebarCollapsed || openMenus['management']" class="space-y-0.5">
+                         <!-- Sub-Group: Restaurant -->
+                        <div class="space-y-0.5">
+                             <button 
+                                @click="toggleMenu('management.restaurant')"
+                                :class="[
+                                    'w-full group flex items-center rounded-lg transition-all duration-200',
+                                    isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
+                                    ($page.url.includes('/menu') || $page.url.includes('/tables')) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                ]"
+                            >
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">Restaurant</span>
+                                </div>
+                                <svg 
+                                    v-if="!isSidebarCollapsed"
+                                    class="w-2.5 h-2.5 text-gray-400 transition-transform duration-200" 
+                                    :class="openMenus['management.restaurant'] ? 'rotate-180' : ''"
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                             <div v-show="openMenus['management.restaurant'] && !isSidebarCollapsed" class="pl-9 space-y-0.5">
+                                <Link 
+                                    :href="route('menu.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/menu')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    {{ $t('nav.menu') }}
+                                </Link>
+                                <Link 
+                                    :href="route('tables.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/tables')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    {{ $t('nav.tables') }}
+                                </Link>
+                            </div>
                         </div>
-                        <span v-if="!isSidebarCollapsed">{{ $t('nav.earning_methods') }}</span>
-                    </Link>
+
+                        <!-- Staff -->
+                        <Link 
+                            :href="route('staff.index')" 
+                           :class="[
+                                'group flex items-center rounded-lg transition-all duration-200',
+                                isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
+                                $page.url.includes('/staff') 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                            ]"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.staff') }}</span>
+                        </Link>
+                    </div>
+                </div>
+
+                <!-- Growth / Marketing Section -->
+                <div>
+                     <div 
+                        @click="toggleMenu('growth')"
+                        class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
+                        v-if="!isSidebarCollapsed"
+                    >
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">Growth</span>
+                        <svg 
+                            class="w-3 h-3 text-gray-400 transition-transform duration-200" 
+                            :class="openMenus['growth'] ? 'rotate-180' : ''"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+
+                    <div v-show="isSidebarCollapsed || openMenus['growth']" class="space-y-0.5">
+                        
+                         <!-- Sub-Group: Loyalty -->
+                        <div class="space-y-0.5">
+                             <button 
+                                @click="toggleMenu('growth.loyalty')"
+                                :class="[
+                                    'w-full group flex items-center rounded-lg transition-all duration-200',
+                                    isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
+                                    $page.url.includes('/loyalty') ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                ]"
+                            >
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.loyalty') }}</span>
+                                </div>
+                                <svg 
+                                    v-if="!isSidebarCollapsed"
+                                    class="w-2.5 h-2.5 text-gray-400 transition-transform duration-200" 
+                                    :class="openMenus['growth.loyalty'] ? 'rotate-180' : ''"
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                             <div v-show="openMenus['growth.loyalty'] && !isSidebarCollapsed" class="pl-9 space-y-0.5">
+                                <Link 
+                                    :href="route('loyalty.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/loyalty') && !$page.url.includes('earning-methods')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    Overview
+                                </Link>
+                                <Link 
+                                    :href="route('loyalty.earning-methods.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/earning-methods')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ $t('nav.earning_methods') }}
+                                </Link>
+                            </div>
+                        </div>
+
+                        <!-- Communication -->
+                        <Link 
+                            :href="route('communication.index')" 
+                           :class="[
+                                'group flex items-center rounded-lg transition-all duration-200',
+                                isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
+                                $page.url.includes('/communication') 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                            ]"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">Communication</span>
+                        </Link>
+                    </div>
                 </div>
             </nav>
 
@@ -475,24 +523,77 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, Transition, onMounted } from 'vue';
+import { ref, computed, Transition, onMounted, watch } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
+import Toast from '@/Components/Toast.vue';
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const userMenuOpen = ref(false);
 const languageMenuOpen = ref(false);
+const getInitialMenuState = () => {
+    const defaults = {
+        'management': true,
+        'management.restaurant': false,
+        'operations': true,
+        'operations.orders': false,
+        'growth': true,
+        'growth.loyalty': false
+    };
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+        const stored = localStorage.getItem('sidebarMenuState');
+        if (stored) {
+            try {
+                return { ...defaults, ...JSON.parse(stored) };
+            } catch (e) {
+                console.warn('Failed to load sidebar state', e);
+            }
+        }
+    }
+    return defaults;
+};
+
+const openMenus = ref<Record<string, boolean>>(getInitialMenuState());
 const page = usePage();
 const route = (window as any).route;
 const { locale } = useI18n();
+
+const toggleMenu = (key: string) => {
+    openMenus.value[key] = !openMenus.value[key];
+    if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('sidebarMenuState', JSON.stringify(openMenus.value));
+    }
+};
 
 const userName = computed(() => (page.props.auth as any)?.user?.name || 'User');
 const userEmail = computed(() => (page.props.auth as any)?.user?.email || 'user@example.com');
 const userAvatarUrl = computed(() => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=FF6B35&color=fff&bold=true`;
 });
+
+// Toast state
+const toastMessage = ref('');
+const toastTitle = ref('');
+const toastType = ref('info');
+const toastTrigger = ref(0);
+
+// Watch for flash messages
+watch(() => page.props.flash, (flash: any) => {
+    if (flash?.message) {
+        toastMessage.value = flash.message;
+        toastTitle.value = 'Success';
+        toastType.value = 'success';
+        toastTrigger.value++;
+    } else if (flash?.error) {
+        toastMessage.value = flash.error;
+        toastTitle.value = 'Error';
+        toastType.value = 'error';
+        toastTrigger.value++;
+    }
+}, { deep: true });
 
 // Get current locale from URL
 const currentLocale = computed(() => {
