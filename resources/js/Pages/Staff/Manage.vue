@@ -179,8 +179,8 @@
                                     <span class="text-sm text-gray-500">{{ member.email }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="['px-3 py-1 rounded-full text-xs font-semibold capitalize', getRoleClass(member.role)]">
-                                        {{ member.role }}
+                                    <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getRoleClass(member.role)]">
+                                        {{ formatRole(member.role) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -252,8 +252,8 @@
                         required
                     >
                         <option value="" disabled>Select a role</option>
-                        <option v-for="role in roles" :key="role" :value="role" class="capitalize">
-                            {{ role.charAt(0).toUpperCase() + role.slice(1) }}
+                        <option v-for="role in roles" :key="role" :value="role">
+                            {{ formatRole(role) }}
                         </option>
                     </select>
                     <p v-if="form.errors.role" class="mt-1 text-sm text-red-600">{{ form.errors.role }}</p>
@@ -322,7 +322,7 @@ const props = withDefaults(defineProps<{
     };
 }>(), {
     staff: () => ({ data: [] }),
-    roles: () => ['owner', 'manager', 'waiter', 'chef'],
+    roles: () => ['owner', 'manager', 'head_chef', 'kitchen_staff', 'waiter', 'cashier', 'delivery_driver'],
     filters: () => ({})
 });
 
@@ -411,14 +411,23 @@ const getInitials = (name: string): string => {
         .substring(0, 2);
 };
 
+const formatRole = (role: string): string => {
+    return role.split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
 const getRoleClass = (role: string): string => {
     const classes: Record<string, string> = {
-        owner: 'bg-purple-100 text-purple-800',
-        manager: 'bg-blue-100 text-blue-800',
-        waiter: 'bg-green-100 text-green-800',
-        chef: 'bg-orange-100 text-orange-800'
+        owner: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+        manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+        head_chef: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+        kitchen_staff: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+        waiter: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+        cashier: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
+        delivery_driver: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
     };
-    return classes[role] || 'bg-gray-100 text-gray-800';
+    return classes[role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400';
 };
 
 const toggleActive = (member: StaffMember) => {

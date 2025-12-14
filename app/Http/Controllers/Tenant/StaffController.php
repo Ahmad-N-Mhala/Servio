@@ -68,7 +68,7 @@ class StaffController extends Controller
 
         return Inertia::render('Staff/Manage', [
             'staff' => $staff,
-            'roles' => ['owner', 'manager', 'waiter', 'chef'],
+            'roles' => ['owner', 'manager', 'head_chef', 'kitchen_staff', 'waiter', 'cashier', 'delivery_driver'],
             'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
@@ -78,7 +78,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'role' => ['required', 'in:owner,manager,waiter,chef'],
+            'role' => ['required', 'in:owner,manager,head_chef,kitchen_staff,waiter,cashier,delivery_driver'],
         ]);
 
         $restaurant = Restaurant::first();
@@ -109,7 +109,7 @@ class StaffController extends Controller
     public function update(Request $request, Staff $staff)
     {
         $validated = $request->validate([
-            'role' => ['sometimes', 'in:owner,manager,waiter,chef'],
+            'role' => ['sometimes', 'in:owner,manager,head_chef,kitchen_staff,waiter,cashier,delivery_driver'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 

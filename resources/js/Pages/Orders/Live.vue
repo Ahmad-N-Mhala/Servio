@@ -134,7 +134,21 @@
                                 class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm font-bold text-gray-900 dark:text-white">{{ order.order_number || 'N/A' }}</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ order.order_number || 'N/A' }}</span>
+                                        <span v-if="order.delivery_provider" 
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium w-fit mt-1"
+                                            :class="{
+                                                'bg-yellow-100 text-yellow-800': order.delivery_provider === 'noon',
+                                                'bg-orange-100 text-orange-800': order.delivery_provider === 'talabat',
+                                                'bg-cyan-100 text-cyan-800': order.delivery_provider === 'deliveroo',
+                                                'bg-green-100 text-green-800': order.delivery_provider === 'careem',
+                                                'bg-gray-100 text-gray-800': !['noon', 'talabat', 'deliveroo', 'careem'].includes(order.delivery_provider)
+                                            }"
+                                        >
+                                            {{ order.delivery_provider }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ order.customer_name || $t('orders.guest') }}</div>
@@ -276,6 +290,7 @@ interface Order {
     total: number;
     created_at: string;
     completed_at?: string;
+    delivery_provider?: string;
 }
 
 interface PaginatedOrders {

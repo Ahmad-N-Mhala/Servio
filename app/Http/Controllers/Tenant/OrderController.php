@@ -35,6 +35,7 @@ class OrderController extends Controller
                 $q->where('order_number', 'ilike', "%{$search}%")
                     ->orWhere('customer_name', 'ilike', "%{$search}%")
                     ->orWhere('customer_phone', 'ilike', "%{$search}%")
+                    ->orWhere('delivery_provider', 'ilike', "%{$search}%")
                     ->orWhere('status', 'ilike', "%{$search}%")
                     ->orWhereRaw('CAST(total AS TEXT) ilike ?', ["%{$search}%"]);
             });

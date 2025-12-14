@@ -322,6 +322,23 @@
                             </div>
                         </div>
 
+                        <!-- Delivery Integrations -->
+                        <Link 
+                            :href="route('integrations.delivery.index')" 
+                           :class="[
+                                'group flex items-center rounded-lg transition-all duration-200',
+                                isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
+                                $page.url.includes('/integrations/delivery') 
+                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                            ]"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">Delivery Integrations</span>
+                        </Link>
+
                         <!-- Communication -->
                         <Link 
                             :href="route('communication.index')" 

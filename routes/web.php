@@ -130,6 +130,11 @@ Route::group([
             Route::put('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'updateTemplate'])->name('templates.update');
             Route::delete('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'destroyTemplate'])->name('templates.destroy');
         });
+
+        Route::prefix('integrations')->name('integrations.')->group(function () {
+            Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index');
+            Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update');
+        });
     });
 });
 

@@ -31,6 +31,8 @@ class Order extends Model
         'points_earned',
         'points_redeemed',
         'completed_at',
+        'delivery_provider',
+        'delivery_order_id',
     ];
 
     protected $casts = [
