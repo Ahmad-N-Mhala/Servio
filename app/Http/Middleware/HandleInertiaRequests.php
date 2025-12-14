@@ -37,8 +37,32 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'message' => $request->session()->get('message'),
                 'error' => $request->session()->get('error'),
+                'success' => $request->session()->get('success'),
             ],
-            'ziggy' => fn () => [
+            // Share user's restaurants for restaurant switcher (regular users)
+            'user_restaurants' => $request->user() && !$request->user()->is_super_admin ? \App\Models\Restaurant::whereExists(function ($query) use ($request) {
+                $query->select(\DB::raw(1))
+                    ->from('restaurant_user')
+                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
+                    ->where('restaurant_user.email', $request->user()->email);
+            })->select(['id', 'name'])->get() : [],
+            'active_restaurant_id' => $request->session()->get('active_restaurant_id'),
+
+            // Share ALL restaurants for super admin
+            'all_restaurants' => $request->user() && $request->user()->is_super_admin
+                ? \App\Models\Restaurant::select(['id', 'name'])->get()
+                : [],
+            'current_restaurant' => function () use ($request) {
+                if ($request->user() && $request->user()->is_super_admin) {
+                    $restaurantId = session('active_restaurant_id');
+                    if ($restaurantId) {
+                        return \App\Models\Restaurant::find($restaurantId);
+                    }
+                }
+                return null;
+            },
+
+            'ziggy' => fn() => [
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
                 'location' => $request->url(),
             ],

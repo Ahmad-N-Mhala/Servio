@@ -387,7 +387,35 @@
                     </svg>
                 </button>
 
-                <div class="flex items-center ml-auto" :class="currentLocale === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'">
+                <div class="flex items-center ml-auto gap-3" :class="currentLocale === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'">
+                    <!-- Restaurant Switcher (for users with multiple restaurants) -->
+                    <div class="relative group" v-if="userRestaurants && userRestaurants.length > 1">
+                        <button
+                            @click="isRestaurantMenuOpen = !isRestaurantMenuOpen"
+                            class="flex items-center space-x-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                        >
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <span>{{ currentRestaurantName }}</span>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        
+                        <!-- Dropdown -->
+                        <div v-if="isRestaurantMenuOpen" class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 max-h-96 overflow-y-auto">
+                            <div class="px-4 py-2 border-b border-gray-50">
+                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Switch Restaurant</p>
+                            </div>
+                            <button
+                                v-for="restaurant in userRestaurants"
+                                :key="restaurant.id"
+                                @click="switchRestaurant(restaurant)"
+                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors flex items-center justify-between group"
+                            >
+                                <span>{{ restaurant.name }}</span>
+                                <svg v-if="currentRestaurantId === restaurant.id" class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Language Switcher Dropdown -->
                     <div class="relative">
                         <button 
@@ -496,6 +524,12 @@
                                         </svg>
                                         {{ $t('auth.settings') }}
                                     </a>
+                                    <a :href="route('restaurants.index')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                        Multi-Store Overview
+                                    </a>
                                 </div>
                                 <div class="border-t border-gray-100 dark:border-gray-700 pt-1">
                                     <Link 
@@ -550,6 +584,7 @@ const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const userMenuOpen = ref(false);
 const languageMenuOpen = ref(false);
+const isRestaurantMenuOpen = ref(false);
 const getInitialMenuState = () => {
     const defaults = {
         'management': true,
@@ -590,6 +625,35 @@ const userEmail = computed(() => (page.props.auth as any)?.user?.email || 'user@
 const userAvatarUrl = computed(() => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=FF6B35&color=fff&bold=true`;
 });
+
+// Restaurant Switcher
+const userRestaurants = computed(() => (page.props as any).user_restaurants || []);
+const currentRestaurantId = computed(() => (page.props as any).active_restaurant_id || null);
+const currentRestaurantName = computed(() => {
+    const restaurant = userRestaurants.value.find((r: any) => r.id === currentRestaurantId.value);
+    return restaurant?.name || 'Select Restaurant';
+});
+
+const switchRestaurant = (restaurant: any) => {
+    isRestaurantMenuOpen.value = false;
+    
+    // Show success toast
+    toastMessage.value = `Switched to ${restaurant.name}`;
+    toastTitle.value = 'Success';
+    toastType.value = 'success';
+    toastTrigger.value++;
+    
+    // Update session and reload
+    fetch(route('restaurants.switch', { restaurant: restaurant.id }), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''
+        }
+    }).then(() => {
+        window.location.reload();
+    });
+};
 
 // Toast state
 const toastMessage = ref('');

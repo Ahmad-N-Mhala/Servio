@@ -18,6 +18,15 @@
                         </div>
                     </div>
                     
+                    <a :href="exportUrl" target="_blank" class="inline-flex">
+                        <Button class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Export
+                        </Button>
+                    </a>
+
                     <Link :href="route('orders.create')">
                         <Button>
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -370,6 +379,22 @@ watch(
     }, 300),
     { deep: true }
 );
+
+const exportUrl = computed(() => {
+    // We'll use a try-catch because route() might be undefined initially or during SSR
+    try {
+        const baseUrl = route('orders.export');
+        const url = new URL(baseUrl, window.location.origin);
+        
+        if (params.value.search) url.searchParams.append('search', params.value.search);
+        if (params.value.start_date) url.searchParams.append('start_date', params.value.start_date);
+        if (params.value.end_date) url.searchParams.append('end_date', params.value.end_date);
+        
+        return url.toString();
+    } catch (e) {
+        return '#';
+    }
+});
 
 const sort = (field: string) => {
     params.value.sort_field = field;

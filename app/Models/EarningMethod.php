@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
+use App\Traits\HasRestaurant;
+
 class EarningMethod extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, HasRestaurant;
 
     protected $fillable = [
         'restaurant_id',

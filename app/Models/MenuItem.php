@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
+use App\Traits\HasRestaurant;
+
 class MenuItem extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, HasRestaurant;
 
     public $translatable = ['name'];
 

@@ -15,35 +15,7 @@ Route::get('/login', function () {
 
 require base_path('routes/tenant_api.php');
 
-// Central Domain Routes
-Route::group([
-    'prefix' => LaravelLocalization::setLocale(),
-    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath'],
-], function () {
-    Route::get('/', function () {
-        // Central domain - redirect to onboarding
-        return redirect()->route('onboard');
-    });
-
-    Route::get('/onboard', [OnboardingController::class, 'show'])->name('onboard');
-    Route::post('/onboard', [OnboardingController::class, 'store'])->name('onboard.store');
-    Route::get('/onboard/success', [OnboardingController::class, 'success'])->name('onboard.success');
-});
-
-// Tenant Domain Redirect (Root to /en)
-Route::group([
-    'middleware' => [
-        'web',
-        \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
-        \App\Http\Middleware\InitializeTenancyByDomainOrFail::class,
-    ],
-], function () {
-    Route::get('/', function () {
-        return redirect('/en');
-    });
-});
-
-// Tenant Domain Routes (Localized)
+// Main App Routes (Authenticated & Localized)
 Route::group([
     'prefix' => LaravelLocalization::setLocale(),
     'middleware' => [
@@ -51,17 +23,15 @@ Route::group([
         'localeSessionRedirect',
         'localizationRedirect',
         'localeViewPath',
-        \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
-        \App\Http\Middleware\InitializeTenancyByDomainOrFail::class,
     ],
 ], function () {
+    // Public Routes
     Route::get('/', function () {
-        return redirect()->route('dashboard');
+        return redirect()->route('login');
     });
 
     Route::get('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'show'])->name('login');
     Route::post('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'store'])->name('login.store');
-
     Route::post('/logout', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'destroy'])->name('logout');
 
     Route::get('/forgot-password', [\App\Http\Controllers\Tenant\Auth\PasswordResetLinkController::class, 'create'])->name('password.request');
@@ -69,71 +39,97 @@ Route::group([
     Route::get('/reset-password/{token}', [\App\Http\Controllers\Tenant\Auth\NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [\App\Http\Controllers\Tenant\Auth\NewPasswordController::class, 'store'])->name('password.store');
 
+    // Onboarding (optional if you still want signup flow)
+    Route::get('/onboard', [OnboardingController::class, 'show'])->name('onboard');
+    Route::post('/onboard', [OnboardingController::class, 'store'])->name('onboard.store');
+
+    // Authenticated Routes
     Route::middleware(['auth'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/dashboard/details', [DashboardController::class, 'getDetails'])->name('dashboard.details');
+        // Restaurant Selection (No Context Check Required)
+        Route::get('/select-restaurant', [\App\Http\Controllers\MultiRestaurantController::class, 'index'])->name('restaurants.index');
+        Route::post('/switch-restaurant/{restaurant}', [\App\Http\Controllers\MultiRestaurantController::class, 'switch'])->name('restaurants.switch');
 
-        Route::prefix('menu')->name('menu.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Tenant\MenuController::class, 'index'])->name('index');
-            Route::post('/categories', [\App\Http\Controllers\Tenant\MenuController::class, 'storeCategory'])->name('categories.store');
-            Route::put('/categories/{category}', [\App\Http\Controllers\Tenant\MenuController::class, 'updateCategory'])->name('categories.update');
-            Route::delete('/categories/{category}', [\App\Http\Controllers\Tenant\MenuController::class, 'destroyCategory'])->name('categories.destroy');
-            Route::post('/items', [\App\Http\Controllers\Tenant\MenuController::class, 'storeItem'])->name('items.store');
-            Route::put('/items/{item}', [\App\Http\Controllers\Tenant\MenuController::class, 'updateItem'])->name('items.update');
-            Route::delete('/items/{item}', [\App\Http\Controllers\Tenant\MenuController::class, 'destroyItem'])->name('items.destroy');
+        // Protected by Restaurant Context
+        Route::middleware(['restaurant.context'])->group(function () {
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+            Route::get('/dashboard/details', [DashboardController::class, 'getDetails'])->name('dashboard.details');
+
+            Route::prefix('menu')->name('menu.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\MenuController::class, 'index'])->name('index');
+                Route::post('/categories', [\App\Http\Controllers\Tenant\MenuController::class, 'storeCategory'])->name('categories.store');
+                Route::put('/categories/{category}', [\App\Http\Controllers\Tenant\MenuController::class, 'updateCategory'])->name('categories.update');
+                Route::delete('/categories/{category}', [\App\Http\Controllers\Tenant\MenuController::class, 'destroyCategory'])->name('categories.destroy');
+                Route::post('/items', [\App\Http\Controllers\Tenant\MenuController::class, 'storeItem'])->name('items.store');
+                Route::put('/items/{item}', [\App\Http\Controllers\Tenant\MenuController::class, 'updateItem'])->name('items.update');
+                Route::delete('/items/{item}', [\App\Http\Controllers\Tenant\MenuController::class, 'destroyItem'])->name('items.destroy');
+            });
+
+            Route::prefix('orders')->name('orders.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\OrderController::class, 'index'])->name('index');
+                Route::get('/export', [\App\Http\Controllers\Tenant\OrderController::class, 'export'])->name('export');
+                Route::get('/create', [\App\Http\Controllers\Tenant\OrderController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Tenant\OrderController::class, 'store'])->name('store');
+                Route::put('/{order}/status', [\App\Http\Controllers\Tenant\OrderController::class, 'updateStatus'])->name('status.update');
+                Route::get('/{order}/bill', [\App\Http\Controllers\Tenant\OrderController::class, 'generateBill'])->name('bill');
+            });
+
+            Route::resource('tables', \App\Http\Controllers\Tenant\TableController::class);
+
+            Route::prefix('loyalty')->name('loyalty.')->group(function () {
+                Route::resource('loyalty', \App\Http\Controllers\Tenant\LoyaltyController::class);
+                Route::get('/', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'index'])->name('index');
+                Route::get('/customers/{customer}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'showCustomer'])->name('customers.show');
+                Route::post('/rewards', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'storeReward'])->name('rewards.store');
+                Route::put('/rewards/{reward}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateReward'])->name('rewards.update');
+                Route::delete('/rewards/{reward}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'deleteReward'])->name('rewards.delete');
+                Route::post('/customers/{customer}/adjust-points', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'adjustPoints'])->name('customers.adjust-points');
+
+                Route::resource('earning-methods', \App\Http\Controllers\Tenant\EarningMethodController::class)->except(['create', 'edit', 'show']);
+            });
+
+            Route::prefix('staff')->name('staff.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\StaffController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\Tenant\StaffController::class, 'store'])->name('store');
+                Route::put('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'update'])->name('update');
+                Route::delete('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'destroy'])->name('destroy');
+            });
+
+            Route::prefix('kitchen')->name('kitchen.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\KitchenController::class, 'index'])->name('index');
+            });
+
+            Route::prefix('pos')->name('pos.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\POSController::class, 'index'])->name('index');
+                Route::post('/{order}/settle', [\App\Http\Controllers\Tenant\POSController::class, 'settle'])->name('settle');
+            });
+
+            Route::prefix('communication')->name('communication.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\CommunicationController::class, 'index'])->name('index');
+                Route::post('/bundles/{bundle}/purchase', [\App\Http\Controllers\Tenant\CommunicationController::class, 'purchaseBundle'])->name('bundles.purchase');
+
+                Route::post('/templates', [\App\Http\Controllers\Tenant\CommunicationController::class, 'storeTemplate'])->name('templates.store');
+                Route::put('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'updateTemplate'])->name('templates.update');
+                Route::delete('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'destroyTemplate'])->name('templates.destroy');
+            });
+
+            Route::prefix('integrations')->name('integrations.')->group(function () {
+                Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index');
+                Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update');
+            });
         });
 
-        Route::prefix('orders')->name('orders.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Tenant\OrderController::class, 'index'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Tenant\OrderController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Tenant\OrderController::class, 'store'])->name('store');
-            Route::put('/{order}/status', [\App\Http\Controllers\Tenant\OrderController::class, 'updateStatus'])->name('status.update');
-            Route::get('/{order}/bill', [\App\Http\Controllers\Tenant\OrderController::class, 'generateBill'])->name('bill');
-        });
+        // Admin Portal Routes
+        Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
-        Route::resource('tables', \App\Http\Controllers\Tenant\TableController::class);
+            Route::resource('restaurants', \App\Http\Controllers\Admin\RestaurantController::class);
+            Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);
+            Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
+            Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
 
-        Route::prefix('loyalty')->name('loyalty.')->group(function () {
-            Route::resource('loyalty', \App\Http\Controllers\Tenant\LoyaltyController::class);
-            Route::get('/', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'index'])->name('index');
-            Route::get('/customers/{customer}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'showCustomer'])->name('customers.show');
-            Route::post('/rewards', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'storeReward'])->name('rewards.store');
-            Route::put('/rewards/{reward}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateReward'])->name('rewards.update');
-            Route::delete('/rewards/{reward}', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'deleteReward'])->name('rewards.delete');
-            Route::post('/customers/{customer}/adjust-points', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'adjustPoints'])->name('customers.adjust-points');
-
-            Route::resource('earning-methods', \App\Http\Controllers\Tenant\EarningMethodController::class)->except(['create', 'edit', 'show']);
-        });
-
-        Route::prefix('staff')->name('staff.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Tenant\StaffController::class, 'index'])->name('index');
-            Route::post('/', [\App\Http\Controllers\Tenant\StaffController::class, 'store'])->name('store');
-            Route::put('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'update'])->name('update');
-            Route::delete('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'destroy'])->name('destroy');
-        });
-
-        Route::prefix('kitchen')->name('kitchen.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Tenant\KitchenController::class, 'index'])->name('index');
-        });
-
-        Route::prefix('pos')->name('pos.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Tenant\POSController::class, 'index'])->name('index');
-            Route::post('/{order}/settle', [\App\Http\Controllers\Tenant\POSController::class, 'settle'])->name('settle');
-        });
-
-        Route::prefix('communication')->name('communication.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Tenant\CommunicationController::class, 'index'])->name('index');
-            Route::post('/bundles/{bundle}/purchase', [\App\Http\Controllers\Tenant\CommunicationController::class, 'purchaseBundle'])->name('bundles.purchase');
-
-            // Templates / Rules
-            Route::post('/templates', [\App\Http\Controllers\Tenant\CommunicationController::class, 'storeTemplate'])->name('templates.store');
-            Route::put('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'updateTemplate'])->name('templates.update');
-            Route::delete('/templates/{template}', [\App\Http\Controllers\Tenant\CommunicationController::class, 'destroyTemplate'])->name('templates.destroy');
-        });
-
-        Route::prefix('integrations')->name('integrations.')->group(function () {
-            Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index');
-            Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update');
+            // Permissions Management
+            Route::get('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('permissions.index');
+            Route::post('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'update'])->name('permissions.update');
         });
     });
 });

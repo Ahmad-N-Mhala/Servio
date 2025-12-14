@@ -395,6 +395,37 @@ const closeAddModal = () => {
 };
 
 const submitForm = () => {
+    form.clearErrors();
+    let hasErrors = false;
+
+    // Validate Name
+    if (!form.name) {
+        form.errors.name = 'Full name is required.';
+        hasErrors = true;
+    }
+
+    // Validate Email
+    if (!form.email) {
+        form.errors.email = 'Email address is required.';
+        hasErrors = true;
+    } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.email)) {
+            form.errors.email = 'Please enter a valid email address.';
+            hasErrors = true;
+        }
+    }
+
+    // Validate Role
+    if (!form.role) {
+        form.errors.role = 'Role is required.';
+        hasErrors = true;
+    }
+
+    if (hasErrors) {
+        return;
+    }
+
     form.post(route('staff.store'), {
         onSuccess: () => {
             closeAddModal();

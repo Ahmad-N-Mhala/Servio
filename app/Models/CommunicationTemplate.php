@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use App\Traits\HasRestaurant;
+
 class CommunicationTemplate extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRestaurant;
 
     protected $fillable = [
         'restaurant_id',

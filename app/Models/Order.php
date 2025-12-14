@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\Traits\HasRestaurant;
+
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRestaurant;
 
     protected $fillable = [
         'restaurant_id',

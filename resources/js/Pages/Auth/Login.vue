@@ -118,6 +118,34 @@ const toastType = ref('info');
 const toastTrigger = ref(0);
 
 const submit = () => {
+    form.clearErrors();
+    let hasErrors = false;
+
+    // Client-side validation
+    if (!form.email) {
+        form.errors.email = 'Email address is required.';
+        hasErrors = true;
+    } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(form.email)) {
+            form.errors.email = 'Please enter a valid email address.';
+            hasErrors = true;
+        }
+    }
+
+    if (!form.password) {
+        form.errors.password = 'Password is required.';
+        hasErrors = true;
+    }
+
+    if (hasErrors) {
+        toastType.value = 'error';
+        toastTitle.value = 'Validation Error';
+        toastMessage.value = 'Please check the required fields.';
+        toastTrigger.value++;
+        return;
+    }
+
     // Get the current URL path to extract locale
     const currentPath = window.location.pathname;
     // Extract locale from path (e.g., /en/login -> en)

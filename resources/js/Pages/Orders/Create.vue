@@ -24,15 +24,19 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                            <input 
-                                v-model="form.customer_phone"
-                                type="tel"
-                                placeholder="+971-50-1234567"
-                                required
-                                @blur="lookupCustomer"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                            />
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-gray-500 font-medium">+971</span>
+                                <input 
+                                    v-model="phoneInput"
+                                    type="tel"
+                                    placeholder="50 123 4567"
+                                    maxlength="9"
+                                    @input="handlePhoneInput"
+                                    @blur="lookupCustomer"
+                                    class="w-full pl-14 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                />
+                            </div>
                         </div>
                         <Input 
                             v-model="form.customer_name"
@@ -308,9 +312,8 @@
                         <Button 
                             type="submit" 
                             block 
-                            size="lg"
                             :loading="form.processing"
-                            :disabled="cart.length === 0 || !form.customer_phone"
+                            :disabled="cart.length === 0"
                         >
                             Create Order
                         </Button>
@@ -400,6 +403,7 @@ const tablesList = computed(() => props.tables || []);
 const cart = ref<CartItem[]>([]);
 const selectedCustomer = ref<Customer | null>(null);
 const selectedReward = ref<Reward | null>(null);
+const phoneInput = ref('');
 
 // Form
 const form = useForm({
@@ -417,32 +421,58 @@ const form = useForm({
     reward_id: null as number | null
 });
 
+// Handle phone input
+const handlePhoneInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    // Allow only numbers
+    const value = target.value.replace(/\D/g, '');
+    
+    // Update the display value
+    phoneInput.value = value;
+    
+    // Update the form value with full format (+971...)
+    if (value) {
+        form.customer_phone = '+971' + value;
+    } else {
+        form.customer_phone = '';
+    }
+};
+
 // Customer lookup
 const lookupCustomer = () => {
-    if (!form.customer_phone) {
+    if (!phoneInput.value) {
         selectedCustomer.value = null;
         return;
     }
     
-    const phone = form.customer_phone.replace(/\D/g, '');
+    // Search using the input value (local number without prefix issues)
+    // We compare against the stored phone which likely contains the country code
+    const searchText = phoneInput.value;
+    
     const customer = props.customers?.find(c => 
-        c.phone?.replace(/\D/g, '').includes(phone) || phone.includes(c.phone?.replace(/\D/g, '') || '')
+        (c.phone && c.phone.includes(searchText))
     );
     
     if (customer) {
         selectedCustomer.value = customer;
         form.customer_name = customer.name || '';
         form.customer_id = customer.id;
+        // Ensure form phone matches found customer
+        form.customer_phone = customer.phone;
     } else {
         selectedCustomer.value = null;
         form.customer_id = null;
+        // Keep the entered phone number in form
+        form.customer_phone = '+971' + phoneInput.value;
     }
 };
 
 // Watch phone changes for auto-lookup
-watch(() => form.customer_phone, (newPhone) => {
-    if (newPhone && newPhone.length >= 7) {
+watch(phoneInput, (newVal) => {
+    if (newVal && newVal.length >= 7) {
         lookupCustomer();
+    } else {
+        selectedCustomer.value = null;
     }
 });
 

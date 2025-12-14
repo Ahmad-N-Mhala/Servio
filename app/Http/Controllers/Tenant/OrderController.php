@@ -71,6 +71,82 @@ class OrderController extends Controller
         ]);
     }
 
+    public function export(Request $request)
+    {
+        $restaurant = \App\Models\Restaurant::first();
+
+        $query = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', '!=', 'deleted');
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'ilike', "%{$search}%")
+                    ->orWhere('customer_name', 'ilike', "%{$search}%")
+                    ->orWhere('customer_phone', 'ilike', "%{$search}%")
+                    ->orWhere('delivery_provider', 'ilike', "%{$search}%")
+                    ->orWhere('status', 'ilike', "%{$search}%")
+                    ->orWhereRaw('CAST(total AS TEXT) ilike ?', ["%{$search}%"]);
+            });
+        }
+
+        // Date Range
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->input('end_date'));
+        }
+
+        // Sort
+        $sortField = $request->input('sort_field', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        $allowedSorts = ['order_number', 'customer_name', 'total', 'status', 'created_at'];
+        if (in_array($sortField, $allowedSorts)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $orders = $query->get();
+
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=orders_" . date('Y-m-d_H-i') . ".csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $columns = ['Order Number', 'Customer Name', 'Phone', 'Status', 'Total', 'Currency', 'Delivery Provider', 'Created At'];
+
+        $callback = function () use ($orders, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($orders as $order) {
+                $row = [
+                    $order->order_number,
+                    $order->customer_name,
+                    $order->customer_phone,
+                    ucfirst($order->status),
+                    $order->total,
+                    $order->currency,
+                    ucfirst($order->delivery_provider ?? ''),
+                    $order->created_at->format('Y-m-d H:i:s')
+                ];
+
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create(): Response
     {
         $restaurant = \App\Models\Restaurant::first();
@@ -150,7 +226,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_phone' => ['required', 'string'],
+            'customer_phone' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
             'type' => ['required', 'in:dine_in,takeaway'],
             'table_id' => ['nullable', 'exists:restaurant_tables,id'],
@@ -174,17 +250,20 @@ class OrderController extends Controller
             }
         }
 
-        // Find or create customer
-        $customer = $this->loyaltyService->findOrCreateCustomer(
-            $restaurant,
-            $validated['customer_phone'],
-            $validated['customer_name'] ?? null
-        );
+        // Find or create customer ONLY if phone is provided
+        $customer = null;
+        if (!empty($validated['customer_phone'])) {
+            $customer = $this->loyaltyService->findOrCreateCustomer(
+                $restaurant,
+                $validated['customer_phone'],
+                $validated['customer_name'] ?? null
+            );
+        }
 
         // Create order
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
-            'customer_id' => $customer->id,
+            'customer_id' => $customer ? $customer->id : null,
             'order_number' => 'ORD-' . strtoupper(Str::random(8)),
             'status' => 'pending',
             'type' => $validated['type'],
@@ -193,8 +272,8 @@ class OrderController extends Controller
             'tax' => $validated['tax'] ?? 0,
             'total' => $validated['total'],
             'currency' => $restaurant->currency ?? 'AED',
-            'customer_name' => $validated['customer_name'] ?? $customer->name,
-            'customer_phone' => $validated['customer_phone'],
+            'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
+            'customer_phone' => $validated['customer_phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
         ]);
 

@@ -15,11 +15,16 @@ class Plan extends Model
     protected $fillable = [
         'name',
         'slug',
+        'description',
         'price_monthly',
         'price_yearly',
         'currency',
         'features',
+        'max_restaurants',
+        'max_users',
+        'max_orders_per_month',
         'is_active',
+        'is_featured',
     ];
 
     protected $casts = [
@@ -27,11 +32,16 @@ class Plan extends Model
         'price_monthly' => 'decimal:2',
         'price_yearly' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     public function tenants(): HasMany
     {
         return $this->hasMany(Tenant::class);
     }
-}
 
+    public function restaurantSubscriptions(): HasMany
+    {
+        return $this->hasMany(RestaurantSubscription::class);
+    }
+}

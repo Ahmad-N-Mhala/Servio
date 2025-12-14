@@ -19,9 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'localeSessionRedirect' => \Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect::class,
             'localizationRedirect' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
             'localeViewPath' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class,
+            'restaurant.context' => \App\Http\Middleware\CheckRestaurantContext::class,
         ]);
 
-        $middleware->prependToGroup('web', \App\Http\Middleware\InitializeTenancyByDomainOrFail::class);
+        // Remove the tenant middleware injection
+        // $middleware->prependToGroup('web', \App\Http\Middleware\InitializeTenancyByDomainOrFail::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

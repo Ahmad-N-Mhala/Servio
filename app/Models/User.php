@@ -17,6 +17,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'is_super_admin',
         'password',
     ];
 
@@ -37,5 +38,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
+
+
 }
 

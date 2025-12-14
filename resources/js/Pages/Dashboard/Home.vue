@@ -307,10 +307,13 @@ const initRevenueChart = () => {
                 },
             },
             onClick: (e: any, activeElements: any[]) => {
-                if (activeElements.length > 0) {
-                    const dataIndex = activeElements[0].index;
-                    const date = revenueChart.value[dataIndex].date;
-                    fetchDetails('revenue_chart_point', { date });
+                if (activeElements && activeElements.length > 0) {
+                    const firstElement = activeElements[0];
+                    if (firstElement && typeof firstElement.index !== 'undefined') {
+                        const dataIndex = firstElement.index;
+                        const date = revenueChart.value[dataIndex].date;
+                        fetchDetails('revenue_chart_point', { date });
+                    }
                 }
             },
         },
@@ -351,10 +354,13 @@ const initStatusChart = () => {
                 },
             },
             onClick: (e: any, activeElements: any[]) => {
-                if (activeElements.length > 0) {
-                    const dataIndex = activeElements[0].index;
-                    const status = statusDistribution.value[dataIndex].status;
-                    fetchDetails('status_slice', { status });
+                if (activeElements && activeElements.length > 0) {
+                    const firstElement = activeElements[0];
+                    if (firstElement && typeof firstElement.index !== 'undefined') {
+                        const dataIndex = firstElement.index;
+                        const status = statusDistribution.value[dataIndex].status;
+                        fetchDetails('status_slice', { status });
+                    }
                 }
             },
         },

@@ -36,79 +36,72 @@ class OnboardingController extends Controller
 
     public function store(Request $request)
     {
-        // Get the base domain (skip 127.0.0.1, prefer localhost)
-        $baseDomain = collect(config('tenancy.central_domains'))
-            ->reject(fn($domain) => in_array($domain, ['127.0.0.1']))
-            ->first(fn($domain) => $domain === 'localhost') ?? collect(config('tenancy.central_domains'))->reject(fn($domain) => in_array($domain, ['127.0.0.1', 'localhost']))->first() ?? 'localhost';
-
         $validated = $request->validate([
-            'subdomain' => [
-                'required',
-                'string',
-                'min:3',
-                'max:50',
-                'alpha_dash',
-                'unique:tenants,identifier',
-                function ($attribute, $value, $fail) use ($baseDomain) {
-                    $fullDomain = $value . '.' . $baseDomain;
-                    if (Domain::where('domain', $fullDomain)->exists()) {
-                        $fail('This subdomain is already taken.');
-                    }
-                },
-            ],
+            'restaurant_name' => ['required', 'string', 'max:255'],
             'plan_id' => ['required', 'exists:plans,id'],
             'billing_cycle' => ['required', 'in:monthly,yearly'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
 
-        $tenant = Tenant::create([
-            'id' => (string) Str::uuid(),
-            'identifier' => $validated['subdomain'],
-            'plan_id' => $plan->id,
-            'subscription_status' => 'active', // Set active immediately
-            'data' => [
-                'owner_name' => $validated['name'],
-                'owner_email' => $validated['email'],
-                'owner_password' => bcrypt($validated['password']),
-                'billing_cycle' => $validated['billing_cycle'],
-            ],
-        ]);
+        DB::beginTransaction();
+        try {
+            // 1. Create User (Central)
+            $user = \App\Models\User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+                'email_verified_at' => now(), // Auto-verify for now
+            ]);
 
-        $domain = Domain::create([
-            'domain' => $validated['subdomain'] . '.' . $baseDomain,
-            'tenant_id' => $tenant->id,
-        ]);
+            // 2. Create Restaurant (Central)
+            $restaurant = \App\Models\Restaurant::create([
+                'name' => $validated['restaurant_name'],
+                'slug' => Str::slug($validated['restaurant_name']) . '-' . Str::random(6),
+                'currency' => 'AED',
+                'locale' => 'en', // Default locale
+            ]);
 
-        // Create the tenant database (using tenant ID as database name)
-        $dbName = $tenant->id;
-        $dbConnection = config('database.connections.pgsql');
-        $host = $dbConnection['host'];
-        $port = $dbConnection['port'];
-        $username = $dbConnection['username'];
-        $password = $dbConnection['password'];
+            // 3. Link User to Restaurant via Pivot
+            DB::table('restaurant_user')->insert([
+                'restaurant_id' => $restaurant->id,
+                'email' => $user->email,
+                'role' => 'owner',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        // Create database using psql
-        $command = sprintf(
-            'PGPASSWORD=%s psql -h %s -p %s -U %s -d %s -c "CREATE DATABASE \"%s\";" 2>&1',
-            escapeshellarg($password),
-            escapeshellarg($host),
-            escapeshellarg($port),
-            escapeshellarg($username),
-            escapeshellarg(config('database.connections.pgsql.database')),
-            $dbName
-        );
-        exec($command, $output, $returnCode);
+            // 4. Create Staff Record
+            // Note: Staff model uses restaurant_id field, make sure it is provided
+            // Temporarily switching off Global Scope if needed, or manually setting ID
+            $staff = new \App\Models\Staff();
+            $staff->restaurant_id = $restaurant->id;
+            $staff->user_id = $user->id;
+            $staff->role = 'owner';
+            $staff->is_active = true;
+            $staff->joined_at = now();
+            $staff->save();
 
-        \Log::info("Database creation command: {$command}");
-        \Log::info("Database creation output: " . implode("\n", $output));
-        \Log::info("Database creation return code: {$returnCode}");
+            DB::commit();
 
-        // BYPASS STRIPE: Redirect directly to success with tenant_id
-        return redirect()->route('onboard.success', ['tenant_id' => $tenant->id]);
+            // Auto-login the user
+            \Illuminate\Support\Facades\Auth::login($user);
+
+            // Set active restaurant session
+            session(['active_restaurant_id' => $restaurant->id]);
+
+            // Redirect to dashboard
+            return redirect()->route('dashboard');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Onboarding failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Onboarding failed. Please try again.']);
+        }
     }
 
     public function success(Request $request)

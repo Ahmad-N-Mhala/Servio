@@ -48,6 +48,11 @@ class Restaurant extends Model
         return $this->hasMany(MenuItem::class);
     }
 
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'restaurant_user');
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
@@ -62,5 +67,16 @@ class Restaurant extends Model
     {
         return $this->hasMany(Reward::class);
     }
+
+    public function subscription(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(RestaurantSubscription::class)->latest();
+    }
+
+    public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'restaurant_user', 'restaurant_id', 'email', 'id', 'email')->limit(1);
+    }
+
 }
 
