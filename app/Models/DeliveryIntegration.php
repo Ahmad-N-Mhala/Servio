@@ -37,4 +37,12 @@ class DeliveryIntegration extends Model
     {
         return $this->belongsTo(Restaurant::class);
     }
+
+    /**
+     * Get the delivery provider definition for this integration
+     */
+    public function deliveryProvider(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryProvider::class, 'provider', 'slug');
+    }
 }

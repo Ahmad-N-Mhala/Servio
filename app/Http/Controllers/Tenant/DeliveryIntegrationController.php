@@ -16,33 +16,25 @@ class DeliveryIntegrationController extends Controller
 
         $integrations = DeliveryIntegration::where('restaurant_id', $restaurant->id)->get();
 
-        // Default providers we support
-        $providers = [
-            [
-                'id' => 'noon',
-                'name' => 'Noon Food',
-                'logo' => '/images/integrations/noon-food.png',
-                'description' => 'Integrate with Noon Food for seamless order management.',
-            ],
-            [
-                'id' => 'talabat',
-                'name' => 'Talabat',
-                'logo' => '/images/integrations/talabat.png',
-                'description' => 'Connect your restaurant with Talabat delivery network.',
-            ],
-            [
-                'id' => 'deliveroo',
-                'name' => 'Deliveroo',
-                'logo' => '/images/integrations/deliveroo.png',
-                'description' => 'Sync menus and orders with Deliveroo.',
-            ],
-            [
-                'id' => 'careem',
-                'name' => 'Careem Now',
-                'logo' => '/images/integrations/careem.png',
-                'description' => 'Manage Careem orders directly from your dashboard.',
-            ]
-        ];
+        // Fetch active delivery providers from database (single source of truth)
+        // This ensures admin-managed providers are immediately available to tenants
+        $providers = \App\Models\DeliveryProvider::active()
+            ->ordered()
+            ->get()
+            ->map(function ($provider) {
+                return [
+                    'id' => $provider->slug,
+                    'name' => $provider->name,
+                    'logo' => $provider->logo_url,
+                    'description' => $provider->description,
+                    'api_documentation_url' => $provider->api_documentation_url,
+                    'requires_api_key' => $provider->requires_api_key,
+                    'requires_api_secret' => $provider->requires_api_secret,
+                    'requires_store_id' => $provider->requires_store_id,
+                    'requires_webhook_secret' => $provider->requires_webhook_secret,
+                    'configuration_fields' => $provider->configuration_fields,
+                ];
+            });
 
         return Inertia::render('Integrations/Delivery', [
             'providers' => $providers,

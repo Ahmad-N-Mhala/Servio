@@ -62,6 +62,20 @@ class HandleInertiaRequests extends Middleware
                 return null;
             },
 
+            // Share current subscription for the active restaurant
+            'current_subscription' => (function () use ($request) {
+                if ($request->user()) {
+                    $restaurant = $request->user()->currentRestaurant();
+                    if ($restaurant) {
+                        return \App\Models\RestaurantSubscription::where('restaurant_id', $restaurant->id)
+                            ->where('status', 'active')
+                            ->with('plan')
+                            ->first();
+                    }
+                }
+                return null;
+            })(),
+
             'ziggy' => fn() => [
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
                 'location' => $request->url(),

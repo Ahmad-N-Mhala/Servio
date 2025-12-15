@@ -62,13 +62,7 @@ class PermissionController extends Controller
     // Define all available roles
     private function getAllRoles()
     {
-        return [
-            'owner' => 'Restaurant Owner',
-            'manager' => 'Manager',
-            'waiter' => 'Waiter',
-            'chef' => 'Chef',
-            'cashier' => 'Cashier',
-        ];
+        return config('roles.display_names');
     }
 
     public function index()

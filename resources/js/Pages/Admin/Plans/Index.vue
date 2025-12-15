@@ -8,28 +8,33 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div v-for="plan in plans" :key="plan.id" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
+            <div v-if="plansData.length === 0" class="text-center py-12">
+                <p class="text-gray-500">No plans found. Create your first plan to get started.</p>
+            </div>
+
+            <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div v-for="plan in plansData" :key="plan.id" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="text-xl font-bold text-gray-900">{{ plan.name }}</h3>
                             <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-full uppercase tracking-wide">{{ plan.slug }}</span>
                         </div>
                         <div class="text-right">
-                            <p class="text-2xl font-bold text-gray-900">{{ plan.currency }}{{ plan.price_monthly }}</p>
+                            <p class="text-2xl font-bold text-gray-900">AED {{ plan.price_monthly }}</p>
                             <p class="text-xs text-gray-400">/month</p>
                         </div>
                     </div>
                     
                     <div class="flex-grow space-y-2 mb-6">
                         <p class="text-sm text-gray-600 font-medium">Features:</p>
-                        <ul class="text-sm text-gray-500 space-y-1">
-                            <li v-for="(feature, idx) in plan.features.slice(0, 4)" :key="idx" class="flex items-center gap-2">
+                        <ul v-if="planFeatures(plan).length > 0" class="text-sm text-gray-500 space-y-1">
+                            <li v-for="(feature, idx) in planFeatures(plan).slice(0, 4)" :key="idx" class="flex items-center gap-2">
                                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 {{ feature }}
                             </li>
-                             <li v-if="plan.features.length > 4" class="text-xs text-gray-400 pl-6">+ {{ plan.features.length - 4 }} more</li>
+                             <li v-if="planFeatures(plan).length > 4" class="text-xs text-gray-400 pl-6">+ {{ planFeatures(plan).length - 4 }} more</li>
                         </ul>
+                        <p v-else class="text-sm text-gray-400 italic">No features listed</p>
                     </div>
                     
                     <div class="flex items-center gap-3 pt-4 border-t border-gray-50 mt-auto">
@@ -43,9 +48,37 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
-defineProps<{
-    plans: any[];
+const props = defineProps<{
+    plans: any;
 }>();
+
+// Handle both paginated and non-paginated data
+const plansData = computed(() => {
+    if (!props.plans) return [];
+    // Check if it's Laravel pagination object
+    if (props.plans.data && Array.isArray(props.plans.data)) {
+        return props.plans.data;
+    }
+    // Otherwise assume it's a plain array
+    return Array.isArray(props.plans) ? props.plans : [];
+});
+
+// Safely get features array
+const planFeatures = (plan: any) => {
+    if (!plan.features) return [];
+    if (Array.isArray(plan.features)) return plan.features;
+    // If features is a JSON string, parse it
+    if (typeof plan.features === 'string') {
+        try {
+            const parsed = JSON.parse(plan.features);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+};
 </script>

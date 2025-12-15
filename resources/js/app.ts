@@ -1,5 +1,4 @@
 import '../css/app.css';
-// Rebuild trigger 2
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';

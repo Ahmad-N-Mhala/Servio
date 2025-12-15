@@ -475,9 +475,8 @@ const createReward = () => {
 
 const deleteReward = (reward: any) => {
     if (confirm('Are you sure you want to delete this reward?')) {
-        // In a real app, use a form or router.delete
+        // TODO: Implement delete functionality
         // router.delete(route('loyalty.rewards.destroy', reward.id));
-        console.log('Delete reward', reward.id);
     }
 };
 </script>

@@ -359,19 +359,77 @@
                 </div>
             </nav>
 
-            <!-- Sidebar Footer -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100/50 dark:border-gray-700/50">
-                <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10">
-                    <div class="p-2 bg-primary/10 rounded-lg">
-                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Sidebar Footer - Subscription Info -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100/50 dark:border-gray-700/50" v-if="!isSidebarCollapsed">
+                <Link 
+                    :href="route('plans.index')"
+                    class="block group"
+                >
+                    <div 
+                        v-if="currentSubscription"
+                        class="px-3 py-3 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all duration-200 cursor-pointer border border-primary/20 hover:border-primary/30"
+                    >
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">{{ currentSubscription.plan.name }}</p>
+                                    <svg class="w-3 h-3 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                                <p class="text-[10px] text-gray-600 dark:text-gray-400 mb-1">
+                                    <span class="font-medium">{{ subscriptionStatus }}</span>
+                                </p>
+                                <div class="flex items-center gap-1 text-[10px] text-gray-500">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>Expires {{ formatExpiryDate(currentSubscription.ends_at) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div 
+                        v-else
+                        class="px-3 py-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200 cursor-pointer"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs font-semibold text-gray-900 dark:text-white">No Active Plan</p>
+                                <p class="text-[10px] text-gray-600 dark:text-gray-400">Click to choose a plan</p>
+                            </div>
+                            <svg class="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </Link>
+            </div>
+            
+            <!-- Collapsed Sidebar - Plan Icon -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100/50 dark:border-gray-700/50" v-else>
+                <Link 
+                    :href="route('plans.index')"
+                    class="flex justify-center p-2 rounded-lg hover:bg-primary/10 transition-colors group"
+                    :title="currentSubscription ? `${currentSubscription.plan.name} - Expires ${formatExpiryDate(currentSubscription.ends_at)}` : 'View Plans'"
+                >
+                    <div class="relative">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
+                        <span v-if="currentSubscription && daysUntilExpiry(currentSubscription.ends_at) <= 7" class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                     </div>
-                    <div>
-                        <p class="text-xs font-medium text-gray-900 dark:text-white">{{ $t('common.pro_plan') }}</p>
-                        <p class="text-xs text-gray-500">{{ $t('common.active') }}</p>
-                    </div>
-                </div>
+                </Link>
             </div>
         </aside>
 
@@ -701,6 +759,37 @@ const switchLanguage = (newLocale: string) => {
     
     // Redirect to new locale
     window.location.href = newUrl;
+};
+
+// Subscription Management
+const currentSubscription = computed(() => (page.props as any).current_subscription || null);
+
+const subscriptionStatus = computed(() => {
+    if (!currentSubscription.value) return 'No active plan';
+    
+    const days = daysUntilExpiry(currentSubscription.value.ends_at);
+    if (days <= 0) return 'Expired';
+    if (days <= 7) return `Expiring soon`;
+    return 'Active';
+});
+
+const formatExpiryDate = (date: string) => {
+    const expiryDate = new Date(date);
+    const now = new Date();
+    const diffDays = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return 'Expired';
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays <= 7) return `in ${diffDays} days`;
+    
+    return expiryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+const daysUntilExpiry = (endDate: string) => {
+    const end = new Date(endDate);
+    const now = new Date();
+    return Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 };
 
 // Set initial direction based on locale

@@ -116,6 +116,12 @@ Route::group([
                 Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index');
                 Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update');
             });
+
+            // Plans & Subscription
+            Route::prefix('plans')->name('plans.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\PlanController::class, 'index'])->name('index');
+                Route::post('/{plan}/subscribe', [\App\Http\Controllers\PlanController::class, 'subscribe'])->name('subscribe');
+            });
         });
 
         // Admin Portal Routes
@@ -126,6 +132,15 @@ Route::group([
             Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);
             Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
             Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
+
+            // Delivery Providers Management
+            Route::get('delivery-providers', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'index'])->name('delivery-providers.index');
+            Route::get('delivery-providers/create', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'create'])->name('delivery-providers.create');
+            Route::post('delivery-providers', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'store'])->name('delivery-providers.store');
+            Route::get('delivery-providers/{deliveryProvider}/edit', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'edit'])->name('delivery-providers.edit');
+            Route::put('delivery-providers/{deliveryProvider}', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'update'])->name('delivery-providers.update');
+            Route::delete('delivery-providers/{deliveryProvider}', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'destroy'])->name('delivery-providers.destroy');
+            Route::post('delivery-providers/{deliveryProvider}/toggle-status', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'toggleStatus'])->name('delivery-providers.toggle-status');
 
             // Permissions Management
             Route::get('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('permissions.index');
