@@ -21,7 +21,7 @@ class LoyaltyController extends Controller
 
     public function index(Request $request): Response
     {
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         // Customers Query
         $customersQuery = Customer::where('restaurant_id', $restaurant->id)
@@ -59,6 +59,7 @@ class LoyaltyController extends Controller
 
         $rewards = Reward::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
+            ->with(['menuItems'])
             ->orderBy('sort_order')
             ->get();
 
@@ -99,22 +100,32 @@ class LoyaltyController extends Controller
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'points_required' => ['required', 'integer', 'min:1'],
+            'min_order_value' => ['nullable', 'numeric', 'min:0'],
             'reward_type' => ['required', 'in:discount_percentage,discount_fixed,free_item,cashback'],
             'discount_value' => ['nullable', 'numeric', 'min:0'],
-            'menu_item_id' => ['nullable', 'exists:menu_items,id'],
+            'menu_item_ids' => ['nullable', 'array'],
+            'menu_item_ids.*' => ['exists:menu_items,id'],
             'max_redemptions' => ['nullable', 'integer', 'min:1'],
             'valid_from' => ['nullable', 'date'],
             'valid_until' => ['nullable', 'date', 'after:valid_from'],
             'is_active' => ['boolean'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
-        Reward::create(array_merge($validated, [
+        $data = $validated;
+        unset($data['menu_item_ids']);
+        $data['min_order_value'] = $data['min_order_value'] ?? 0;
+
+        $reward = Reward::create(array_merge($data, [
             'restaurant_id' => $restaurant->id,
             'redemptions_count' => 0,
             'sort_order' => 0,
         ]));
+
+        if (isset($validated['menu_item_ids'])) {
+            $reward->menuItems()->sync($validated['menu_item_ids']);
+        }
 
         return redirect()->back()->with('message', __('loyalty.reward_created'));
     }
@@ -125,16 +136,26 @@ class LoyaltyController extends Controller
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'points_required' => ['required', 'integer', 'min:1'],
+            'min_order_value' => ['nullable', 'numeric', 'min:0'],
             'reward_type' => ['required', 'in:discount_percentage,discount_fixed,free_item,cashback'],
             'discount_value' => ['nullable', 'numeric', 'min:0'],
-            'menu_item_id' => ['nullable', 'exists:menu_items,id'],
+            'menu_item_ids' => ['nullable', 'array'],
+            'menu_item_ids.*' => ['exists:menu_items,id'],
             'max_redemptions' => ['nullable', 'integer', 'min:1'],
             'valid_from' => ['nullable', 'date'],
             'valid_until' => ['nullable', 'date', 'after:valid_from'],
             'is_active' => ['boolean'],
         ]);
 
-        $reward->update($validated);
+        $data = $validated;
+        unset($data['menu_item_ids']);
+        $data['min_order_value'] = $data['min_order_value'] ?? 0;
+
+        $reward->update($data);
+
+        if (isset($validated['menu_item_ids'])) {
+            $reward->menuItems()->sync($validated['menu_item_ids']);
+        }
 
         return redirect()->back()->with('message', __('loyalty.reward_updated'));
     }

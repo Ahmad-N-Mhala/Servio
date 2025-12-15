@@ -236,6 +236,53 @@
                 ></textarea>
             </div>
 
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h4 class="font-medium text-gray-900 dark:text-white mb-3">Recipe / Ingredients</h4>
+                <div class="space-y-3">
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                             <select 
+                                v-model="newIngredientId" 
+                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary"
+                             >
+                                 <option :value="null">Select Ingredient...</option>
+                                 <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
+                                    {{ getCategoryName(ing.name) }} ({{ ing.unit }})
+                                 </option>
+                             </select>
+                        </div>
+                        <div class="w-32">
+                            <Input 
+                                v-model="newIngredientQty" 
+                                type="number" 
+                                step="0.0001" 
+                                placeholder="Qty" 
+                                @keypress.enter.prevent="addIngredient"
+                            />
+                        </div>
+                        <Button type="button" @click="addIngredient" size="sm" :disabled="!newIngredientId">Add</Button>
+                    </div>
+
+                    <!-- List -->
+                    <div v-if="itemForm.ingredients.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
+                        <div v-for="(ing, index) in itemForm.ingredients" :key="index" class="flex justify-between items-center text-sm p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">
+                                {{ getCategoryName(getIngredient(ing.id)?.name) }}
+                            </span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs text-gray-500 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
+                                    {{ ing.quantity }} {{ getIngredient(ing.id)?.unit }}
+                                </span>
+                                <button type="button" @click="removeIngredient(index)" class="text-red-500 hover:text-red-700 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-xs text-gray-500 italic">No ingredients linked to this item.</p>
+                </div>
+            </div>
+
             <div class="flex justify-between pt-4">
                 <Button 
                     v-if="editingItem"
@@ -267,8 +314,9 @@ const { t, locale } = useI18n();
 const page = usePage();
 const route = (window as any).route;
 
-defineProps<{
+const props = defineProps<{
     categories: any[];
+    ingredients: any[];
 }>();
 
 const isRtl = computed(() => page.props.isRtl as boolean);
@@ -292,8 +340,36 @@ const itemForm = useForm({
     price: '',
     image: null,
     sort_order: 0,
-    allergens: []
+    allergens: [],
+    ingredients: [] as any[]
 });
+
+const newIngredientId = ref<number | null>(null);
+const newIngredientQty = ref<number | string>('');
+
+const getIngredient = (id: number) => props.ingredients.find((i: any) => i.id === id);
+
+const addIngredient = () => {
+    if (!newIngredientId.value || !newIngredientQty.value) return;
+    
+    // Check if already exists
+    const existing = itemForm.ingredients.find(i => i.id === newIngredientId.value);
+    if (existing) {
+        existing.quantity = Number(existing.quantity) + Number(newIngredientQty.value);
+    } else {
+        itemForm.ingredients.push({
+            id: newIngredientId.value,
+            quantity: Number(newIngredientQty.value)
+        });
+    }
+    
+    newIngredientId.value = null;
+    newIngredientQty.value = '';
+};
+
+const removeIngredient = (index: number) => {
+    itemForm.ingredients.splice(index, 1);
+};
 
 const getCategoryName = (name: any) => {
     if (typeof name === 'string') return name;
@@ -364,6 +440,10 @@ const openItemModal = (category: any, item: any = null) => {
         itemForm.description = item.description;
         itemForm.price = item.price;
         itemForm.sort_order = item.sort_order;
+        itemForm.ingredients = item.ingredients ? item.ingredients.map((i: any) => ({
+            id: i.id,
+            quantity: i.pivot.quantity
+        })) : [];
     } else {
         editingItem.value = null;
         // Keep category_id

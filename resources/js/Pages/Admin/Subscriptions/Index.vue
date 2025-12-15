@@ -8,10 +8,23 @@
 
         <div class="py-6">
             <div class="max-w-7xl mx-auto">
-                <!-- Header -->
-                <div class="mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900">Manage Restaurant Subscriptions</h3>
-                    <p class="mt-1 text-sm text-gray-600">View and update subscription plans for all restaurants</p>
+                <!-- Header & Search -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900">Manage Restaurant Subscriptions</h3>
+                        <p class="mt-1 text-sm text-gray-600">View and update subscription plans for all restaurants</p>
+                    </div>
+                    <div class="relative w-full sm:w-auto">
+                        <input 
+                            v-model="search" 
+                            type="text" 
+                            placeholder="Search restaurants..." 
+                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-primary focus:border-primary w-full sm:w-64"
+                        >
+                        <div class="absolute left-3 top-2.5 text-gray-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Restaurants Table -->
@@ -106,8 +119,9 @@
             </div>
         </div>
 
-        <!-- Edit/Assign Modal -->
-        <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeModal">
+        <!-- Edit/Assign Modal remains same -->
+        <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeModal"> 
+            <!-- ... modal content ... -->
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                 
@@ -183,9 +197,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { debounce } from 'lodash';
 
 const props = defineProps<{
     restaurants: {
@@ -196,7 +211,16 @@ const props = defineProps<{
         links: Array<any>;
     };
     plans: Array<any>;
+    filters: {
+        search?: string;
+    };
 }>();
+
+const search = ref(props.filters?.search || '');
+
+watch(search, debounce((value: string) => {
+    router.get(route('admin.subscriptions.index'), { search: value }, { preserveState: true, replace: true });
+}, 300));
 
 const route = (window as any).route;
 

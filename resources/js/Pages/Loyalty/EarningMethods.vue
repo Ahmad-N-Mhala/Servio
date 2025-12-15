@@ -21,7 +21,7 @@
                             </svg>
                         </div>
                     </div>
-                    <Button @click="openModal()" variant="primary" class="whitespace-nowrap">
+                    <Button v-if="methodsList.length === 0" @click="openModal()" variant="primary" class="whitespace-nowrap">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
@@ -31,131 +31,62 @@
             </div>
 
             <!-- Table Layout -->
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <div v-if="methodsList.length === 0" class="text-center py-16 px-6">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900">No earning methods found</h3>
-                    <p class="text-gray-500 mt-1">Try adjusting your search or add a new method.</p>
-                </div>
+            <!-- Cards Grid Layout -->
+            <div v-if="methodsList.length === 0" class="glass-card rounded-2xl overflow-hidden text-center py-16 px-6">
+                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                     </svg>
+                 </div>
+                 <h3 class="text-lg font-medium text-gray-900">No earning methods configred</h3>
+                 <p class="text-gray-500 mt-1">Add a method to start rewarding your customers.</p>
+            </div>
 
-                <div v-else>
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('name')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        Name
-                                        <span v-if="params.sort_field === 'name'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('type')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        Type
-                                        <span v-if="params.sort_field === 'type'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('points')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        Points Rule
-                                        <span v-if="params.sort_field === 'points'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('is_active')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        Status
-                                        <span v-if="params.sort_field === 'is_active'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr 
-                                v-for="method in methodsList" 
-                                :key="method.id"
-                                class="hover:bg-gray-50 transition-colors"
-                            >
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-bold text-gray-900">{{ getLocaleName(method.name) }}</div>
-                                    <div class="text-xs text-gray-500 line-clamp-1">{{ method.description || 'No description' }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center gap-2">
-                                        <div class="p-1.5 rounded-lg" :class="getTypeColor(method.type)">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getTypeIcon(method.type)" />
-                                            </svg>
-                                        </div>
-                                        <span class="text-sm text-gray-700">{{ getTypeLabel(method.type) }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-bold text-primary">
-                                        {{ method.points }} Points
-                                        <span v-if="method.type === 'order_total'" class="text-xs font-normal text-gray-500">/ {{ method.currency_amount || 1 }} Currency</span>
-                                        <span v-if="method.type === 'visit'" class="text-xs font-normal text-gray-500">/ Visit</span>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-0.5">
-                                        <span v-if="method.min_spent">Min: {{ method.min_spent }}</span>
-                                        <span v-if="method.max_points" class="ml-2">Max: {{ method.max_points }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="method.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
-                                        {{ method.is_active ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end gap-2">
-                                        <button @click="openModal(method)" class="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </button>
-                                        <button @click="deleteMethod(method)" class="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <!-- Pagination -->
-                    <div class="border-t border-gray-200 bg-gray-50">
-                        <Pagination :meta="paginationMeta" />
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div 
+                    v-for="method in methodsList" 
+                    :key="method.id"
+                    class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 p-6 flex flex-col"
+                >
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-2">
+                             <div class="p-2 rounded-lg" :class="getTypeColor(method.type)">
+                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getTypeIcon(method.type)" />
+                                 </svg>
+                             </div>
+                             <span class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ getTypeLabel(method.type) }}</span>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full" :class="method.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                             {{ method.is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">{{ getLocaleName(method.name) }}</h3>
+                    <p class="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{{ method.description || 'No description provided' }}</p>
+
+                    <div class="mt-auto bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="text-sm text-gray-500 mb-1">Earning Rule</div>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-2xl font-bold text-primary">{{ method.points }}</span>
+                            <span class="font-semibold text-gray-900">Points</span>
+                            <span v-if="method.type === 'order_total'" class="text-sm text-gray-500">per {{ method.currency_amount || 1 }} Currency</span>
+                            <span v-if="method.type === 'visit'" class="text-sm text-gray-500">per Visit</span>
+                            <span v-if="method.type === 'referral'" class="text-sm text-gray-500">per Referral</span>
+                        </div>
+                         <div class="flex flex-wrap gap-2 mt-2">
+                             <span v-if="method.min_spent" class="text-xs bg-white px-2 py-1 rounded border border-gray-200 text-gray-600">Min Order: {{ method.min_spent }}</span>
+                             <span v-if="method.max_points" class="text-xs bg-white px-2 py-1 rounded border border-gray-200 text-gray-600">Max Cap: {{ method.max_points }}</span>
+                         </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-4 border-t border-gray-100">
+                        <button @click="openModal(method)" class="flex-1 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                            Edit Configuration
+                        </button>
+                        <button @click="deleteMethod(method)" class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors" title="Delete Method">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -200,7 +131,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <button 
                             type="button"
-                            v-for="type in ['order_total', 'visit', 'referral', 'review']" 
+                            v-for="type in ['order_total', 'visit']"   
                             :key="type"
                             @click="form.type = type"
                             class="relative flex items-center p-3 rounded-xl border transition-all duration-200 text-left"
@@ -333,8 +264,6 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
-import Pagination from '@/Components/Pagination.vue';
-
 const props = withDefaults(defineProps<{
     methods: any;
     filters?: {
@@ -362,6 +291,7 @@ const params = ref({
 watch(
     () => params.value.search,
     debounce((value: string) => {
+        // @ts-ignore
         router.get(route('loyalty.earning-methods.index'), { ...params.value, search: value }, {
             preserveState: true,
             replace: true
@@ -369,18 +299,8 @@ watch(
     }, 300)
 );
 
-const sort = (field: string) => {
-    params.value.sort_field = field;
-    params.value.sort_direction = params.value.sort_direction === 'asc' ? 'desc' : 'asc';
-    
-    router.get(route('loyalty.earning-methods.index'), params.value, {
-        preserveState: true,
-        replace: true
-    });
-};
-
 const methodsList = computed(() => props.methods.data || []);
-const paginationMeta = computed(() => props.methods);
+// const paginationMeta = computed(() => props.methods); // Removed unused pagination
 
 const form = useForm({
     name: { en: '', ar: '' },
@@ -401,9 +321,7 @@ const getLocaleName = (name: any) => {
 const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
         order_total: 'Per Order Amount',
-        visit: 'Per Visit',
-        referral: 'Referral Reward',
-        review: 'Review Reward'
+        visit: 'Per Visit'
     };
     return labels[type] || type;
 };

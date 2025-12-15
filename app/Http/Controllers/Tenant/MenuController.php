@@ -15,19 +15,26 @@ class MenuController extends Controller
 {
     public function index(): Response
     {
-        $restaurant = \App\Models\Restaurant::first();
-        
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
-            ->with(['items' => function ($query) {
-                $query->where('is_available', true)
-                    ->orderBy('sort_order');
-            }])
+            ->with([
+                'items' => function ($query) {
+                    $query->where('is_available', true)
+                        ->with('ingredients')
+                        ->orderBy('sort_order');
+                }
+            ])
             ->orderBy('sort_order')
+            ->orderBy('created_at', 'desc')
             ->get();
+
+        $ingredients = \App\Models\Ingredient::where('restaurant_id', $restaurant->id)->get();
 
         return Inertia::render('Menu/Builder', [
             'categories' => $categories,
+            'ingredients' => $ingredients,
         ]);
     }
 
@@ -39,7 +46,7 @@ class MenuController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         MenuCategory::create([
             'restaurant_id' => $restaurant->id,
@@ -83,11 +90,12 @@ class MenuController extends Controller
             'image' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
+            'ingredients' => ['nullable', 'array'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
-        MenuItem::create([
+        $item = MenuItem::create([
             'restaurant_id' => $restaurant->id,
             'menu_category_id' => $validated['menu_category_id'],
             'name' => $validated['name'],
@@ -99,6 +107,16 @@ class MenuController extends Controller
             'allergens' => $validated['allergens'] ?? null,
             'is_available' => true,
         ]);
+
+        if ($request->has('ingredients')) {
+            $syncData = [];
+            foreach ($request->ingredients as $ing) {
+                if (isset($ing['id']) && isset($ing['quantity'])) {
+                    $syncData[$ing['id']] = ['quantity' => $ing['quantity']];
+                }
+            }
+            $item->ingredients()->sync($syncData);
+        }
 
         return redirect()->back()->with('message', __('menu.item_created'));
     }
@@ -114,9 +132,20 @@ class MenuController extends Controller
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'is_available' => ['boolean'],
+            'ingredients' => ['nullable', 'array'],
         ]);
 
         $item->update($validated);
+
+        if ($request->has('ingredients')) {
+            $syncData = [];
+            foreach ($request->ingredients as $ing) {
+                if (isset($ing['id']) && isset($ing['quantity'])) {
+                    $syncData[$ing['id']] = ['quantity' => $ing['quantity']];
+                }
+            }
+            $item->ingredients()->sync($syncData);
+        }
 
         return redirect()->back()->with('message', __('menu.item_updated'));
     }

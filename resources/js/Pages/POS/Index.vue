@@ -11,17 +11,25 @@
             <div class="flex gap-8 h-[calc(100vh-12rem)]">
                 <!-- Left Column: Unpaid Orders -->
                 <div class="w-1/2 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
-                    <h2 class="text-lg font-bold text-gray-900 sticky top-0 bg-gray-50 pb-2 z-10 flex items-center justify-between">
-                        Active Orders
-                        <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ orders.length }}</span>
+                    <h2 class="text-lg font-bold text-gray-900 sticky top-0 bg-gray-50 pb-2 z-10 flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            Active Orders
+                            <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ filteredOrders.length }}</span>
+                        </div>
+                        <input 
+                            v-model="searchQuery"
+                            type="text"
+                            placeholder="Search active orders..."
+                            class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                        >
                     </h2>
                     
-                    <div v-if="orders.length === 0" class="glass-card p-8 text-center rounded-2xl border-2 border-dashed border-gray-200">
+                    <div v-if="filteredOrders.length === 0" class="glass-card p-8 text-center rounded-2xl border-2 border-dashed border-gray-200">
                         <p class="text-gray-500">No unpaid orders found</p>
                     </div>
 
                     <div 
-                        v-for="order in orders" 
+                        v-for="order in filteredOrders" 
                         :key="order.id" 
                         @click="selectOrder(order)"
                         :class="['cursor-pointer p-6 rounded-2xl border transition-all duration-200',
@@ -193,7 +201,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 
@@ -202,9 +210,20 @@ const props = defineProps<{
     tables: any[];
 }>();
 
+const searchQuery = ref('');
 const selectedOrder = ref<any>(null);
 const paymentMethod = ref<string>('cash');
 const processing = ref(false);
+
+const filteredOrders = computed(() => {
+    if (!searchQuery.value) return props.orders;
+    const query = searchQuery.value.toLowerCase();
+    return props.orders.filter(order => 
+        order.order_number.toLowerCase().includes(query) ||
+        (order.customer_name && order.customer_name.toLowerCase().includes(query)) ||
+        (order.table && order.table.name.toLowerCase().includes(query))
+    );
+});
 
 const selectOrder = (order: any) => {
     selectedOrder.value = order;

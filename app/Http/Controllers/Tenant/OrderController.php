@@ -10,6 +10,7 @@ use App\Services\LoyaltyService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,7 +23,7 @@ class OrderController extends Controller
 
     public function index(Request $request): Response
     {
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
@@ -73,7 +74,7 @@ class OrderController extends Controller
 
     public function export(Request $request)
     {
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted');
@@ -149,7 +150,7 @@ class OrderController extends Controller
 
     public function create(): Response
     {
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         // Get available tables
         $tables = \App\Models\Table::where('restaurant_id', $restaurant->id)
@@ -201,6 +202,7 @@ class OrderController extends Controller
         // Get active rewards for redemption
         $rewards = \App\Models\Reward::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
+            ->with(['menuItems'])
             ->orderBy('points_required')
             ->get()
             ->map(function ($reward) {
@@ -211,6 +213,9 @@ class OrderController extends Controller
                     'points_required' => $reward->points_required,
                     'reward_type' => $reward->reward_type,
                     'discount_value' => $reward->discount_value,
+                    'menu_item_id' => $reward->menu_item_id, // Keep for legacy/fallback
+                    'menu_item_ids' => $reward->menuItems->pluck('id')->toArray(),
+                    'min_order_value' => $reward->min_order_value,
                 ];
             });
 
@@ -236,58 +241,88 @@ class OrderController extends Controller
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'subtotal' => ['required', 'numeric', 'min:0'],
             'tax' => ['nullable', 'numeric', 'min:0'],
+            'discount_amount' => ['nullable', 'numeric', 'min:0'],
             'total' => ['required', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
+            'reward_id' => ['nullable', 'exists:rewards,id'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
-        // Update table status if dine-in
-        if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
-            $table = \App\Models\Table::find($validated['table_id']);
-            if ($table) {
-                $table->update(['status' => 'occupied']);
+        return DB::transaction(function () use ($validated, $restaurant) {
+            // Update table status if dine-in
+            if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
+                $table = \App\Models\Table::find($validated['table_id']);
+                if ($table) {
+                    $table->update(['status' => 'occupied']);
+                }
             }
-        }
 
-        // Find or create customer ONLY if phone is provided
-        $customer = null;
-        if (!empty($validated['customer_phone'])) {
-            $customer = $this->loyaltyService->findOrCreateCustomer(
-                $restaurant,
-                $validated['customer_phone'],
-                $validated['customer_name'] ?? null
-            );
-        }
+            // Find or create customer ONLY if phone is provided
+            $customer = null;
+            if (!empty($validated['customer_phone'])) {
+                $customer = $this->loyaltyService->findOrCreateCustomer(
+                    $restaurant,
+                    $validated['customer_phone'],
+                    $validated['customer_name'] ?? null
+                );
+            }
 
-        // Create order
-        $order = Order::create([
-            'restaurant_id' => $restaurant->id,
-            'customer_id' => $customer ? $customer->id : null,
-            'order_number' => 'ORD-' . strtoupper(Str::random(8)),
-            'status' => 'pending',
-            'type' => $validated['type'],
-            'table_id' => $validated['table_id'] ?? null,
-            'subtotal' => $validated['subtotal'],
-            'tax' => $validated['tax'] ?? 0,
-            'total' => $validated['total'],
-            'currency' => $restaurant->currency ?? 'AED',
-            'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
-            'customer_phone' => $validated['customer_phone'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        // Create order items
-        foreach ($validated['items'] as $item) {
-            $order->items()->create([
-                'menu_item_id' => $item['menu_item_id'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['quantity'] * $item['unit_price'],
+            // Create order
+            $order = Order::create([
+                'restaurant_id' => $restaurant->id,
+                'customer_id' => $customer ? $customer->id : null,
+                'order_number' => 'ORD-' . strtoupper(Str::random(8)),
+                'status' => 'pending',
+                'type' => $validated['type'],
+                'table_id' => $validated['table_id'] ?? null,
+                'subtotal' => $validated['subtotal'],
+                'tax' => $validated['tax'] ?? 0,
+                'discount_amount' => $validated['discount_amount'] ?? 0,
+                'total' => $validated['total'],
+                'currency' => $restaurant->currency ?? 'AED',
+                'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
+                'customer_phone' => $validated['customer_phone'] ?? null,
+                'notes' => $validated['notes'] ?? null,
             ]);
-        }
 
-        return redirect()->back()->with('message', __('orders.order_created'));
+            // Create order items and Update Inventory
+            foreach ($validated['items'] as $item) {
+                $order->items()->create([
+                    'menu_item_id' => $item['menu_item_id'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['quantity'] * $item['unit_price'],
+                ]);
+
+                // Deduct Inventory
+                $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
+                if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
+                    foreach ($menuItem->ingredients as $ingredient) {
+                        $deduction = $ingredient->pivot->quantity * $item['quantity'];
+                        $ingredient->decrement('current_stock', $deduction);
+                    }
+                }
+            }
+
+            // Handle Reward Redemption
+            if (!empty($validated['reward_id']) && $customer) {
+                $reward = \App\Models\Reward::find($validated['reward_id']);
+
+                if ($reward && $reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'reward_id' => ["Minimum order value of {$reward->min_order_value} required for this reward."]
+                    ]);
+                }
+
+                if ($reward) {
+                    $redemption = $this->loyaltyService->redeemReward($customer, (int) $validated['reward_id']);
+                    $redemption->markAsUsed($order->id);
+                }
+            }
+
+            return redirect()->back()->with('message', __('orders.order_created'));
+        });
     }
 
     public function updateStatus(Request $request, Order $order)

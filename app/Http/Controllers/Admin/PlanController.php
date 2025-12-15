@@ -8,12 +8,20 @@ use Illuminate\Http\Request;
 
 class PlanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $plans = Plan::orderBy('price_monthly')->paginate(20);
+        $query = Plan::query();
+
+        if ($request->input('search')) {
+            $query->where('name', 'like', '%' . $request->input('search') . '%')
+                ->orWhere('slug', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $plans = $query->orderBy('price_monthly')->paginate(20)->withQueryString();
 
         return inertia('Admin/Plans/Index', [
             'plans' => $plans,
+            'filters' => $request->only(['search']),
         ]);
     }
 

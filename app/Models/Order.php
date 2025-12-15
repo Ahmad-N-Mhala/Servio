@@ -22,6 +22,7 @@ class Order extends Model
         'order_number',
         'status',
         'subtotal',
+        'discount_amount',
         'tax',
         'total',
         'currency',
@@ -35,10 +36,13 @@ class Order extends Model
         'completed_at',
         'delivery_provider',
         'delivery_order_id',
+        'payment_status',
+        'payment_method',
     ];
 
     protected $casts = [
         'subtotal' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
         'points_earned' => 'integer',

@@ -1,0 +1,62 @@
+---
+description: How to run the RestoFy project and login credentials
+---
+
+This workflow describes the steps to set up and run the RestoFy application locally, and provides the default login credentials.
+
+# 1. Setup & Installation (One-time)
+
+If you haven't set up the project yet, run the following commands:
+
+```bash
+# Install PHP dependencies
+composer install
+
+# Install Node.js dependencies
+npm install
+
+# Setup Environment File
+cp .env.example .env
+php artisan key:generate
+```
+
+Make sure your database credentials in `.env` are correct.
+
+# 2. Database Setup
+
+To create the tables and seed default users:
+
+```bash
+// turbo
+php artisan migrate:fresh --seed
+```
+
+# 3. Running the Application
+
+You need two terminal windows running simultaneously:
+
+**Terminal 1 (Backend):**
+```bash
+// turbo
+php artisan serve
+```
+
+**Terminal 2 (Frontend):**
+```bash
+// turbo
+npm run dev
+```
+
+Access the application at: `http://127.0.0.1:8000`
+
+# 4. Login Credentials
+
+**Super Admin (Admin Panel)**
+- **URL**: `/login` (redirects to admin dashboard if super admin)
+- **Email**: `superadmin@restofy.com`
+- **Password**: `password`
+
+**Restaurant Owner (Tenant Panel)**
+- **URL**: `/login`
+- **Email**: `admin@demo.com`
+- **Password**: `password`

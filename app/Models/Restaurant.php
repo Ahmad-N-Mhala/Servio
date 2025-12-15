@@ -27,6 +27,7 @@ class Restaurant extends Model
         'settings',
         'sms_balance',
         'email_balance',
+        'status',
     ];
 
     protected $casts = [

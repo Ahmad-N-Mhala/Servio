@@ -9,20 +9,34 @@
         <div class="py-6">
             <div class="max-w-7xl mx-auto">
                 <!-- Header Actions -->
-                <div class="mb-6 flex justify-between items-center">
+                <!-- Header Actions -->
+                <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h3 class="text-2xl font-bold text-gray-900">Delivery Integrations</h3>
                         <p class="mt-1 text-sm text-gray-600">Manage delivery provider integrations for each restaurant</p>
                     </div>
-                    <Link 
-                        :href="route('admin.integrations.create')" 
-                        class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition ease-in-out duration-150"
-                    >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Integration
-                    </Link>
+                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <div class="relative">
+                            <input 
+                                v-model="search" 
+                                type="text" 
+                                placeholder="Search integrations..." 
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-primary focus:border-primary w-full sm:w-64"
+                            >
+                            <div class="absolute left-3 top-2.5 text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                        </div>
+                        <Link 
+                            :href="route('admin.integrations.create')" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-primary border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition ease-in-out duration-150 whitespace-nowrap"
+                        >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Integration
+                        </Link>
+                    </div>
                 </div>
 
                 <!-- Integrations Table -->
@@ -109,10 +123,12 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { debounce } from 'lodash';
 
-defineProps<{
+const props = defineProps<{
     integrations: {
         data: Array<any>;
         from: number;
@@ -120,7 +136,16 @@ defineProps<{
         total: number;
         links: Array<any>;
     };
+    filters: {
+        search?: string;
+    };
 }>();
+
+const search = ref(props.filters?.search || '');
+
+watch(search, debounce((value: string) => {
+    router.get(route('admin.integrations.index'), { search: value }, { preserveState: true, replace: true });
+}, 300));
 
 const route = (window as any).route;
 

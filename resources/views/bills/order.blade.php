@@ -279,10 +279,10 @@
                 </div>
             @endif
 
-            @if($order->discount > 0)
+            @if($order->discount_amount > 0)
                 <div class="total-row">
                     <span class="total-label">Discount:</span>
-                    <span class="total-value">-${{ number_format($order->discount, 2) }}</span>
+                    <span class="total-value">-${{ number_format($order->discount_amount, 2) }}</span>
                 </div>
             @endif
 

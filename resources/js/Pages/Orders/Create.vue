@@ -139,7 +139,10 @@
                                     class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
                                 >
                                     <div class="flex-1">
-                                        <p class="font-medium text-gray-900">{{ getLocaleName(item.name) }}</p>
+                                        <p class="font-medium text-gray-900">
+                                            {{ getLocaleName(item.name) }}
+                                            <span v-if="selectedReward?.reward_type === 'free_item' && (selectedReward.menu_item_ids ? selectedReward.menu_item_ids.includes(item.id) : selectedReward.menu_item_id === item.id)" class="ml-2 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold uppercase">Free</span>
+                                        </p>
                                         <p class="text-sm font-semibold text-primary">{{ currencyCode }} {{ item.price.toFixed(2) }}</p>
                                     </div>
                                     <div class="flex items-center gap-3 ml-4">
@@ -218,6 +221,9 @@
                                     {{ getRewardValue(reward) }}
                                 </span>
                             </div>
+                             <p v-if="reward.min_order_value && subtotal < reward.min_order_value" class="text-xs text-red-500 mt-1">
+                                Min Order: {{ currencyCode }} {{ reward.min_order_value }}
+                            </p>
                         </div>
                     </div>
                     
@@ -248,6 +254,8 @@
                         >
                             <div>
                                 <span class="font-medium">{{ item.name }}</span>
+                                <span class="font-medium">{{ item.name }}</span>
+                                <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">1 FREE</span>
                                 <span class="text-gray-500 ml-2">× {{ item.qty }}</span>
                             </div>
                             <span class="font-semibold">{{ currencyCode }} {{ (item.price * item.qty).toFixed(2) }}</span>
@@ -303,7 +311,7 @@
 
                 <!-- Submit Button -->
                 <div class="flex gap-4">
-                    <Link :href="route('orders.index')" class="flex-1">
+                    <Link :href="route('orders.index')" class="flex-1 block">
                         <Button type="button" variant="secondary" block size="lg">
                             Cancel
                         </Button>
@@ -366,6 +374,9 @@ interface Reward {
     points_required: number;
     reward_type: 'discount_percentage' | 'discount_fixed' | 'free_item' | 'cashback';
     discount_value: number | null;
+    menu_item_id?: number | null;
+    menu_item_ids?: number[];
+    min_order_value?: number | null;
 }
 
 interface Table {
@@ -414,7 +425,7 @@ const form = useForm({
     table_id: null as number | null,
     items: [] as { menu_item_id: number; quantity: number; unit_price: number }[],
     subtotal: 0,
-    discount: 0,
+    discount_amount: 0,
     tax: 0,
     total: 0,
     notes: '',
@@ -515,7 +526,16 @@ const removeItem = (item: MenuItem) => {
 // Reward helpers
 const canRedeemReward = (reward: Reward): boolean => {
     if (!selectedCustomer.value) return false;
-    return selectedCustomer.value.loyalty_points >= reward.points_required;
+    if (selectedCustomer.value.loyalty_points < reward.points_required) return false;
+    if (reward.min_order_value && subtotal.value < reward.min_order_value) return false;
+    
+    // Check item eligibility for discounts
+    if (reward.menu_item_ids && reward.menu_item_ids.length > 0 && reward.reward_type !== 'free_item') {
+        const hasItem = cart.value.some(i => reward.menu_item_ids!.includes(i.id));
+        if (!hasItem) return false;
+    }
+    
+    return true;
 };
 
 const toggleReward = (reward: Reward) => {
@@ -525,6 +545,30 @@ const toggleReward = (reward: Reward) => {
         selectedReward.value = null;
     } else {
         selectedReward.value = reward;
+
+        // Auto-add free item if not in cart
+        if (reward.reward_type === 'free_item') {
+             const targetIds = (reward.menu_item_ids && reward.menu_item_ids.length) 
+                ? reward.menu_item_ids 
+                : (reward.menu_item_id ? [reward.menu_item_id] : []);
+
+             if (targetIds.length > 0) {
+                 // Check for each target item and add if missing
+                 targetIds.forEach(targetId => {
+                     const inCart = cart.value.some(i => i.id === targetId);
+                     if (!inCart) {
+                         // Find item in menu
+                         for (const cat of categoriesList.value) {
+                             const item = cat.items.find((i: MenuItem) => i.id === targetId);
+                             if (item) {
+                                 addItem(item);
+                                 break; // Item found, stop searching categories for THIS item
+                             }
+                         }
+                     }
+                 });
+             }
+        }
     }
 };
 
@@ -559,6 +603,18 @@ const getRewardValue = (reward: Reward): string => {
 };
 
 // Calculations
+const freeItems = computed(() => {
+    if (selectedReward.value?.reward_type !== 'free_item') return [];
+    const targetIds = (selectedReward.value.menu_item_ids && selectedReward.value.menu_item_ids.length) 
+        ? selectedReward.value.menu_item_ids 
+        : (selectedReward.value.menu_item_id ? [selectedReward.value.menu_item_id] : []);
+    
+    if (!targetIds.length) return [];
+    
+    // Return all eligible items found in cart
+    return cart.value.filter(i => targetIds.includes(i.id));
+});
+
 const subtotal = computed(() => 
     cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0)
 );
@@ -568,9 +624,22 @@ const discountAmount = computed(() => {
     
     switch (selectedReward.value.reward_type) {
         case 'discount_percentage':
+            if (selectedReward.value.menu_item_ids?.length) {
+                const eligibleTotal = cart.value
+                    .filter(i => selectedReward.value!.menu_item_ids!.includes(i.id))
+                    .reduce((sum, i) => sum + (i.price * i.qty), 0);
+                return eligibleTotal * ((selectedReward.value.discount_value || 0) / 100);
+            }
             return subtotal.value * ((selectedReward.value.discount_value || 0) / 100);
         case 'discount_fixed':
+            // Logic: If specific items, verify presence (already done in canRedeem), deduct from total?
+            // Or deduct from eligible total? Fixed amount usually off bill.
+            // Requirement was about "setting" reward on specific items.
+            // If specific items set, we assume it's a condition.
             return Math.min(selectedReward.value.discount_value || 0, subtotal.value);
+        case 'free_item':
+            // Sum of 1 unit price for EACH eligible item found
+            return freeItems.value.reduce((sum, item) => sum + item.price, 0);
         default:
             return 0;
     }
@@ -589,9 +658,8 @@ const createOrder = () => {
         unit_price: item.price
     }));
     form.subtotal = subtotal.value;
-    form.discount = discountAmount.value;
+    form.discount_amount = discountAmount.value;
     form.tax = tax.value;
-    form.total = total.value;
     form.total = total.value;
     form.reward_id = selectedReward.value?.id || null;
     if (form.type === 'takeaway') {
@@ -603,6 +671,7 @@ const createOrder = () => {
             cart.value = [];
             selectedReward.value = null;
             selectedCustomer.value = null;
+            phoneInput.value = '';
             form.reset();
         }
     });

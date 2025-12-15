@@ -10,23 +10,28 @@ use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Get all restaurants with their current subscription
-        $restaurants = Restaurant::with([
+        $query = Restaurant::with([
             'subscription' => function ($query) {
                 $query->with('plan')->latest();
             }
-        ])
-            ->select(['id', 'name', 'email', 'phone', 'created_at'])
-            ->paginate(20);
+        ])->select(['id', 'name', 'email', 'phone', 'created_at']);
+
+        if ($request->input('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->input('search') . '%')
+                    ->orWhere('email', 'like', '%' . $request->input('search') . '%');
+            });
+        }
 
         // Get all available plans for the dropdown
         $plans = Plan::where('is_active', true)->get();
 
         return inertia('Admin/Subscriptions/Index', [
-            'restaurants' => $restaurants,
+            'restaurants' => $query->paginate(20)->withQueryString(),
             'plans' => $plans,
+            'filters' => $request->only(['search']),
         ]);
     }
 

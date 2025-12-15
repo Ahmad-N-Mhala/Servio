@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
 use App\Traits\HasRestaurant;
@@ -23,6 +24,7 @@ class Reward extends Model
         'name',
         'description',
         'points_required',
+        'min_order_value',
         'reward_type',
         'discount_value',
         'menu_item_id',
@@ -37,6 +39,7 @@ class Reward extends Model
     protected $casts = [
         'name' => 'array',
         'points_required' => 'integer',
+        'min_order_value' => 'decimal:2',
         'discount_value' => 'decimal:2',
         'max_redemptions' => 'integer',
         'redemptions_count' => 'integer',
@@ -56,6 +59,11 @@ class Reward extends Model
         return $this->belongsTo(MenuItem::class);
     }
 
+    public function menuItems(): BelongsToMany
+    {
+        return $this->belongsToMany(MenuItem::class, 'reward_menu_item');
+    }
+
     public function redemptions(): HasMany
     {
         return $this->hasMany(RewardRedemption::class);
@@ -72,11 +80,11 @@ class Reward extends Model
         }
 
         $now = now();
-        if ($this->valid_from && $now->lt($this->valid_from)) {
+        if ($this->valid_from && $now->lt(\Illuminate\Support\Carbon::parse($this->valid_from))) {
             return false;
         }
 
-        if ($this->valid_until && $now->gt($this->valid_until)) {
+        if ($this->valid_until && $now->gt(\Illuminate\Support\Carbon::parse($this->valid_until))) {
             return false;
         }
 

@@ -10,7 +10,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Header Section -->
                 <div class="mb-8">
-                    <div class="flex justify-between items-start">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h3 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                 Delivery Applications
@@ -19,15 +19,28 @@
                                 Manage the list of delivery platforms that restaurants can integrate with
                             </p>
                         </div>
-                        <Link 
-                            :href="route('admin.delivery-providers.create')" 
-                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-xl font-semibold text-sm text-white uppercase tracking-wider hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                        >
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add Provider
-                        </Link>
+                        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                            <div class="relative">
+                                <input 
+                                    v-model="search" 
+                                    type="text" 
+                                    placeholder="Search providers..." 
+                                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-primary focus:border-primary w-full sm:w-64"
+                                >
+                                <div class="absolute left-3 top-2.5 text-gray-400">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </div>
+                            </div>
+                            <Link 
+                                :href="route('admin.delivery-providers.create')" 
+                                class="inline-flex items-center justify-center px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-xl font-semibold text-sm text-white uppercase tracking-wider hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 whitespace-nowrap"
+                            >
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Provider
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
@@ -209,9 +222,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { debounce } from 'lodash';
 
 const props = defineProps<{
     providers: {
@@ -221,7 +235,16 @@ const props = defineProps<{
         to: number;
         links: Array<any>;
     };
+    filters: {
+        search?: string;
+    };
 }>();
+
+const search = ref(props.filters?.search || '');
+
+watch(search, debounce((value: string) => {
+    router.get(route('admin.delivery-providers.index'), { search: value }, { preserveState: true, replace: true });
+}, 300));
 
 const route = (window as any).route;
 

@@ -20,12 +20,12 @@ class KitchenController extends Controller
 
     public function index(): Response
     {
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         // Fetch active orders (pending, processing)
         // Ordered by FIFO (First In, First Out)
         $orders = Order::where('restaurant_id', $restaurant->id)
-            ->whereIn('status', ['pending', 'processing'])
+            ->whereIn('status', ['pending', 'processing', 'served'])
             ->with(['items.menuItem', 'customer', 'table'])
             ->orderBy('created_at', 'asc')
             ->get();
@@ -47,17 +47,24 @@ class KitchenController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,processing,completed,cancelled'],
+            'status' => ['required', 'in:pending,processing,completed,cancelled,served'],
         ]);
 
         $oldStatus = $order->status;
+        $status = $validated['status'];
+
+        // Auto-complete if served and paid
+        if ($status === 'served' && $order->payment_status === 'paid') {
+            $status = 'completed';
+        }
+
         $order->update([
-            'status' => $validated['status'],
-            'completed_at' => $validated['status'] === 'completed' ? now() : null,
+            'status' => $status,
+            'completed_at' => $status === 'completed' ? now() : null,
         ]);
 
         // Process loyalty points when order is completed
-        if ($validated['status'] === 'completed' && $oldStatus !== 'completed') {
+        if ($status === 'completed' && $oldStatus !== 'completed') {
             $this->loyaltyService->processOrderPoints($order);
         }
 

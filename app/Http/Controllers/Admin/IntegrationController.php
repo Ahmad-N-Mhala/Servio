@@ -9,15 +9,20 @@ use App\Models\Restaurant;
 
 class IntegrationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Get all delivery integrations with restaurant info
-        $integrations = DeliveryIntegration::with('restaurant')
-            ->latest()
-            ->paginate(20);
+        $query = DeliveryIntegration::with('restaurant');
+
+        if ($request->input('search')) {
+            $query->where('provider', 'like', '%' . $request->input('search') . '%')
+                ->orWhereHas('restaurant', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->input('search') . '%');
+                });
+        }
 
         return inertia('Admin/Integrations/Index', [
-            'integrations' => $integrations,
+            'integrations' => $query->latest()->paginate(20)->withQueryString(),
+            'filters' => $request->only(['search']),
         ]);
     }
 

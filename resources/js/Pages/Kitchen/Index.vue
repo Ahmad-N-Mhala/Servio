@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Pending Orders -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
@@ -152,7 +152,7 @@
                             </div>
 
                             <button 
-                                @click="updateStatus(order, 'completed')"
+                                @click="updateStatus(order, 'served')"
                                 :disabled="processingId === order.id"
                                 class="w-full py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                             >
@@ -160,8 +160,52 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span v-else>Mark Ready</span>
+                                <span v-else>Serve Order</span>
                             </button>
+                        </div>
+                    </transition-group>
+                </div>
+
+                <!-- Served Orders -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <span class="h-3 w-3 rounded-full bg-green-500"></span>
+                            Served
+                            <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                {{ servedOrders.length }}
+                            </span>
+                        </h2>
+                    </div>
+
+                    <div v-if="servedOrders.length === 0" class="glass-card p-8 text-center rounded-2xl border-2 border-dashed border-gray-200">
+                        <p class="text-gray-500">No served orders</p>
+                    </div>
+
+                    <transition-group name="list" tag="div" class="space-y-4">
+                        <div v-for="order in servedOrders" :key="order.id" class="glass-card p-6 rounded-2xl border-l-4 border-green-500 hover:shadow-lg transition-all">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900">#{{ order.order_number }}</h3>
+                                    <p class="text-sm text-gray-500">{{ new Date(order.created_at).toLocaleTimeString() }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">
+                                        Served
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div v-for="item in order.items" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                                    <div class="flex items-center gap-3">
+                                        <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                                            {{ item.quantity }}x
+                                        </span>
+                                        <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </transition-group>
                 </div>
@@ -192,6 +236,8 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 
+const route = (window as any).route;
+
 const props = defineProps<{
     orders: any[];
     completedOrders: any[];
@@ -212,14 +258,12 @@ const filterOrders = (orders: any[]) => {
 
 const pendingOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'pending')));
 const processingOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'processing')));
+const servedOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'served')));
 
 const updateStatus = (order: any, status: string) => {
     processingId.value = order.id;
 
-    // Use the dedicated non-localized API route
-    const url = `/app-api/kitchen/${order.id}/status`;
-    router.post(url, {
-        _method: 'PUT',
+    router.put(route('kitchen.status.update', order.id), {
         status: status,
     }, {
         preserveScroll: true,

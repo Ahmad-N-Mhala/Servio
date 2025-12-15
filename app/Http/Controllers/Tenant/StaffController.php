@@ -18,7 +18,7 @@ class StaffController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         // Staff Query
         $staffQuery = Staff::with('user')
@@ -81,7 +81,7 @@ class StaffController extends Controller
             'role' => ['required', config('roles.validation_rule')],
         ]);
 
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
         $password = Str::random(12);
 
         $user = User::create([

@@ -15,7 +15,7 @@
             />
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
                 <StatsCard
                     :title="$t('dashboard.total_orders')"
                     :value="stats.total_orders"
@@ -58,6 +58,22 @@
                     class="cursor-pointer"
                     @click="fetchDetails('active_staff')"
                 />
+                
+                <StatsCard
+                    title="Inventory"
+                    :value="formatCurrency(stats.inventory_value)"
+                    icon="revenue"
+                    color="blue"
+                    subtitle="total value"
+                />
+
+                <StatsCard
+                    title="Low Stock"
+                    :value="stats.low_stock_count"
+                    icon="waste"
+                    color="red"
+                    subtitle="items to reorder"
+                />
             </div>
 
             <!-- Charts Grid -->
@@ -86,7 +102,13 @@
                 <ChartCard title="Avg Completion Time (Minutes)" height="300px">
                     <canvas ref="completionTimeChartCanvas"></canvas>
                 </ChartCard>
-            </div>
+
+                <!-- Waste Trend -->
+                <ChartCard title="Waste Trend (Money)" height="300px">
+                    <canvas ref="wasteChartCanvas"></canvas>
+                </ChartCard>
+            </div>     <!-- Waste Trend -->
+
 
             <!-- Recent Orders Table -->
             <Card title="Recent Orders" class="mb-8">
@@ -195,6 +217,7 @@ const statusDistribution = computed(() => page.props.status_distribution as any[
 const peakHours = computed(() => page.props.peak_hours as any[]);
 const topMenuItems = computed(() => page.props.top_menu_items as any[]);
 const avgCompletionTime = computed(() => page.props.avg_completion_time as any[]);
+const wasteChart = computed(() => page.props.waste_chart as any[]);
 const dateRange = computed(() => page.props.date_range as any);
 
 const showDetailsModal = ref(false);
@@ -234,12 +257,14 @@ const statusChartCanvas = ref<HTMLCanvasElement | null>(null);
 const peakHoursChartCanvas = ref<HTMLCanvasElement | null>(null);
 const topItemsChartCanvas = ref<HTMLCanvasElement | null>(null);
 const completionTimeChartCanvas = ref<HTMLCanvasElement | null>(null);
+const wasteChartCanvas = ref<HTMLCanvasElement | null>(null);
 
 let revenueChartInstance: Chart | null = null;
 let statusChartInstance: Chart | null = null;
 let peakHoursChartInstance: Chart | null = null;
 let topItemsChartInstance: Chart | null = null;
 let completionTimeChartInstance: Chart | null = null;
+let wasteChartInstance: Chart | null = null;
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AE', {
@@ -491,12 +516,53 @@ const initCompletionTimeChart = () => {
     });
 };
 
+const initWasteChart = () => {
+    if (!wasteChartCanvas.value) return;
+    
+    if (wasteChartInstance) {
+        wasteChartInstance.destroy();
+    }
+
+    const ctx = wasteChartCanvas.value.getContext('2d');
+    if (!ctx) return;
+
+    wasteChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: wasteChart.value.map((item: any) => item.date),
+            datasets: [{
+                label: 'Waste Value',
+                data: wasteChart.value.map((item: any) => item.loss),
+                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => formatCurrency(value as number),
+                    },
+                },
+            },
+        },
+    });
+};
+
 onMounted(() => {
     initRevenueChart();
     initStatusChart();
     initPeakHoursChart();
     initTopItemsChart();
     initCompletionTimeChart();
+    initWasteChart();
 });
 
 watch([revenueChart, statusDistribution, peakHours, topMenuItems, avgCompletionTime], () => {
@@ -505,5 +571,6 @@ watch([revenueChart, statusDistribution, peakHours, topMenuItems, avgCompletionT
     initPeakHoursChart();
     initTopItemsChart();
     initCompletionTimeChart();
+    initWasteChart();
 });
 </script>

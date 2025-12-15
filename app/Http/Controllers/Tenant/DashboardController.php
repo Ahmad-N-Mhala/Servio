@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\Staff;
+use App\Models\Ingredient;
+use App\Models\WasteLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -17,7 +19,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         // Get date range from request or default to last 7 days
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
@@ -142,15 +144,45 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Waste Stats
+        $totalWaste = WasteLog::where('restaurant_id', $restaurant->id)
+            ->whereBetween('log_date', [$startDate, $endDate])
+            ->sum('total_loss');
+
+        $lowStockCount = Ingredient::where('restaurant_id', $restaurant->id)
+            ->whereColumn('current_stock', '<=', 'reorder_level')
+            ->count();
+
+        $inventoryValue = Ingredient::where('restaurant_id', $restaurant->id)
+            ->select(DB::raw('SUM(current_stock * cost) as total_value'))
+            ->value('total_value') ?? 0;
+
+        $wasteChart = WasteLog::where('restaurant_id', $restaurant->id)
+            ->whereBetween('log_date', [$startDate, $endDate])
+            ->select('log_date', DB::raw('SUM(total_loss) as loss'))
+            ->groupBy('log_date')
+            ->orderBy('log_date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->log_date->format('Y-m-d'),
+                    'loss' => (float) $item->loss,
+                ];
+            });
+
         return Inertia::render('Dashboard/Home', [
             'stats' => [
                 'total_orders' => $totalOrders,
                 'today_orders' => $todayOrders,
                 'revenue' => (float) $revenue,
                 'active_staff' => $activeStaff,
+                'total_waste' => (float) $totalWaste,
+                'low_stock_count' => $lowStockCount,
+                'inventory_value' => (float) $inventoryValue,
             ],
             'recent_orders' => $recentOrders,
             'revenue_chart' => $revenueChart,
+            'waste_chart' => $wasteChart,
             'status_distribution' => $statusDistribution,
             'peak_hours' => $peakHours,
             'top_menu_items' => $topMenuItems,
@@ -185,7 +217,7 @@ class DashboardController extends Controller
 
     public function getDetails(Request $request)
     {
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
         $type = $request->input('type');
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());

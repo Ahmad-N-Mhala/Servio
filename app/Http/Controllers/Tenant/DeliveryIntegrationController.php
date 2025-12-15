@@ -12,7 +12,7 @@ class DeliveryIntegrationController extends Controller
 {
     public function index()
     {
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         $integrations = DeliveryIntegration::where('restaurant_id', $restaurant->id)->get();
 
@@ -52,7 +52,7 @@ class DeliveryIntegrationController extends Controller
             'is_enabled' => 'boolean',
         ]);
 
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         $integration = DeliveryIntegration::updateOrCreate(
             [

@@ -12,6 +12,10 @@ export default {
         earning_methods: 'Earning Methods',
         management: 'Management',
     },
+    inventory: {
+        title: 'Inventory Management',
+        add_item: 'Add Raw Item',
+    },
     dashboard: {
         welcome: 'Welcome to RestaurFy',
         subtitle: 'Manage your restaurant operations',

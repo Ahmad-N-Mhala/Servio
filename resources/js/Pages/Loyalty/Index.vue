@@ -65,8 +65,13 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Active Rewards</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div v-for="reward in rewards" :key="reward.id" class="glass-card p-6 rounded-2xl border border-gray-100 hover:border-primary/30 transition-all group relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button @click="deleteReward(reward)" class="text-red-500 hover:text-red-700">
+                        <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                            <button @click="openEditModal(reward)" class="text-blue-500 hover:text-blue-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Edit Reward">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <button @click="deleteReward(reward)" class="text-red-500 hover:text-red-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Delete Reward">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
@@ -205,8 +210,8 @@
         </div>
 
         <!-- Add Reward Modal -->
-        <Modal :show="showRewardModal" @close="closeRewardModal" title="Create New Reward" size="lg">
-            <form @submit.prevent="createReward" class="space-y-6">
+        <Modal :show="showRewardModal" @close="closeRewardModal" :title="editingRewardId ? 'Edit Reward' : 'Create New Reward'" size="lg">
+            <form @submit.prevent="submitReward" class="space-y-6">
                 <!-- Reward Name (Multilingual) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input 
@@ -237,8 +242,8 @@
                     ></textarea>
                 </div>
 
-                <!-- Points Required -->
-                <div>
+                <!-- Points & Min Value -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input 
                         v-model="rewardForm.points_required"
                         label="Points Required"
@@ -247,6 +252,15 @@
                         placeholder="e.g. 100"
                         required
                         :error="rewardForm.errors.points_required"
+                    />
+                    <Input 
+                        v-model="rewardForm.min_order_value"
+                        label="Min Order Amount (AED)"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Optional"
+                        :error="rewardForm.errors.min_order_value"
                     />
                 </div>
 
@@ -273,25 +287,41 @@
                 </div>
 
                 <!-- Dynamic Fields based on Type -->
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <!-- Free Item Selection -->
-                    <div v-if="rewardForm.reward_type === 'free_item'">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Menu Item</label>
-                        <select 
-                            v-model="rewardForm.menu_item_id"
-                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                            required
-                        >
-                            <option value="" disabled>Select an item...</option>
-                            <option v-for="item in menuItems" :key="item.id" :value="item.id">
-                                {{ getLocaleName(item.name) }}
-                            </option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-500">The customer will get this item for free.</p>
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
+                    
+                    <!-- Scope Selection -->
+                    <div v-if="['discount_percentage', 'discount_fixed', 'free_item'].includes(rewardForm.reward_type)">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Apply On</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" v-model="rewardForm.apply_on" value="all" class="h-4 w-4 text-primary border-gray-300 focus:ring-primary">
+                                <span class="ml-2 text-sm text-gray-700">Whole Menu</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" v-model="rewardForm.apply_on" value="specific" class="h-4 w-4 text-primary border-gray-300 focus:ring-primary">
+                                <span class="ml-2 text-sm text-gray-700">Specific Item(s)</span>
+                            </label>
+                        </div>
                     </div>
 
-                    <!-- Discount Percentage -->
-                    <div v-else-if="rewardForm.reward_type === 'discount_percentage'">
+                    <!-- Item Selection Trigger -->
+                    <div v-if="rewardForm.apply_on === 'specific' && ['discount_percentage', 'discount_fixed', 'free_item'].includes(rewardForm.reward_type)">
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Select Items</label>
+                         <button 
+                            type="button" 
+                            @click="showItemModal = true"
+                            class="w-full py-2.5 px-4 border border-gray-300 rounded-xl text-left text-sm text-gray-700 hover:bg-white bg-white shadow-sm flex justify-between items-center transition-all"
+                         >
+                            <span v-if="rewardForm.menu_item_ids.length === 0" class="text-gray-400">Choose items...</span>
+                            <span v-else class="font-medium text-primary">{{ rewardForm.menu_item_ids.length }} items selected</span>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                         </button>
+                    </div>
+
+                    <!-- Values -->
+                    <div v-if="rewardForm.reward_type === 'discount_percentage'">
                         <Input 
                             v-model="rewardForm.discount_value"
                             label="Discount Percentage"
@@ -303,12 +333,11 @@
                             suffix="%"
                             :error="rewardForm.errors.discount_value"
                         />
-                        <p class="mt-1 text-xs text-gray-500">Percentage to deduct from the order total.</p>
+                         <p class="mt-1 text-xs text-gray-500">Percentage to deduct.</p>
                     </div>
 
-                    <!-- Fixed Discount -->
                     <div v-else-if="rewardForm.reward_type === 'discount_fixed'">
-                        <Input 
+                         <Input 
                             v-model="rewardForm.discount_value"
                             label="Discount Amount"
                             type="number"
@@ -318,10 +347,9 @@
                             prefix="AED"
                             :error="rewardForm.errors.discount_value"
                         />
-                        <p class="mt-1 text-xs text-gray-500">Fixed amount to deduct from the order total.</p>
+                        <p class="mt-1 text-xs text-gray-500">Fixed deduction amount.</p>
                     </div>
 
-                    <!-- Cashback -->
                     <div v-else-if="rewardForm.reward_type === 'cashback'">
                         <Input 
                             v-model="rewardForm.discount_value"
@@ -334,7 +362,7 @@
                             suffix="%"
                             :error="rewardForm.errors.discount_value"
                         />
-                        <p class="mt-1 text-xs text-gray-500">Percentage of order value returned as points.</p>
+                        <p class="mt-1 text-xs text-gray-500">Percentage returned as points.</p>
                     </div>
                 </div>
 
@@ -343,6 +371,43 @@
                     <Button type="submit" :loading="rewardForm.processing">Create Reward</Button>
                 </div>
             </form>
+        </Modal>
+
+        <!-- Item Selection Modal -->
+        <Modal :show="showItemModal" @close="showItemModal = false" title="Select Eligible Items" size="lg">
+            <div class="space-y-4">
+                <input 
+                    v-model="itemSearch"
+                    type="text"
+                    placeholder="Search items..."
+                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                >
+                
+                <div class="h-64 overflow-y-auto border border-gray-200 rounded-xl divide-y divide-gray-100">
+                    <label 
+                        v-for="item in filteredModalItems" 
+                        :key="item.id"
+                        class="flex items-center p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                        <input 
+                            type="checkbox"
+                            :checked="rewardForm.menu_item_ids.includes(item.id)"
+                            @change="toggleModalItem(item.id)"
+                            class="h-5 w-5 text-primary border-gray-300 rounded focus:ring-primary"
+                        >
+                        <span class="ml-3 text-sm text-gray-700 font-medium">{{ getLocaleName(item.name) }}</span>
+                        <span class="ml-auto text-xs text-gray-400">AED {{ item.price }}</span>
+                    </label>
+                    <div v-if="filteredModalItems.length === 0" class="p-4 text-center text-gray-500 text-sm">
+                        No items found
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-sm text-gray-500">{{ rewardForm.menu_item_ids.length }} items selected</span>
+                    <Button @click="showItemModal = false">Done</Button>
+                </div>
+            </div>
         </Modal>
     </MainLayout>
 </template>
@@ -378,6 +443,7 @@ const props = withDefaults(defineProps<{
 const { locale } = useI18n();
 const route = (window as any).route;
 const showRewardModal = ref(false);
+const editingRewardId = ref<number | null>(null);
 
 const params = ref({
     search: props.filters?.search || '',
@@ -416,6 +482,26 @@ const sort = (field: string) => {
     });
 };
 
+const showItemModal = ref(false);
+const itemSearch = ref('');
+
+const filteredModalItems = computed(() => {
+    if (!itemSearch.value) return props.menuItems;
+    const q = itemSearch.value.toLowerCase();
+    return props.menuItems.filter(i => 
+        getLocaleName(i.name).toLowerCase().includes(q)
+    );
+});
+
+const toggleModalItem = (id: number) => {
+    const index = rewardForm.menu_item_ids.indexOf(id);
+    if (index === -1) {
+        rewardForm.menu_item_ids.push(id);
+    } else {
+        rewardForm.menu_item_ids.splice(index, 1);
+    }
+};
+
 const rewardTypes = [
     { value: 'discount_percentage', label: 'Percentage Discount' },
     { value: 'discount_fixed', label: 'Fixed Amount Discount' },
@@ -427,9 +513,11 @@ const rewardForm = useForm({
     name: { en: '', ar: '' },
     description: '',
     points_required: '',
+    min_order_value: '',
     reward_type: 'discount_percentage',
     discount_value: '',
-    menu_item_id: '',
+    menu_item_ids: [] as number[],
+    apply_on: 'all',
     is_active: true
 });
 
@@ -449,8 +537,6 @@ const formatRewardValue = (reward: any) => {
         case 'discount_fixed':
             return `AED ${reward.discount_value} Off`;
         case 'free_item':
-            // Ideally we'd look up the item name here, but for now just show "Free Item"
-            // In a real app we might want to pass the item name with the reward
             return 'Free Item';
         case 'cashback':
             return `${reward.discount_value}% Cashback`;
@@ -463,20 +549,42 @@ const closeRewardModal = () => {
     showRewardModal.value = false;
     rewardForm.reset();
     rewardForm.clearErrors();
+    editingRewardId.value = null;
+    rewardForm.apply_on = 'all';
 };
 
-const createReward = () => {
-    rewardForm.post(route('loyalty.rewards.store'), {
-        onSuccess: () => {
-            closeRewardModal();
-        }
-    });
+const openEditModal = (reward: any) => {
+    editingRewardId.value = reward.id;
+    rewardForm.name = reward.name;
+    rewardForm.description = reward.description || '';
+    rewardForm.points_required = reward.points_required;
+    rewardForm.min_order_value = reward.min_order_value || '';
+    rewardForm.reward_type = reward.reward_type;
+    rewardForm.discount_value = reward.discount_value;
+    
+    // Map existing items
+    rewardForm.menu_item_ids = reward.menu_items ? reward.menu_items.map((i:any) => i.id) : [];
+    rewardForm.apply_on = rewardForm.menu_item_ids.length > 0 ? 'specific' : 'all';
+    
+    rewardForm.is_active = reward.is_active;
+    showRewardModal.value = true;
+};
+
+const submitReward = () => {
+    if (editingRewardId.value) {
+        rewardForm.put(route('loyalty.rewards.update', editingRewardId.value), {
+            onSuccess: () => closeRewardModal()
+        });
+    } else {
+        rewardForm.post(route('loyalty.rewards.store'), {
+            onSuccess: () => closeRewardModal()
+        });
+    }
 };
 
 const deleteReward = (reward: any) => {
     if (confirm('Are you sure you want to delete this reward?')) {
-        // TODO: Implement delete functionality
-        // router.delete(route('loyalty.rewards.destroy', reward.id));
+        router.delete(route('loyalty.rewards.delete', reward.id));
     }
 };
 </script>

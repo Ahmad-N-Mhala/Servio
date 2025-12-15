@@ -41,8 +41,11 @@ class OnboardingController extends Controller
             'plan_id' => ['required', 'exists:plans,id'],
             'billing_cycle' => ['required', 'in:monthly,yearly'],
             'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'earning_method_type' => ['required', 'in:order_total,visit'],
+            'earning_points' => ['required', 'integer', 'min:1'],
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
@@ -53,9 +56,14 @@ class OnboardingController extends Controller
             $user = \App\Models\User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'phone' => $validated['phone'],
                 'password' => bcrypt($validated['password']),
                 'email_verified_at' => now(), // Auto-verify for now
             ]);
+
+            // Assign Owner Role
+            $user->assignRole('owner');
+
 
             // 2. Create Restaurant (Central)
             $restaurant = \App\Models\Restaurant::create([
@@ -84,7 +92,19 @@ class OnboardingController extends Controller
             $staff->role = 'owner';
             $staff->is_active = true;
             $staff->joined_at = now();
+            $staff->joined_at = now();
             $staff->save();
+
+            // 5. Create Default Earning Method
+            \App\Models\EarningMethod::create([
+                'restaurant_id' => $restaurant->id,
+                'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
+                'description' => 'Default earning method set during onboarding.',
+                'type' => $validated['earning_method_type'],
+                'points' => $validated['earning_points'],
+                'currency_amount' => 1,
+                'is_active' => true,
+            ]);
 
             DB::commit();
 

@@ -17,7 +17,7 @@ class CommunicationController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         // Ensure default bundles exist
         if (CommunicationBundle::count() === 0) {
@@ -76,7 +76,7 @@ class CommunicationController extends Controller
 
     public function purchaseBundle(Request $request, CommunicationBundle $bundle)
     {
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         if ($bundle->type === 'sms') {
             $restaurant->increment('sms_balance', $bundle->quantity);
@@ -112,7 +112,7 @@ class CommunicationController extends Controller
             'timing_time' => 'required|date_format:H:i',
         ]);
 
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         CommunicationTemplate::create(array_merge($validated, [
             'restaurant_id' => $restaurant->id,

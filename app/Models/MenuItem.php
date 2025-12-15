@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
 use App\Traits\HasRestaurant;
@@ -32,7 +33,6 @@ class MenuItem extends Model
     ];
 
     protected $casts = [
-        'name' => 'array',
         'price' => 'decimal:2',
         'is_available' => 'boolean',
         'sort_order' => 'integer',
@@ -52,6 +52,13 @@ class MenuItem extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function ingredients(): BelongsToMany
+    {
+        return $this->belongsToMany(Ingredient::class, 'menu_item_ingredients')
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 }
 

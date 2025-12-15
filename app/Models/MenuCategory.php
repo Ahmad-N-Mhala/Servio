@@ -27,7 +27,6 @@ class MenuCategory extends Model
     ];
 
     protected $casts = [
-        'name' => 'array',
         'sort_order' => 'integer',
         'is_active' => 'boolean',
     ];

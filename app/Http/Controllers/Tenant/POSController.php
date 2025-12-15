@@ -17,13 +17,14 @@ class POSController extends Controller
     public function index(): Response
     {
         $orders = Order::with(['items.menuItem', 'customer', 'table'])
-            ->whereIn('status', ['completed', 'processing', 'ready', 'served'])
+            ->whereIn('status', ['pending', 'completed', 'processing', 'ready', 'served'])
             ->where('payment_status', 'unpaid')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $tables = Table::all();
 
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
         return Inertia::render('POS/Index', [
             'orders' => $orders,
             'tables' => $tables,
@@ -41,9 +42,14 @@ class POSController extends Controller
             $order->update([
                 'payment_status' => 'paid',
                 'payment_method' => $validated['payment_method'],
-                'status' => 'completed',
-                'completed_at' => $order->completed_at ?? now(),
+                'status' => $order->status === 'served' ? 'completed' : $order->status,
+                'completed_at' => $order->status === 'served' ? now() : (($order->status === 'completed') ? $order->completed_at : null),
             ]);
+
+            // Process Loyalty Points if completed
+            if ($order->fresh()->status === 'completed') {
+                app(\App\Services\LoyaltyService::class)->processOrderPoints($order);
+            }
 
             // Update Table if exists
             if ($order->table_id) {

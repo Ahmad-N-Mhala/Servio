@@ -12,7 +12,8 @@ class TableController extends Controller
 {
     public function index()
     {
-        $tables = Table::where('restaurant_id', Restaurant::first()->id)
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $tables = Table::where('restaurant_id', $restaurant->id)
             ->orderBy('name')
             ->get();
 
@@ -30,7 +31,7 @@ class TableController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
-        $restaurant = Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
         Table::create([
             'restaurant_id' => $restaurant->id,

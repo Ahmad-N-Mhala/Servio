@@ -9,14 +9,19 @@ use Illuminate\Support\Str;
 
 class DeliveryProviderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $providers = DeliveryProvider::withCount('integrations')
-            ->ordered()
-            ->paginate(20);
+        $query = \App\Models\DeliveryProvider::withCount('integrations');
+
+        if ($request->input('search')) {
+            $query->where('name', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $providers = $query->latest()->paginate(10)->withQueryString();
 
         return inertia('Admin/DeliveryProviders/Index', [
             'providers' => $providers,
+            'filters' => $request->only(['search']),
         ]);
     }
 

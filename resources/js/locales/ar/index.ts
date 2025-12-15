@@ -12,6 +12,10 @@ export default {
         earning_methods: 'طرق الكسب',
         management: 'الإدارة',
     },
+    inventory: {
+        title: 'إدارة المخزون',
+        add_item: 'إضافة عنصر خام',
+    },
     dashboard: {
         welcome: 'مرحباً بك في RestaurFy',
         subtitle: 'إدارة عمليات مطعمك',

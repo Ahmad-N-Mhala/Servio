@@ -45,6 +45,11 @@ Route::group([
 
     // Authenticated Routes
     Route::middleware(['auth'])->group(function () {
+        // Profile Routes (Tenant/User)
+        Route::get('/profile', [\App\Http\Controllers\Tenant\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [\App\Http\Controllers\Tenant\ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/password', [\App\Http\Controllers\Tenant\ProfileController::class, 'updatePassword'])->name('password.update');
+
         // Restaurant Selection (No Context Check Required)
         Route::get('/select-restaurant', [\App\Http\Controllers\MultiRestaurantController::class, 'index'])->name('restaurants.index');
         Route::post('/switch-restaurant/{restaurant}', [\App\Http\Controllers\MultiRestaurantController::class, 'switch'])->name('restaurants.switch');
@@ -73,6 +78,8 @@ Route::group([
                 Route::get('/{order}/bill', [\App\Http\Controllers\Tenant\OrderController::class, 'generateBill'])->name('bill');
             });
 
+            Route::resource('customers', \App\Http\Controllers\Tenant\CustomerController::class)->only(['index', 'show']);
+
             Route::resource('tables', \App\Http\Controllers\Tenant\TableController::class);
 
             Route::prefix('loyalty')->name('loyalty.')->group(function () {
@@ -96,6 +103,7 @@ Route::group([
 
             Route::prefix('kitchen')->name('kitchen.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\KitchenController::class, 'index'])->name('index');
+                Route::put('/{order}/status', [\App\Http\Controllers\Tenant\KitchenController::class, 'updateStatus'])->name('status.update');
             });
 
             Route::prefix('pos')->name('pos.')->group(function () {
@@ -116,6 +124,9 @@ Route::group([
                 Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index');
                 Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update');
             });
+
+            Route::resource('waste', \App\Http\Controllers\Tenant\WasteController::class)->only(['index', 'store', 'update']);
+            Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class);
 
             // Plans & Subscription
             Route::prefix('plans')->name('plans.')->group(function () {
@@ -145,6 +156,13 @@ Route::group([
             // Permissions Management
             Route::get('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('permissions.index');
             Route::post('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'update'])->name('permissions.update');
+
+            // Profile Routes
+            Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
+            Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+            Route::put('/password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('password.update');
+
+
         });
     });
 });

@@ -14,7 +14,7 @@ class EarningMethodController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         $query = EarningMethod::where('restaurant_id', $restaurant->id);
 
@@ -58,7 +58,7 @@ class EarningMethodController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
-            'type' => ['required', 'in:order_total,visit,referral,review'],
+            'type' => ['required', 'in:order_total,visit'],
             'points' => ['required', 'integer', 'min:1'],
             'currency_amount' => ['nullable', 'required_if:type,order_total', 'numeric', 'min:0.01'],
             'min_spent' => ['nullable', 'numeric', 'min:0'],
@@ -66,7 +66,12 @@ class EarningMethodController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+
+        // Enforce single earning method
+        if (EarningMethod::where('restaurant_id', $restaurant->id)->exists()) {
+            return redirect()->back()->withErrors(['error' => 'Each store can have only one earning method. Please edit the existing one.']);
+        }
 
         EarningMethod::create(array_merge($validated, [
             'restaurant_id' => $restaurant->id,
@@ -80,7 +85,7 @@ class EarningMethodController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
-            'type' => ['required', 'in:order_total,visit,referral,review'],
+            'type' => ['required', 'in:order_total,visit'],
             'points' => ['required', 'integer', 'min:1'],
             'currency_amount' => ['nullable', 'required_if:type,order_total', 'numeric', 'min:0.01'],
             'min_spent' => ['nullable', 'numeric', 'min:0'],

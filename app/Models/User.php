@@ -17,8 +17,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'is_super_admin',
+        'phone',
         'password',
+        'is_super_admin',
     ];
 
     protected $hidden = [
@@ -37,6 +38,11 @@ class User extends Authenticatable
     public function staff()
     {
         return $this->hasOne(Staff::class);
+    }
+
+    public function restaurants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Restaurant::class, 'restaurant_user', 'email', 'restaurant_id', 'email', 'id');
     }
 
     public function currentRestaurant()
@@ -73,7 +79,7 @@ class User extends Authenticatable
                 ->from('restaurant_user')
                 ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
                 ->where('restaurant_user.email', $this->email);
-        })->first();
+        })->orderBy('id')->first();
     }
 
 }

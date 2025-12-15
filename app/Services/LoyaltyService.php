@@ -43,6 +43,12 @@ class LoyaltyService
             return;
         }
 
+        // Check if order has redeemed reward - if so, no points earned
+        $hasRedemption = \App\Models\RewardRedemption::where('order_id', $order->id)->exists();
+        if ($hasRedemption) {
+            return;
+        }
+
         DB::transaction(function () use ($order, $customer) {
             // Calculate points earned (1 point per currency unit)
             $pointsEarned = (int) floor((float) $order->total * $this->pointsPerCurrency);
