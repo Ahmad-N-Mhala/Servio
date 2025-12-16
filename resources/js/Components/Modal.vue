@@ -14,7 +14,7 @@
                 @click.self="closeOnBackdrop && $emit('close')"
             >
                 <!-- Backdrop -->
-                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="closeOnBackdrop && $emit('close')"></div>
 
                 <!-- Modal Content -->
                 <Transition
@@ -70,12 +70,13 @@ import { computed, watch } from 'vue';
 const props = withDefaults(defineProps<{
     show: boolean;
     title?: string;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full';
+    maxWidth?: string; // For backward compatibility/flexibility
     showClose?: boolean;
     closeOnBackdrop?: boolean;
 }>(), {
     show: false,
-    size: 'md',
+    size: '7xl',
     showClose: true,
     closeOnBackdrop: true
 });
@@ -85,7 +86,17 @@ defineEmits<{
 }>();
 
 const sizeClasses = computed(() => {
-    switch (props.size) {
+    // Start with explicitly passed maxWidth if mapped, otherwise use size
+    let currentSize = props.size;
+    if (props.maxWidth) {
+       // Map maxWidth common string to size if possible, or just ignore if we want strict typing? 
+       // Start simple: strict size mapping.
+       if (['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl', '7xl', 'full'].includes(props.maxWidth)) {
+           currentSize = props.maxWidth as any;
+       }
+    }
+
+    switch (currentSize) {
         case 'sm':
             return 'w-full max-w-sm mx-4';
         case 'md':
@@ -93,9 +104,21 @@ const sizeClasses = computed(() => {
         case 'lg':
             return 'w-full max-w-lg mx-4';
         case 'xl':
+            return 'w-full max-w-xl mx-4';
+        case '2xl':
             return 'w-full max-w-2xl mx-4';
-        case 'full':
+        case '3xl':
+            return 'w-full max-w-3xl mx-4';
+        case '4xl':
             return 'w-full max-w-4xl mx-4';
+        case '5xl':
+            return 'w-full max-w-5xl mx-4';
+        case '6xl':
+            return 'w-full max-w-6xl mx-4';
+        case '7xl':
+            return 'w-full max-w-7xl mx-4';
+        case 'full':
+            return 'w-full mx-4';
         default:
             return 'w-full max-w-md mx-4';
     }

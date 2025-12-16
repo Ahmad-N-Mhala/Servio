@@ -19,8 +19,15 @@ class DeliveryProviderController extends Controller
 
         $providers = $query->latest()->paginate(10)->withQueryString();
 
+        $stats = [
+            'total_providers' => \App\Models\DeliveryProvider::count(),
+            'active_providers' => \App\Models\DeliveryProvider::where('is_active', true)->count(),
+            'total_integrations' => \App\Models\DeliveryProvider::withCount('integrations')->get()->sum('integrations_count'),
+        ];
+
         return inertia('Admin/DeliveryProviders/Index', [
             'providers' => $providers,
+            'stats' => $stats,
             'filters' => $request->only(['search']),
         ]);
     }

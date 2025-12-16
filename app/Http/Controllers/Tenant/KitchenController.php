@@ -63,10 +63,8 @@ class KitchenController extends Controller
             'completed_at' => $status === 'completed' ? now() : null,
         ]);
 
-        // Process loyalty points when order is completed
-        if ($status === 'completed' && $oldStatus !== 'completed') {
-            $this->loyaltyService->processOrderPoints($order);
-        }
+        // Note: Loyalty points are automatically processed by Order model observer
+        // when status changes to 'completed'
 
         return redirect()->back()->with('message', __('orders.status_updated'));
     }

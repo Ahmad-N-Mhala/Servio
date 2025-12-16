@@ -21,7 +21,7 @@ class OnboardingController extends Controller
 {
     public function show(): Response
     {
-        $plans = Plan::where('is_active', true)->get();
+        $plans = Plan::where('is_active', true)->orderBy('price_monthly')->get();
 
         // Get the base domain (skip 127.0.0.1, prefer localhost)
         $baseDomain = collect(config('tenancy.central_domains'))
@@ -31,6 +31,7 @@ class OnboardingController extends Controller
         return Inertia::render('Onboarding/Index', [
             'plans' => $plans,
             'baseDomain' => $baseDomain,
+            'availableFeatures' => config('features'),
         ]);
     }
 

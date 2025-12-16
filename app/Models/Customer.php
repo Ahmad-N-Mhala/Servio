@@ -22,6 +22,7 @@ class Customer extends Model
         'name',
         'email',
         'birthday',
+        'birth_date',
         'preferences',
         'total_orders',
         'total_spent',
@@ -35,6 +36,7 @@ class Customer extends Model
         'total_orders' => 'integer',
         'total_spent' => 'decimal:2',
         'birthday' => 'date',
+        'birth_date' => 'date',
         'last_order_at' => 'datetime',
         'is_active' => 'boolean',
     ];

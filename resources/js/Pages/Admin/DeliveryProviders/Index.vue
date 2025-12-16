@@ -50,7 +50,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-blue-100 text-sm font-medium">Total Providers</p>
-                                <p class="text-3xl font-bold mt-2">{{ providers.total || 0 }}</p>
+                                <p class="text-3xl font-bold mt-2">{{ stats?.total_providers || 0 }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,6 +235,11 @@ const props = defineProps<{
         to: number;
         links: Array<any>;
     };
+    stats: {
+        total_providers: number;
+        active_providers: number;
+        total_integrations: number;
+    };
     filters: {
         search?: string;
     };
@@ -249,11 +254,11 @@ watch(search, debounce((value: string) => {
 const route = (window as any).route;
 
 const activeCount = computed(() => {
-    return props.providers.data.filter(p => p.is_active).length;
+    return props.stats?.active_providers || 0;
 });
 
 const totalIntegrations = computed(() => {
-    return props.providers.data.reduce((sum, p) => sum + (p.integrations_count || 0), 0);
+    return props.stats?.total_integrations || 0;
 });
 
 const toggleStatus = (id: number) => {

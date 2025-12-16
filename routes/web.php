@@ -125,8 +125,14 @@ Route::group([
                 Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update');
             });
 
-            Route::resource('waste', \App\Http\Controllers\Tenant\WasteController::class)->only(['index', 'store', 'update']);
-            Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class);
+            Route::post('waste/{waste}/restore', [\App\Http\Controllers\Tenant\WasteController::class, 'restore'])->name('waste.restore');
+            Route::resource('waste', \App\Http\Controllers\Tenant\WasteController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::get('inventory/{inventory}/history', [\App\Http\Controllers\Tenant\InventoryController::class, 'history'])->name('inventory.history');
+            Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class)->except(['show']);
+
+            Route::prefix('reports')->name('reports.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\ReportController::class, 'index'])->name('sales'); // Defaulting index to sales for now, or use specific path
+            });
 
             // Plans & Subscription
             Route::prefix('plans')->name('plans.')->group(function () {

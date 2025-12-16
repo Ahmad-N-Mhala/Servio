@@ -46,10 +46,8 @@ class POSController extends Controller
                 'completed_at' => $order->status === 'served' ? now() : (($order->status === 'completed') ? $order->completed_at : null),
             ]);
 
-            // Process Loyalty Points if completed
-            if ($order->fresh()->status === 'completed') {
-                app(\App\Services\LoyaltyService::class)->processOrderPoints($order);
-            }
+            // Note: Loyalty points are automatically processed by Order model observer
+            // when status changes to 'completed'
 
             // Update Table if exists
             if ($order->table_id) {

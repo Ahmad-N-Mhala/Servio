@@ -63,6 +63,25 @@
                                 </div>
                             </div>
 
+                            <div class="border-t border-gray-200 pt-6">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Plan Features</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <label v-for="(label, key) in availableFeatures" :key="key" class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input 
+                                                type="checkbox" 
+                                                :value="key" 
+                                                v-model="form.features"
+                                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                            >
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <span class="font-medium text-gray-700">{{ label }}</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div>
                                 <label class="flex items-center">
                                     <input type="checkbox" v-model="form.is_active" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -90,6 +109,7 @@ import { useForm, Link } from '@inertiajs/vue3';
 
 const props = defineProps<{
     plan: any;
+    availableFeatures: Record<string, string>;
 }>();
 
 const form = useForm({

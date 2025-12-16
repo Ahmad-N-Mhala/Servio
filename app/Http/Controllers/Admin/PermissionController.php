@@ -14,47 +14,59 @@ class PermissionController extends Controller
         return [
             'dashboard' => [
                 'label' => 'Dashboard',
-                'permissions' => ['view_dashboard']
+                'permissions' => ['view_dashboard', 'view_analytics']
             ],
             'pos' => [
                 'label' => 'POS System',
-                'permissions' => ['view_pos', 'create_order', 'edit_order', 'delete_order']
+                'permissions' => ['view_pos', 'create_order', 'discount_order', 'void_order']
             ],
             'orders' => [
-                'label' => 'Orders',
-                'permissions' => ['view_orders', 'edit_orders', 'delete_orders']
+                'label' => 'Order Management',
+                'permissions' => ['view_orders', 'edit_order', 'cancel_order', 'delete_order', 'print_bill']
             ],
             'kitchen' => [
-                'label' => 'Kitchen',
-                'permissions' => ['view_kitchen', 'update_order_status']
+                'label' => 'Kitchen Display',
+                'permissions' => ['view_kitchen', 'update_item_status', 'complete_order']
             ],
             'menu' => [
                 'label' => 'Menu Management',
-                'permissions' => ['view_menu', 'create_menu_item', 'edit_menu_item', 'delete_menu_item']
+                'permissions' => ['view_menu', 'create_category', 'edit_category', 'delete_category', 'create_item', 'edit_item', 'delete_item']
             ],
             'tables' => [
-                'label' => 'Tables',
-                'permissions' => ['view_tables', 'create_table', 'edit_table', 'delete_table']
+                'label' => 'Table Management',
+                'permissions' => ['view_tables', 'create_table', 'edit_table', 'delete_table', 'manage_zones']
+            ],
+            'customers' => [
+                'label' => 'Customer Management',
+                'permissions' => ['view_customers', 'create_customer', 'edit_customer', 'delete_customer']
             ],
             'staff' => [
                 'label' => 'Staff Management',
-                'permissions' => ['view_staff', 'create_staff', 'edit_staff', 'delete_staff']
+                'permissions' => ['view_staff', 'create_staff', 'edit_staff', 'delete_staff', 'manage_permissions']
+            ],
+            'inventory' => [
+                'label' => 'Inventory & Stock',
+                'permissions' => ['view_inventory', 'add_stock', 'deduct_stock', 'manage_suppliers', 'view_waste', 'record_waste']
             ],
             'loyalty' => [
                 'label' => 'Loyalty Program',
-                'permissions' => ['view_loyalty', 'manage_rewards', 'manage_earning_methods']
+                'permissions' => ['view_loyalty', 'manage_rewards', 'manage_earning_rules', 'adjust_points']
             ],
             'delivery' => [
                 'label' => 'Delivery Integrations',
-                'permissions' => ['view_delivery', 'manage_delivery_integrations']
+                'permissions' => ['view_delivery_settings', 'toggle_providers', 'manage_menus_sync']
             ],
             'communication' => [
-                'label' => 'Communication',
-                'permissions' => ['view_communication', 'send_messages']
+                'label' => 'Communication & Marketing',
+                'permissions' => ['view_communication', 'purchase_sms_bundles', 'send_campaigns', 'manage_templates']
             ],
-            'reports' => [
-                'label' => 'Reports & Analytics',
-                'permissions' => ['view_reports', 'export_reports']
+            'finance' => [
+                'label' => 'Finance & Reports',
+                'permissions' => ['view_sales_reports', 'view_expense_reports', 'view_staff_performance', 'export_reports']
+            ],
+            'settings' => [
+                'label' => 'System Settings',
+                'permissions' => ['view_settings', 'update_restaurant_profile', 'manage_billing', 'manage_printers']
             ],
         ];
     }
@@ -94,14 +106,46 @@ class PermissionController extends Controller
             'permissions' => 'required|array',
         ]);
 
-        DB::table('role_permissions')->updateOrInsert(
-            ['role' => $validated['role']],
-            [
+        $record = DB::table('role_permissions')->where('role', $validated['role'])->first();
+
+        if ($record) {
+            DB::table('role_permissions')
+                ->where('role', $validated['role'])
+                ->update([
+                    'permissions' => json_encode($validated['permissions']),
+                    'updated_at' => now(),
+                ]);
+        } else {
+            DB::table('role_permissions')->insert([
+                'role' => $validated['role'],
                 'permissions' => json_encode($validated['permissions']),
+                'created_at' => now(),
                 'updated_at' => now(),
-                'created_at' => DB::raw('COALESCE(created_at, NOW())'),
-            ]
-        );
+            ]);
+        }
+
+        // Sync with Spatie Permissions
+        try {
+            $roleName = $validated['role'];
+            $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+
+            // Ensure permissions exist
+            $permissionsToSync = [];
+            foreach ($validated['permissions'] as $permName) {
+                // Create if not exists to avoid errors
+                $permission = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
+                $permissionsToSync[] = $permission;
+            }
+
+            $role->syncPermissions($permissionsToSync);
+
+            // Clear cache to apply changes immediately
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to sync permissions for role ' . $validated['role'] . ': ' . $e->getMessage());
+            // We don't stop the flow, but logging is good
+        }
 
         return redirect()->route('admin.permissions.index')
             ->with('success', 'Permissions updated successfully for ' . $validated['role']);

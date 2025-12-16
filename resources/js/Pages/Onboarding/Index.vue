@@ -65,7 +65,7 @@
 
                         <div class="mb-6 relative z-10">
                             <h3 class="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">{{ plan.name }}</h3>
-                            <p class="text-gray-500 text-sm mt-2 min-h-[40px]">{{ getPlanDescription(plan.slug) }}</p>
+                            <p class="text-gray-500 text-sm mt-2 min-h-[40px]">{{ plan.description || getPlanDescription(plan.slug) }}</p>
                         </div>
 
                         <div class="mb-8 p-6 bg-gray-50 rounded-2xl group-hover:bg-primary-50 transition-colors duration-300">
@@ -86,7 +86,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                                         </svg>
                                     </div>
-                                    <span class="text-gray-600 text-sm font-medium group-hover:text-gray-900 transition-colors">{{ feature }}</span>
+                                    <span class="text-gray-600 text-sm font-medium group-hover:text-gray-900 transition-colors">{{ availableFeatures[feature] || feature }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -280,6 +280,7 @@ import Button from '@/Components/Button.vue';
 
 defineProps<{
     plans: any[];
+    availableFeatures: Record<string, string>;
 }>();
 
 const step = ref(1);

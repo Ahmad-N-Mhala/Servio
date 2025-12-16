@@ -248,79 +248,176 @@
             </div>
 
         <!-- Create/Edit Template Modal -->
-        <Modal :show="showTemplateModal" @close="closeTemplateModal" :title="editingTemplate ? 'Edit Automation Rule' : 'New Automation Rule'" size="lg">
+        <Modal :show="showTemplateModal" @close="closeTemplateModal" :title="editingTemplate ? 'Edit Automation Rule' : 'New Automation Rule'" size="2xl">
             <form @submit.prevent="submitTemplate" class="space-y-6">
-                <!-- Name -->
-                <Input 
-                    v-model="templateForm.name"
-                    label="Rule Name"
-                    placeholder="e.g. Welcome Message"
-                    required
-                    :error="templateForm.errors.name"
-                />
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Trigger Event -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Trigger Event</label>
-                        <select 
-                            v-model="templateForm.trigger_event"
-                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                        >
-                            <option value="registration">Registration (New Customer)</option>
-                            <option value="order_created">Order Placed</option>
-                            <option value="order_completed">Order Completed</option>
-                            <option value="order_cancelled">Order Cancelled</option>
-                            <option value="birthday">Customer Birthday</option>
-                            <option value="churn_risk">Churn Risk (Inactive Customer)</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-500">When should this message be sent?</p>
-                    </div>
-
-                    <!-- Channels (Checkbox Group) -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Channels</label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" v-model="templateForm.channels" value="sms" class="text-primary focus:ring-primary rounded">
-                                <span class="text-sm">SMS</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" v-model="templateForm.channels" value="email" class="text-primary focus:ring-primary rounded">
-                                <span class="text-sm">Email</span>
-                            </label>
-                        </div>
-                        <p v-if="templateForm.channels.length === 0" class="text-xs text-red-500 mt-1">Select at least one.</p>
-                    </div>
-                </div>
-
-                <!-- Email Subject (only if email is selected) -->
-                <div v-if="templateForm.channels.includes('email')" class="animate-fade-in">
+                <!-- Rule Information Section -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-100">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Rule Information
+                    </h3>
+                    
+                    <!-- Name -->
                     <Input 
-                        v-model="templateForm.subject"
-                        label="Email Subject"
-                        placeholder="e.g. Welcome to RestoFy!"
-                        :required="templateForm.channels.includes('email')"
-                        :error="templateForm.errors.subject"
+                        v-model="templateForm.name"
+                        label="Rule Name"
+                        placeholder="e.g. Welcome Message, Order Confirmation, Birthday Greetings"
+                        required
+                        :error="templateForm.errors.name"
                     />
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <!-- Trigger Event -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Trigger Event <span class="text-red-500">*</span>
+                            </label>
+                            <select 
+                                v-model="templateForm.trigger_event"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                required
+                            >
+                                <option value="registration">📝 New Customer Registration</option>
+                                <option value="order_created">🛒 Order Placed</option>
+                                <option value="order_completed">✅ Order Completed</option>
+                                <option value="order_cancelled">❌ Order Cancelled</option>
+                                <option value="birthday">🎂 Customer Birthday</option>
+                                <option value="churn_risk">⚠️ Churn Risk (Inactive)</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">When should this message be sent?</p>
+                        </div>
+
+                        <!-- Channels (Checkbox Group) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Channels <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex gap-4 p-3 bg-white rounded-lg border border-gray-200">
+                                <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors">
+                                    <input type="checkbox" v-model="templateForm.channels" value="sms" class="text-blue-600 focus:ring-blue-500 rounded">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                    </svg>
+                                    <span class="text-sm font-medium">SMS</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer hover:text-purple-600 transition-colors">
+                                    <input type="checkbox" v-model="templateForm.channels" value="email" class="text-purple-600 focus:ring-purple-500 rounded">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Email</span>
+                                </label>
+                            </div>
+                            <p v-if="templateForm.channels.length === 0" class="text-xs text-red-500 mt-1">Select at least one channel.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Message Content -->
-                <div>
-                     <label class="block text-sm font-medium text-gray-700 mb-1">Message Content</label>
-                     <textarea 
-                         v-model="templateForm.content"
-                         rows="4"
-                         class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                         placeholder="Enter your message here..."
-                         required
-                     ></textarea>
-                     <p class="mt-1 text-xs text-gray-500">You can use simple text. Dynamic variables coming soon.</p>
+                <!-- SMS Configuration -->
+                <div v-if="templateForm.channels.includes('sms')" class="bg-blue-50 p-5 rounded-xl border border-blue-100 animate-fade-in">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        SMS Settings
+                    </h3>
+
+                    <div class="space-y-4">
+                        <Input 
+                            v-model="templateForm.sms_sender_name"
+                            label="Sender Name (Optional)"
+                            placeholder="e.g. RestoFy, YourBrand"
+                            :error="templateForm.errors.sms_sender_name"
+                            hint="Custom sender name (if supported by your SMS provider)"
+                        />
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                SMS Message <span class="text-red-500">*</span>
+                            </label>
+                            <textarea 
+                                v-model="templateForm.sms_content"
+                                rows="3"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
+                                placeholder="Enter your SMS message here..."
+                                :required="templateForm.channels.includes('sms')"
+                                maxlength="160"
+                            ></textarea>
+                            <div class="flex justify-between mt-1">
+                                <p class="text-xs text-gray-500">Keep it short and clear (160 characters max)</p>
+                                <p class="text-xs font-medium" :class="(templateForm.sms_content?.length || 0) > 160 ? 'text-red-600' : 'text-gray-600'">
+                                    {{ templateForm.sms_content?.length || 0 }}/160
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Configuration -->
+                <div v-if="templateForm.channels.includes('email')" class="bg-purple-50 p-5 rounded-xl border border-purple-100 animate-fade-in">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Email Settings
+                    </h3>
+
+                    <div class="space-y-4">
+                        <!-- Email Subject -->
+                        <Input 
+                            v-model="templateForm.subject"
+                            label="Email Subject"
+                            placeholder="e.g. Welcome to RestoFy! 🎉"
+                            :required="templateForm.channels.includes('email')"
+                            :error="templateForm.errors.subject"
+                        />
+
+                        <!-- Email Header -->
+                        <Input 
+                            v-model="templateForm.email_header"
+                            label="Email Header (Optional)"
+                            placeholder="e.g. Welcome!, Thank You, Important Update"
+                            :error="templateForm.errors.email_header"
+                            hint="Large heading at the top of the email"
+                        />
+
+                        <!-- Email Content -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Email Body <span class="text-red-500">*</span>
+                            </label>
+                            <textarea 
+                                v-model="templateForm.content"
+                                rows="6"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                placeholder="Enter your email message here...&#10;&#10;You can write multiple paragraphs.&#10;Use clear, friendly language."
+                                :required="templateForm.channels.includes('email')"
+                            ></textarea>
+                            <p class="mt-1 text-xs text-gray-500">Main content of your email. Keep it clear and concise.</p>
+                        </div>
+
+                        <!-- Email Footer -->
+                        <Input 
+                            v-model="templateForm.email_footer"
+                            label="Email Footer (Optional)"
+                            placeholder="e.g. Best regards, The RestoFy Team"
+                            :error="templateForm.errors.email_footer"
+                            hint="Signature or closing message"
+                        />
+                    </div>
                 </div>
 
                 <!-- Timing Configuration -->
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Timing Setup</h4>
+                <div class="bg-green-50 p-5 rounded-xl border border-green-100">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Timing Setup
+                    </h3>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">When?</label>
@@ -328,9 +425,9 @@
                                 v-model="templateForm.timing_type"
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
                             >
-                                <option value="immediately">Immediately</option>
-                                <option value="before">Before Event</option>
-                                <option value="after">After Event</option>
+                                <option value="immediately">⚡ Immediately</option>
+                                <option value="before">⏪ Before Event</option>
+                                <option value="after">⏩ After Event</option>
                             </select>
                         </div>
                         <div v-if="templateForm.timing_type !== 'immediately'">
@@ -350,59 +447,82 @@
                             />
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2 italic" v-if="templateForm.timing_type === 'immediately'">
-                        Message will be sent as soon as the event occurs.
-                    </p>
-                    <p class="text-xs text-gray-500 mt-2 italic" v-else>
-                        Message will be sent {{ templateForm.timing_days }} days {{ templateForm.timing_type }} the event at {{ templateForm.timing_time }}.
-                    </p>
+                    <div class="mt-3 p-3 bg-white rounded-lg border border-green-200">
+                        <p class="text-sm text-gray-700 flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span v-if="templateForm.timing_type === 'immediately'">
+                                <strong>Instant delivery:</strong> Message will be sent immediately when the event occurs.
+                            </span>
+                            <span v-else>
+                                <strong>Scheduled:</strong> Message will be sent {{ templateForm.timing_days }} day(s) {{ templateForm.timing_type }} the event at {{ templateForm.timing_time }}.
+                            </span>
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Conditions Area -->
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Conditions (Optional)</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                            <Input 
-                                v-model="templateForm.conditions.min_order_amount"
-                                label="Min Order Amount"
-                                type="number"
-                                placeholder="0"
-                            />
-                         </div>
-                         <div>
-                            <Input 
-                                v-model="templateForm.conditions.min_orders_count"
-                                label="Min Orders Count"
-                                type="number"
-                                placeholder="0"
-                            />
-                         </div>
-                         <div v-if="templateForm.trigger_event === 'churn_risk'">
-                            <Input 
-                                v-model="templateForm.conditions.days_since_last_order"
-                                label="Days Since Last Order"
-                                type="number"
-                                placeholder="30"
-                            />
-                         </div>
+                <div class="bg-amber-50 p-5 rounded-xl border border-amber-100">
+                    <h3 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Conditions (Optional)
+                    </h3>
+                    <p class="text-xs text-gray-600 mb-4">Only send if these conditions are met</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <Input 
+                            v-model="templateForm.conditions.min_order_amount"
+                            label="Min Order Amount"
+                            type="number"
+                            placeholder="0"
+                            hint="Minimum order value required"
+                         />
+                         <Input 
+                            v-model="templateForm.conditions.min_orders_count"
+                            label="Min Orders Count"
+                            type="number"
+                            placeholder="0"
+                            hint="Minimum past orders required"
+                         />
+                         <Input 
+                            v-if="templateForm.trigger_event === 'churn_risk'"
+                            v-model="templateForm.conditions.days_since_last_order"
+                            label="Days Since Last Order"
+                            type="number"
+                            placeholder="30"
+                            hint="Days of inactivity"
+                         />
                     </div>
                 </div>
 
                 <!-- Active Toggle -->
-                <div class="flex items-center mt-4">
+                <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <input 
                         type="checkbox" 
                         v-model="templateForm.is_active"
                         id="is_active"
-                        class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                        class="rounded border-gray-300 text-green-600 focus:ring-green-500 h-5 w-5"
                     >
-                    <label for="is_active" class="ml-2 text-sm text-gray-700">Set Status to Active</label>
+                    <label for="is_active" class="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                        <svg class="w-5 h-5" :class="templateForm.is_active ? 'text-green-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Activate this rule immediately
+                    </label>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
                     <Button type="button" variant="secondary" @click="closeTemplateModal">Cancel</Button>
-                    <Button type="submit" :loading="templateForm.processing">{{ editingTemplate ? 'Update Rule' : 'Create Rule' }}</Button>
+                    <Button type="submit" :loading="templateForm.processing">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {{ editingTemplate ? 'Update Rule' : 'Create Rule' }}
+                    </Button>
                 </div>
             </form>
         </Modal>
@@ -501,6 +621,10 @@ const templateForm = useForm({
     trigger_event: 'registration',
     subject: '',
     content: '',
+    sms_sender_name: '',
+    sms_content: '',
+    email_header: '',
+    email_footer: '',
     conditions: {
         min_order_amount: null as number | null,
         min_orders_count: null as number | null,
@@ -521,15 +645,19 @@ const openTemplateModal = (template: any = null) => {
         // But we did migration.
         templateForm.channels = template.channels || (template.channel ? [template.channel] : []);
         templateForm.trigger_event = template.trigger_event;
-        templateForm.subject = template.subject;
-        templateForm.content = template.content;
+        templateForm.subject = template.subject || '';
+        templateForm.content = template.content || '';
+        templateForm.sms_sender_name = template.sms_sender_name || '';
+        templateForm.sms_content = template.sms_content || '';
+        templateForm.email_header = template.email_header || '';
+        templateForm.email_footer = template.email_footer || '';
         templateForm.conditions = {
             min_order_amount: template.conditions?.min_order_amount || null,
             min_orders_count: template.conditions?.min_orders_count || null,
             days_since_last_order: template.conditions?.days_since_last_order || null,
             loyalty_tier: template.conditions?.loyalty_tier || ''
         };
-        templateForm.is_active = !!template.is_active;
+       templateForm.is_active = !!template.is_active;
         templateForm.timing_type = template.timing_type || 'immediately';
         templateForm.timing_days = template.timing_days || 0;
         templateForm.timing_time = template.timing_time ? template.timing_time.substring(0, 5) : '12:00'; // Format H:i

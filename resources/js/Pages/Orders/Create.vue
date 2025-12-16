@@ -12,6 +12,26 @@
             </div>
 
             <form @submit.prevent="createOrder" class="space-y-8">
+                <!-- Stock Error Display -->
+                <div v-if="form.errors.items" class="glass-card rounded-2xl p-6 border-2 border-red-300 bg-red-50">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-red-900 mb-2">⚠️ Insufficient Stock</h4>
+                            <ul class="space-y-1 text-sm text-red-800">
+                                <li v-for="(error, idx) in (Array.isArray(form.errors.items) ? form.errors.items : [form.errors.items])" :key="idx">
+                                    {{ error }}
+                                </li>
+                            </ul>
+                            <p class="mt-3 text-sm text-red-700 font-medium">
+                                Please remove these items from your order or reduce the quantity to proceed.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Customer Details Card -->
                 <div class="glass-card rounded-2xl p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -45,6 +65,17 @@
                             placeholder="Optional"
                             :error="form.errors.customer_name"
                         />
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <Input 
+                            v-model="form.customer_birth_date"
+                            label="Birth Date (Optional)"
+                            type="date"
+                            placeholder="YYYY-MM-DD"
+                            :error="form.errors.customer_birth_date"
+                        />
+                        <div></div> <!-- Spacer -->
                     </div>
                     
                     <!-- Customer Loyalty Points Display -->
@@ -101,15 +132,14 @@
                     </div>
 
                     <div v-if="form.type === 'dine_in'" class="animate-fade-in-up">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Table *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Table (Optional)</label>
                         <select 
                             v-model="form.table_id" 
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition-colors"
-                            required
                         >
-                            <option value="null" disabled>Choose a table...</option>
-                            <option v-for="table in tablesList" :key="table.id" :value="table.id">
-                                {{ table.name }} ({{ table.capacity }} seats) - {{ table.location || 'Main' }}{{ table.status === 'reserved' ? ' [RESERVED]' : '' }}
+                            <option :value="null">No table assigned</option>
+                            <option v-for="table in tablesList" :key="table.id" :value="table.id" :disabled="!table.is_available">
+                                {{ table.name }} ({{ table.capacity }} seats) - {{ table.location || 'Main' }}{{ !table.is_available ? ' [OCCUPIED]' : '' }}
                             </option>
                         </select>
                         <p v-if="form.errors.table_id" class="mt-1 text-sm text-red-600">{{ form.errors.table_id }}</p>
@@ -137,6 +167,7 @@
                                     v-for="item in category.items" 
                                     :key="item.id"
                                     class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
+                                    :class="{'opacity-60': !canAddItem(item.id) && getQty(item.id) === 0}"
                                 >
                                     <div class="flex-1">
                                         <p class="font-medium text-gray-900">
@@ -144,6 +175,17 @@
                                             <span v-if="selectedReward?.reward_type === 'free_item' && (selectedReward.menu_item_ids ? selectedReward.menu_item_ids.includes(item.id) : selectedReward.menu_item_id === item.id)" class="ml-2 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold uppercase">Free</span>
                                         </p>
                                         <p class="text-sm font-semibold text-primary">{{ currencyCode }} {{ item.price.toFixed(2) }}</p>
+                                        <p 
+                                            v-if="getStockMessage(item.id)" 
+                                            class="text-xs font-medium mt-1"
+                                            :class="{
+                                                'text-red-600': getMaxAvailable(item.id) === 0,
+                                                'text-amber-600': getMaxAvailable(item.id) > 0 && getMaxAvailable(item.id) <= 3,
+                                                'text-gray-500': getMaxAvailable(item.id) > 3
+                                            }"
+                                        >
+                                            {{ getStockMessage(item.id) }}
+                                        </p>
                                     </div>
                                     <div class="flex items-center gap-3 ml-4">
                                         <button 
@@ -160,11 +202,26 @@
                                         <button 
                                             type="button"
                                             @click="addItem(item)"
-                                            class="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-white hover:bg-primary-hover transition-colors"
+                                            :disabled="!canAddItem(item.id)"
+                                            :title="!canAddItem(item.id) ? getStockMessage(item.id) : ''"
+                                            class="w-9 h-9 flex items-center justify-center rounded-full transition-colors relative group"
+                                            :class="canAddItem(item.id) 
+                                                ? 'bg-primary text-white hover:bg-primary-hover' 
+                                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                             </svg>
+                                            <!-- Tooltip -->
+                                            <span 
+                                                v-if="!canAddItem(item.id)" 
+                                                class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap z-10"
+                                            >
+                                                <span class="block">{{ getStockMessage(item.id) }}</span>
+                                                <svg class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-3 h-2 text-gray-900" viewBox="0 0 12 6">
+                                                    <path fill="currentColor" d="M0 0l6 6 6-6z"/>
+                                                </svg>
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
@@ -385,6 +442,7 @@ interface Table {
     capacity: number;
     status: string;
     location: string | null;
+    is_available?: boolean;
 }
 
 const props = withDefaults(defineProps<{
@@ -393,12 +451,14 @@ const props = withDefaults(defineProps<{
     rewards?: Reward[];
     tables?: Table[];
     currency?: string;
+    stockAvailability?: Record<number, { max_quantity: number; available: boolean }>;
 }>(), {
     menuCategories: () => [],
     customers: () => [],
     rewards: () => [],
     tables: () => [],
-    currency: 'AED'
+    currency: 'AED',
+    stockAvailability: () => ({})
 });
 
 const { locale } = useI18n();
@@ -420,6 +480,7 @@ const phoneInput = ref('');
 const form = useForm({
     customer_phone: '',
     customer_name: '',
+    customer_birth_date: '',
     customer_id: null as number | null,
     type: 'dine_in',
     table_id: null as number | null,
@@ -521,6 +582,41 @@ const removeItem = (item: MenuItem) => {
             cart.value.splice(idx, 1);
         }
     }
+};
+
+// Stock availability helpers
+const canAddItem = (itemId: number): boolean => {
+    const stockInfo = props.stockAvailability?.[itemId];
+    if (!stockInfo) return true; // If no stock info, allow (item has no ingredients)
+    
+    const currentQty = getQty(itemId);
+    return currentQty < stockInfo.max_quantity;
+};
+
+const getStockMessage = (itemId: number): string => {
+    const stockInfo = props.stockAvailability?.[itemId];
+    if (!stockInfo) return '';
+    
+    const currentQty = getQty(itemId);
+    const remaining = stockInfo.max_quantity - currentQty;
+    
+    if (!stockInfo.available || stockInfo.max_quantity === 0) {
+        return 'Out of stock';
+    }
+    
+    if (remaining === 0) {
+        return 'Maximum quantity reached';
+    }
+    
+    if (remaining <= 3) {
+        return `Only ${remaining} left`;
+    }
+    
+    return `${stockInfo.max_quantity} available`;
+};
+
+const getMaxAvailable = (itemId: number): number => {
+    return props.stockAvailability?.[itemId]?.max_quantity ?? 999;
 };
 
 // Reward helpers

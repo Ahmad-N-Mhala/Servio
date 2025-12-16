@@ -15,6 +15,8 @@ class MenuController extends Controller
 {
     public function index(): Response
     {
+        \Illuminate\Support\Facades\Gate::authorize('menu_management');
+
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)

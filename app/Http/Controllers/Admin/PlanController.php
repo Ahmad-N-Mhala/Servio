@@ -27,7 +27,9 @@ class PlanController extends Controller
 
     public function create()
     {
-        return inertia('Admin/Plans/Create');
+        return inertia('Admin/Plans/Create', [
+            'availableFeatures' => config('features'),
+        ]);
     }
 
     public function store(Request $request)
@@ -56,6 +58,7 @@ class PlanController extends Controller
     {
         return inertia('Admin/Plans/Edit', [
             'plan' => $plan,
+            'availableFeatures' => config('features'),
         ]);
     }
 

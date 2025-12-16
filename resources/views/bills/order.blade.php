@@ -259,8 +259,10 @@
                     <tr>
                         <td>{{ $item->menuItem->name ?? 'Item' }}</td>
                         <td style="text-align: center;">{{ $item->quantity }}</td>
-                        <td style="text-align: right;">${{ number_format($item->unit_price, 2) }}</td>
-                        <td style="text-align: right;">${{ number_format($item->total_price, 2) }}</td>
+                        <td style="text-align: right;">{{ $order->currency ?? 'AED' }}
+                            {{ number_format($item->unit_price, 2) }}</td>
+                        <td style="text-align: right;">{{ $order->currency ?? 'AED' }}
+                            {{ number_format($item->total_price, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -269,26 +271,28 @@
         <div class="totals">
             <div class="total-row">
                 <span class="total-label">Subtotal:</span>
-                <span class="total-value">${{ number_format($order->subtotal, 2) }}</span>
+                <span class="total-value">{{ $order->currency ?? 'AED' }}
+                    {{ number_format($order->subtotal, 2) }}</span>
             </div>
 
             @if($order->tax > 0)
                 <div class="total-row">
                     <span class="total-label">Tax:</span>
-                    <span class="total-value">${{ number_format($order->tax, 2) }}</span>
+                    <span class="total-value">{{ $order->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}</span>
                 </div>
             @endif
 
             @if($order->discount_amount > 0)
                 <div class="total-row">
                     <span class="total-label">Discount:</span>
-                    <span class="total-value">-${{ number_format($order->discount_amount, 2) }}</span>
+                    <span class="total-value">-{{ $order->currency ?? 'AED' }}
+                        {{ number_format($order->discount_amount, 2) }}</span>
                 </div>
             @endif
 
             <div class="total-row grand-total">
                 <span class="total-label">Total:</span>
-                <span class="total-value">${{ number_format($order->total, 2) }}</span>
+                <span class="total-value">{{ $order->currency ?? 'AED' }} {{ number_format($order->total, 2) }}</span>
             </div>
         </div>
 

@@ -12,7 +12,8 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        $roles = ['owner', 'manager', 'waiter', 'chef'];
+        // specific roles from config
+        $roles = array_keys(config('roles.roles'));
 
         foreach ($roles as $role) {
             Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);

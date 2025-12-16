@@ -20,6 +20,52 @@ class StaffController extends Controller
     {
         $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
 
+        // Ensure Owner is in Staff list
+        $ownerEmails = [];
+
+        // 1. Check Owner Email from restaurant record
+        if ($restaurant->email) {
+            $ownerEmails[] = $restaurant->email;
+        }
+
+        // 2. Check Owner from pivot table
+        $pivotOwner = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('restaurant_id', $restaurant->id)
+            ->where('role', 'owner')
+            ->value('email');
+
+        if ($pivotOwner) {
+            $ownerEmails[] = $pivotOwner;
+        }
+
+        $ownerEmails = array_unique($ownerEmails);
+
+        if (!empty($ownerEmails)) {
+            $ownerUsers = User::whereIn('email', $ownerEmails)->get();
+
+            foreach ($ownerUsers as $ownerUser) {
+                // Check if staff record exists
+                $exists = Staff::where('restaurant_id', $restaurant->id)
+                    ->where('user_id', $ownerUser->id)
+                    ->exists();
+
+                if (!$exists) {
+                    Staff::create([
+                        'user_id' => $ownerUser->id,
+                        'restaurant_id' => $restaurant->id,
+                        'role' => 'owner',
+                        'is_active' => true,
+                        'joined_at' => now(),
+                    ]);
+
+                    // Also ensure they have the role
+                    if (!$ownerUser->hasRole('owner')) {
+                        $ownerUser->assignRole('owner');
+                    }
+                }
+            }
+        }
+
         // Staff Query
         $staffQuery = Staff::with('user')
             ->where('restaurant_id', $restaurant->id);

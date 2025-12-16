@@ -153,8 +153,12 @@ class DashboardController extends Controller
             ->whereColumn('current_stock', '<=', 'reorder_level')
             ->count();
 
-        $inventoryValue = Ingredient::where('restaurant_id', $restaurant->id)
-            ->select(DB::raw('SUM(current_stock * cost) as total_value'))
+        // Calculate actual inventory value from batches (FIFO Valuation)
+        $inventoryValue = DB::table('ingredient_batches')
+            ->join('ingredients', 'ingredient_batches.ingredient_id', '=', 'ingredients.id')
+            ->where('ingredients.restaurant_id', $restaurant->id)
+            ->where('ingredient_batches.quantity_remaining', '>', 0)
+            ->select(DB::raw('SUM(ingredient_batches.quantity_remaining * ingredient_batches.cost_per_unit) as total_value'))
             ->value('total_value') ?? 0;
 
         $wasteChart = WasteLog::where('restaurant_id', $restaurant->id)
@@ -286,21 +290,35 @@ class DashboardController extends Controller
                 break;
 
             case 'active_staff':
-                $title = 'Active Staff';
+                $title = 'Active Staff Details';
                 $columns = [
                     ['key' => 'name', 'label' => 'Name'],
                     ['key' => 'email', 'label' => 'Email'],
                     ['key' => 'role', 'label' => 'Role'],
                 ];
 
-                $data = Staff::where('restaurant_id', $restaurant->id)
-                    ->where('is_active', true)
+                // Fetch employees from staff table
+                $employees = DB::table('staff')
+                    ->join('users', 'staff.user_id', '=', 'users.id')
+                    ->where('staff.restaurant_id', $restaurant->id)
+                    ->where('staff.is_active', true)
+                    ->select('users.name', 'users.email', 'staff.role');
+
+                // Fetch owners/users from restaurant_user pivot
+                $owners = DB::table('restaurant_user')
+                    ->leftJoin('users', 'restaurant_user.email', '=', 'users.email')
+                    ->where('restaurant_user.restaurant_id', $restaurant->id)
+                    ->where('restaurant_user.is_active', true)
+                    ->select('users.name', 'restaurant_user.email', 'restaurant_user.role');
+
+                // Union all active staff
+                $data = $employees->union($owners)
                     ->get()
-                    ->map(function ($staff) {
+                    ->map(function ($user) {
                         return [
-                            'name' => $staff->name,
-                            'email' => $staff->email,
-                            'role' => $staff->role,
+                            'name' => $user->name ?? 'Pending Registration',
+                            'email' => $user->email,
+                            'role' => ucfirst($user->role),
                         ];
                     });
                 break;
@@ -351,6 +369,79 @@ class DashboardController extends Controller
                             'customer_name' => $order->customer_name,
                             'total' => $order->total,
                             'created_at' => $order->created_at,
+                        ];
+                    });
+                break;
+
+            case 'inventory_value':
+                $title = 'Inventory Value Details (By Batch)';
+                $columns = [
+                    ['key' => 'ingredient_name', 'label' => 'Ingredient'],
+                    ['key' => 'batch_number', 'label' => 'Batch'],
+                    ['key' => 'quantity_remaining', 'label' => 'Qty Remaining'],
+                    ['key' => 'unit', 'label' => 'Unit'],
+                    ['key' => 'cost_per_unit', 'label' => 'Cost/Unit', 'format' => 'currency'],
+                    ['key' => 'batch_value', 'label' => 'Batch Value', 'format' => 'currency'],
+                ];
+
+                $data = DB::table('ingredient_batches')
+                    ->join('ingredients', 'ingredient_batches.ingredient_id', '=', 'ingredients.id')
+                    ->where('ingredients.restaurant_id', $restaurant->id)
+                    ->where('ingredient_batches.quantity_remaining', '>', 0)
+                    ->select(
+                        'ingredients.name as ingredient_name',
+                        'ingredients.unit',
+                        'ingredient_batches.batch_number',
+                        'ingredient_batches.quantity_remaining',
+                        'ingredient_batches.cost_per_unit',
+                        DB::raw('(ingredient_batches.quantity_remaining * ingredient_batches.cost_per_unit) as batch_value')
+                    )
+                    ->orderByDesc('batch_value')
+                    ->get()
+                    ->map(function ($item) {
+                        // Decode name if needed
+                        $name = $item->ingredient_name;
+                        if (is_string($name) && str_starts_with($name, '{')) {
+                            $decoded = json_decode($name, true);
+                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                        }
+
+                        return [
+                            'ingredient_name' => $name,
+                            'batch_number' => $item->batch_number,
+                            'quantity_remaining' => $item->quantity_remaining,
+                            'unit' => $item->unit,
+                            'cost_per_unit' => $item->cost_per_unit,
+                            'batch_value' => $item->batch_value,
+                        ];
+                    });
+                break;
+
+            case 'low_stock':
+                $title = 'Low Stock Items';
+                $columns = [
+                    ['key' => 'name', 'label' => 'Item Name'],
+                    ['key' => 'current_stock', 'label' => 'Current Stock'],
+                    ['key' => 'reorder_level', 'label' => 'Reorder Level'],
+                    ['key' => 'unit', 'label' => 'Unit'],
+                ];
+
+                $data = Ingredient::where('restaurant_id', $restaurant->id)
+                    ->whereColumn('current_stock', '<=', 'reorder_level')
+                    ->get()
+                    ->map(function ($item) {
+                        // Decode name if needed
+                        $name = $item->name;
+                        if (is_string($name) && str_starts_with($name, '{')) {
+                            $decoded = json_decode($name, true);
+                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                        }
+
+                        return [
+                            'name' => $name,
+                            'current_stock' => $item->current_stock,
+                            'reorder_level' => $item->reorder_level,
+                            'unit' => $item->unit,
                         ];
                     });
                 break;

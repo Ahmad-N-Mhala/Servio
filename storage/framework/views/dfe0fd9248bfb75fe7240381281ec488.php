@@ -261,8 +261,12 @@
                     <tr>
                         <td><?php echo e($item->menuItem->name ?? 'Item'); ?></td>
                         <td style="text-align: center;"><?php echo e($item->quantity); ?></td>
-                        <td style="text-align: right;">$<?php echo e(number_format($item->unit_price, 2)); ?></td>
-                        <td style="text-align: right;">$<?php echo e(number_format($item->total_price, 2)); ?></td>
+                        <td style="text-align: right;"><?php echo e($order->currency ?? 'AED'); ?>
+
+                            <?php echo e(number_format($item->unit_price, 2)); ?></td>
+                        <td style="text-align: right;"><?php echo e($order->currency ?? 'AED'); ?>
+
+                            <?php echo e(number_format($item->total_price, 2)); ?></td>
                     </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
@@ -271,26 +275,30 @@
         <div class="totals">
             <div class="total-row">
                 <span class="total-label">Subtotal:</span>
-                <span class="total-value">$<?php echo e(number_format($order->subtotal, 2)); ?></span>
+                <span class="total-value"><?php echo e($order->currency ?? 'AED'); ?>
+
+                    <?php echo e(number_format($order->subtotal, 2)); ?></span>
             </div>
 
             <?php if($order->tax > 0): ?>
                 <div class="total-row">
                     <span class="total-label">Tax:</span>
-                    <span class="total-value">$<?php echo e(number_format($order->tax, 2)); ?></span>
+                    <span class="total-value"><?php echo e($order->currency ?? 'AED'); ?> <?php echo e(number_format($order->tax, 2)); ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if($order->discount_amount > 0): ?>
                 <div class="total-row">
                     <span class="total-label">Discount:</span>
-                    <span class="total-value">-$<?php echo e(number_format($order->discount_amount, 2)); ?></span>
+                    <span class="total-value">-<?php echo e($order->currency ?? 'AED'); ?>
+
+                        <?php echo e(number_format($order->discount_amount, 2)); ?></span>
                 </div>
             <?php endif; ?>
 
             <div class="total-row grand-total">
                 <span class="total-label">Total:</span>
-                <span class="total-value">$<?php echo e(number_format($order->total, 2)); ?></span>
+                <span class="total-value"><?php echo e($order->currency ?? 'AED'); ?> <?php echo e(number_format($order->total, 2)); ?></span>
             </div>
         </div>
 

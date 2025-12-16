@@ -65,6 +65,8 @@
                     icon="revenue"
                     color="blue"
                     subtitle="total value"
+                    class="cursor-pointer"
+                    @click="fetchDetails('inventory_value')"
                 />
 
                 <StatsCard
@@ -73,6 +75,8 @@
                     icon="waste"
                     color="red"
                     subtitle="items to reorder"
+                    class="cursor-pointer"
+                    @click="fetchDetails('low_stock')"
                 />
             </div>
 

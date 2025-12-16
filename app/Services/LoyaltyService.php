@@ -16,7 +16,7 @@ class LoyaltyService
     protected int $pointsPerCurrency = 1; // 1 point per 1 currency unit (e.g., 1 AED = 1 point)
     protected int $pointsExpiryDays = 365; // Points expire after 1 year
 
-    public function findOrCreateCustomer(Restaurant $restaurant, string $phone, ?string $name = null, ?string $email = null): Customer
+    public function findOrCreateCustomer(Restaurant $restaurant, string $phone, ?string $name = null, ?string $email = null, ?string $birthDate = null): Customer
     {
         return Customer::firstOrCreate(
             [
@@ -26,6 +26,7 @@ class LoyaltyService
             [
                 'name' => $name,
                 'email' => $email,
+                'birth_date' => $birthDate,
                 'loyalty_tier' => 'bronze',
                 'is_active' => true,
             ]
@@ -49,9 +50,35 @@ class LoyaltyService
             return;
         }
 
-        DB::transaction(function () use ($order, $customer) {
-            // Calculate points earned (1 point per currency unit)
-            $pointsEarned = (int) floor((float) $order->total * $this->pointsPerCurrency);
+        // ===== NEW: Check if restaurant has active earning method =====
+        $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $order->restaurant_id)
+            ->where('is_active', true)
+            ->where('type', 'order_total') // Only order_total type awards points automatically
+            ->first();
+
+        // If no active earning method, don't award points
+        if (!$earningMethod) {
+            return;
+        }
+
+        // Check minimum spend requirement
+        if ($earningMethod->min_spent && $order->total < $earningMethod->min_spent) {
+            return;
+        }
+        // ===== END NEW =====
+
+        DB::transaction(function () use ($order, $customer, $earningMethod) {
+            // Use earning method configuration for points calculation
+            $pointsPerCurrency = $earningMethod->points ?? $this->pointsPerCurrency;
+            $currencyAmount = $earningMethod->currency_amount ?? 1;
+
+            // Calculate points: (order total / currency amount) * points
+            $pointsEarned = (int) floor(($order->total / $currencyAmount) * $pointsPerCurrency);
+
+            // Apply max points cap if set
+            if ($earningMethod->max_points && $pointsEarned > $earningMethod->max_points) {
+                $pointsEarned = $earningMethod->max_points;
+            }
 
             if ($pointsEarned > 0) {
                 $loyaltyPoints = $customer->loyaltyPoints()->firstOrCreate([

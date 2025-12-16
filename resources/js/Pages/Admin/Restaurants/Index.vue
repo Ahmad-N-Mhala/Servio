@@ -59,7 +59,9 @@
                                     {{ restaurant.status || 'Active' }}
                                 </span>
                             </td>
-                             <td class="px-6 py-4">Pro Plan</td>
+                             <td class="px-6 py-4">
+                                {{ restaurant.subscription?.plan?.name || 'No Plan' }}
+                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
                                 <Link :href="route('admin.restaurants.edit', restaurant.id)" class="text-indigo-600 hover:text-indigo-900 font-medium">Edit</Link>
                                 <button @click="deleteRestaurant(restaurant)" class="text-red-600 hover:text-red-900 font-medium">Delete</button>

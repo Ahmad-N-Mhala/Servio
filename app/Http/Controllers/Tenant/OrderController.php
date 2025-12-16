@@ -150,13 +150,29 @@ class OrderController extends Controller
 
     public function create(): Response
     {
+        \Illuminate\Support\Facades\Gate::authorize('pos_system');
+
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
-        // Get available tables
+        // Get tables with availability status
         $tables = \App\Models\Table::where('restaurant_id', $restaurant->id)
-            ->where('status', '!=', 'occupied') // Optional: only show available tables? Or allow any? Let's allow all for now but maybe indicate status
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($table) {
+                // Check if table has any active/incomplete orders
+                $hasActiveOrder = \App\Models\Order::where('table_id', $table->id)
+                    ->whereIn('status', ['pending', 'preparing', 'ready', 'serving'])
+                    ->exists();
+
+                return [
+                    'id' => $table->id,
+                    'name' => $table->name,
+                    'capacity' => $table->capacity,
+                    'location' => $table->location,
+                    'status' => $table->status,
+                    'is_available' => !$hasActiveOrder, // Available if no active orders
+                ];
+            });
 
         // Get menu categories with items for order creation
         $menuCategories = \App\Models\MenuCategory::where('restaurant_id', $restaurant->id)
@@ -219,22 +235,59 @@ class OrderController extends Controller
                 ];
             });
 
+        // Calculate stock availability for each menu item
+        $menuItemStockInfo = [];
+        foreach (\App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get() as $menuItem) {
+            $maxServings = PHP_INT_MAX; // Start with infinite
+
+            if ($menuItem->ingredients->isNotEmpty()) {
+                foreach ($menuItem->ingredients as $ingredient) {
+                    $requiredPerServing = $ingredient->pivot->quantity;
+
+                    // Get available stock from batches
+                    $availableStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
+                        ->where('quantity_remaining', '>', 0)
+                        ->sum('quantity_remaining');
+
+                    // Calculate how many servings we can make with this ingredient
+                    if ($requiredPerServing > 0) {
+                        $possibleServings = floor($availableStock / $requiredPerServing);
+                        $maxServings = min($maxServings, $possibleServings);
+                    }
+                }
+            }
+
+            // If item has no ingredients, allow unlimited
+            if ($maxServings === PHP_INT_MAX) {
+                $maxServings = 999;
+            }
+
+            $menuItemStockInfo[$menuItem->id] = [
+                'max_quantity' => (int) $maxServings,
+                'available' => $maxServings > 0,
+            ];
+        }
+
         return Inertia::render('Orders/Create', [
             'menuCategories' => $menuCategories,
             'customers' => $customers,
             'rewards' => $rewards,
             'tables' => $tables,
             'currency' => $restaurant->currency ?? 'AED',
+            'stockAvailability' => $menuItemStockInfo,
         ]);
     }
 
     public function store(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('pos_system');
+
         $validated = $request->validate([
             'customer_phone' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
+            'customer_birth_date' => ['nullable', 'date'],
             'type' => ['required', 'in:dine_in,takeaway'],
-            'table_id' => ['nullable', 'exists:restaurant_tables,id'],
+            'table_id' => ['nullable', 'exists:restaurant_tables,id'], // Made optional for all order types
             'items' => ['required', 'array', 'min:1'],
             'items.*.menu_item_id' => ['required', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -264,9 +317,52 @@ class OrderController extends Controller
                 $customer = $this->loyaltyService->findOrCreateCustomer(
                     $restaurant,
                     $validated['customer_phone'],
-                    $validated['customer_name'] ?? null
+                    $validated['customer_name'] ?? null,
+                    null, // email
+                    $validated['customer_birth_date'] ?? null
                 );
             }
+
+            // ====== STOCK VALIDATION BEFORE ORDER CREATION ======
+            $stockErrors = [];
+            foreach ($validated['items'] as $item) {
+                $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
+
+                if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
+                    foreach ($menuItem->ingredients as $ingredient) {
+                        $neededQty = $ingredient->pivot->quantity * $item['quantity'];
+
+                        // Get available stock from batches
+                        $availableStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
+                            ->where('quantity_remaining', '>', 0)
+                            ->sum('quantity_remaining');
+
+                        if ($availableStock < $neededQty) {
+                            // Get menu item name (handle translations)
+                            $menuItemName = $menuItem->name;
+                            if (is_array($menuItemName)) {
+                                $menuItemName = $menuItemName['en'] ?? $menuItemName['ar'] ?? 'Unknown Item';
+                            }
+
+                            // Get ingredient name (handle translations)
+                            $ingredientName = $ingredient->name;
+                            if (is_array($ingredientName)) {
+                                $ingredientName = $ingredientName['en'] ?? $ingredientName['ar'] ?? 'Unknown Ingredient';
+                            }
+
+                            $stockErrors[] = "{$menuItemName} - Insufficient stock for ingredient '{$ingredientName}'. Available: {$availableStock} {$ingredient->unit}, Required: {$neededQty} {$ingredient->unit}";
+                        }
+                    }
+                }
+            }
+
+            // If there are stock errors, abort the transaction and return error
+            if (!empty($stockErrors)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'items' => $stockErrors
+                ]);
+            }
+            // ====== END STOCK VALIDATION ======
 
             // Create order
             $order = Order::create([
@@ -295,12 +391,55 @@ class OrderController extends Controller
                     'total_price' => $item['quantity'] * $item['unit_price'],
                 ]);
 
-                // Deduct Inventory
+                // Deduct Inventory using FIFO (First-In, First-Out) Batch Logic
                 $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
                 if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
                     foreach ($menuItem->ingredients as $ingredient) {
-                        $deduction = $ingredient->pivot->quantity * $item['quantity'];
-                        $ingredient->decrement('current_stock', $deduction);
+                        $neededQty = $ingredient->pivot->quantity * $item['quantity'];
+                        $remainingQty = $neededQty;
+
+                        // Get available batches (FIFO - oldest first)
+                        $batches = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
+                            ->where('quantity_remaining', '>', 0)
+                            ->orderBy('created_at', 'asc')
+                            ->lockForUpdate()
+                            ->get();
+
+                        $totalCost = 0;
+                        $batchesUsed = [];
+
+                        foreach ($batches as $batch) {
+                            if ($remainingQty <= 0)
+                                break;
+
+                            $deductFromBatch = min($remainingQty, $batch->quantity_remaining);
+                            $batch->decrement('quantity_remaining', $deductFromBatch);
+
+                            $totalCost += $deductFromBatch * $batch->cost_per_unit;
+                            $batchesUsed[] = "{$batch->batch_number} ({$deductFromBatch})";
+
+                            $remainingQty -= $deductFromBatch;
+                        }
+
+                        // Safety check: ensure we deducted the full amount
+                        if ($remainingQty > 0.0001) { // Small epsilon for floating point
+                            throw new \Exception("Critical Error: Unable to fulfill order. Insufficient stock for {$ingredient->name}. This should have been caught by validation.");
+                        }
+
+                        // Update ingredient's global stock
+                        $ingredient->decrement('current_stock', $neededQty);
+                        $ingredient->refresh();
+
+                        // Log Usage with batch details
+                        \App\Models\InventoryLog::create([
+                            'restaurant_id' => $restaurant->id,
+                            'ingredient_id' => $ingredient->id,
+                            'user_id' => auth()->id(),
+                            'action' => 'used_in_menu',
+                            'quantity_change' => -$neededQty,
+                            'new_stock_level' => $ingredient->current_stock,
+                            'notes' => 'Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
+                        ]);
                     }
                 }
             }
@@ -337,10 +476,8 @@ class OrderController extends Controller
             'completed_at' => $validated['status'] === 'completed' ? now() : null,
         ]);
 
-        // Process loyalty points when order is completed
-        if ($validated['status'] === 'completed' && $oldStatus !== 'completed') {
-            $this->loyaltyService->processOrderPoints($order);
-        }
+        // Note: Loyalty points are automatically processed by Order model observer
+        // when status changes to 'completed'
 
         // Reverse loyalty points if order is deleted
         if ($validated['status'] === 'deleted' && $order->points_earned > 0) {
@@ -352,7 +489,7 @@ class OrderController extends Controller
             }
         }
 
-        return redirect()->route('orders.index')->with('message', __('orders.status_updated'));
+        return redirect()->back()->with('message', __('orders.status_updated'));
     }
 
     public function generateBill(Order $order)
