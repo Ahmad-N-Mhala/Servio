@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 use App\Traits\HasRestaurant;
@@ -27,8 +27,8 @@ class EarningMethod extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'points' => 'integer',
-        'currency_amount' => 'decimal:2',
-        'min_spent' => 'decimal:2',
+        'currency_amount' => 'float',
+        'min_spent' => 'float',
         'max_points' => 'integer',
     ];
 

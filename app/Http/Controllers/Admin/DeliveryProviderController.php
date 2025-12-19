@@ -11,18 +11,26 @@ class DeliveryProviderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = \App\Models\DeliveryProvider::withCount('integrations');
+        $query = \App\Models\DeliveryProvider::query();
 
         if ($request->input('search')) {
             $query->where('name', 'like', '%' . $request->input('search') . '%');
         }
 
-        $providers = $query->latest()->paginate(10)->withQueryString();
+        $providers = $query->latest()
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function ($provider) {
+                // Manually map count
+                $provider->integrations_count = $provider->integrations()->count();
+                return $provider;
+            });
 
         $stats = [
             'total_providers' => \App\Models\DeliveryProvider::count(),
             'active_providers' => \App\Models\DeliveryProvider::where('is_active', true)->count(),
-            'total_integrations' => \App\Models\DeliveryProvider::withCount('integrations')->get()->sum('integrations_count'),
+            // Count total integrations directly from the Integration model (more efficient)
+            'total_integrations' => \App\Models\DeliveryIntegration::count(),
         ];
 
         return inertia('Admin/DeliveryProviders/Index', [
@@ -67,8 +75,10 @@ class DeliveryProviderController extends Controller
 
     public function edit(DeliveryProvider $deliveryProvider)
     {
+        $deliveryProvider->integrations_count = $deliveryProvider->integrations()->count();
+
         return inertia('Admin/DeliveryProviders/Edit', [
-            'provider' => $deliveryProvider->loadCount('integrations'),
+            'provider' => $deliveryProvider,
         ]);
     }
 

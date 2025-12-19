@@ -28,30 +28,48 @@ class AppServiceProvider extends ServiceProvider
             // Get Current Context (Restaurant)
             $restaurant = $user->currentRestaurant();
             if (!$restaurant) {
+                \Log::warning('Gate: No current restaurant context');
                 return null; // Fallback to standard logic if no context
             }
 
             try {
-                // Get Role Name from Pivot Table for this Context
-                $pivotRole = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                // Robust Way: Fetch all user roles for restaurants and filter in PHP 
+                // This avoids strict ObjectId vs String mismatch in DB::table queries
+                $pivotEntries = \Illuminate\Support\Facades\DB::table('restaurant_user')
                     ->where('email', $user->email)
-                    ->where('restaurant_id', $restaurant->id)
-                    ->value('role');
+                    ->get();
+
+                $pivotRole = null;
+                $targetId = (string) $restaurant->id;
+
+                foreach ($pivotEntries as $entry) {
+                    // Check ID match (handle object or array access)
+                    $rId = is_array($entry) ? $entry['restaurant_id'] : $entry->restaurant_id;
+                    if ((string) $rId === $targetId) {
+                        $pivotRole = is_array($entry) ? $entry['role'] : $entry->role;
+                        break;
+                    }
+                }
 
                 if (!$pivotRole) {
+                    \Log::info("Gate: No pivot role found for user {$user->email} in restaurant {$targetId}");
                     return null;
                 }
 
                 // Check Spatie Permissions for this Role Name
                 // We use 'web' guard as default for this app
-                $role = \Spatie\Permission\Models\Role::findByName($pivotRole, 'web');
+                $role = \App\Models\Role::findByName($pivotRole, 'web');
 
                 if ($role && $role->hasPermissionTo($ability)) {
+                    // \Log::info("Gate: Access GRANTED for {$ability} via role {$pivotRole}");
                     return true;
+                } else {
+                    \Log::info("Gate: Access DENIED for {$ability}. Role {$pivotRole} does not have it.");
                 }
             } catch (\Exception $e) {
                 // Role might not exist or permission not found
                 // Continue to other checks
+                \Log::error("Gate Check Failed: " . $e->getMessage());
             }
 
             return null; // Continue to next gate checks (e.g. features loop)

@@ -18,7 +18,7 @@ class PermissionController extends Controller
             ],
             'pos' => [
                 'label' => 'POS System',
-                'permissions' => ['view_pos', 'create_order', 'discount_order', 'void_order']
+                'permissions' => ['pos_system', 'view_pos', 'create_order', 'discount_order', 'void_order']
             ],
             'orders' => [
                 'label' => 'Order Management',
@@ -30,7 +30,7 @@ class PermissionController extends Controller
             ],
             'menu' => [
                 'label' => 'Menu Management',
-                'permissions' => ['view_menu', 'create_category', 'edit_category', 'delete_category', 'create_item', 'edit_item', 'delete_item']
+                'permissions' => ['menu_management', 'view_menu', 'create_category', 'edit_category', 'delete_category', 'create_item', 'edit_item', 'delete_item']
             ],
             'tables' => [
                 'label' => 'Table Management',
@@ -127,20 +127,20 @@ class PermissionController extends Controller
         // Sync with Spatie Permissions
         try {
             $roleName = $validated['role'];
-            $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+            $role = \App\Models\Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
 
             // Ensure permissions exist
             $permissionsToSync = [];
             foreach ($validated['permissions'] as $permName) {
                 // Create if not exists to avoid errors
-                $permission = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
+                $permission = \App\Models\Permission::firstOrCreate(['name' => $permName, 'guard_name' => 'web']);
                 $permissionsToSync[] = $permission;
             }
 
             $role->syncPermissions($permissionsToSync);
 
             // Clear cache to apply changes immediately
-            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         } catch (\Exception $e) {
             \Log::error('Failed to sync permissions for role ' . $validated['role'] . ': ' . $e->getMessage());

@@ -40,12 +40,13 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
             ],
             // Share user's restaurants for restaurant switcher (regular users)
-            'user_restaurants' => $request->user() && !$request->user()->is_super_admin ? \App\Models\Restaurant::whereExists(function ($query) use ($request) {
-                $query->select(\DB::raw(1))
-                    ->from('restaurant_user')
-                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                    ->where('restaurant_user.email', $request->user()->email);
-            })->select(['id', 'name'])->get() : [],
+            'user_restaurants' => $request->user() && !$request->user()->is_super_admin ? (function () use ($request) {
+                $ids = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                    ->where('email', $request->user()->email)
+                    ->pluck('restaurant_id')
+                    ->toArray();
+                return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name'])->get();
+            })() : [],
             'active_restaurant_id' => $request->session()->get('active_restaurant_id'),
 
             // Share ALL restaurants for super admin

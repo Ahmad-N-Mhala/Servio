@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -42,5 +42,22 @@ class Ingredient extends Model
     public function batches()
     {
         return $this->hasMany(IngredientBatch::class);
+    }
+
+    /**
+     * Update ingredient cost based on FIFO (First In, First Out)
+     * The cost reflects the oldest batch with remaining stock
+     */
+    public function updateCostFromFIFO(): void
+    {
+        $oldestBatchWithStock = IngredientBatch::where('ingredient_id', $this->id)
+            ->where('quantity_remaining', '>', 0)
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        if ($oldestBatchWithStock) {
+            $this->cost = $oldestBatchWithStock->cost_per_unit;
+            $this->save();
+        }
     }
 }

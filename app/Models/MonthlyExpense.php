@@ -1,26 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class RestaurantSubscription extends Model
+class MonthlyExpense extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'restaurant_id',
-        'plan_id',
-        'starts_at',
-        'ends_at',
-        'status',
+        'category',
+        'description',
+        'amount',
+        'month',
+        'payment_status',
+        'paid_at',
+        'notes',
+        'created_by',
     ];
 
     protected $casts = [
-        'starts_at' => 'date',
-        'ends_at' => 'date',
+        'amount' => 'decimal:2',
+        'paid_at' => 'date',
     ];
 
     public function restaurant(): BelongsTo
@@ -28,8 +34,8 @@ class RestaurantSubscription extends Model
         return $this->belongsTo(Restaurant::class);
     }
 
-    public function plan(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(Plan::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

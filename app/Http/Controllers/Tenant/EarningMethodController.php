@@ -22,9 +22,13 @@ class EarningMethodController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["%" . strtolower($search) . "%"])
-                    ->orWhere('type', 'ilike', "%{$search}%")
-                    ->orWhereRaw('CAST(points AS TEXT) ilike ?', ["%{$search}%"]);
+                $q->where('name.en', 'like', "%{$search}%")
+                    ->orWhere('name.ar', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%");
+
+                if (is_numeric($search)) {
+                    $q->orWhere('points', (int) $search);
+                }
             });
         }
 
@@ -35,8 +39,7 @@ class EarningMethodController extends Controller
         $allowedSorts = ['name', 'type', 'points', 'is_active', 'created_at'];
         if (in_array($sortField, $allowedSorts)) {
             if ($sortField === 'name') {
-                // Sort by English name by default for JSON column
-                $query->orderByRaw("name->>'en' " . $sortDirection);
+                $query->orderBy('name.en', $sortDirection);
             } else {
                 $query->orderBy($sortField, $sortDirection);
             }

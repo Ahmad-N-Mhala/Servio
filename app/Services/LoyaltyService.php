@@ -67,45 +67,45 @@ class LoyaltyService
         }
         // ===== END NEW =====
 
-        DB::transaction(function () use ($order, $customer, $earningMethod) {
-            // Use earning method configuration for points calculation
-            $pointsPerCurrency = $earningMethod->points ?? $this->pointsPerCurrency;
-            $currencyAmount = $earningMethod->currency_amount ?? 1;
+        // Note: MongoDB transactions require replica sets, executing without transaction
+        // Use earning method configuration for points calculation
+        $pointsPerCurrency = $earningMethod->points ?? $this->pointsPerCurrency;
+        $currencyAmount = $earningMethod->currency_amount ?? 1;
 
-            // Calculate points: (order total / currency amount) * points
-            $pointsEarned = (int) floor(($order->total / $currencyAmount) * $pointsPerCurrency);
+        // Calculate points: (order total / currency amount) * points
+        $pointsEarned = (int) floor(($order->total / $currencyAmount) * $pointsPerCurrency);
 
-            // Apply max points cap if set
-            if ($earningMethod->max_points && $pointsEarned > $earningMethod->max_points) {
-                $pointsEarned = $earningMethod->max_points;
-            }
+        // Apply max points cap if set
+        if ($earningMethod->max_points && $pointsEarned > $earningMethod->max_points) {
+            $pointsEarned = $earningMethod->max_points;
+        }
 
-            if ($pointsEarned > 0) {
-                $loyaltyPoints = $customer->loyaltyPoints()->firstOrCreate([
-                    'customer_id' => $customer->id,
-                ], [
-                    'balance' => 0,
-                    'total_earned' => 0,
-                    'total_redeemed' => 0,
-                ]);
+        if ($pointsEarned > 0) {
+            $loyaltyPoints = $customer->loyaltyPoints()->firstOrCreate([
+                'customer_id' => $customer->id,
+            ], [
+                'balance' => 0,
+                'total_earned' => 0,
+                'total_redeemed' => 0,
+            ]);
 
-                $expiresAt = now()->addDays($this->pointsExpiryDays);
-                $loyaltyPoints->addPoints(
-                    $pointsEarned,
-                    "Points earned from order #{$order->order_number}",
-                    $order->id,
-                    $expiresAt
-                );
+            $expiresAt = now()->addDays($this->pointsExpiryDays);
+            $loyaltyPoints->addPoints(
+                $pointsEarned,
+                "Points earned from order #{$order->order_number}",
+                $order->id,
+                $expiresAt
+            );
 
-                $order->update(['points_earned' => $pointsEarned]);
-            }
+            $order->update(['points_earned' => $pointsEarned]);
+        }
 
-            // Update customer stats
-            $customer->increment('total_orders');
-            $customer->increment('total_spent', $order->total);
-            $customer->update(['last_order_at' => now()]);
-            $customer->updateTier();
-        });
+        // Update customer stats
+        $customer->increment('total_orders');
+        // Cast Decimal128 to float for MongoDB compatibility
+        $customer->increment('total_spent', (float) (string) $order->total);
+        $customer->update(['last_order_at' => now()]);
+        $customer->updateTier();
     }
 
     public function redeemReward(Customer $customer, int $rewardId): RewardRedemption
@@ -128,29 +128,28 @@ class LoyaltyService
             throw new \Exception('Insufficient points');
         }
 
-        return DB::transaction(function () use ($customer, $reward, $loyaltyPoints) {
-            // Deduct points
-            $rewardName = $reward->name[app()->getLocale()] ?? $reward->name['en'] ?? 'Unknown Reward';
-            $loyaltyPoints->redeemPoints(
-                $reward->points_required,
-                "Redeemed reward: {$rewardName}",
-                null
-            );
+        // Note: MongoDB transactions require replica sets, executing without transaction
+        // Deduct points
+        $rewardName = $reward->name[app()->getLocale()] ?? $reward->name['en'] ?? 'Unknown Reward';
+        $loyaltyPoints->redeemPoints(
+            $reward->points_required,
+            "Redeemed reward: {$rewardName}",
+            null
+        );
 
-            // Create redemption
-            $redemption = \App\Models\RewardRedemption::create([
-                'customer_id' => $customer->id,
-                'reward_id' => $reward->id,
-                'points_used' => $reward->points_required,
-                'status' => 'pending',
-                'expires_at' => now()->addDays(30), // Redemption valid for 30 days
-            ]);
+        // Create redemption
+        $redemption = \App\Models\RewardRedemption::create([
+            'customer_id' => $customer->id,
+            'reward_id' => $reward->id,
+            'points_used' => $reward->points_required,
+            'status' => 'pending',
+            'expires_at' => now()->addDays(30), // Redemption valid for 30 days
+        ]);
 
-            // Update reward redemption count
-            $reward->increment('redemptions_count');
+        // Update reward redemption count
+        $reward->increment('redemptions_count');
 
-            return $redemption;
-        });
+        return $redemption;
     }
 
     public function getCustomerByPhone(Restaurant $restaurant, string $phone): ?Customer

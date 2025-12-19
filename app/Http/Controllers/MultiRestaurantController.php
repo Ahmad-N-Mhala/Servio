@@ -19,13 +19,15 @@ class MultiRestaurantController extends Controller
 
         // Fetch restaurants where the user's email is associated
         // We use the central 'restaurants' table now
+        // Fetch restaurants where the user's email is associated
+        // We use the central 'restaurants' table now
+        $allowedIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $user->email)
+            ->pluck('restaurant_id')
+            ->toArray();
+
         $restaurants = Restaurant::with(['subscription.plan'])
-            ->whereExists(function ($query) use ($user) {
-                $query->select(\DB::raw(1))
-                    ->from('restaurant_user')
-                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                    ->where('restaurant_user.email', $user->email);
-            })
+            ->whereIn('id', $allowedIds)
             ->get()
             ->map(function ($restaurant) use ($user) {
                 // Fetch pivot data manually
@@ -58,15 +60,16 @@ class MultiRestaurantController extends Controller
         $currentPlan = null;
         $maxRestaurants = 1; // Default limit
 
-        $firstRestaurant = Restaurant::with(['subscription.plan'])
-            ->whereExists(function ($query) use ($user) {
-                $query->select(\DB::raw(1))
-                    ->from('restaurant_user')
-                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                    ->where('restaurant_user.email', $user->email)
-                    ->where('restaurant_user.role', 'owner');
-            })
-            ->first();
+        // Check if user has an 'owner' role in any restaurant
+        $ownerRestaurantIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $user->email)
+            ->where('role', 'owner')
+            ->pluck('restaurant_id')
+            ->toArray();
+
+        $firstRestaurant = !empty($ownerRestaurantIds)
+            ? Restaurant::with(['subscription.plan'])->whereIn('id', $ownerRestaurantIds)->first()
+            : null;
 
         if ($firstRestaurant && $firstRestaurant->subscription && $firstRestaurant->subscription->plan) {
             $currentPlan = $firstRestaurant->subscription->plan;
@@ -106,5 +109,103 @@ class MultiRestaurantController extends Controller
         session(['active_restaurant_id' => $restaurant->id]);
 
         return redirect()->route('dashboard');
+    }
+    public function create()
+    {
+        return Inertia::render('MultiRestaurant/Create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'restaurant_name' => ['required', 'string', 'max:255'],
+            'earning_method_type' => ['required', 'in:order_total,visit'],
+            'earning_points' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $user = Auth::user();
+
+        // Get user's existing subscription plan from their first restaurant
+        $existingRestaurantIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $user->email)
+            ->where('role', 'owner')
+            ->pluck('restaurant_id')
+            ->toArray();
+
+        if (empty($existingRestaurantIds)) {
+            return back()->withErrors(['error' => 'No existing subscription found. Please contact support.']);
+        }
+
+        $existingRestaurant = Restaurant::with('subscription.plan')->whereIn('id', $existingRestaurantIds)->first();
+
+        if (!$existingRestaurant || !$existingRestaurant->subscription) {
+            return back()->withErrors(['error' => 'No active subscription found. Please contact support.']);
+        }
+
+        $subscription = $existingRestaurant->subscription;
+        $plan = $subscription->plan;
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // 1. Create Restaurant
+            $restaurant = Restaurant::create([
+                'name' => $validated['restaurant_name'],
+                'slug' => \Illuminate\Support\Str::slug($validated['restaurant_name']) . '-' . \Illuminate\Support\Str::random(6),
+                'currency' => 'AED',
+                'locale' => 'en',
+            ]);
+
+            // 2. Link User to Restaurant via Pivot
+            \Illuminate\Support\Facades\DB::table('restaurant_user')->insert([
+                'restaurant_id' => $restaurant->id,
+                'email' => $user->email,
+                'role' => 'owner',
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 3. Create Staff Record
+            $staff = new \App\Models\Staff();
+            $staff->restaurant_id = $restaurant->id;
+            $staff->user_id = $user->id;
+            $staff->role = 'owner';
+            $staff->is_active = true;
+            $staff->joined_at = now();
+            $staff->save();
+
+            // 4. Create Default Earning Method
+            \App\Models\EarningMethod::create([
+                'restaurant_id' => $restaurant->id,
+                'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
+                'description' => 'Default earning method set.',
+                'type' => $validated['earning_method_type'],
+                'points' => $validated['earning_points'],
+                'currency_amount' => 1,
+                'is_active' => true,
+            ]);
+
+            // 5. Create Subscription (using same plan and billing cycle as existing)
+            \App\Models\Subscription::create([
+                'restaurant_id' => $restaurant->id,
+                'plan_id' => $plan->id,
+                'status' => 'active',
+                'billing_cycle' => $subscription->billing_cycle,
+                'starts_at' => now(),
+                'ends_at' => $subscription->billing_cycle === 'yearly' ? now()->addYear() : now()->addMonth(),
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            // Setup Session
+            session(['active_restaurant_id' => $restaurant->id]);
+
+            return redirect()->route('dashboard')->with('success', 'Restaurant created successfully!');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            \Log::error('Restaurant Creation failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Creation failed: ' . $e->getMessage()]);
+        }
     }
 }

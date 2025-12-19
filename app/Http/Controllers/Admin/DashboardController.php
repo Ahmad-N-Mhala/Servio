@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
@@ -29,54 +30,75 @@ class DashboardController extends Controller
             $stats['total_revenue'] = \App\Models\Order::sum('total') ?? 0;
 
             // Restaurant Growth Chart (Last 6 months)
-            $charts['restaurant_growth'] = \App\Models\Restaurant::selectRaw('DATE_TRUNC(\'month\', created_at) as month, COUNT(*) as count')
-                ->where('created_at', '>=', now()->subMonths(6))
-                ->groupBy('month')
-                ->orderBy('month')
+            $charts['restaurant_growth'] = \App\Models\Restaurant::where('created_at', '>=', now()->subMonths(6))
                 ->get()
-                ->map(function ($item) {
+                ->groupBy(function ($date) {
+                    return Carbon::parse($date->created_at)->format('M Y');
+                })
+                ->map(function ($group, $month) {
                     return [
-                        'month' => date('M Y', strtotime($item->month)),
-                        'count' => $item->count
+                        'month' => $month,
+                        'count' => $group->count()
                     ];
-                });
+                })
+                ->values();
 
             // Subscription Distribution by Plan
-            $charts['subscription_by_plan'] = \App\Models\RestaurantSubscription::join('plans', 'restaurant_subscriptions.plan_id', '=', 'plans.id')
-                ->selectRaw('plans.name as plan_name, COUNT(*) as count')
-                ->where('restaurant_subscriptions.status', 'active')
-                ->groupBy('plans.name')
-                ->get();
+            $charts['subscription_by_plan'] = \App\Models\RestaurantSubscription::with('plan')
+                ->where('status', 'active')
+                ->get()
+                ->groupBy(function ($sub) {
+                    return $sub->plan->name ?? 'Unknown';
+                })
+                ->map(function ($group, $name) {
+                    return [
+                        'plan_name' => $name,
+                        'count' => $group->count()
+                    ];
+                })
+                ->values();
 
             // Revenue Trend (Last 6 months)
-            $charts['revenue_trend'] = \App\Models\Order::selectRaw('DATE_TRUNC(\'month\', created_at) as month, SUM(total) as revenue')
-                ->where('created_at', '>=', now()->subMonths(6))
-                ->groupBy('month')
-                ->orderBy('month')
+            $charts['revenue_trend'] = \App\Models\Order::where('created_at', '>=', now()->subMonths(6))
                 ->get()
-                ->map(function ($item) {
+                ->groupBy(function ($date) {
+                    return Carbon::parse($date->created_at)->format('M Y');
+                })
+                ->map(function ($group, $month) {
                     return [
-                        'month' => date('M Y', strtotime($item->month)),
-                        'revenue' => round($item->revenue ?? 0, 2)
+                        'month' => $month,
+                        'revenue' => round($group->sum('total'), 2)
                     ];
-                });
+                })
+                ->values();
 
             // Top 5 Restaurants by Orders
-            $charts['top_restaurants'] = \App\Models\Restaurant::withCount('orders')
-                ->orderBy('orders_count', 'desc')
-                ->limit(5)
-                ->get()
-                ->map(function ($restaurant) {
-                    return [
-                        'name' => $restaurant->name,
-                        'orders' => $restaurant->orders_count
-                    ];
-                });
+            // Efficient way: Aggregate orders by restaurant_id
+            $topRestaurantIds = \App\Models\Order::get(['restaurant_id'])
+                ->groupBy('restaurant_id')
+                ->map(fn($orders) => $orders->count())
+                ->sortDesc()
+                ->take(5);
+
+            $restaurantNames = \App\Models\Restaurant::whereIn('id', $topRestaurantIds->keys())->pluck('name', 'id');
+
+            $charts['top_restaurants'] = $topRestaurantIds->map(function ($count, $id) use ($restaurantNames) {
+                return [
+                    'name' => $restaurantNames[$id] ?? 'Unknown',
+                    'orders' => $count
+                ];
+            })->values();
 
             // Subscription Status Distribution
-            $charts['subscription_status'] = \App\Models\RestaurantSubscription::selectRaw('status, COUNT(*) as count')
+            $charts['subscription_status'] = \App\Models\RestaurantSubscription::get()
                 ->groupBy('status')
-                ->get();
+                ->map(function ($group, $status) {
+                    return [
+                        'status' => $status,
+                        'count' => $group->count()
+                    ];
+                })
+                ->values();
         }
 
         return inertia('Admin/Dashboard', [

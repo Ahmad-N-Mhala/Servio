@@ -26,10 +26,10 @@ class InventoryController extends Controller
 
         $ingredients = Ingredient::where('restaurant_id', $restaurant->id)
             ->when($request->search, function ($query, $search) {
-                $query->where('name->en', 'like', "%{$search}%")
-                    ->orWhere('name->ar', 'like', "%{$search}%");
+                $query->where('name.en', 'like', "%{$search}%")
+                    ->orWhere('name.ar', 'like', "%{$search}%");
             })
-            ->orderByRaw("name->>'en' ASC")
+            ->orderBy('name.en', 'asc')
             ->get();
 
         return Inertia::render('Inventory/Index', [
@@ -65,7 +65,28 @@ class InventoryController extends Controller
             $validated['name'] = ['en' => $validated['name'], 'ar' => $validated['name']];
         }
 
-        Ingredient::create($validated);
+        $ingredient = Ingredient::create($validated);
+
+        // Create initial ingredient batch for FIFO tracking
+        \App\Models\IngredientBatch::create([
+            'ingredient_id' => $ingredient->id,
+            'batch_number' => 'Batch 1',
+            'quantity_received' => $validated['current_stock'],
+            'quantity_remaining' => $validated['current_stock'],
+            'cost_per_unit' => $validated['cost'],
+            'received_at' => now(),
+        ]);
+
+        // Log the creation of new ingredient with initial stock
+        \App\Models\InventoryLog::create([
+            'restaurant_id' => $restaurant->id,
+            'ingredient_id' => $ingredient->id,
+            'user_id' => $request->user()->id,
+            'action' => 'created',
+            'quantity_change' => $validated['current_stock'],
+            'new_stock_level' => $validated['current_stock'],
+            'notes' => "New ingredient created with initial stock: {$validated['current_stock']} {$validated['unit']} @ {$validated['cost']}",
+        ]);
 
         return redirect()->back()->with('message', 'Ingredient added successfully.');
     }
@@ -134,11 +155,21 @@ class InventoryController extends Controller
             ]);
 
             // Update Total Stock (Sum of all batches essentially, but we store it for performance)
-            $ingredient->increment('current_stock', $addedQty);
-            // We do NOT update the master reference 'cost' to average.
-            // We could update it to 'incomingCost' if we want 'Last Purchase Price', but keeping it steady is safer for now.
-            // Or maybe user wants to see the cost of the "Next to use" item?
-            // For now, only stock quantity is updated.
+            // Update Total Stock manually to ensure type safety (MongoDB strict increment on strings fails)
+            $ingredient->current_stock = (float) $ingredient->current_stock + (float) $addedQty;
+
+            // Update ingredient cost to reflect FIFO (First In, First Out)
+            // The cost should always be the cost of the oldest batch with remaining stock
+            $oldestBatchWithStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
+                ->where('quantity_remaining', '>', 0)
+                ->orderBy('created_at', 'asc')
+                ->first();
+
+            if ($oldestBatchWithStock) {
+                $ingredient->cost = $oldestBatchWithStock->cost_per_unit;
+            }
+
+            $ingredient->save();
 
             // Log the action
             \App\Models\InventoryLog::create([

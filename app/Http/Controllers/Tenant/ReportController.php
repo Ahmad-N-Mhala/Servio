@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Order; // Added this line
+use App\Models\Order;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -16,35 +17,46 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', now()->subDays(30)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
 
-        // Daily Sales Chart Data
-        $dailySales = Order::where('restaurant_id', $restaurantId)
+        // Normalize dates - make range inclusive
+        if (is_string($startDate))
+            $startDate = Carbon::parse($startDate)->startOfDay();  // Include full start day (00:00:00)
+        if (is_string($endDate))
+            $endDate = Carbon::parse($endDate)->endOfDay();  // Include full end day (23:59:59)
+
+        // Daily Sales Chart Data - Process in PHP
+        $orders = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('DATE(created_at) as date, SUM(total) as total, COUNT(*) as count')
-            ->groupBy('date')
-            ->orderBy('date')
             ->get();
 
+        $dailySales = $orders->groupBy(function ($order) {
+            return $order->created_at->format('Y-m-d');
+        })
+            ->map(function ($dayOrders, $date) {
+                return [
+                    'date' => $date,
+                    'total' => (float) (string) $dayOrders->sum('total'),
+                    'count' => $dayOrders->count(),
+                ];
+            })
+            ->values()
+            ->sortBy('date')
+            ->values();
+
         // Summary Stats
-        $totalRevenue = Order::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('total');
-
-        $totalOrders = Order::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
-
-        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+        $totalRevenue = $orders->sum('total');
+        $totalOrders = $orders->count();
+        $averageOrderValue = $totalOrders > 0 ? (float) (string) $totalRevenue / $totalOrders : 0;
 
         return \Inertia\Inertia::render('Reports/Sales', [
             'salesData' => $dailySales,
             'stats' => [
-                'total_revenue' => $totalRevenue,
+                'total_revenue' => (float) (string) $totalRevenue,
                 'total_orders' => $totalOrders,
-                'average_order_value' => $averageOrderValue,
+                'average_order_value' => (float) $averageOrderValue,
             ],
             'filters' => [
-                'start_date' => $startDate instanceof \Carbon\Carbon ? $startDate->format('Y-m-d') : $startDate,
-                'end_date' => $endDate instanceof \Carbon\Carbon ? $endDate->format('Y-m-d') : $endDate,
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
             ]
         ]);
     }

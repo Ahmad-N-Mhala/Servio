@@ -56,30 +56,30 @@ class User extends Authenticatable
             return null;
         }
 
-        // For regular users, get the restaurant from the active session or their first restaurant
-        $restaurantId = session('active_restaurant_id');
+        // For regular users, find restaurants via the pivot collection 'restaurant_user'
+        // Get all restaurant IDs for this user email
+        // Note: In MongoDB, we query the 'restaurant_user' collection directly
+        $allowedRestaurantIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $this->email)
+            ->pluck('restaurant_id')
+            ->map(function ($id) {
+                return (string) $id;
+            })
+            ->toArray();
 
-        if ($restaurantId) {
-            // Verify user has access to this restaurant
-            $restaurant = Restaurant::whereExists(function ($query) {
-                $query->select(\DB::raw(1))
-                    ->from('restaurant_user')
-                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                    ->where('restaurant_user.email', $this->email);
-            })->find($restaurantId);
+        // Check active session
+        $activeId = (string) session('active_restaurant_id');
 
-            if ($restaurant) {
-                return $restaurant;
-            }
+        if ($activeId && in_array($activeId, $allowedRestaurantIds)) {
+            return Restaurant::find($activeId);
         }
 
-        // Fall back to first restaurant user has access to
-        return Restaurant::whereExists(function ($query) {
-            $query->select(\DB::raw(1))
-                ->from('restaurant_user')
-                ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                ->where('restaurant_user.email', $this->email);
-        })->orderBy('id')->first();
+        // Fallback to first allowed restaurant
+        if (!empty($allowedRestaurantIds)) {
+            return Restaurant::whereIn('id', $allowedRestaurantIds)->orderBy('id')->first();
+        }
+
+        return null;
     }
 
 }

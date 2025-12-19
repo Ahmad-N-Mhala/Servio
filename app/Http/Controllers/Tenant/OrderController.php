@@ -179,16 +179,25 @@ class OrderController extends Controller
             ->where('is_active', true)
             ->with([
                 'items' => function ($query) {
-                    $query->where('is_available', true)->orderByRaw("name->>'en' ASC");
+                    $query->where('is_available', true);
                 }
             ])
             ->orderBy('sort_order')
             ->get()
             ->map(function ($category) {
+                // Sort items by name in PHP (handle JSON translations)
+                $sortedItems = $category->items->sortBy(function ($item) {
+                    $name = $item->name;
+                    if (is_array($name)) {
+                        return $name['en'] ?? $name['ar'] ?? '';
+                    }
+                    return $name;
+                })->values();
+
                 return [
                     'id' => $category->id,
                     'name' => $category->name,
-                    'items' => $category->items->map(function ($item) {
+                    'items' => $sortedItems->map(function ($item) {
                         return [
                             'id' => $item->id,
                             'name' => $item->name,
@@ -242,6 +251,11 @@ class OrderController extends Controller
 
             if ($menuItem->ingredients->isNotEmpty()) {
                 foreach ($menuItem->ingredients as $ingredient) {
+                    // Skip if pivot data is missing
+                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity)) {
+                        continue;
+                    }
+
                     $requiredPerServing = $ingredient->pivot->quantity;
 
                     // Get available stock from batches
@@ -302,166 +316,177 @@ class OrderController extends Controller
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
-        return DB::transaction(function () use ($validated, $restaurant) {
-            // Update table status if dine-in
-            if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
-                $table = \App\Models\Table::find($validated['table_id']);
-                if ($table) {
-                    $table->update(['status' => 'occupied']);
-                }
+        // Note: MongoDB transactions require replica sets, so we execute without transaction wrapper
+        // Update table status if dine-in
+        if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
+            $table = \App\Models\Table::find($validated['table_id']);
+            if ($table) {
+                $table->update(['status' => 'occupied']);
             }
+        }
 
-            // Find or create customer ONLY if phone is provided
-            $customer = null;
-            if (!empty($validated['customer_phone'])) {
-                $customer = $this->loyaltyService->findOrCreateCustomer(
-                    $restaurant,
-                    $validated['customer_phone'],
-                    $validated['customer_name'] ?? null,
-                    null, // email
-                    $validated['customer_birth_date'] ?? null
-                );
-            }
+        // Find or create customer ONLY if phone is provided
+        $customer = null;
+        if (!empty($validated['customer_phone'])) {
+            $customer = $this->loyaltyService->findOrCreateCustomer(
+                $restaurant,
+                $validated['customer_phone'],
+                $validated['customer_name'] ?? null,
+                null, // email
+                $validated['customer_birth_date'] ?? null
+            );
+        }
 
-            // ====== STOCK VALIDATION BEFORE ORDER CREATION ======
-            $stockErrors = [];
-            foreach ($validated['items'] as $item) {
-                $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
+        // ====== STOCK VALIDATION BEFORE ORDER CREATION ======
+        $stockErrors = [];
+        foreach ($validated['items'] as $item) {
+            $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
 
-                if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
-                    foreach ($menuItem->ingredients as $ingredient) {
-                        $neededQty = $ingredient->pivot->quantity * $item['quantity'];
+            if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
+                foreach ($menuItem->ingredients as $ingredient) {
+                    // Skip if pivot data is missing
+                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity)) {
+                        continue;
+                    }
 
-                        // Get available stock from batches
-                        $availableStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
-                            ->where('quantity_remaining', '>', 0)
-                            ->sum('quantity_remaining');
+                    $neededQty = $ingredient->pivot->quantity * $item['quantity'];
 
-                        if ($availableStock < $neededQty) {
-                            // Get menu item name (handle translations)
-                            $menuItemName = $menuItem->name;
-                            if (is_array($menuItemName)) {
-                                $menuItemName = $menuItemName['en'] ?? $menuItemName['ar'] ?? 'Unknown Item';
-                            }
+                    // Get available stock from batches
+                    $availableStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
+                        ->where('quantity_remaining', '>', 0)
+                        ->sum('quantity_remaining');
 
-                            // Get ingredient name (handle translations)
-                            $ingredientName = $ingredient->name;
-                            if (is_array($ingredientName)) {
-                                $ingredientName = $ingredientName['en'] ?? $ingredientName['ar'] ?? 'Unknown Ingredient';
-                            }
-
-                            $stockErrors[] = "{$menuItemName} - Insufficient stock for ingredient '{$ingredientName}'. Available: {$availableStock} {$ingredient->unit}, Required: {$neededQty} {$ingredient->unit}";
+                    if ($availableStock < $neededQty) {
+                        // Get menu item name (handle translations)
+                        $menuItemName = $menuItem->name;
+                        if (is_array($menuItemName)) {
+                            $menuItemName = $menuItemName['en'] ?? $menuItemName['ar'] ?? 'Unknown Item';
                         }
+
+                        // Get ingredient name (handle translations)
+                        $ingredientName = $ingredient->name;
+                        if (is_array($ingredientName)) {
+                            $ingredientName = $ingredientName['en'] ?? $ingredientName['ar'] ?? 'Unknown Ingredient';
+                        }
+
+                        $stockErrors[] = "{$menuItemName} - Insufficient stock for ingredient '{$ingredientName}'. Available: {$availableStock} {$ingredient->unit}, Required: {$neededQty} {$ingredient->unit}";
                     }
                 }
             }
+        }
+        // If there are stock errors, abort the transaction and return error
+        if (!empty($stockErrors)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'items' => $stockErrors
+            ]);
+        }
+        // ====== END STOCK VALIDATION ======
 
-            // If there are stock errors, abort the transaction and return error
-            if (!empty($stockErrors)) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'items' => $stockErrors
-                ]);
-            }
-            // ====== END STOCK VALIDATION ======
+        // Create order
+        $order = Order::create([
+            'restaurant_id' => $restaurant->id,
+            'customer_id' => $customer ? $customer->id : null,
+            'order_number' => 'ORD-' . strtoupper(Str::random(8)),
+            'status' => 'pending',
+            'type' => $validated['type'],
+            'table_id' => $validated['table_id'] ?? null,
+            'subtotal' => $validated['subtotal'],
+            'tax' => $validated['tax'] ?? 0,
+            'discount_amount' => $validated['discount_amount'] ?? 0,
+            'total' => $validated['total'],
+            'currency' => $restaurant->currency ?? 'AED',
+            'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
+            'customer_phone' => $validated['customer_phone'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
 
-            // Create order
-            $order = Order::create([
-                'restaurant_id' => $restaurant->id,
-                'customer_id' => $customer ? $customer->id : null,
-                'order_number' => 'ORD-' . strtoupper(Str::random(8)),
-                'status' => 'pending',
-                'type' => $validated['type'],
-                'table_id' => $validated['table_id'] ?? null,
-                'subtotal' => $validated['subtotal'],
-                'tax' => $validated['tax'] ?? 0,
-                'discount_amount' => $validated['discount_amount'] ?? 0,
-                'total' => $validated['total'],
-                'currency' => $restaurant->currency ?? 'AED',
-                'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
-                'customer_phone' => $validated['customer_phone'] ?? null,
-                'notes' => $validated['notes'] ?? null,
+        // Create order items and Update Inventory
+        foreach ($validated['items'] as $item) {
+            $order->items()->create([
+                'menu_item_id' => $item['menu_item_id'],
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'total_price' => $item['quantity'] * $item['unit_price'],
             ]);
 
-            // Create order items and Update Inventory
-            foreach ($validated['items'] as $item) {
-                $order->items()->create([
-                    'menu_item_id' => $item['menu_item_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'total_price' => $item['quantity'] * $item['unit_price'],
-                ]);
-
-                // Deduct Inventory using FIFO (First-In, First-Out) Batch Logic
-                $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
-                if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
-                    foreach ($menuItem->ingredients as $ingredient) {
-                        $neededQty = $ingredient->pivot->quantity * $item['quantity'];
-                        $remainingQty = $neededQty;
-
-                        // Get available batches (FIFO - oldest first)
-                        $batches = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
-                            ->where('quantity_remaining', '>', 0)
-                            ->orderBy('created_at', 'asc')
-                            ->lockForUpdate()
-                            ->get();
-
-                        $totalCost = 0;
-                        $batchesUsed = [];
-
-                        foreach ($batches as $batch) {
-                            if ($remainingQty <= 0)
-                                break;
-
-                            $deductFromBatch = min($remainingQty, $batch->quantity_remaining);
-                            $batch->decrement('quantity_remaining', $deductFromBatch);
-
-                            $totalCost += $deductFromBatch * $batch->cost_per_unit;
-                            $batchesUsed[] = "{$batch->batch_number} ({$deductFromBatch})";
-
-                            $remainingQty -= $deductFromBatch;
-                        }
-
-                        // Safety check: ensure we deducted the full amount
-                        if ($remainingQty > 0.0001) { // Small epsilon for floating point
-                            throw new \Exception("Critical Error: Unable to fulfill order. Insufficient stock for {$ingredient->name}. This should have been caught by validation.");
-                        }
-
-                        // Update ingredient's global stock
-                        $ingredient->decrement('current_stock', $neededQty);
-                        $ingredient->refresh();
-
-                        // Log Usage with batch details
-                        \App\Models\InventoryLog::create([
-                            'restaurant_id' => $restaurant->id,
-                            'ingredient_id' => $ingredient->id,
-                            'user_id' => auth()->id(),
-                            'action' => 'used_in_menu',
-                            'quantity_change' => -$neededQty,
-                            'new_stock_level' => $ingredient->current_stock,
-                            'notes' => 'Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
-                        ]);
+            // Deduct Inventory using FIFO (First-In, First-Out) Batch Logic
+            $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
+            if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
+                foreach ($menuItem->ingredients as $ingredient) {
+                    // Skip if pivot data is missing
+                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity)) {
+                        continue;
                     }
-                }
-            }
 
-            // Handle Reward Redemption
-            if (!empty($validated['reward_id']) && $customer) {
-                $reward = \App\Models\Reward::find($validated['reward_id']);
+                    $neededQty = $ingredient->pivot->quantity * $item['quantity'];
+                    $remainingQty = $neededQty;
 
-                if ($reward && $reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'reward_id' => ["Minimum order value of {$reward->min_order_value} required for this reward."]
+                    // Get available batches (FIFO - oldest first)
+                    $batches = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
+                        ->where('quantity_remaining', '>', 0)
+                        ->orderBy('created_at', 'asc')
+                        ->lockForUpdate()
+                        ->get();
+
+                    $totalCost = 0;
+                    $batchesUsed = [];
+
+                    foreach ($batches as $batch) {
+                        if ($remainingQty <= 0)
+                            break;
+
+                        $deductFromBatch = min($remainingQty, $batch->quantity_remaining);
+                        $batch->decrement('quantity_remaining', $deductFromBatch);
+
+                        $totalCost += $deductFromBatch * $batch->cost_per_unit;
+                        $batchesUsed[] = "{$batch->batch_number} ({$deductFromBatch})";
+
+                        $remainingQty -= $deductFromBatch;
+                    }
+
+                    // Update ingredient cost to reflect FIFO
+                    $ingredient->updateCostFromFIFO();
+
+                    // Safety check: ensure we deducted the full amount
+                    if ($remainingQty > 0.0001) { // Small epsilon for floating point
+                        throw new \Exception("Critical Error: Unable to fulfill order. Insufficient stock for {$ingredient->name}. This should have been caught by validation.");
+                    }
+
+                    // Update ingredient's global stock
+                    $ingredient->decrement('current_stock', $neededQty);
+                    $ingredient->refresh();
+
+                    // Log Usage with batch details
+                    \App\Models\InventoryLog::create([
+                        'restaurant_id' => $restaurant->id,
+                        'ingredient_id' => $ingredient->id,
+                        'user_id' => auth()->id(),
+                        'action' => 'used_in_menu',
+                        'quantity_change' => -$neededQty,
+                        'new_stock_level' => $ingredient->current_stock,
+                        'notes' => 'Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
                     ]);
                 }
+            }
+        }
 
-                if ($reward) {
-                    $redemption = $this->loyaltyService->redeemReward($customer, (int) $validated['reward_id']);
-                    $redemption->markAsUsed($order->id);
-                }
+        // Handle Reward Redemption
+        if (!empty($validated['reward_id']) && $customer) {
+            $reward = \App\Models\Reward::find($validated['reward_id']);
+
+            if ($reward && $reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'reward_id' => ["Minimum order value of {$reward->min_order_value} required for this reward."]
+                ]);
             }
 
-            return redirect()->back()->with('message', __('orders.order_created'));
-        });
+            if ($reward) {
+                $redemption = $this->loyaltyService->redeemReward($customer, (int) $validated['reward_id']);
+                $redemption->markAsUsed($order->id);
+            }
+        }
+
+        return redirect()->back()->with('message', __('orders.order_created'));
     }
 
     public function updateStatus(Request $request, Order $order)

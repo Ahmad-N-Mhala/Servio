@@ -392,22 +392,57 @@
                             <span class="text-sm" v-if="!isSidebarCollapsed">Communication</span>
                         </Link>
 
-                        <!-- Reports -->
-                        <Link 
-                            :href="route('reports.sales')" 
-                           :class="[
-                                'group flex items-center rounded-lg transition-all duration-200',
-                                isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
-                                $page.url.includes('/reports') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
-                            ]"
-                        >
-                            <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Sales Reports</span>
-                        </Link>
+                        <!-- Financial (Sub-Group) -->
+                        <div class="space-y-0.5">
+                            <button 
+                                @click="toggleMenu('growth.financial')"
+                                :class="[
+                                    'w-full group flex items-center rounded-lg transition-all duration-200',
+                                    isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
+                                    ($page.url.includes('/reports') || $page.url.includes('/monthly-expenses')) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                                ]"
+                            >
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">Financial</span>
+                                </div>
+                                <svg 
+                                    v-if="!isSidebarCollapsed"
+                                    class="w-2.5 h-2.5 text-gray-400 transition-transform duration-200" 
+                                    :class="openMenus['growth.financial'] ? 'rotate-180' : ''"
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            
+                            <div v-show="openMenus['growth.financial'] && !isSidebarCollapsed" class="pl-9 space-y-0.5">
+                                <Link 
+                                    :href="route('monthly-expenses.index')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/monthly-expenses')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    Monthly Expenses
+                                </Link>
+                                <Link 
+                                    :href="route('reports.sales')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/reports')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Sales Reports
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -704,7 +739,8 @@ const getInitialMenuState = () => {
         'operations': true,
         'operations.orders': false,
         'growth': true,
-        'growth.loyalty': false
+        'growth.loyalty': false,
+        'growth.financial': false
     };
 
     if (typeof window !== 'undefined' && window.localStorage) {

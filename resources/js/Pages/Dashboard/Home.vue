@@ -15,7 +15,7 @@
             />
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatsCard
                     :title="$t('dashboard.total_orders')"
                     :value="stats.total_orders"
@@ -28,17 +28,6 @@
                 />
                 
                 <StatsCard
-                    :title="$t('dashboard.today_orders')"
-                    :value="stats.today_orders"
-                    icon="orders"
-                    color="green"
-                    :trend="8"
-                    subtitle="orders today"
-                    class="cursor-pointer"
-                    @click="fetchDetails('today_orders')"
-                />
-                
-                <StatsCard
                     :title="$t('dashboard.revenue')"
                     :value="formatCurrency(stats.revenue)"
                     icon="revenue"
@@ -48,25 +37,15 @@
                     class="cursor-pointer"
                     @click="fetchDetails('revenue')"
                 />
-                
+
                 <StatsCard
-                    :title="$t('dashboard.active_staff')"
-                    :value="stats.active_staff"
-                    icon="staff"
-                    color="purple"
-                    subtitle="team members"
-                    class="cursor-pointer"
-                    @click="fetchDetails('active_staff')"
-                />
-                
-                <StatsCard
-                    title="Inventory"
-                    :value="formatCurrency(stats.inventory_value)"
+                    title="Net Profit"
+                    :value="formatCurrency(stats.net_profit)"
                     icon="revenue"
-                    color="blue"
-                    subtitle="total value"
+                    :color="stats.net_profit >= 0 ? 'green' : 'red'"
+                    subtitle="after expenses & waste"
                     class="cursor-pointer"
-                    @click="fetchDetails('inventory_value')"
+                    @click="fetchDetails('net_profit')"
                 />
 
                 <StatsCard
@@ -112,38 +91,6 @@
                     <canvas ref="wasteChartCanvas"></canvas>
                 </ChartCard>
             </div>     <!-- Waste Trend -->
-
-
-            <!-- Recent Orders Table -->
-            <Card title="Recent Orders" class="mb-8">
-                <div v-if="recentOrders.length > 0" class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order #</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="order in recentOrders" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ order.order_number }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{{ order.customer_name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-semibold">{{ formatCurrency(order.total) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="getStatusClass(order.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                                        {{ order.status }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{{ order.created_at }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <p v-else class="text-gray-600 dark:text-gray-400">No recent orders</p>
-            </Card>
         </div>
 
         <!-- Details Modal -->
@@ -205,7 +152,6 @@ import DateRangePicker from '@/Components/DateRangePicker.vue';
 import StatsCard from '@/Components/StatsCard.vue';
 import ChartCard from '@/Components/ChartCard.vue';
 import Modal from '@/Components/Modal.vue';
-import Card from '@/Components/Card.vue';
 import axios from 'axios';
 
 Chart.register(...registerables);
@@ -215,7 +161,6 @@ const route = (window as any).route;
 
 const isRtl = computed(() => page.props.isRtl as boolean);
 const stats = computed(() => page.props.stats as any);
-const recentOrders = computed(() => page.props.recent_orders as any[]);
 const revenueChart = computed(() => page.props.revenue_chart as any[]);
 const statusDistribution = computed(() => page.props.status_distribution as any[]);
 const peakHours = computed(() => page.props.peak_hours as any[]);

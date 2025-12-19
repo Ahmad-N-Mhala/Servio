@@ -29,10 +29,12 @@ class StaffController extends Controller
         }
 
         // 2. Check Owner from pivot table
+        // Use value() or pluck()->first()
         $pivotOwner = \Illuminate\Support\Facades\DB::table('restaurant_user')
             ->where('restaurant_id', $restaurant->id)
             ->where('role', 'owner')
-            ->value('email');
+            ->pluck('email')
+            ->first();
 
         if ($pivotOwner) {
             $ownerEmails[] = $pivotOwner;
@@ -73,10 +75,13 @@ class StaffController extends Controller
         // Search
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $staffQuery->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhere('email', 'ilike', "%{$search}%");
-            })->orWhere('role', 'ilike', "%{$search}%");
+            $staffQuery->where(function ($query) use ($search) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    // MongoDB uses regex for like search usually; standard 'like' works in Laravel-Mongo wrapper
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('role', 'like', "%{$search}%");
+            });
         }
 
         // Sort
@@ -87,15 +92,9 @@ class StaffController extends Controller
 
         if (in_array($sortField, $allowedSorts)) {
             $staffQuery->orderBy($sortField, $sortDirection);
-        } elseif ($sortField === 'name') {
-            $staffQuery->join('users', 'staff.user_id', '=', 'users.id')
-                ->orderBy('users.name', $sortDirection)
-                ->select('staff.*'); // Avoid column collision
-        } elseif ($sortField === 'email') {
-            $staffQuery->join('users', 'staff.user_id', '=', 'users.id')
-                ->orderBy('users.email', $sortDirection)
-                ->select('staff.*');
         } else {
+            // For name/email, standard MongoDB cannot sort by lookup aggregation easily in Eloquent
+            // We fallback to created_at for now to avoid crash
             $staffQuery->orderBy('created_at', 'desc');
         }
 
@@ -103,8 +102,8 @@ class StaffController extends Controller
             ->through(function ($staff) {
                 return [
                     'id' => $staff->id,
-                    'name' => $staff->user->name,
-                    'email' => $staff->user->email,
+                    'name' => $staff->user->name ?? 'Unknown',
+                    'email' => $staff->user->email ?? 'Unknown',
                     'role' => $staff->role,
                     'is_active' => $staff->is_active,
                     'joined_at' => $staff->joined_at?->format('Y-m-d'),
@@ -174,5 +173,3 @@ class StaffController extends Controller
         return back()->with('success', 'Staff member removed successfully');
     }
 }
-
-

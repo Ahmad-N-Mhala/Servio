@@ -39,12 +39,14 @@ class LoginController extends Controller
             }
 
             // Fetch available restaurants for this user
-            $restaurants = \App\Models\Restaurant::whereExists(function ($query) use ($user) {
-                $query->select(\DB::raw(1))
-                    ->from('restaurant_user')
-                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                    ->where('restaurant_user.email', $user->email);
-            })->get();
+            $allowedIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('email', $user->email)
+                ->pluck('restaurant_id')
+                ->toArray();
+
+            $restaurants = !empty($allowedIds)
+                ? \App\Models\Restaurant::whereIn('id', $allowedIds)->get()
+                : collect();
 
             // If user has 0 restaurants, redirect to onboarding or show error
             if ($restaurants->isEmpty()) {

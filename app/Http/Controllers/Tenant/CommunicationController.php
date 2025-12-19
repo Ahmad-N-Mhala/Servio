@@ -56,9 +56,13 @@ class CommunicationController extends Controller
 
         // --- Templates Query ---
         $templates = CommunicationTemplate::where('restaurant_id', $restaurant->id)
-            ->withCount('logs') // show total sent count
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($template) {
+                // Manually count logs to avoid MongoDB withCount limitations
+                $template->logs_count = CommunicationLog::where('communication_template_id', $template->id)->count();
+                return $template;
+            });
 
         $bundles = CommunicationBundle::where('is_active', true)->get();
 

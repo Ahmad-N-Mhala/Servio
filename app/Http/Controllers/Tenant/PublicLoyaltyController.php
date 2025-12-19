@@ -15,7 +15,8 @@ class PublicLoyaltyController extends Controller
 {
     public function __construct(
         protected LoyaltyService $loyaltyService
-    ) {}
+    ) {
+    }
 
     public function checkPoints(Request $request): JsonResponse
     {
@@ -43,7 +44,7 @@ class PublicLoyaltyController extends Controller
                 'phone' => $customer->phone,
                 'loyalty_tier' => $customer->loyalty_tier,
                 'total_orders' => $customer->total_orders,
-                'total_spent' => (float) $customer->total_spent,
+                'total_spent' => (float) (string) $customer->total_spent,
                 'points' => $customer->current_points,
             ],
         ]);
@@ -72,7 +73,7 @@ class PublicLoyaltyController extends Controller
                     'description' => $reward->description,
                     'points_required' => $reward->points_required,
                     'reward_type' => $reward->reward_type,
-                    'discount_value' => $reward->discount_value ? (float) $reward->discount_value : null,
+                    'discount_value' => $reward->discount_value ? (float) (string) $reward->discount_value : null,
                 ];
             });
 

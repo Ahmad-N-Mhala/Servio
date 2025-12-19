@@ -31,9 +31,9 @@ class LoyaltyController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $customersQuery->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhere('phone', 'ilike', "%{$search}%")
-                    ->orWhere('email', 'ilike', "%{$search}%");
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -46,10 +46,9 @@ class LoyaltyController extends Controller
         if (in_array($sortField, $allowedSorts)) {
             $customersQuery->orderBy($sortField, $sortDirection);
         } elseif ($sortField === 'points_balance') {
-            // Sort by related loyalty points balance
-            $customersQuery->leftJoin('loyalty_points', 'customers.id', '=', 'loyalty_points.customer_id')
-                ->orderBy('loyalty_points.balance', $sortDirection)
-                ->select('customers.*');
+            // Sort by related loyalty points balance is not supported via aggregation in simple Eloquent Mongo
+            // Fallback to total_spent
+            $customersQuery->orderBy('total_spent', 'desc');
         } else {
             $customersQuery->orderBy('total_spent', 'desc');
         }
@@ -65,7 +64,7 @@ class LoyaltyController extends Controller
 
         $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
             ->where('is_available', true)
-            ->orderByRaw("name->>'en' ASC")
+            ->orderBy('name.en', 'asc') // Mongo object sort syntax
             ->get(['id', 'name']);
 
         return Inertia::render('Loyalty/Index', [
@@ -191,4 +190,3 @@ class LoyaltyController extends Controller
         return redirect()->back()->with('message', __('loyalty.points_adjusted'));
     }
 }
-

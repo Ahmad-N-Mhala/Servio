@@ -52,6 +52,8 @@ Route::group([
 
         // Restaurant Selection (No Context Check Required)
         Route::get('/select-restaurant', [\App\Http\Controllers\MultiRestaurantController::class, 'index'])->name('restaurants.index');
+        Route::get('/select-restaurant/create', [\App\Http\Controllers\MultiRestaurantController::class, 'create'])->name('restaurants.create');
+        Route::post('/select-restaurant/create', [\App\Http\Controllers\MultiRestaurantController::class, 'store'])->name('restaurants.store');
         Route::post('/switch-restaurant/{restaurant}', [\App\Http\Controllers\MultiRestaurantController::class, 'switch'])->name('restaurants.switch');
 
         // Protected by Restaurant Context
@@ -129,6 +131,12 @@ Route::group([
             Route::resource('waste', \App\Http\Controllers\Tenant\WasteController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::get('inventory/{inventory}/history', [\App\Http\Controllers\Tenant\InventoryController::class, 'history'])->name('inventory.history');
             Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class)->except(['show']);
+
+            // Monthly Expenses
+            Route::resource('monthly-expenses', \App\Http\Controllers\Tenant\MonthlyExpenseController::class)->except(['show', 'create', 'edit']);
+
+            // Financial Overview (combines expenses and reports)
+            Route::get('financial', [\App\Http\Controllers\Tenant\FinancialController::class, 'index'])->name('financial.index');
 
             Route::prefix('reports')->name('reports.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\ReportController::class, 'index'])->name('sales'); // Defaulting index to sales for now, or use specific path

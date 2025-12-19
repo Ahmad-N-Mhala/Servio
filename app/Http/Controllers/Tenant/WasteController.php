@@ -142,6 +142,9 @@ class WasteController extends Controller
             $batch->decrement('quantity_remaining', $validated['waste_amount']);
             $ingredient->decrement('current_stock', $validated['waste_amount']);
 
+            // Update ingredient cost to reflect FIFO
+            $ingredient->updateCostFromFIFO();
+
             // Log Inventory Change
             InventoryLog::create([
                 'restaurant_id' => $restaurant->id,

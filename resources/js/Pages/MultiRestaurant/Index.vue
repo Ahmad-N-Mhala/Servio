@@ -163,8 +163,6 @@ const switchRestaurant = (restaurant: Restaurant) => {
 };
 
 const handleAddRestaurant = () => {
-    // For now, just navigate to plans page since we don't have create functionality yet
-    // TODO: Implement restaurant creation
-    router.get(route('plans.index'));
+    router.get(route('restaurants.create'));
 };
 </script>
