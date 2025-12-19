@@ -1,71 +1,68 @@
 <template>
     <MainLayout>
-        <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    {{ $t('inventory.title', 'Inventory Management') }}
-                </h2>
-                <Button @click="openCreateModal">
-                    {{ $t('inventory.add_item', 'Add Raw Item') }}
-                </Button>
-            </div>
-        </template>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            <!-- Table Component -->
+            <Table
+                :columns="columns"
+                :data="filteredIngredients"
+                v-model:search="search"
+                :title="$t('inventory.title', 'Inventory Management')"
+            >
+                <template #header-actions>
+                    <Button @click="openCreateModal">
+                        {{ $t('inventory.add_item', 'Add Raw Item') }}
+                    </Button>
+                </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <!-- Data Table -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Stock</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cost/Unit</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="item in ingredients" :key="item.id">
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ getLocaleName(item.name) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-bold" :class="{'text-red-500': item.current_stock <= (item.reorder_level || 0)}">
-                                            {{ item.current_stock }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ item.unit }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(item.cost) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div class="relative inline-block text-left">
-                                                <button @click="toggleDropdown(item.id)" type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                    Actions
-                                                    <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
+                <!-- Name Column -->
+                <template #cell-name="{ row }">
+                    <span class="font-medium text-gray-900">{{ getLocaleName(row.name) }}</span>
+                </template>
 
-                                                <div v-if="activeDropdown === item.id" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                                                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                                                        <button @click="openAddStockModal(item); closeDropdown()" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Add Stock</button>
-                                                        <button @click="openHistoryModal(item); closeDropdown()" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">History</button>
-                                                        <button @click="openEditModal(item); closeDropdown()" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Edit</button>
-                                                        <button @click="deleteItem(item); closeDropdown()" class="w-full text-left block px-4 py-2 text-sm text-red-700 hover:bg-red-50 hover:text-red-900" role="menuitem">Delete</button>
-                                                    </div>
-                                                </div>
-                                                <!-- Click overlay to close -->
-                                                <div v-if="activeDropdown === item.id" @click="closeDropdown()" class="fixed inset-0 z-40 bg-transparent cursor-default"></div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="ingredients.length === 0">
-                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No ingredients found.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                 <!-- Stock Column -->
+                <template #cell-current_stock="{ row }">
+                    <span 
+                        class="font-bold" 
+                        :class="{'text-red-500': row.current_stock <= (row.reorder_level || 0)}"
+                    >
+                        {{ row.current_stock }}
+                    </span>
+                </template>
+
+                <!-- Actions Column -->
+                <template #actions="{ row }">
+                    <div class="flex items-center justify-end gap-2">
+                        <button 
+                            @click="openAddStockModal(row)" 
+                            class="text-green-600 hover:text-green-800 p-1 rounded-md hover:bg-green-50 transition-colors"
+                            title="Add Stock"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        </button>
+                        <button 
+                            @click="openHistoryModal(row)" 
+                            class="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors"
+                            title="History"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </button>
+                        <button 
+                            @click="openEditModal(row)" 
+                            class="text-gray-600 hover:text-gray-800 p-1 rounded-md hover:bg-gray-50 transition-colors"
+                            title="Edit"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00-2 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button 
+                            @click="deleteItem(row)" 
+                            class="text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-50 transition-colors"
+                            title="Delete"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
                     </div>
-                </div>
-            </div>
+                </template>
+            </Table>
         </div>
 
         <!-- Create/Edit Modal -->
@@ -190,12 +187,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
+import Table from '@/Components/Table.vue';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 
@@ -206,13 +204,30 @@ const props = defineProps<{
     ingredients: any[];
 }>();
 
+const columns = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'current_stock', label: 'Current Stock', sortable: true },
+    { key: 'unit', label: 'Unit', sortable: true },
+    { key: 'cost', label: 'Cost/Unit', sortable: true, format: 'currency' as const, currency: 'AED' },
+];
+
+const search = ref('');
+
+const filteredIngredients = computed(() => {
+    if (!search.value) return props.ingredients;
+    const q = search.value.toLowerCase();
+    return props.ingredients.filter((item: any) => {
+        const name = getLocaleName(item.name).toLowerCase();
+        return name.includes(q);
+    });
+});
+
 const showCreateModal = ref(false);
 const showStockModal = ref(false);
 const showHistoryModal = ref(false);
 const isEditing = ref(false);
 const selectedItem = ref<any>(null);
 const historyLogs = ref<any[]>([]);
-const activeDropdown = ref<number | null>(null);
 
 const form = useForm({
     id: null,
@@ -232,10 +247,6 @@ const getLocaleName = (name: any) => {
     if (!name) return '';
     if (typeof name === 'string') return name;
     return name[locale.value] || name['en'] || name['ar'] || 'Unknown';
-};
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(amount);
 };
 
 const openCreateModal = () => {
@@ -314,17 +325,5 @@ const deleteItem = (item: any) => {
     if (confirm('Are you sure you want to delete this specific ingredient?')) {
         router.delete(route('inventory.destroy', item.id));
     }
-};
-
-const toggleDropdown = (id: number) => {
-    if (activeDropdown.value === id) {
-        activeDropdown.value = null;
-    } else {
-        activeDropdown.value = id;
-    }
-};
-
-const closeDropdown = () => {
-    activeDropdown.value = null;
 };
 </script>

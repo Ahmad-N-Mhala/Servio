@@ -24,11 +24,17 @@ Make sure your database credentials in `.env` are correct.
 
 # 2. Database Setup
 
-To create the tables and seed default users:
+**For first-time setup only** (this will delete all existing data):
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+**For existing setups** (safe - only runs new migrations):
 
 ```bash
 // turbo
-php artisan migrate:fresh --seed
+php artisan migrate
 ```
 
 # 3. Running the Application

@@ -1,85 +1,77 @@
 <template>
     <AdminLayout>
         <div class="space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-900">Restaurants Management</h1>
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                    <div class="relative">
-                        <input 
-                            v-model="search" 
-                            type="text" 
-                            placeholder="Search restaurants..." 
-                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-primary focus:border-primary w-full sm:w-64"
-                        >
-                        <div class="absolute left-3 top-2.5 text-gray-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                    </div>
-                    <Link :href="route('admin.restaurants.create')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/30 text-center whitespace-nowrap">
-                        Add New Restaurant
-                    </Link>
-                </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table class="w-full text-left text-sm text-gray-500">
-                    <thead class="bg-gray-50 text-gray-700 uppercase font-bold text-xs">
-                        <tr>
-                            <th class="px-6 py-4">Name & Owner</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4">Plan</th>
-                            <th class="px-6 py-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr v-for="restaurant in restaurants.data" :key="restaurant.id" class="hover:bg-gray-50/50">
-                            <td class="px-6 py-4">
-                                <div>
-                                    <div class="font-medium text-gray-900 text-base">{{ restaurant.name }}</div>
-                                    <button 
-                                        v-if="getOwner(restaurant)" 
-                                        @click="openOwnerModal(getOwner(restaurant))"
-                                        class="text-xs text-primary hover:text-primary-hover hover:underline mt-1 flex items-center gap-1 transition-colors"
-                                    >
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                        {{ getOwner(restaurant).name }}
-                                    </button>
-                                     <div v-else class="text-xs text-gray-400 mt-1 italic">No Owner Assigned</div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span 
-                                    class="px-3 py-1 rounded-full text-xs font-bold capitalize"
-                                    :class="{
-                                        'bg-green-100 text-green-700': restaurant.status === 'active',
-                                        'bg-red-100 text-red-700': restaurant.status === 'suspended' || restaurant.status === 'deleted',
-                                        'bg-gray-100 text-gray-700': !restaurant.status
-                                    }"
-                                >
-                                    {{ restaurant.status || 'Active' }}
-                                </span>
-                            </td>
-                             <td class="px-6 py-4">
-                                {{ restaurant.subscription?.plan?.name || 'No Plan' }}
-                             </td>
-                            <td class="px-6 py-4 text-right space-x-2">
-                                <Link :href="route('admin.restaurants.edit', restaurant.id)" class="text-indigo-600 hover:text-indigo-900 font-medium">Edit</Link>
-                                <button @click="deleteRestaurant(restaurant)" class="text-red-600 hover:text-red-900 font-medium">Delete</button>
-                            </td>
-                        </tr>
-                        <tr v-if="restaurants.data.length === 0">
-                             <td colspan="4" class="px-6 py-8 text-center text-gray-400">
-                                No restaurants found.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination (Basic Placeholder) -->
-            <div v-if="restaurants.links && restaurants.links.length > 3" class="flex justify-center mt-4">
-                 <span class="text-xs text-gray-400">Pagination to be implemented</span>
-            </div>
+            <Table 
+                :columns="columns"
+                :data="restaurants.data"
+                :pagination="restaurants"
+                v-model:search="search"
+                title="All Restaurants"
+            >
+                <!-- Header Actions -->
+                <template #header-actions>
+                    <Link :href="route('admin.restaurants.create')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/30 text-center whitespace-nowrap flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Add New Restaurant
+                    </Link>
+                </template>
+
+                <!-- Name & Owner Column -->
+                <template #cell-name="{ row }">
+                    <div>
+                        <div class="font-medium text-gray-900 text-base">{{ row.name }}</div>
+                        <button 
+                            v-if="getOwner(row)" 
+                            @click="openOwnerModal(getOwner(row))"
+                            class="text-xs text-primary hover:text-primary-hover hover:underline mt-1 flex items-center gap-1 transition-colors"
+                        >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            {{ getOwner(row).name }}
+                        </button>
+                        <div v-else class="text-xs text-gray-400 mt-1 italic">No Owner Assigned</div>
+                    </div>
+                </template>
+
+                <!-- Status Column -->
+                <template #cell-status="{ row }">
+                    <span 
+                        class="px-3 py-1 rounded-full text-xs font-bold capitalize inline-flex items-center gap-1"
+                        :class="{
+                            'bg-green-100 text-green-700': row.status === 'active',
+                            'bg-yellow-100 text-yellow-700': row.status === 'suspended',
+                            'bg-red-100 text-red-700': row.status === 'deleted',
+                            'bg-gray-100 text-gray-700': !row.status
+                        }"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full" :class="{
+                            'bg-green-500': row.status === 'active',
+                            'bg-yellow-500': row.status === 'suspended',
+                            'bg-red-500': row.status === 'deleted',
+                            'bg-gray-500': !row.status
+                        }"></span>
+                        {{ row.status || 'Active' }}
+                    </span>
+                </template>
+                
+                <!-- Plan Column (Custom rendering if needed, or use default) -->
+                <template #cell-subscription.plan.name="{ value }">
+                     <span class="text-gray-700 font-medium bg-gray-100 px-2 py-1 rounded-md text-xs">{{ value || 'No Plan' }}</span>
+                </template>
+
+                <!-- Actions Column -->
+                <template #actions="{ row }">
+                    <Link :href="route('admin.restaurants.edit', row.id)" class="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </Link>
+                    <button @click="deleteRestaurant(row)" class="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </template>
+            </Table>
         </div>
 
         <!-- Owner Details Modal -->
@@ -146,7 +138,14 @@ import { ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import Table from '@/Components/Table.vue';
 import { debounce } from 'lodash';
+
+const columns = [
+    { key: 'name', label: 'Name & Owner', sortable: true },
+    { key: 'status', label: 'Status', sortable: true, align: 'center' as const },
+    { key: 'subscription.plan.name', label: 'Plan', sortable: false },
+];
 
 const props = defineProps<{
     restaurants: {

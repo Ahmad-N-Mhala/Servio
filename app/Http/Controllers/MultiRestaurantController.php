@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MultiRestaurantController extends Controller
 {
+
     /**
      * Display a listing of the user's restaurants.
      */
@@ -18,12 +19,13 @@ class MultiRestaurantController extends Controller
 
         // Fetch restaurants where the user's email is associated
         // We use the central 'restaurants' table now
-        $restaurants = Restaurant::whereExists(function ($query) use ($user) {
-            $query->select(\DB::raw(1))
-                ->from('restaurant_user')
-                ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
-                ->where('restaurant_user.email', $user->email);
-        })
+        $restaurants = Restaurant::with(['subscription.plan'])
+            ->whereExists(function ($query) use ($user) {
+                $query->select(\DB::raw(1))
+                    ->from('restaurant_user')
+                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
+                    ->where('restaurant_user.email', $user->email);
+            })
             ->get()
             ->map(function ($restaurant) use ($user) {
                 // Fetch pivot data manually
@@ -32,9 +34,10 @@ class MultiRestaurantController extends Controller
                     ->where('email', $user->email)
                     ->first();
 
-                // Fetch active plan (assuming we store it on restaurant or still separate table)
-                // Ideally we should have a relationship: $restaurant->subscription
-                $planName = 'Basic'; // Placeholder until Subscription model is updated to belongsTo Restaurant
+                // Fetch active plan from the subscription relationship
+                $planName = $restaurant->subscription && $restaurant->subscription->plan
+                    ? $restaurant->subscription->plan->name
+                    : 'Free'; // Default to Free if no subscription
     
                 // Domain logic is deprecated in single-DB, so we can return null or a logical ID
                 $domain = request()->getHost(); // Just current host since we are single domain now
@@ -51,8 +54,35 @@ class MultiRestaurantController extends Controller
                 ];
             });
 
+        // Get the user's current plan (from first restaurant they own)
+        $currentPlan = null;
+        $maxRestaurants = 1; // Default limit
+
+        $firstRestaurant = Restaurant::with(['subscription.plan'])
+            ->whereExists(function ($query) use ($user) {
+                $query->select(\DB::raw(1))
+                    ->from('restaurant_user')
+                    ->whereColumn('restaurant_user.restaurant_id', 'restaurants.id')
+                    ->where('restaurant_user.email', $user->email)
+                    ->where('restaurant_user.role', 'owner');
+            })
+            ->first();
+
+        if ($firstRestaurant && $firstRestaurant->subscription && $firstRestaurant->subscription->plan) {
+            $currentPlan = $firstRestaurant->subscription->plan;
+            $maxRestaurants = $currentPlan->max_restaurants ?? 1;
+        }
+
+        // Check if user can add more restaurants
+        $canAddRestaurant = $restaurants->count() < $maxRestaurants;
+
         return Inertia::render('MultiRestaurant/Index', [
             'restaurants' => $restaurants,
+            'canAddRestaurant' => $canAddRestaurant,
+            'currentPlan' => $currentPlan ? [
+                'name' => $currentPlan->name,
+                'max_restaurants' => $maxRestaurants,
+            ] : null,
         ]);
     }
 

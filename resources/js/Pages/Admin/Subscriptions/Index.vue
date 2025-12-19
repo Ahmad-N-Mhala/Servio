@@ -7,115 +7,48 @@
         </template>
 
         <div class="py-6">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header & Search -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-900">Manage Restaurant Subscriptions</h3>
-                        <p class="mt-1 text-sm text-gray-600">View and update subscription plans for all restaurants</p>
-                    </div>
-                    <div class="relative w-full sm:w-auto">
-                        <input 
-                            v-model="search" 
-                            type="text" 
-                            placeholder="Search restaurants..." 
-                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-primary focus:border-primary w-full sm:w-64"
+            <div class="max-w-7xl mx-auto space-y-6">
+                <!-- Data Table -->
+                <Table
+                    :columns="columns"
+                    :data="restaurants.data"
+                    :pagination="restaurants"
+                    v-model:search="search"
+                    title="Manage Restaurant Subscriptions"
+                >
+                    <!-- Restaurant Column -->
+                    <template #cell-restaurant="{ row }">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ row.name }}</div>
+                            <div class="text-xs text-gray-500">{{ row.email }}</div>
+                        </div>
+                    </template>
+
+                    <!-- Plan Column -->
+                    <template #cell-subscription.plan.name="{ row }">
+                        <div v-if="row.subscription" class="text-sm text-gray-900 font-medium">
+                            {{ row.subscription.plan?.name || 'N/A' }}
+                        </div>
+                        <span v-else class="text-xs text-gray-400 italic">No subscription</span>
+                    </template>
+
+                    <!-- Actions Column -->
+                    <template #actions="{ row }">
+                        <button 
+                            @click="openEditModal(row)"
+                            class="text-primary hover:text-primary/80 text-xs font-medium px-2 py-1 rounded hover:bg-primary/5 transition-colors mr-2"
                         >
-                        <div class="absolute left-3 top-2.5 text-gray-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Restaurants Table -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Restaurant</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Plan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="restaurant in restaurants.data" :key="restaurant.id" class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ restaurant.name }}</div>
-                                    <div class="text-sm text-gray-500">{{ restaurant.email }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div v-if="restaurant.subscription" class="text-sm text-gray-900">
-                                        {{ restaurant.subscription.plan?.name || 'N/A' }}
-                                    </div>
-                                    <span v-else class="text-sm text-gray-400 italic">No subscription</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ restaurant.subscription?.starts_at ? formatDate(restaurant.subscription.starts_at) : '-' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ restaurant.subscription?.ends_at ? formatDate(restaurant.subscription.ends_at) : 'No end date' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span v-if="restaurant.subscription" :class="[
-                                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                                        restaurant.subscription.status === 'active' ? 'bg-green-100 text-green-800' : 
-                                        restaurant.subscription.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
-                                        'bg-gray-100 text-gray-800'
-                                    ]">
-                                        {{ restaurant.subscription.status }}
-                                    </span>
-                                    <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-600">
-                                        None
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button 
-                                        @click="openEditModal(restaurant)"
-                                        class="text-primary hover:text-primary/80 mr-3"
-                                    >
-                                        {{ restaurant.subscription ? 'Update' : 'Assign' }}
-                                    </button>
-                                    <button 
-                                        v-if="restaurant.subscription"
-                                        @click="deleteSubscription(restaurant.subscription.id)"
-                                        class="text-red-600 hover:text-red-900"
-                                    >
-                                        Remove
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr v-if="restaurants.data.length === 0">
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                    <p>No restaurants found.</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <!-- Pagination -->
-                    <div v-if="restaurants.data.length > 0" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-700">
-                                Showing {{ restaurants.from }} to {{ restaurants.to }} of {{ restaurants.total }} results
-                            </div>
-                            <div class="flex gap-2">
-                                <Link 
-                                    v-for="link in restaurants.links" 
-                                    :key="link.label"
-                                    :href="link.url"
-                                    :class="[
-                                        'px-3 py-1 rounded-md text-sm',
-                                        link.active ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    ]"
-                                    v-html="link.label"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            {{ row.subscription ? 'Update' : 'Assign' }}
+                        </button>
+                        <button 
+                            v-if="row.subscription"
+                            @click="deleteSubscription(row.subscription.id)"
+                            class="text-red-600 hover:text-red-900 text-xs font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                        >
+                            Remove
+                        </button>
+                    </template>
+                </Table>
             </div>
         </div>
 
@@ -198,9 +131,18 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Table from '@/Components/Table.vue';
 import { debounce } from 'lodash';
+
+const columns = [
+    { key: 'restaurant', label: 'Restaurant', sortable: false },
+    { key: 'subscription.plan.name', label: 'Current Plan', sortable: false },
+    { key: 'subscription.starts_at', label: 'Start Date', sortable: true, format: 'date' as const },
+    { key: 'subscription.ends_at', label: 'End Date', sortable: true, format: 'date' as const },
+    { key: 'subscription.status', label: 'Status', sortable: true, format: 'badge' as const },
+];
 
 const props = defineProps<{
     restaurants: {
@@ -234,10 +176,6 @@ const form = useForm({
     ends_at: '',
     status: 'active',
 });
-
-const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
 
 const openEditModal = (restaurant: any) => {
     selectedRestaurant.value = restaurant;

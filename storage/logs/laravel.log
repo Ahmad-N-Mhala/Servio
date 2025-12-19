@@ -19322,3 +19322,42 @@ LINE 1: ...ole\" from \"restaurant_user\" inner join \"users\" on \"restauran...
 [stacktrace]
 #0 {main}
 "} 
+[2025-12-19 14:18:57] local.ERROR: The "intl" PHP extension is required to use the [format] method. {"exception":"[object] (RuntimeException(code: 0): The \"intl\" PHP extension is required to use the [format] method. at /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Support/Number.php:385)
+[stacktrace]
+#0 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Support/Number.php(38): Illuminate\\Support\\Number::ensureIntlExtensionIsInstalled()
+#1 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Support/Number.php(173): Illuminate\\Support\\Number::format(48, 2, NULL)
+#2 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Database/Console/TableCommand.php(212): Illuminate\\Support\\Number::fileSize(48, 2)
+#3 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Database/Console/TableCommand.php(180): Illuminate\\Database\\Console\\TableCommand->displayForCli(Array)
+#4 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Database/Console/TableCommand.php(81): Illuminate\\Database\\Console\\TableCommand->display(Array)
+#5 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Database\\Console\\TableCommand->handle(Object(Illuminate\\Database\\DatabaseManager))
+#6 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate\\Container\\BoundMethod::{closure:Illuminate\\Container\\BoundMethod::call():35}()
+#7 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(95): Illuminate\\Container\\Util::unwrapIfClosure(Object(Closure))
+#8 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod(Object(Illuminate\\Foundation\\Application), Array, Object(Closure))
+#9 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Container/Container.php(696): Illuminate\\Container\\BoundMethod::call(Object(Illuminate\\Foundation\\Application), Array, Array, NULL)
+#10 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Console/Command.php(213): Illuminate\\Container\\Container->call(Array)
+#11 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/symfony/console/Command/Command.php(318): Illuminate\\Console\\Command->execute(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#12 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Console/Command.php(182): Symfony\\Component\\Console\\Command\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Illuminate\\Console\\OutputStyle))
+#13 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/symfony/console/Application.php(1073): Illuminate\\Console\\Command->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#14 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/symfony/console/Application.php(356): Symfony\\Component\\Console\\Application->doRunCommand(Object(Illuminate\\Database\\Console\\TableCommand), Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#15 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#16 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#17 /Users/ahmadmhala/Downloads/RestoFy-main/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#18 /Users/ahmadmhala/Downloads/RestoFy-main/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#19 {main}
+"} 
+[2025-12-19 14:30:29] local.ERROR: Cannot redeclare App\Http\Controllers\MultiRestaurantController::index() {"userId":2,"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare App\\Http\\Controllers\\MultiRestaurantController::index() at /Users/ahmadmhala/Downloads/RestoFy-main/app/Http/Controllers/MultiRestaurantController.php:64)
+[stacktrace]
+#0 {main}
+"} 
+[2025-12-19 14:30:34] local.ERROR: Cannot redeclare App\Http\Controllers\MultiRestaurantController::index() {"userId":2,"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare App\\Http\\Controllers\\MultiRestaurantController::index() at /Users/ahmadmhala/Downloads/RestoFy-main/app/Http/Controllers/MultiRestaurantController.php:64)
+[stacktrace]
+#0 {main}
+"} 
+[2025-12-19 14:30:38] local.ERROR: Cannot redeclare App\Http\Controllers\MultiRestaurantController::index() {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare App\\Http\\Controllers\\MultiRestaurantController::index() at /Users/ahmadmhala/Downloads/RestoFy-main/app/Http/Controllers/MultiRestaurantController.php:64)
+[stacktrace]
+#0 {main}
+"} 
+[2025-12-19 14:30:39] local.ERROR: Cannot redeclare App\Http\Controllers\MultiRestaurantController::index() {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare App\\Http\\Controllers\\MultiRestaurantController::index() at /Users/ahmadmhala/Downloads/RestoFy-main/app/Http/Controllers/MultiRestaurantController.php:64)
+[stacktrace]
+#0 {main}
+"} 

@@ -59,18 +59,29 @@ class RestaurantController extends Controller
 
     public function edit(\App\Models\Restaurant $restaurant)
     {
-        // Load loyalty settings if stored in settings json column or separate table
-        // Assuming for now they might be in the 'settings' JSON column based on OnboardingController
-        // Or if you want to support them as direct columns, migration is needed.
-        // Based on OnboardingController, they seem to be saved to EarningMethod model.
-
+        // Load earning method from the EarningMethod model
         $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->where('is_active', true)->first();
 
         $restaurantData = $restaurant->toArray();
         if ($earningMethod) {
-            $restaurantData['earning_method_type'] = $earningMethod->type; // 'order_total' or 'visit'
+            $restaurantData['earning_method_type'] = $earningMethod->type;
             $restaurantData['earning_points'] = $earningMethod->points;
+            $restaurantData['earning_method_name_en'] = is_array($earningMethod->name) ? ($earningMethod->name['en'] ?? '') : $earningMethod->name;
+            $restaurantData['earning_method_name_ar'] = is_array($earningMethod->name) ? ($earningMethod->name['ar'] ?? '') : '';
+            $restaurantData['earning_method_description'] = $earningMethod->description;
+            $restaurantData['earning_currency_amount'] = $earningMethod->currency_amount;
+            $restaurantData['earning_min_spent'] = $earningMethod->min_spent;
+            $restaurantData['earning_max_points'] = $earningMethod->max_points;
+            $restaurantData['earning_is_active'] = $earningMethod->is_active;
         }
+
+        // Load Owner Email specifically
+        $ownerRef = \DB::table('restaurant_user')
+            ->where('restaurant_id', $restaurant->id)
+            ->where('role', 'owner')
+            ->first();
+
+        $restaurantData['owner_email'] = $ownerRef ? $ownerRef->email : $restaurant->email;
 
         return inertia('Admin/Restaurants/Edit', [
             'restaurant' => $restaurantData
@@ -79,39 +90,113 @@ class RestaurantController extends Controller
 
     public function update(Request $request, \App\Models\Restaurant $restaurant)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:restaurants,slug,' . $restaurant->id,
-            'email' => 'required|email',
-            'phone' => 'nullable|string',
-            'currency' => 'required|string|size:3',
-            'status' => 'required|string|in:active,suspended',
-            'address' => 'nullable|string',
-            'city' => 'nullable|string',
-            'country' => 'nullable|string',
-            'earning_method_type' => 'nullable|string|in:order_total,visit',
-            'earning_points' => 'nullable|numeric|min:1',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'slug' => 'required|string|max:255|unique:restaurants,slug,' . $restaurant->id,
+                'email' => 'required|email',
+                'phone' => 'nullable|string',
+                'currency' => 'required|string|size:3',
+                'status' => 'required|string|in:active,suspended',
+                'address' => 'nullable|string',
+                'city' => 'nullable|string',
+                'country' => 'nullable|string',
+                'earning_method_type' => 'nullable|string|in:order_total,visit',
+                'earning_points' => 'nullable|numeric|min:1',
+                'earning_method_name_en' => 'nullable|string|max:255',
+                'earning_method_name_ar' => 'nullable|string|max:255',
+                'earning_method_description' => 'nullable|string',
+                'earning_currency_amount' => 'nullable|numeric|min:0.01',
+                'earning_min_spent' => 'nullable|numeric|min:0',
+                'earning_max_points' => 'nullable|numeric|min:1',
+                'earning_is_active' => 'nullable|boolean',
+                'new_owner_email' => 'nullable|email|unique:users,email',
+                'new_owner_password' => 'nullable|string|min:8',
+            ]);
 
-        $restaurant->update($validated);
+            \DB::beginTransaction();
 
-        // Update Loyalty Settings
-        if ($request->has('earning_method_type') && $request->has('earning_points')) {
-            \App\Models\EarningMethod::updateOrCreate(
-                ['restaurant_id' => $restaurant->id],
-                [
-                    'name' => $request->earning_method_type === 'order_total' ? 'Points per Spend' : 'Points per Visit',
-                    'type' => $request->earning_method_type,
-                    'points' => $request->earning_points,
-                    'is_active' => true,
-                    // Default values for other fields if creating new
-                    'currency_amount' => $request->earning_method_type === 'order_total' ? 1 : null,
-                ]
-            );
+            $restaurant->update($validated);
+
+            // Update Earning Method Settings (comprehensive)
+            if ($request->has('earning_method_type') && $request->has('earning_points')) {
+                \App\Models\EarningMethod::updateOrCreate(
+                    ['restaurant_id' => $restaurant->id],
+                    [
+                        'name' => [
+                            'en' => $request->earning_method_name_en ?? 'Loyalty Points',
+                            'ar' => $request->earning_method_name_ar ?? 'نقاط الولاء',
+                        ],
+                        'description' => $request->earning_method_description,
+                        'type' => $request->earning_method_type,
+                        'points' => $request->earning_points,
+                        'currency_amount' => $request->earning_method_type === 'order_total' ? ($request->earning_currency_amount ?? 1) : null,
+                        'min_spent' => $request->earning_min_spent,
+                        'max_points' => $request->earning_max_points,
+                        'is_active' => $request->earning_is_active ?? true,
+                    ]
+                );
+            }
+
+            // Handle Owner Email Change
+            if ($request->filled('new_owner_email')) {
+                // Get the current owner email from restaurant_user pivot table
+                $currentOwner = \DB::table('restaurant_user')
+                    ->where('restaurant_id', $restaurant->id)
+                    ->where('role', 'owner')
+                    ->first();
+
+                if ($currentOwner) {
+                    // Find the user by current email
+                    $user = \App\Models\User::where('email', $currentOwner->email)->first();
+
+                    if ($user) {
+                        // Update user email
+                        $user->email = $request->new_owner_email;
+                        $user->save();
+
+                        // Update pivot table
+                        \DB::table('restaurant_user')
+                            ->where('restaurant_id', $restaurant->id)
+                            ->where('email', $currentOwner->email)
+                            ->update(['email' => $request->new_owner_email]);
+
+                        // Update restaurant email
+                        $restaurant->update(['email' => $request->new_owner_email]);
+                    }
+                }
+            }
+
+            // Handle Owner Password Reset
+            if ($request->filled('new_owner_password')) {
+                // Get the owner from restaurant_user pivot table
+                $ownerPivot = \DB::table('restaurant_user')
+                    ->where('restaurant_id', $restaurant->id)
+                    ->where('role', 'owner')
+                    ->first();
+
+                if ($ownerPivot) {
+                    // Find and update the user's password
+                    $user = \App\Models\User::where('email', $ownerPivot->email)->first();
+
+                    if ($user) {
+                        $user->password = \Hash::make($request->new_owner_password);
+                        $user->save();
+                    }
+                }
+            }
+
+            \DB::commit();
+
+            return redirect()->route('admin.restaurants.index')
+                ->with('success', 'Restaurant updated successfully.' .
+                    ($request->filled('new_owner_email') ? ' Owner email changed.' : '') .
+                    ($request->filled('new_owner_password') ? ' Owner password reset.' : ''));
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return back()->with('error', 'Update failed: ' . $e->getMessage())->withInput();
         }
-
-        return redirect()->route('admin.restaurants.index')
-            ->with('success', 'Restaurant updated successfully.');
     }
 
     public function destroy(\App\Models\Restaurant $restaurant)
