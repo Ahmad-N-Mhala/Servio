@@ -8,8 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('payment_status')->default('unpaid')->after('status');
-            $table->string('payment_method')->nullable()->after('payment_status');
+            $table->string('payment_status')->default('unpaid');
+            $table->string('payment_method')->nullable();
         });
     }
 

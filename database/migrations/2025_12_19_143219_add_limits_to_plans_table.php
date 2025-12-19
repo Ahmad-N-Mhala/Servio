@@ -11,10 +11,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('plans', function (Blueprint $table) {
-            $table->integer('max_restaurants')->default(1)->after('features');
-            $table->integer('max_users')->default(5)->after('max_restaurants');
-            $table->integer('max_orders_per_month')->nullable()->after('max_users');
-            $table->boolean('is_featured')->default(false)->after('is_active');
+            $table->integer('max_restaurants')->default(1);
+            $table->integer('max_users')->default(5);
+            $table->integer('max_orders_per_month')->nullable();
+            $table->boolean('is_featured')->default(false);
         });
     }
 

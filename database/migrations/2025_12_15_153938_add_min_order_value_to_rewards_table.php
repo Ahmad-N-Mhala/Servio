@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('rewards', function (Blueprint $table) {
-            $table->decimal('min_order_value', 10, 2)->default(0)->after('points_required');
+            $table->decimal('min_order_value', 10, 2)->default(0);
         });
     }
 

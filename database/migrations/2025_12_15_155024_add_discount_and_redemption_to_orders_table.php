@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->decimal('discount_amount', 10, 2)->default(0)->after('tax');
+            $table->decimal('discount_amount', 10, 2)->default(0);
         });
     }
 

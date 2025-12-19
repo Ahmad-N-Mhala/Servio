@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('waste_logs', function (Blueprint $table) {
-            $table->foreignId('ingredient_id')->nullable()->after('restaurant_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('ingredient_id')->nullable()->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('menu_item_id')->nullable()->change();
         });
     }

@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('reward_redemptions', function (Blueprint $table) {
@@ -24,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['customer_id', 'status']);
-            $table->index('code');
+
         });
     }
 

@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('earning_methods', function (Blueprint $table) {
-            $table->decimal('min_spent', 10, 2)->nullable()->after('points');
-            $table->integer('max_points')->nullable()->after('min_spent');
+            $table->decimal('min_spent', 10, 2)->nullable();
+            $table->integer('max_points')->nullable();
         });
     }
 

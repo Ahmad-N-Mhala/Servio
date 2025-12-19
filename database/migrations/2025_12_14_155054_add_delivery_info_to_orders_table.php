@@ -8,8 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('delivery_provider')->nullable()->after('type'); // e.g. noon, talabat
-            $table->string('delivery_order_id')->nullable()->after('delivery_provider'); // External ID
+            $table->string('delivery_provider')->nullable(); // e.g. noon, talabat
+            $table->string('delivery_order_id')->nullable(); // External ID
         });
     }
 

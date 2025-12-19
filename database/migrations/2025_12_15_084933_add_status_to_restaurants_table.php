@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('restaurants', function (Blueprint $table) {
-            $table->string('status')->default('active')->after('locale');
+            $table->string('status')->default('active');
         });
     }
 

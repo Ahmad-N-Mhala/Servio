@@ -41,7 +41,7 @@ return new class extends Migration {
 
         // Customers
         Schema::table('customers', function (Blueprint $table) {
-            $table->index(['restaurant_id', 'phone']);
+
         });
 
         // Loyalty

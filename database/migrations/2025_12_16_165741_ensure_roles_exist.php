@@ -13,7 +13,7 @@ return new class extends Migration {
         $roles = array_keys(config('roles.roles', []));
 
         foreach ($roles as $role) {
-            \Spatie\Permission\Models\Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
+            \App\Models\Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }
     }
 

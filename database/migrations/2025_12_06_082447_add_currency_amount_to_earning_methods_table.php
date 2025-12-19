@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('earning_methods', function (Blueprint $table) {
-            $table->decimal('currency_amount', 10, 2)->default(1)->after('points');
+            $table->decimal('currency_amount', 10, 2)->default(1);
         });
     }
 
