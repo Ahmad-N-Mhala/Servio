@@ -25,6 +25,11 @@ class InventoryController extends Controller
         }
 
         $ingredients = Ingredient::where('restaurant_id', $restaurant->id)
+            ->with([
+                'batches' => function ($query) {
+                    $query->orderBy('created_at', 'asc');
+                }
+            ])
             ->when($request->search, function ($query, $search) {
                 $query->where('name.en', 'like', "%{$search}%")
                     ->orWhere('name.ar', 'like', "%{$search}%");
@@ -56,6 +61,7 @@ class InventoryController extends Controller
             'current_stock' => 'required|numeric|min:0',
             'cost' => 'required|numeric|min:0',
             'reorder_level' => 'nullable|numeric|min:0',
+            'expiration_date' => 'nullable|date',
         ]);
 
         $validated['restaurant_id'] = $restaurant->id;
@@ -71,10 +77,11 @@ class InventoryController extends Controller
         \App\Models\IngredientBatch::create([
             'ingredient_id' => $ingredient->id,
             'batch_number' => 'Batch 1',
-            'quantity_received' => $validated['current_stock'],
+            'quantity_initial' => $validated['current_stock'],
             'quantity_remaining' => $validated['current_stock'],
             'cost_per_unit' => $validated['cost'],
             'received_at' => now(),
+            'expiration_date' => $validated['expiration_date'] ?? null,
         ]);
 
         // Log the creation of new ingredient with initial stock
@@ -127,6 +134,7 @@ class InventoryController extends Controller
             'reorder_level' => 'nullable|numeric|min:0',
             'add_stock' => 'nullable|numeric|min:0',
             'added_cost' => 'nullable|numeric|min:0', // New field for the price of the *new* stock
+            'expiration_date' => 'nullable|date',
         ]);
 
         if (is_string($request->name)) {
@@ -151,7 +159,7 @@ class InventoryController extends Controller
                 'quantity_initial' => $addedQty,
                 'quantity_remaining' => $addedQty,
                 'cost_per_unit' => $incomingCost,
-                'expiration_date' => null,
+                'expiration_date' => $validated['expiration_date'] ?? null,
             ]);
 
             // Update Total Stock (Sum of all batches essentially, but we store it for performance)

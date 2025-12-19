@@ -16,7 +16,12 @@
 
                 <!-- Name Column -->
                 <template #cell-name="{ row }">
-                    <span class="font-medium text-gray-900">{{ getLocaleName(row.name) }}</span>
+                    <button 
+                        @click="openBatchesModal(row)"
+                        class="font-medium text-primary hover:text-primary-hover hover:underline text-left transition-all"
+                    >
+                        {{ getLocaleName(row.name) }}
+                    </button>
                 </template>
 
                  <!-- Stock Column -->
@@ -26,6 +31,13 @@
                         :class="{'text-red-500': row.current_stock <= (row.reorder_level || 0)}"
                     >
                         {{ row.current_stock }}
+                    </span>
+                </template>
+
+                <!-- Total Value Column -->
+                <template #cell-total_value="{ row }">
+                    <span class="font-bold text-gray-900">
+                        {{ formatCurrency(row.current_stock * row.cost) }}
                     </span>
                 </template>
 
@@ -92,6 +104,9 @@
                             <Input id="reorder" type="number" step="0.0001" v-model="form.reorder_level" label="Reorder Level" />
                         </div>
                     </div>
+                    <div class="mb-4">
+                        <Input id="expiry" type="date" v-model="form.expiration_date" label="Expiry Date (Optional)" />
+                    </div>
                     <div class="flex justify-end mt-6">
                         <Button type="submit" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                             Save
@@ -126,6 +141,9 @@
                         <p class="text-xs text-gray-500 mt-1">
                             This will create a new batch with the specified cost. Using FIFO (First-In, First-Out) for usage.
                         </p>
+                    </div>
+                    <div class="mb-4">
+                        <Input id="stock_expiry" type="date" v-model="stockForm.expiration_date" label="Batch Expiry Date (Optional)" />
                     </div>
                     <div class="flex justify-end mt-6">
                         <Button type="submit" class="ml-3" :class="{ 'opacity-25': stockForm.processing }" :disabled="stockForm.processing">
@@ -183,6 +201,76 @@
             </div>
         </Modal>
 
+        <!-- Batches Modal -->
+        <Modal :show="showBatchesModal" @close="closeBatchesModal" maxWidth="4xl">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        Stock Batches: {{ getLocaleName(selectedItem?.name) }}
+                    </h3>
+                    <div class="text-sm px-3 py-1 bg-primary/10 text-primary rounded-full font-semibold">
+                        Total Stock: {{ selectedItem?.current_stock }} {{ selectedItem?.unit }}
+                    </div>
+                </div>
+
+                <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider">Batch #</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Initial Qty</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Remaining</th>
+                                    <th class="px-6 py-3 text-right font-semibold text-gray-500 uppercase tracking-wider">Cost/Unit</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Received At</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Expiry</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-for="batch in selectedIngredientBatches" :key="batch.id" :class="{'bg-red-50/30': batch.quantity_remaining <= 0}">
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                                        {{ batch.batch_number }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-gray-600">
+                                        {{ batch.quantity_initial }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span 
+                                            class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                                            :class="batch.quantity_remaining > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                        >
+                                            {{ batch.quantity_remaining }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right font-semibold text-gray-900">
+                                        {{ formatCurrency(batch.cost_per_unit) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                                        {{ new Date(batch.created_at).toLocaleDateString() }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                                        {{ batch.expiration_date ? new Date(batch.expiration_date).toLocaleDateString() : '-' }}
+                                    </td>
+                                </tr>
+                                <tr v-if="selectedIngredientBatches.length === 0">
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">
+                                        No batches found for this ingredient.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <Button variant="secondary" @click="closeBatchesModal" class="px-6">Close</Button>
+                </div>
+            </div>
+        </Modal>
+
     </MainLayout>
 </template>
 
@@ -209,6 +297,7 @@ const columns = [
     { key: 'current_stock', label: 'Current Stock', sortable: true },
     { key: 'unit', label: 'Unit', sortable: true },
     { key: 'cost', label: 'Cost/Unit', sortable: true, format: 'currency' as const, currency: 'AED' },
+    { key: 'total_value', label: 'Total Value', sortable: true, format: 'currency' as const, currency: 'AED' },
 ];
 
 const search = ref('');
@@ -225,9 +314,11 @@ const filteredIngredients = computed(() => {
 const showCreateModal = ref(false);
 const showStockModal = ref(false);
 const showHistoryModal = ref(false);
+const showBatchesModal = ref(false);
 const isEditing = ref(false);
 const selectedItem = ref<any>(null);
 const historyLogs = ref<any[]>([]);
+const selectedIngredientBatches = ref<any[]>([]);
 
 const form = useForm({
     id: null,
@@ -236,11 +327,13 @@ const form = useForm({
     current_stock: 0,
     cost: 0,
     reorder_level: 0,
+    expiration_date: '',
 });
 
 const stockForm = useForm({
     add_stock: 0,
     added_cost: 0,
+    expiration_date: '',
 });
 
 const getLocaleName = (name: any) => {
@@ -325,5 +418,24 @@ const deleteItem = (item: any) => {
     if (confirm('Are you sure you want to delete this specific ingredient?')) {
         router.delete(route('inventory.destroy', item.id));
     }
+};
+
+const openBatchesModal = (item: any) => {
+    selectedItem.value = item;
+    selectedIngredientBatches.value = item.batches || [];
+    showBatchesModal.value = true;
+};
+
+const closeBatchesModal = () => {
+    showBatchesModal.value = false;
+    selectedItem.value = null;
+    selectedIngredientBatches.value = [];
+};
+
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-AE', {
+        style: 'currency',
+        currency: 'AED',
+    }).format(amount);
 };
 </script>

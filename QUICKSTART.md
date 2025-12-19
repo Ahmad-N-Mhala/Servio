@@ -46,10 +46,12 @@ Located in **Growth > Financial**, this section provides:
 - **Monthly Expenses**: Manual expense tracking + **Auto-calculated Inventory Purchases**.
 - **Sales Reports**: Comprehensive analytics on revenue and orders.
 
-### **📦 Inventory FIFO Logic**
+### **📦 Inventory FIFO & Tracking**
 The system now uses **First-In, First-Out (FIFO)** for inventory valuation:
 - **Automatic Cost Update**: The "Cost/Unit" of an ingredient automatically reflects the cost of the **oldest batch** currently in stock.
 - **Batch Tracking**: Each stock addition is tracked as a separate batch with its specific purchase price.
+- **Total Value**: New column in inventory table showing the total financial value of each item (Stock × Cost).
+- **Expiry Dates**: Optional expiry tracking for both new ingredients and specific stock additions.
 - **Dynamic Pricing**: Once the oldest batch is finished, the ingredient price automatically updates to the next oldest batch.
 
 ---

@@ -9,7 +9,7 @@ A comprehensive multi-tenant restaurant management application built with Larave
 - 🔐 **Authentication** - Secure login system with tenant isolation
 - 📊 **Dashboard** - Comprehensive management dashboard with Net Profit metrics
 - 💰 **Financial Management** - Monthly expenses, sales reports, and auto-calculated inventory costs
-- 📦 **Inventory FIFO** - Smart stock tracking using First-In, First-Out pricing
+- 📦 **Inventory FIFO & Tracking** - Smart stock tracking with Batch management, Total Value calculation, and Expiry date alerts
 - 🎨 **Modern UI** - Built with Vue.js 3 and Inertia.js
 
 ## 🚀 Quick Start
