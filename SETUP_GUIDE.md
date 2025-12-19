@@ -9,7 +9,7 @@ Before you begin, ensure you have the following installed:
 - **PHP 8.1 or higher**
 - **Composer** (PHP dependency manager)
 - **Node.js 18.x or higher** and **npm**
-- **PostgreSQL 14 or higher**
+- **MongoDB** (Local or Atlas)
 - **Git**
 
 ---
@@ -49,18 +49,14 @@ cp .env.example .env
 
 ### Configure Database
 
-Edit the `.env` file and set your database credentials:
+Edit the `.env` file and set your MongoDB credentials:
 
 ```env
-DB_CONNECTION=pgsql
+DB_CONNECTION=mongodb
 DB_HOST=127.0.0.1
-DB_PORT=5432
+DB_PORT=27017
 DB_DATABASE=restaurfy_central
-DB_USERNAME=your_postgres_username
-DB_PASSWORD=your_postgres_password
 ```
-
-**Important:** Replace `your_postgres_username` and `your_postgres_password` with your actual PostgreSQL credentials.
 
 ### Generate Application Key
 
@@ -72,34 +68,23 @@ php artisan key:generate
 
 ## Step 4: Database Setup
 
-### Create Databases
+### Restore Database Backup
 
-Create the required PostgreSQL databases:
+The project includes a full database backup in the root directory. Restore it using `mongorestore`:
 
 ```bash
-# Connect to PostgreSQL
-psql -U your_postgres_username
-
-# Create central database
-CREATE DATABASE restaurfy_central;
-
-# Create tenant database
-CREATE DATABASE restaurfy_tenant_ahmadtest;
-
-# Exit psql
-\q
+# Restore the bundled MongoDB dump
+mongorestore --archive=database_dump.gz --gzip
 ```
 
-### Restore Database Backups
-
-The project includes database backups in the `database/backups/` directory. Restore them:
+**Alternative:** If you want to start fresh:
 
 ```bash
-# Restore central database
-psql -U your_postgres_username -d restaurfy_central < database/backups/restaurfy_central.sql
+# Run migrations
+php artisan migrate
 
-# Restore tenant database
-psql -U your_postgres_username -d restaurfy_tenant_ahmadtest < database/backups/restaurfy_tenant_ahmadtest.sql
+# Run seeders for demo data
+php artisan db:seed --class=DashboardDemoSeeder
 ```
 
 **Alternative:** If you want to start fresh without the backup data:
@@ -290,8 +275,8 @@ RestoFy-main/
 
 - **Backend:** Laravel 10.x (PHP)
 - **Frontend:** Vue.js 3 with Inertia.js
-- **Database:** PostgreSQL
-- **Multi-tenancy:** Laravel Tenancy (stancl/tenancy)
+- **Database:** MongoDB
+- **Multi-tenancy:** Laravel Tenancy (stancl/tenancy configured for MongoDB)
 - **Styling:** CSS
 - **Localization:** mcamara/laravel-localization
 
@@ -319,7 +304,7 @@ Every time you want to work on the project:
 
 Press `Ctrl + C` in each terminal window.
 
-**Note:** Your data persists in the PostgreSQL database, so stopping the servers does not delete any data.
+**Note:** Your data persists in the MongoDB database, so stopping the servers does not delete any data.
 
 ---
 
