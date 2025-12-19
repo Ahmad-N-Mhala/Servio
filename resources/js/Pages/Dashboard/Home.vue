@@ -21,8 +21,6 @@
                     :value="stats.total_orders"
                     icon="orders"
                     color="blue"
-                    :trend="12"
-                    subtitle="vs previous period"
                     class="cursor-pointer"
                     @click="fetchDetails('total_orders')"
                 />
@@ -32,7 +30,6 @@
                     :value="formatCurrency(stats.revenue)"
                     icon="revenue"
                     color="yellow"
-                    :trend="15"
                     subtitle="total revenue"
                     class="cursor-pointer"
                     @click="fetchDetails('revenue')"
