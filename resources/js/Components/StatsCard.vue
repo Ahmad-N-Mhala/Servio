@@ -3,7 +3,7 @@
         class="relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 dark:border-gray-700"
         :class="gradientClass"
     >
-        <div class="p-6 relative z-10">
+        <div class="p-4 sm:p-6 relative z-10">
             <div class="flex items-center justify-between mb-4">
                 <div :class="`p-3 rounded-xl ${iconBgClass}`">
                     <component :is="iconComponent" class="w-6 h-6" :class="iconColorClass" />
@@ -21,7 +21,7 @@
             
             <div>
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ title }}</p>
-                <p class="text-3xl font-bold text-gray-900 dark:text-white">
+                <p class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                     <span ref="valueElement">{{ displayValue }}</span>
                 </p>
                 <p v-if="subtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ subtitle }}</p>

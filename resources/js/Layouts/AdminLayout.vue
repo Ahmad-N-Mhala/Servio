@@ -438,7 +438,7 @@ const toggleMenu = (key: string) => {
 const userName = computed(() => (page.props.auth as any)?.user?.name || 'User');
 const userEmail = computed(() => (page.props.auth as any)?.user?.email || 'user@example.com');
 const userAvatarUrl = computed(() => {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=FF6B35&color=fff&bold=true`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=4F46E5&color=fff&bold=true`;
 });
 
 // Toast state

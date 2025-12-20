@@ -24,17 +24,20 @@ Make sure your database credentials in `.env` are correct.
 
 # 2. Database Setup
 
-**For first-time setup only** (this will delete all existing data):
+**Option 1: Restore Database Backup (Recommended)**
+This restores the pre-configured environment with all demo data.
 
 ```bash
-php artisan migrate:fresh --seed
+mongorestore --archive=database_dump.gz --gzip
 ```
 
-**For existing setups** (safe - only runs new migrations):
+**Option 2: Fresh Install**
+This runs migrations and seeds default data.
 
 ```bash
+php artisan migrate --seed
 // turbo
-php artisan migrate
+php artisan db:seed --class=DashboardDemoSeeder
 ```
 
 # 3. Running the Application

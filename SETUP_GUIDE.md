@@ -77,31 +77,26 @@ The project includes a full database backup in the root directory. Restore it us
 mongorestore --archive=database_dump.gz --gzip
 ```
 
-**Alternative:** If you want to start fresh:
+**Alternative 1: Fresh Install (Essential Data Only)**
+This will set up the database structure and create the default roles, plans, and super admin.
 
 ```bash
-# Run migrations
-php artisan migrate
-
-# Run seeders for demo data
-php artisan db:seed --class=DashboardDemoSeeder
+php artisan migrate --seed
 ```
 
-**Alternative:** If you want to start fresh without the backup data:
+**Alternative 2: Fresh Install with Demo Data**
+This adds sample data to populate the dashboard for testing purposes.
 
 ```bash
-# Run migrations
-php artisan migrate
-
-# Run seeders (if available)
-php artisan db:seed
+php artisan migrate --seed
+php artisan db:seed --class=DashboardDemoSeeder
 ```
 
 ---
 
-## Step 5: Configure Hosts File
+## Step 5: Configure Hosts File (Optional)
 
-The application uses subdomain-based multi-tenancy. You need to add the tenant domain to your hosts file.
+The application can run on `localhost`. However, if you want to test subdomain-based multi-tenancy (e.g., `ahmadtest.localhost`), add the domain to your hosts file.
 
 ### On macOS/Linux:
 
@@ -167,12 +162,12 @@ npm run dev
 
 ## Step 8: Access the Application
 
-### Tenant Login
+### Login
 
 Open your browser and navigate to:
 
 ```
-http://ahmadtest.localhost:8000/en/login
+http://localhost:8000/en/login
 ```
 
 ### Login Credentials
@@ -203,19 +198,19 @@ You can switch between locales by changing the URL prefix.
 
 ### Issue: "Connection refused" or Database Error
 
-**Solution:** Make sure PostgreSQL is running and the credentials in `.env` are correct.
+**Solution:** Make sure MongoDB is running and the credentials in `.env` are correct.
 
 ```bash
-# Check if PostgreSQL is running (macOS)
+# Check if MongoDB is running (macOS)
 brew services list
 
-# Start PostgreSQL if not running
-brew services start postgresql@14
+# Start MongoDB if not running
+brew services start mongodb-community
 ```
 
 ### Issue: "Tenant not found"
 
-**Solution:** Make sure you're accessing the application through `ahmadtest.localhost:8000`, not `localhost:8000`.
+**Solution:** Make sure you're accessing the application through the correct domain configured in your hosts file (e.g., `ahmadtest.localhost:8000`).
 
 ### Issue: Assets not loading
 
@@ -241,11 +236,8 @@ php artisan route:clear
 To create a fresh backup of your databases:
 
 ```bash
-# Backup central database
-pg_dump -U your_postgres_username -d restaurfy_central > database/backups/restaurfy_central_$(date +%Y%m%d).sql
-
-# Backup tenant database
-pg_dump -U your_postgres_username -d restaurfy_tenant_ahmadtest > database/backups/restaurfy_tenant_ahmadtest_$(date +%Y%m%d).sql
+# Backup all databases
+mongodump --uri="mongodb://127.0.0.1:27017" --gzip --archive=database/backups/full_backup_$(date +%Y%m%d).gz
 ```
 
 ---
@@ -256,7 +248,7 @@ pg_dump -U your_postgres_username -d restaurfy_tenant_ahmadtest > database/backu
 RestoFy-main/
 ├── app/                    # Application logic
 ├── database/
-│   ├── backups/           # Database SQL backups
+│   ├── backups/           # Database backups
 │   ├── migrations/        # Database migrations
 │   └── seeders/           # Database seeders
 ├── public/                # Public assets

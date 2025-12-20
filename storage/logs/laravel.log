@@ -25621,3 +25621,25 @@ LINE 1: ...ole\" from \"restaurant_user\" inner join \"users\" on \"restauran...
 [2025-12-19 18:21:15] local.INFO: POS Index - Restaurant ID: 694579e833231912b007b6c3  
 [2025-12-19 18:21:15] local.INFO: POS Index - Orders count: 0  
 [2025-12-19 18:21:15] local.INFO: POS Index - Total orders for restaurant: 3  
+[2025-12-20 07:55:51] local.ERROR: Onboarding failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 08:07:24] local.INFO: POS Index - Restaurant ID: 694579e833231912b007b6c3  
+[2025-12-20 08:07:24] local.INFO: POS Index - Orders count: 0  
+[2025-12-20 08:07:24] local.INFO: POS Index - Total orders for restaurant: 3  
+[2025-12-20 08:26:49] local.INFO: POS Index - Restaurant ID: 694579e833231912b007b6c3  
+[2025-12-20 08:26:49] local.INFO: POS Index - Orders count: 0  
+[2025-12-20 08:26:49] local.INFO: POS Index - Total orders for restaurant: 3  
+[2025-12-20 08:30:12] local.INFO: POS Index - Restaurant ID: 694579e833231912b007b6c3  
+[2025-12-20 08:30:12] local.INFO: POS Index - Orders count: 0  
+[2025-12-20 08:30:12] local.INFO: POS Index - Total orders for restaurant: 3  
+[2025-12-20 08:34:53] local.ERROR: Restaurant Creation failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 08:35:14] local.ERROR: Restaurant Creation failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 08:36:08] local.ERROR: Restaurant Creation failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 09:08:27] local.ERROR: Restaurant Creation failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 09:25:21] local.INFO: POS Index - Restaurant ID: 694579e833231912b007b6c3  
+[2025-12-20 09:25:21] local.INFO: POS Index - Orders count: 0  
+[2025-12-20 09:25:21] local.INFO: POS Index - Total orders for restaurant: 3  
+[2025-12-20 09:53:21] local.ERROR: Onboarding failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 09:54:07] local.ERROR: Onboarding failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 10:07:36] local.ERROR: Onboarding failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 10:13:33] local.ERROR: Onboarding failed: Transaction numbers are only allowed on a replica set member or mongos  
+[2025-12-20 10:18:24] local.ERROR: Onboarding failed: Transaction numbers are only allowed on a replica set member or mongos  

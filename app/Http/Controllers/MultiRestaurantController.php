@@ -145,7 +145,19 @@ class MultiRestaurantController extends Controller
         $subscription = $existingRestaurant->subscription;
         $plan = $subscription->plan;
 
-        \Illuminate\Support\Facades\DB::beginTransaction();
+        $useTransactions = true;
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+        } catch (\Exception $e) {
+            // Check if it's the "Transaction numbers are only allowed on a replica set member" error
+            if (str_contains($e->getMessage(), 'replica set member')) {
+                $useTransactions = false;
+                \Log::warning('MongoDB Transaction skipped: Server is running as standalone instance.');
+            } else {
+                throw $e;
+            }
+        }
+
         try {
             // 1. Create Restaurant
             $restaurant = Restaurant::create([
@@ -195,7 +207,9 @@ class MultiRestaurantController extends Controller
                 'ends_at' => $subscription->billing_cycle === 'yearly' ? now()->addYear() : now()->addMonth(),
             ]);
 
-            \Illuminate\Support\Facades\DB::commit();
+            if ($useTransactions) {
+                \Illuminate\Support\Facades\DB::commit();
+            }
 
             // Setup Session
             session(['active_restaurant_id' => $restaurant->id]);
@@ -203,7 +217,9 @@ class MultiRestaurantController extends Controller
             return redirect()->route('dashboard')->with('success', 'Restaurant created successfully!');
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
+            if ($useTransactions) {
+                \Illuminate\Support\Facades\DB::rollBack();
+            }
             \Log::error('Restaurant Creation failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Creation failed: ' . $e->getMessage()]);
         }

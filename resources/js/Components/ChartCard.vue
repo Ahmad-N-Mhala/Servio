@@ -19,7 +19,7 @@
         </div>
         
         <!-- Chart Container -->
-        <div class="p-6" :style="{ height: height }">
+        <div class="p-4 sm:p-6" :style="{ height: height }">
             <slot></slot>
         </div>
     </div>

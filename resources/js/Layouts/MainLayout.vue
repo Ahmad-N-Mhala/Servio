@@ -18,16 +18,27 @@
             <!-- Logo Section with Collapse Button -->
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-100/50 dark:border-gray-700/50">
                 <Logo v-if="!isSidebarCollapsed" />
-                <button 
-                    @click="isSidebarCollapsed = !isSidebarCollapsed"
-                    class="hidden lg:flex p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
-                    :class="isSidebarCollapsed ? 'mx-auto' : ''"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path v-if="!isSidebarCollapsed" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="currentLocale === 'ar' ? 'M13 5l7 7-7 7M5 5l7 7-7 7' : 'M11 19l-7-7 7-7m8 14l-7-7 7-7'" />
-                        <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="currentLocale === 'ar' ? 'M11 19l-7-7 7-7m8 14l-7-7 7-7' : 'M13 5l7 7-7 7M5 5l7 7-7 7'" />
-                    </svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button 
+                        @click="isSidebarCollapsed = !isSidebarCollapsed"
+                        class="hidden lg:flex p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                        :class="isSidebarCollapsed ? 'mx-auto' : ''"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path v-if="!isSidebarCollapsed" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="currentLocale === 'ar' ? 'M13 5l7 7-7 7M5 5l7 7-7 7' : 'M11 19l-7-7 7-7m8 14l-7-7 7-7'" />
+                            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="currentLocale === 'ar' ? 'M11 19l-7-7 7-7m8 14l-7-7 7-7' : 'M13 5l7 7-7 7M5 5l7 7-7 7'" />
+                        </svg>
+                    </button>
+                    <!-- Mobile Close Button -->
+                    <button 
+                        @click="isSidebarOpen = false"
+                        class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
             
             <!-- Navigation (Scrollable) -->
@@ -447,78 +458,7 @@
                 </div>
             </nav>
 
-            <!-- Sidebar Footer - Subscription Info -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100/50 dark:border-gray-700/50" v-if="!isSidebarCollapsed">
-                <Link 
-                    :href="route('plans.index')"
-                    class="block group"
-                >
-                    <div 
-                        v-if="currentSubscription"
-                        class="px-3 py-3 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all duration-200 cursor-pointer border border-primary/20 hover:border-primary/30"
-                    >
-                        <div class="flex items-start gap-3">
-                            <div class="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1">
-                                    <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">{{ currentSubscription.plan.name }}</p>
-                                    <svg class="w-3 h-3 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </div>
-                                <p class="text-[10px] text-gray-600 dark:text-gray-400 mb-1">
-                                    <span class="font-medium">{{ subscriptionStatus }}</span>
-                                </p>
-                                <div class="flex items-center gap-1 text-[10px] text-gray-500">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span>Expires {{ formatExpiryDate(currentSubscription.ends_at) }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div 
-                        v-else
-                        class="px-3 py-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200 cursor-pointer"
-                    >
-                        <div class="flex items-center gap-3">
-                            <div class="p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs font-semibold text-gray-900 dark:text-white">No Active Plan</p>
-                                <p class="text-[10px] text-gray-600 dark:text-gray-400">Click to choose a plan</p>
-                            </div>
-                            <svg class="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </Link>
-            </div>
-            
-            <!-- Collapsed Sidebar - Plan Icon -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100/50 dark:border-gray-700/50" v-else>
-                <Link 
-                    :href="route('plans.index')"
-                    class="flex justify-center p-2 rounded-lg hover:bg-primary/10 transition-colors group"
-                    :title="currentSubscription ? `${currentSubscription.plan.name} - Expires ${formatExpiryDate(currentSubscription.ends_at)}` : 'View Plans'"
-                >
-                    <div class="relative">
-                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span v-if="currentSubscription && daysUntilExpiry(currentSubscription.ends_at) <= 7" class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                    </div>
-                </Link>
-            </div>
+
         </aside>
 
         <!-- Main Content -->
@@ -526,23 +466,27 @@
             currentLocale === 'ar' ? (isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-64') : (isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64')
         ]">
             <!-- Header -->
-            <header class="glass sticky top-0 z-40 h-16 flex items-center justify-between px-6 lg:px-8 border-b border-gray-100/50 dark:border-gray-700/50">
-                <button @click="isSidebarOpen = !isSidebarOpen" class="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+            <header class="glass sticky top-0 z-40 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-gray-100/50 dark:border-gray-700/50">
+                <div class="flex items-center gap-4">
+                    <button @click="isSidebarOpen = !isSidebarOpen" class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <!-- Mobile Logo -->
+                    <Logo class="lg:hidden scale-90 origin-left" />
+                </div>
 
-                <div class="flex items-center ml-auto gap-3" :class="currentLocale === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'">
+                <div class="flex items-center gap-2 sm:gap-3" :class="currentLocale === 'ar' ? 'space-x-reverse' : ''">
                     <!-- Restaurant Switcher (for users with multiple restaurants) -->
                     <div class="relative group" v-if="userRestaurants && userRestaurants.length > 1">
                         <button
                             @click="isRestaurantMenuOpen = !isRestaurantMenuOpen"
-                            class="flex items-center space-x-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                            class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                         >
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                            <span>{{ currentRestaurantName }}</span>
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <span class="max-w-[80px] sm:max-w-[150px] truncate">{{ currentRestaurantName }}</span>
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         
                         <!-- Dropdown -->
@@ -566,13 +510,13 @@
                     <div class="relative">
                         <button 
                             @click="languageMenuOpen = !languageMenuOpen"
-                            class="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 border border-gray-200 dark:border-gray-600"
+                            class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 border border-gray-200 dark:border-gray-600"
                         >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                             </svg>
-                            <span class="text-sm font-medium">{{ currentLocale === 'ar' ? 'العربية' : 'English' }}</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="text-xs sm:text-sm font-bold hidden xs:block">{{ currentLocale === 'ar' ? 'العربية' : 'EN' }}</span>
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
@@ -623,18 +567,18 @@
                     <div class="relative">
                         <button 
                             @click="userMenuOpen = !userMenuOpen" 
-                            class="flex items-center gap-3 p-1.5 pr-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                            class="flex items-center gap-2 sm:gap-3 p-1 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
                         >
                             <img 
-                                class="h-8 w-8 rounded-lg object-cover ring-2 ring-primary/20" 
+                                class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl object-cover ring-2 ring-primary/10" 
                                 :src="userAvatarUrl" 
                                 alt="User avatar" 
                             />
-                            <div class="hidden sm:block text-left">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ userName }}</p>
-                                <p class="text-xs text-gray-500">Admin</p>
+                            <div class="hidden md:block text-left">
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ userName }}</p>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Admin</p>
                             </div>
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-gray-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
@@ -650,8 +594,52 @@
                             <div 
                                 v-show="userMenuOpen" 
                                 @click.away="userMenuOpen = false" 
-                                class="absolute right-0 mt-2 w-56 glass-card rounded-xl shadow-lifted py-2 z-50"
+                                class="absolute right-0 mt-2 w-64 glass-card rounded-xl shadow-lifted py-2 z-50 overflow-hidden"
                             >
+                                <!-- Subscription Info Section -->
+                                <div class="px-2 pb-2 border-b border-gray-100 dark:border-gray-700">
+                                    <Link 
+                                        :href="route('plans.index')"
+                                        class="block group"
+                                    >
+                                        <div 
+                                            v-if="currentSubscription"
+                                            class="px-3 py-3 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all duration-200 cursor-pointer border border-primary/20 hover:border-primary/30"
+                                        >
+                                            <div class="flex items-start gap-3">
+                                                <div class="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                                                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">{{ currentSubscription.plan.name }}</p>
+                                                        <svg class="w-3 h-3 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </div>
+                                                    <p class="text-[10px] text-gray-600 dark:text-gray-400 mb-1">
+                                                        <span class="font-medium">{{ subscriptionStatus }}</span>
+                                                    </p>
+                                                    <div class="flex items-center gap-1 text-[10px] text-gray-500">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span>Expires {{ formatExpiryDate(currentSubscription.ends_at) }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div 
+                                            v-else
+                                            class="px-3 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200 cursor-pointer text-center"
+                                        >
+                                            <p class="text-xs font-semibold text-gray-900 dark:text-white">No Active Plan</p>
+                                            <p class="text-[10px] text-primary mt-1 font-medium">Click to choose a plan</p>
+                                        </div>
+                                    </Link>
+                                </div>
                                 <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ userName }}</p>
                                     <p class="text-xs text-gray-500">{{ userEmail }}</p>
@@ -697,7 +685,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 p-6 lg:p-8 animate-fade-in">
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-in">
                 <slot />
             </main>
         </div>
@@ -771,7 +759,7 @@ const toggleMenu = (key: string) => {
 const userName = computed(() => (page.props.auth as any)?.user?.name || 'User');
 const userEmail = computed(() => (page.props.auth as any)?.user?.email || 'user@example.com');
 const userAvatarUrl = computed(() => {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=FF6B35&color=fff&bold=true`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=4F46E5&color=fff&bold=true`;
 });
 
 // Restaurant Switcher

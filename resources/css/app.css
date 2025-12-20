@@ -5,61 +5,114 @@
 /* ========================================
    Dark Mode Support
    ======================================== */
+/* ========================================
+   Design System Variables
+   ======================================== */
 :root {
-    color-scheme: light dark;
+    --primary: #4F46E5;
+    --primary-hover: #4338CA;
+    --primary-soft: rgba(79, 70, 229, 0.1);
+    --secondary: #2D3748;
+    --bg-light: #f8fafc;
+    --bg-dark: #f8fafc;
+    /* Same as light */
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --card-bg-dark: rgba(255, 255, 255, 0.95);
+    /* Same as light */
+    --border-soft: rgba(0, 0, 0, 0.05);
+    --border-dark: rgba(0, 0, 0, 0.05);
+    /* Same as light */
+    --radius-standard: 12px;
+    --shadow-standard: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* Light mode defaults */
+/* ========================================
+   Base Styles
+   ======================================== */
 html {
-    background-color: #f9fafb;
+    background-color: var(--bg-light) !important;
+    color: #1f2937 !important;
+    scroll-behavior: smooth;
+}
+
+/* Base body styles (removing transition to avoid flicker when system changes) */
+body {
+    background-color: var(--bg-light);
+    color: #1f2937;
+    font-family: 'Figtree', sans-serif;
+}
+
+/* ========================================
+   Theme Lock (Force Light Aesthetics)
+   ======================================== */
+:root,
+html {
+    color-scheme: light !important;
+}
+
+/* Neutralize the .dark class and Tailwind dark: utilities */
+.dark,
+[data-theme='dark'] {
+    background-color: var(--bg-light) !important;
+    color: #1f2937 !important;
+}
+
+.dark .text-white,
+.dark .text-gray-100,
+.dark .text-gray-200,
+.dark .text-gray-300,
+.dark .text-gray-400 {
+    color: #4b5563 !important;
+    /* gray-600 */
+}
+
+.dark .bg-gray-900,
+.dark .bg-gray-800,
+.dark .bg-slate-900,
+.dark .bg-slate-800,
+.dark .bg-gray-700\/50 {
+    background-color: #ffffff !important;
+}
+
+.dark .border-gray-700\/50,
+.dark .border-slate-700,
+.dark .border-gray-800 {
+    border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark .glass-card,
+.dark .glass-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ========================================
+   Global Input Styles
+   ======================================== */
+input,
+select,
+textarea {
+    @apply rounded-xl border-gray-200 bg-white transition-all duration-300;
     color: #1f2937;
 }
 
-/* Dark mode */
-html.dark {
-    background-color: #111827;
-    color: #f3f4f6;
+input:focus,
+select:focus,
+textarea:focus {
+    @apply border-primary ring-2 ring-primary/20 bg-white;
 }
 
-/* Ensure smooth transitions between modes */
-html,
-body {
-    transition: background-color 0.2s ease, color 0.2s ease;
+/* Force Light Mode for Inputs even if .dark class is present */
+.dark input,
+.dark select,
+.dark textarea {
+    @apply border-gray-200 bg-white text-gray-900;
 }
 
-/* Form inputs dark mode support */
-@media (prefers-color-scheme: dark) {
-    html:not(.light) {
-        background-color: #111827;
-        color: #f3f4f6;
-    }
-
-    html:not(.light) input,
-    html:not(.light) textarea,
-    html:not(.light) select {
-        background-color: #1f2937;
-        color: #f3f4f6;
-        border-color: #374151;
-    }
-
-    html:not(.light) input::placeholder,
-    html:not(.light) textarea::placeholder {
-        color: #6b7280;
-    }
-}
-
-/* Explicit dark mode class */
-html.dark input,
-html.dark textarea,
-html.dark select {
-    background-color: #1f2937;
-    color: #f3f4f6;
-    border-color: #374151;
-}
-
-html.dark input::placeholder,
-html.dark textarea::placeholder {
-    color: #6b7280;
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+    @apply border-primary ring-2 ring-primary/20 bg-white;
 }
 
 
@@ -124,11 +177,11 @@ html.dark textarea::placeholder {
 
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4);
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
     }
 
     50% {
-        box-shadow: 0 0 20px 5px rgba(255, 107, 53, 0.2);
+        box-shadow: 0 0 20px 5px rgba(79, 70, 229, 0.2);
     }
 }
 
@@ -244,10 +297,10 @@ html.dark textarea::placeholder {
 }
 
 .glass-dark {
-    background: rgba(31, 41, 55, 0.8);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .glass-sidebar {
@@ -260,8 +313,8 @@ html.dark textarea::placeholder {
 
 .dark .glass-sidebar {
     background: linear-gradient(135deg,
-            rgba(31, 41, 55, 0.95) 0%,
-            rgba(31, 41, 55, 0.85) 100%);
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.85) 100%);
 }
 
 .glass-card {
@@ -287,11 +340,11 @@ html.dark textarea::placeholder {
    Gradient Utilities
    ======================================== */
 .gradient-primary {
-    background: linear-gradient(135deg, #FF6B35 0%, #E85A2D 100%);
+    background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
 }
 
 .gradient-primary-soft {
-    background: linear-gradient(135deg, #FFF0EB 0%, #FFE1D6 100%);
+    background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
 }
 
 .gradient-accent {
@@ -312,15 +365,15 @@ html.dark textarea::placeholder {
 
 .gradient-mesh {
     background:
-        radial-gradient(at 40% 20%, rgba(255, 107, 53, 0.1) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(147, 51, 234, 0.1) 0px, transparent 50%),
-        radial-gradient(at 0% 50%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
-        radial-gradient(at 80% 50%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(255, 107, 53, 0.1) 0px, transparent 50%);
+        radial-gradient(at 40% 20%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(147, 51, 234, 0.08) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 80% 50%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(79, 70, 229, 0.08) 0px, transparent 50%);
 }
 
 .text-gradient {
-    background: linear-gradient(135deg, #FF6B35 0%, #E85A2D 50%, #FF8C5A 100%);
+    background: linear-gradient(135deg, #4F46E5 0%, #4338CA 50%, #6366F1 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -330,15 +383,15 @@ html.dark textarea::placeholder {
    Glow Effects
    ======================================== */
 .glow-primary {
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
 }
 
 .glow-primary-sm {
-    box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
 }
 
 .hover-glow:hover {
-    box-shadow: 0 0 25px rgba(255, 107, 53, 0.4);
+    box-shadow: 0 0 25px rgba(79, 70, 229, 0.4);
 }
 
 .glow-accent {
@@ -386,7 +439,7 @@ html.dark textarea::placeholder {
 
 .menu-item-active {
     position: relative;
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
 }
 
 .menu-item-active::before {
@@ -397,7 +450,7 @@ html.dark textarea::placeholder {
     transform: translateY(-50%);
     width: 4px;
     height: 60%;
-    background: linear-gradient(180deg, #FF6B35 0%, #E85A2D 100%);
+    background: linear-gradient(180deg, #4F46E5 0%, #4338CA 100%);
     border-radius: 0 4px 4px 0;
 }
 
@@ -486,7 +539,7 @@ html.dark textarea::placeholder {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #FF6B35, #E85A2D, #FF8C5A);
+    background: linear-gradient(90deg, #4F46E5, #4338CA, #6366F1);
     border-radius: 8px 8px 0 0;
 }
 

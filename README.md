@@ -17,7 +17,6 @@ A comprehensive multi-tenant restaurant management application built with Larave
 ### Prerequisites
 
 - PHP 8.1+
-- PHP 8.1+
 - MongoDB (running locally or via Atlas)
 - Node.js 18+
 - Composer
@@ -56,12 +55,7 @@ A comprehensive multi-tenant restaurant management application built with Larave
    mongorestore --archive=database_dump.gz --gzip
    ```
 
-6. **Add to hosts file**
-   ```
-   127.0.0.1    ahmadtest.localhost
-   ```
-
-7. **Start the application**
+6. **Start the application**
    ```bash
    # Terminal 1
    php artisan serve
@@ -70,9 +64,9 @@ A comprehensive multi-tenant restaurant management application built with Larave
    npm run dev
    ```
 
-8. **Access the application**
+7. **Access the application**
    
-   Visit: `http://ahmadtest.localhost:8000/en/login`
+   Visit: `http://localhost:8000/en/login`
    
    **Login credentials:**
    - Email: `admin@ahmadtest.com`
@@ -96,7 +90,7 @@ For detailed setup instructions, troubleshooting, and more, see [SETUP_GUIDE.md]
 RestoFy-main/
 ├── app/                 # Application logic
 ├── database/
-│   ├── backups/        # SQL database backups
+│   ├── backups/        # Database backups
 │   └── migrations/     # Database migrations
 ├── resources/
 │   ├── js/            # Vue.js components

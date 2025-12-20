@@ -71,19 +71,19 @@ const props = withDefaults(defineProps<{
 const variantClasses = computed(() => {
     switch (props.variant) {
         case 'primary':
-            return 'bg-gradient-to-r from-primary to-primary-hover text-white shadow-lg hover:shadow-xl hover:shadow-primary/30 active:shadow-md focus:ring-primary';
+            return 'bg-gradient-to-r from-primary to-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 focus:ring-primary';
         case 'secondary':
-            return 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md hover:shadow-lg hover:from-gray-700 hover:to-gray-800 focus:ring-gray-500';
+            return 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-200 hover:shadow-xl hover:from-slate-700 hover:to-slate-800 active:scale-95 focus:ring-slate-500';
         case 'success':
-            return 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md hover:shadow-lg hover:shadow-green-500/30 focus:ring-green-500';
+            return 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 active:scale-95 focus:ring-emerald-500';
         case 'danger':
-            return 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:shadow-red-500/30 focus:ring-red-500';
+            return 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/20 hover:shadow-xl hover:shadow-rose-500/30 active:scale-95 focus:ring-rose-500';
         case 'outline':
-            return 'border-2 border-primary text-primary bg-transparent hover:bg-primary/5 hover:border-primary-hover focus:ring-primary';
+            return 'border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20 active:scale-95 focus:ring-primary';
         case 'ghost':
-            return 'text-gray-600 dark:text-gray-300 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white focus:ring-gray-500';
+            return 'text-slate-600 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white active:scale-95 focus:ring-slate-500';
         default:
-            return 'bg-gradient-to-r from-primary to-primary-hover text-white';
+            return 'bg-gradient-to-r from-primary to-primary-hover text-white shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95';
     }
 });
 

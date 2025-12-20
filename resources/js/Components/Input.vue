@@ -1,24 +1,24 @@
 <template>
     <div :class="$attrs.class">
-        <label v-if="label" :for="id" class="block text-sm font-semibold text-gray-700 mb-2 ml-1">
+        <label v-if="label" :for="id" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
             {{ label }}
-            <span v-if="required" class="text-red-500">*</span>
+            <span v-if="required" class="text-rose-500">*</span>
         </label>
-        <div class="relative">
+        <div class="relative group">
             <input
                 :id="id"
                 ref="input"
                 v-bind="{ ...$attrs, class: null }"
-                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4 transition-all hover:border-gray-400 disabled:bg-gray-100 disabled:text-gray-500"
+                class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all hover:border-slate-300 dark:hover:border-slate-600 disabled:bg-slate-100 disabled:text-slate-500"
                 :class="[
-                    error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '',
+                    error ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10' : '',
                     inputClass
                 ]"
                 :value="modelValue"
                 @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
             />
             <div v-if="error" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-5 w-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                 </svg>
             </div>

@@ -1,16 +1,16 @@
 <template>
-    <div class="glass-card rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+    <div class="glass-card rounded-2xl overflow-hidden shadow-soft border border-slate-100 dark:border-slate-800">
         <!-- Table Header (Title, Search, Actions) -->
-        <div v-if="title || search !== undefined || $slots['header-actions']" class="px-6 py-5 border-b border-gray-100 bg-white/50 backdrop-blur-sm">
+        <div v-if="title || search !== undefined || $slots['header-actions']" class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <!-- Left Side: Title and Search -->
                 <div class="flex items-center gap-4 flex-1">
-                    <h3 v-if="title" class="text-lg font-bold text-gray-900 whitespace-nowrap">{{ title }}</h3>
+                    <h3 v-if="title" class="text-xl font-bold text-slate-800 dark:text-white whitespace-nowrap">{{ title }}</h3>
                     
                     <!-- Search Bar -->
-                    <div v-if="search !== undefined" class="relative w-full sm:max-w-xs">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div v-if="search !== undefined" class="relative w-full sm:max-w-xs group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-primary">
+                            <svg class="h-4 w-4 text-slate-400 group-focus-within:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
@@ -19,7 +19,7 @@
                             @input="$emit('update:search', ($event.target as HTMLInputElement).value)"
                             type="text"
                             placeholder="Search..."
-                            class="block w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+                            class="block w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-300"
                         >
                     </div>
                 </div>

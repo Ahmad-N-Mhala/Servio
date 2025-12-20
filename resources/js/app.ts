@@ -38,27 +38,11 @@ const i18n = createI18n({
     },
 });
 
-// Dark mode detection and setup
-function setupDarkMode() {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    function updateDarkMode(e: MediaQueryListEvent | MediaQueryList) {
-        if (e.matches) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }
-
-    // Set initial dark mode state
-    updateDarkMode(darkModeMediaQuery);
-
-    // Listen for changes in color scheme preference
-    darkModeMediaQuery.addEventListener('change', updateDarkMode);
+// Dark mode disabled - forcing light mode as per user request
+function disableDarkMode() {
+    document.documentElement.classList.remove('dark');
 }
-
-// Initialize dark mode
-setupDarkMode();
+disableDarkMode();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -77,7 +61,7 @@ createInertiaApp({
         app.mount(el);
     },
     progress: {
-        color: '#FF6B35',
+        color: '#4F46E5',
     },
 });
 
