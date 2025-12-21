@@ -41,8 +41,6 @@
                     icon="revenue"
                     :color="stats.net_profit >= 0 ? 'green' : 'red'"
                     subtitle="after expenses & waste"
-                    class="cursor-pointer"
-                    @click="fetchDetails('net_profit')"
                 />
 
                 <StatsCard

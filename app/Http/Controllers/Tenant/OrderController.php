@@ -27,7 +27,7 @@ class OrderController extends Controller
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
-            ->with(['customer']);
+            ->with(['customer', 'waiter']);
 
         // Search
         if ($request->filled('search')) {
@@ -398,6 +398,7 @@ class OrderController extends Controller
             'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
             'customer_phone' => $validated['customer_phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
+            'waiter_id' => auth()->id(),
         ]);
 
         // Create order items and Update Inventory

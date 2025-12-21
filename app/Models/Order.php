@@ -38,6 +38,7 @@ class Order extends Model
         'delivery_order_id',
         'payment_status',
         'payment_method',
+        'waiter_id',
     ];
 
     protected $casts = [
@@ -80,5 +81,10 @@ class Order extends Model
     public function table(): BelongsTo
     {
         return $this->belongsTo(Table::class);
+    }
+
+    public function waiter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'waiter_id');
     }
 }

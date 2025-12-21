@@ -91,6 +91,12 @@
                                 </th>
                                 <th 
                                     scope="col" 
+                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                                >
+                                    Waiter
+                                </th>
+                                <th 
+                                    scope="col" 
                                     class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     @click="sort('status')"
                                 >
@@ -162,6 +168,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ order.customer_name || $t('orders.guest') }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ order.customer_phone || '-' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-900 dark:text-white">{{ order.waiter?.name || '-' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(order.status)]">
@@ -300,6 +309,7 @@ interface Order {
     created_at: string;
     completed_at?: string;
     delivery_provider?: string;
+    waiter?: { name: string };
 }
 
 interface PaginatedOrders {
