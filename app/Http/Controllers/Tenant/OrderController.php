@@ -77,7 +77,8 @@ class OrderController extends Controller
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         $query = Order::where('restaurant_id', $restaurant->id)
-            ->where('status', '!=', 'deleted');
+            ->where('status', '!=', 'deleted')
+            ->with('waiter');
 
         // Search
         if ($request->filled('search')) {
@@ -121,7 +122,7 @@ class OrderController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['Order Number', 'Customer Name', 'Phone', 'Status', 'Total', 'Currency', 'Delivery Provider', 'Created At'];
+        $columns = ['Order Number', 'Customer Name', 'Phone', 'Waiter', 'Status', 'Total', 'Currency', 'Delivery Provider', 'Created At'];
 
         $callback = function () use ($orders, $columns) {
             $file = fopen('php://output', 'w');
@@ -132,6 +133,7 @@ class OrderController extends Controller
                     $order->order_number,
                     $order->customer_name,
                     $order->customer_phone,
+                    $order->waiter->name ?? '-',
                     ucfirst($order->status),
                     $order->total,
                     $order->currency,
