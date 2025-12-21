@@ -54,6 +54,14 @@
                     class="cursor-pointer"
                     @click="fetchDetails('low_stock')"
                 />
+
+                <StatsCard
+                    title="Avg Dining Time"
+                    :value="stats.avg_dining_time + ' min'"
+                    icon="time"
+                    color="purple"
+                    subtitle="monitor table turnover"
+                />
             </div>
 
             <!-- Charts Grid -->

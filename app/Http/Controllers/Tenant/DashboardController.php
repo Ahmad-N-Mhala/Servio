@@ -108,6 +108,11 @@ class DashboardController extends Controller
             ];
         })->values()->sortBy('date')->values();
 
+        // -- Average Dining Time --
+        $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
+            return $order->completed_at->diffInMinutes($order->created_at);
+        }) ?? 0;
+
         // -- Status Distribution --
         $statusDistribution = (clone $baseOrderQuery)
             ->get()
@@ -191,6 +196,7 @@ class DashboardController extends Controller
                 'inventory_value' => (float) $inventoryValue,
                 'monthly_expenses' => (float) (string) $monthlyExpenses,
                 'net_profit' => $netProfit,
+                'avg_dining_time' => round((float) $avgDiningTime, 0),
             ],
             'recent_orders' => $recentOrders,
             'revenue_chart' => $revenueChart,
