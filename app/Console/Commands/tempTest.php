@@ -28,5 +28,6 @@ class tempTest extends Command
     {
         //
         Log::info('Temp Test Command Executed');
+        Log::info('new code');
     }
 }
