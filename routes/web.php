@@ -60,6 +60,7 @@ Route::group([
         Route::middleware(['restaurant.context'])->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
             Route::get('/dashboard/details', [DashboardController::class, 'getDetails'])->name('dashboard.details');
+            Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export');
 
             Route::prefix('menu')->name('menu.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\MenuController::class, 'index'])->name('index');

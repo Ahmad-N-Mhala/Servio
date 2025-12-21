@@ -110,6 +110,9 @@
                             >
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
+                                         <div v-if="item.image" class="mb-3">
+                                             <img :src="'/storage/' + item.image" alt="Item Image" class="w-full h-32 object-cover rounded-lg" />
+                                         </div>
                                         <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
                                             {{ getItemName(item.name) }}
                                         </h3>
@@ -223,7 +226,42 @@
                     required
                     :error="itemForm.errors.price"
                 />
-                <!-- Add image upload later if needed -->
+                
+                <!-- Images Section -->
+                <div>
+                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Images</label>
+                     
+                     <!-- Existing Images (Update Mode) -->
+                     <div v-if="editingItem && itemForm.kept_images.length > 0" class="mb-3 grid grid-cols-4 gap-2">
+                         <div v-for="(img, idx) in itemForm.kept_images" :key="idx" class="relative group">
+                             <img :src="'/storage/' + img" class="w-full h-20 object-cover rounded-lg border dark:border-gray-600" />
+                             <button 
+                                type="button" 
+                                @click="removeKeptImage(idx)"
+                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
+                             >
+                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                             </button>
+                         </div>
+                     </div>
+
+                     <input 
+                        type="file" 
+                        @change="handleImageUpload" 
+                        multiple
+                        accept="image/*"
+                        class="block w-full text-sm text-gray-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-full file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-primary/10 file:text-primary
+                          hover:file:bg-primary/20"
+                     />
+                     <div v-if="newFiles.length > 0" class="mt-2 text-xs text-gray-500">
+                         {{ newFiles.length }} file(s) selected
+                     </div>
+                     <div v-if="itemForm.errors.images" class="text-red-500 text-xs mt-1">{{ itemForm.errors.images }}</div>
+                </div>
             </div>
 
             <div>
@@ -333,21 +371,40 @@ const categoryForm = useForm({
 // Item State
 const showItemModal = ref(false);
 const editingItem = ref<any>(null);
+const newFiles = ref<File[]>([]); // Temp storage for selected files
+
 const itemForm = useForm({
     menu_category_id: null as number | null,
     name: { en: '', ar: '' },
     description: '',
     price: '',
-    image: null,
+    // Image handling
+    images: [] as File[],      // For Create: all images
+    new_images: [] as File[],  // For Update: newly added images
+    kept_images: [] as string[], // For Update: paths of images to keep
+    
     sort_order: 0,
     allergens: [],
-    ingredients: [] as any[]
+    ingredients: [] as any[],
+    _method: 'POST'
 });
 
 const newIngredientId = ref<number | null>(null);
 const newIngredientQty = ref<number | string>('');
 
 const getIngredient = (id: number) => props.ingredients.find((i: any) => i.id === id);
+
+const handleImageUpload = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        // Convert FileList to Array
+        newFiles.value = Array.from(target.files);
+    }
+};
+
+const removeKeptImage = (index: number) => {
+    itemForm.kept_images.splice(index, 1);
+};
 
 const addIngredient = () => {
     if (!newIngredientId.value || !newIngredientQty.value) return;
@@ -432,20 +489,35 @@ const deleteCategory = () => {
 // Item Actions
 const openItemModal = (category: any, item: any = null) => {
     itemForm.menu_category_id = category.id;
+    newFiles.value = []; // Reset new files
+    itemForm.images = [];
+    itemForm.new_images = [];
+    itemForm.kept_images = [];
     
     if (item) {
         editingItem.value = item;
+        itemForm._method = 'PUT';
         itemForm.name.en = item.name.en || item.name;
         itemForm.name.ar = item.name.ar || '';
         itemForm.description = item.description;
         itemForm.price = item.price;
         itemForm.sort_order = item.sort_order;
+        
+        // Populate kept_images
+        // Priority: item.images (array), then item.image (string)
+        if (item.images && Array.isArray(item.images)) {
+             itemForm.kept_images = [...item.images];
+        } else if (item.image) {
+             itemForm.kept_images = [item.image];
+        }
+
         itemForm.ingredients = item.ingredients ? item.ingredients.map((i: any) => ({
             id: i.id,
             quantity: i.pivot.quantity
         })) : [];
     } else {
         editingItem.value = null;
+        itemForm._method = 'POST';
         // Keep category_id
         const catId = itemForm.menu_category_id;
         itemForm.reset();
@@ -458,17 +530,26 @@ const openItemModal = (category: any, item: any = null) => {
 const closeItemModal = () => {
     showItemModal.value = false;
     itemForm.reset();
+    newFiles.value = [];
+    itemForm.images = [];
+    itemForm.new_images = [];
+    itemForm.kept_images = [];
     editingItem.value = null;
 };
 
 const submitItem = () => {
+    // Populate form files from ref
     if (editingItem.value) {
-        itemForm.put(route('menu.items.update', editingItem.value.id), {
-            onSuccess: () => closeItemModal()
+        itemForm.new_images = newFiles.value;
+        itemForm.post(route('menu.items.update', editingItem.value.id), {
+            onSuccess: () => closeItemModal(),
+            forceFormData: true,
         });
     } else {
+        itemForm.images = newFiles.value;
         itemForm.post(route('menu.items.store'), {
-            onSuccess: () => closeItemModal()
+            onSuccess: () => closeItemModal(),
+            forceFormData: true,
         });
     }
 };

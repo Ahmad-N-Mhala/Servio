@@ -89,13 +89,21 @@ class MenuController extends Controller
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
-            'image' => ['nullable', 'string'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'max:5120'], // Multiple images
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'ingredients' => ['nullable', 'array'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $imagePaths[] = $file->store('menu-items', 'public');
+            }
+        }
 
         $item = MenuItem::create([
             'restaurant_id' => $restaurant->id,
@@ -104,7 +112,8 @@ class MenuController extends Controller
             'description' => $validated['description'] ?? null,
             'price' => $validated['price'],
             'currency' => $restaurant->currency ?? 'AED',
-            'image' => $validated['image'] ?? null,
+            'images' => $imagePaths,
+            'image' => $imagePaths[0] ?? null, // Primary image fallback
             'sort_order' => $validated['sort_order'] ?? 0,
             'allergens' => $validated['allergens'] ?? null,
             'is_available' => true,
@@ -130,14 +139,34 @@ class MenuController extends Controller
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
-            'image' => ['nullable', 'string'],
+            'new_images' => ['nullable', 'array'],
+            'new_images.*' => ['image', 'max:5120'],
+            'kept_images' => ['nullable', 'array'],
+            'kept_images.*' => ['string'],
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'is_available' => ['boolean'],
             'ingredients' => ['nullable', 'array'],
         ]);
 
-        $item->update($validated);
+        $itemData = collect($validated)->except(['new_images', 'kept_images'])->toArray();
+
+        // Handle Images
+        $finalImages = $request->input('kept_images', []);
+
+        // Add new uploads
+        if ($request->hasFile('new_images')) {
+            foreach ($request->file('new_images') as $file) {
+                $finalImages[] = $file->store('menu-items', 'public');
+            }
+        }
+
+        // Ensure we always have an array
+        $itemData['images'] = $finalImages;
+        // Update primary image (first one)
+        $itemData['image'] = $finalImages[0] ?? null;
+
+        $item->update($itemData);
 
         if ($request->has('ingredients')) {
             $syncData = [];

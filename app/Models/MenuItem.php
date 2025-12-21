@@ -30,6 +30,7 @@ class MenuItem extends Model
         'is_available',
         'sort_order',
         'allergens',
+        'images',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class MenuItem extends Model
         'is_available' => 'boolean',
         'sort_order' => 'integer',
         'allergens' => 'array',
+        'images' => 'array',
     ];
 
     public function restaurant(): BelongsTo

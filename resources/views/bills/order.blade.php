@@ -260,27 +260,37 @@
 
                 @if($order->points_earned > 0)
                     <div style="margin-top: 15px; color: #4f46e5; font-size: 13px;">
-                        🎉 You earned <strong>{{ $order->points_earned }}</strong> loyalty points!
+                        You earned <strong>{{ $order->points_earned }}</strong> loyalty points with this order!
                     </div>
                 @endif
             </div>
             <div class="totals-right">
-                <div class="total-row">
-                    <span style="color: #666;">Subtotal</span> {{ number_format($order->subtotal, 2) }}
-                </div>
-                @if($order->tax > 0)
-                    <div class="total-row">
-                        <span style="color: #666;">Tax</span> {{ number_format($order->tax, 2) }}
-                    </div>
-                @endif
-                @if($order->discount_amount > 0)
-                    <div class="total-row" style="color: #e53e3e;">
-                        <span>Discount</span> -{{ number_format($order->discount_amount, 2) }}
-                    </div>
-                @endif
-                <div class="grand-total">
-                    <span
-                        style="font-size: 14px; font-weight: normal; color: #666; min-width: auto; margin-right: 15px;">Total</span>
+                <table style="width: 100%; margin-bottom: 0;">
+                    <tr>
+                        <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Subtotal</td>
+                        <td style="text-align: right; padding: 5px 0; border: none; width: 120px;">
+                            {{ $order->currency ?? 'AED' }} {{ number_format($order->subtotal, 2) }}
+                        </td>
+                    </tr>
+                    @if($order->tax > 0)
+                        <tr>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Tax</td>
+                            <td style="text-align: right; padding: 5px 0; border: none;">
+                                {{ $order->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}
+                            </td>
+                        </tr>
+                    @endif
+                    @if($order->discount_amount > 0)
+                        <tr>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">Discount</td>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">
+                                -{{ $order->currency ?? 'AED' }} {{ number_format($order->discount_amount, 2) }}
+                            </td>
+                        </tr>
+                    @endif
+                </table>
+                <div class="grand-total" style="text-align: right;">
+                    <span style="font-size: 14px; font-weight: normal; color: #666; margin-right: 15px;">Total</span>
                     {{ $order->currency ?? 'AED' }} {{ number_format($order->total, 2) }}
                 </div>
             </div>
