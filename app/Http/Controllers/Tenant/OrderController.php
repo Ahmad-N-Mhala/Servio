@@ -523,7 +523,7 @@ class OrderController extends Controller
     public function generateBill(Order $order)
     {
         // Load relationships needed for the bill
-        $order->load(['customer', 'table', 'items.menuItem']);
+        $order->load(['customer', 'table', 'items.menuItem', 'restaurant']);
 
         // Generate PDF
         $pdf = Pdf::loadView('bills.order', [

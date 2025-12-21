@@ -3,23 +3,20 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Bill #{{ $order->id }}</title>
+    <title>Bill #{{ $order->order_number }}</title>
     <style>
-        * {
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 14px;
-            color: #333;
-            line-height: 1.6;
+            background: #fff;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 40px;
         }
@@ -27,164 +24,156 @@
         .header {
             text-align: center;
             margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #4f46e5;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 30px;
         }
 
-        .header h1 {
+        .restaurant-name {
             font-size: 32px;
-            color: #4f46e5;
+            font-weight: 800;
+            color: #1a1a1a;
             margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .header .subtitle {
-            font-size: 16px;
+        .restaurant-info {
+            font-size: 13px;
             color: #666;
+            margin-top: 5px;
         }
 
-        .bill-info {
+        .bill-details {
             display: table;
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
-        .bill-info-left,
-        .bill-info-right {
+        .col-left,
+        .col-right {
             display: table-cell;
             width: 50%;
             vertical-align: top;
         }
 
-        .bill-info-right {
+        .col-right {
             text-align: right;
         }
 
-        .info-group {
+        .label {
+            font-weight: 700;
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .value {
             margin-bottom: 15px;
+            font-size: 15px;
+            color: #222;
         }
 
-        .info-label {
-            font-weight: bold;
-            color: #4f46e5;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            color: #555;
-        }
-
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-        }
-
-        .items-table thead {
-            background-color: #4f46e5;
-            color: white;
-        }
-
-        .items-table th {
-            padding: 12px;
-            text-align: left;
+        .value strong {
             font-weight: 600;
         }
 
-        .items-table th:last-child,
-        .items-table td:last-child {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th {
+            text-align: left;
+            background-color: #f8f9fa;
+            color: #555;
+            font-weight: 700;
+            padding: 15px 12px;
+            border-bottom: 2px solid #eee;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f5f5f5;
+            color: #333;
+        }
+
+        .text-right {
             text-align: right;
         }
 
-        .items-table tbody tr {
-            border-bottom: 1px solid #e5e7eb;
+        .text-center {
+            text-align: center;
         }
 
-        .items-table tbody tr:hover {
-            background-color: #f9fafb;
+        .totals-section {
+            width: 100%;
+            display: table;
+            margin-top: 20px;
         }
 
-        .items-table td {
-            padding: 12px;
+        .totals-left {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            padding-right: 20px;
         }
 
-        .totals {
-            margin-top: 30px;
+        .totals-right {
+            display: table-cell;
+            width: 50%;
             text-align: right;
         }
 
         .total-row {
-            padding: 8px 0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 100px;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
-        .total-label {
-            font-weight: 600;
-            min-width: 150px;
-            text-align: right;
-        }
-
-        .total-value {
+        .total-row span {
+            display: inline-block;
             min-width: 100px;
-            text-align: right;
         }
 
         .grand-total {
-            border-top: 2px solid #4f46e5;
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+            border-top: 2px solid #000;
             padding-top: 15px;
             margin-top: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #4f46e5;
         }
 
         .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
+            margin-top: 60px;
             text-align: center;
-            color: #666;
             font-size: 12px;
-        }
-
-        .points-earned {
-            background-color: #dbeafe;
-            color: #1e40af;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-            font-weight: 600;
+            color: #999;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
         }
 
         .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            background: #eee;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
             text-transform: uppercase;
+            font-weight: bold;
         }
 
-        .status-completed {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .status-pending {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-processing {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-cancelled {
-            background-color: #fee2e2;
-            color: #991b1b;
+        .notes-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
@@ -192,119 +181,115 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>{{ $tenant->name ?? 'RestaurFy' }}</h1>
-            <div class="subtitle">Order Bill</div>
+            <div class="restaurant-name">{{ $order->restaurant->name ?? $tenant->name ?? 'RestaurFy' }}</div>
+            <div class="restaurant-info">
+                @if($order->restaurant->address) {{ $order->restaurant->address }} @endif
+                @if($order->restaurant->city) , {{ $order->restaurant->city }} @endif
+                @if($order->restaurant->country) , {{ $order->restaurant->country }} @endif
+                @if($order->restaurant->phone) <br> Tel: {{ $order->restaurant->phone }} @endif
+                @if($order->restaurant->email) <br> {{ $order->restaurant->email }} @endif
+            </div>
         </div>
 
-        <div class="bill-info">
-            <div class="bill-info-left">
-                <div class="info-group">
-                    <div class="info-label">Bill #</div>
-                    <div class="info-value">{{ $order->id }}</div>
+        <div class="bill-details">
+            <div class="col-left">
+                <div class="label">Bill To</div>
+                <div class="value">
+                    @if($order->customer)
+                        <strong>{{ $order->customer->name }}</strong><br>
+                        {{ $order->customer->phone }}
+                    @else
+                        Guest
+                    @endif
                 </div>
-
-                @if($order->customer)
-                    <div class="info-group">
-                        <div class="info-label">Customer</div>
-                        <div class="info-value">
-                            {{ $order->customer->name }}<br>
-                            {{ $order->customer->phone }}
-                        </div>
-                    </div>
-                @endif
 
                 @if($order->table)
-                    <div class="info-group">
-                        <div class="info-label">Table</div>
-                        <div class="info-value">{{ $order->table->table_number }}</div>
-                    </div>
+                    <div class="label">Table</div>
+                    <div class="value">#{{ $order->table->table_number }} <span
+                            style="color:#888; font-size:12px">({{ $order->table->location ?? 'Main' }})</span></div>
                 @endif
             </div>
-
-            <div class="bill-info-right">
-                <div class="info-group">
-                    <div class="info-label">Date</div>
-                    <div class="info-value">{{ $order->created_at->format('d M Y, h:i A') }}</div>
-                </div>
-
-                @if($order->completed_at)
-                    <div class="info-group">
-                        <div class="info-label">Completed At</div>
-                        <div class="info-value">{{ $order->completed_at->format('d M Y, h:i A') }}</div>
-                    </div>
-                @endif
-
-                <div class="info-group">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">
-                        <span class="status-badge status-{{ $order->status }}">
-                            {{ ucfirst($order->status) }}
-                        </span>
-                    </div>
+            <div class="col-right">
+                <div class="label">Order Details</div>
+                <div class="value">
+                    Order #: <strong>{{ $order->order_number }}</strong><br>
+                    Date: {{ $order->created_at->format('M d, Y h:i A') }}<br>
+                    Status: {{ ucfirst($order->status) }}
+                    @if(isset($order->waiter))
+                        <br>Waiter: {{ $order->waiter->name }}
+                    @endif
                 </div>
             </div>
         </div>
 
-        <table class="items-table">
+        <table>
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th style="text-align: center;">Quantity</th>
-                    <th style="text-align: right;">Price</th>
-                    <th style="text-align: right;">Total</th>
+                    <th width="50%">Item</th>
+                    <th width="15%" class="text-center">Qty</th>
+                    <th width="15%" class="text-right">Price</th>
+                    <th width="20%" class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->items as $item)
                     <tr>
-                        <td>{{ $item->menuItem->name ?? 'Item' }}</td>
-                        <td style="text-align: center;">{{ $item->quantity }}</td>
-                        <td style="text-align: right;">{{ $order->currency ?? 'AED' }}
-                            {{ number_format($item->unit_price, 2) }}</td>
-                        <td style="text-align: right;">{{ $order->currency ?? 'AED' }}
-                            {{ number_format($item->total_price, 2) }}</td>
+                        <td>
+                            <strong style="font-weight:600; color:#333;">{{ $item->menuItem->name ?? 'Item' }}</strong>
+                            @if(isset($item->notes))
+                                <br><small
+                                    style="color: #999; font-size: 11px; margin-top:2px; display:block;">{{ $item->notes }}</small>
+                            @endif
+                        </td>
+                        <td class="text-center">{{ $item->quantity }}</td>
+                        <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
+                        <td class="text-right">{{ number_format($item->total_price, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
 
-        <div class="totals">
-            <div class="total-row">
-                <span class="total-label">Subtotal:</span>
-                <span class="total-value">{{ $order->currency ?? 'AED' }}
-                    {{ number_format($order->subtotal, 2) }}</span>
+        <div class="totals-section">
+            <div class="totals-left">
+                @if($order->notes)
+                    <div class="notes-box">
+                        <strong>Note:</strong><br>
+                        {{ $order->notes }}
+                    </div>
+                @endif
+
+                @if($order->points_earned > 0)
+                    <div style="margin-top: 15px; color: #4f46e5; font-size: 13px;">
+                        🎉 You earned <strong>{{ $order->points_earned }}</strong> loyalty points!
+                    </div>
+                @endif
             </div>
-
-            @if($order->tax > 0)
+            <div class="totals-right">
                 <div class="total-row">
-                    <span class="total-label">Tax:</span>
-                    <span class="total-value">{{ $order->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}</span>
+                    <span style="color: #666;">Subtotal</span> {{ number_format($order->subtotal, 2) }}
                 </div>
-            @endif
-
-            @if($order->discount_amount > 0)
-                <div class="total-row">
-                    <span class="total-label">Discount:</span>
-                    <span class="total-value">-{{ $order->currency ?? 'AED' }}
-                        {{ number_format($order->discount_amount, 2) }}</span>
+                @if($order->tax > 0)
+                    <div class="total-row">
+                        <span style="color: #666;">Tax</span> {{ number_format($order->tax, 2) }}
+                    </div>
+                @endif
+                @if($order->discount_amount > 0)
+                    <div class="total-row" style="color: #e53e3e;">
+                        <span>Discount</span> -{{ number_format($order->discount_amount, 2) }}
+                    </div>
+                @endif
+                <div class="grand-total">
+                    <span
+                        style="font-size: 14px; font-weight: normal; color: #666; min-width: auto; margin-right: 15px;">Total</span>
+                    {{ $order->currency ?? 'AED' }} {{ number_format($order->total, 2) }}
                 </div>
-            @endif
-
-            <div class="total-row grand-total">
-                <span class="total-label">Total:</span>
-                <span class="total-value">{{ $order->currency ?? 'AED' }} {{ number_format($order->total, 2) }}</span>
             </div>
         </div>
 
-        @if($order->points_earned > 0)
-            <div class="points-earned">
-                🎉 You earned {{ $order->points_earned }} loyalty points with this order!
-            </div>
-        @endif
-
         <div class="footer">
-            <p>Thank you for your business!</p>
-            <p>{{ $tenant->name ?? 'RestaurFy' }}</p>
+            Thank you for dining with
+            <strong>{{ $order->restaurant->name ?? $tenant->name ?? 'RestaurFy' }}</strong>!<br>
+            <span style="opacity: 0.6; font-size: 10px;">Powered by RestaurFy</span>
         </div>
     </div>
 </body>
