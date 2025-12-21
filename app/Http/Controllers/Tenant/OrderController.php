@@ -204,6 +204,9 @@ class OrderController extends Controller
                             'id' => $item->id,
                             'name' => $item->name,
                             'price' => (float) $item->price,
+                            'description' => $item->description,
+                            'image' => $item->image,
+                            'images' => $item->images,
                         ];
                     }),
                 ];
@@ -281,6 +284,7 @@ class OrderController extends Controller
             $menuItemStockInfo[$menuItem->id] = [
                 'max_quantity' => (int) $maxServings,
                 'available' => $maxServings > 0,
+                'is_tracked' => $menuItem->ingredients->isNotEmpty(),
             ];
         }
 
@@ -456,8 +460,9 @@ class OrderController extends Controller
                     }
 
                     // Update ingredient's global stock
-                    $ingredient->decrement('current_stock', $neededQty);
-                    $ingredient->refresh();
+                    // Manual update to ensure MongoDB persistence handles types correctly
+                    $ingredient->current_stock = (float) $ingredient->current_stock - (float) $neededQty;
+                    $ingredient->save();
 
                     // Log Usage with batch details
                     \App\Models\InventoryLog::create([

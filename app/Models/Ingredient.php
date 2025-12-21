@@ -34,7 +34,7 @@ class Ingredient extends Model
 
     public function menuItems(): BelongsToMany
     {
-        return $this->belongsToMany(MenuItem::class, 'menu_item_ingredients')
+        return $this->belongsToMany(MenuItem::class, 'menu_item_ingredients', 'ingredient_id', 'menu_item_id')
             ->withPivot('quantity')
             ->withTimestamps();
     }

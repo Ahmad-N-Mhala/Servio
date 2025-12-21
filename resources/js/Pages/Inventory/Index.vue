@@ -24,14 +24,22 @@
                     </button>
                 </template>
 
-                 <!-- Stock Column -->
+                <!-- Stock Column -->
                 <template #cell-current_stock="{ row }">
-                    <span 
-                        class="font-bold" 
-                        :class="{'text-red-500': row.current_stock <= (row.reorder_level || 0)}"
-                    >
-                        {{ row.current_stock }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span 
+                            class="font-bold" 
+                            :class="{'text-red-600': parseFloat(row.current_stock) <= parseFloat(row.reorder_level || 0)}"
+                        >
+                            {{ row.current_stock }}
+                        </span>
+                        <span 
+                            v-if="parseFloat(row.current_stock) <= parseFloat(row.reorder_level || 0)" 
+                            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200"
+                        >
+                            Low
+                        </span>
+                    </div>
                 </template>
 
                 <!-- Total Value Column -->
@@ -101,7 +109,7 @@
                             <Input id="cost" type="number" step="0.01" v-model="form.cost" label="Cost per Unit" required :error="form.errors.cost" />
                         </div>
                         <div>
-                            <Input id="reorder" type="number" step="0.0001" v-model="form.reorder_level" label="Reorder Level" />
+                            <Input id="reorder" type="number" step="0.0001" v-model="form.reorder_level" label="Low Stock Threshold" placeholder="e.g. 5" />
                         </div>
                     </div>
                     <div class="mb-4">

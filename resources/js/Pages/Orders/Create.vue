@@ -162,67 +162,94 @@
                             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
                                 {{ getLocaleName(category.name) }}
                             </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 <div 
                                     v-for="item in category.items" 
                                     :key="item.id"
-                                    class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
-                                    :class="{'opacity-60': !canAddItem(item.id) && getQty(item.id) === 0}"
+                                    class="group flex flex-col bg-white border border-gray-100 dark:border-gray-700 hover:border-primary/50 hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-300 relative"
+                                    :class="{'opacity-75': !canAddItem(item.id) && getQty(item.id) === 0}"
                                 >
-                                    <div class="flex-1">
-                                        <p class="font-medium text-gray-900">
-                                            {{ getLocaleName(item.name) }}
-                                            <span v-if="selectedReward?.reward_type === 'free_item' && (selectedReward.menu_item_ids ? selectedReward.menu_item_ids.includes(item.id) : selectedReward.menu_item_id === item.id)" class="ml-2 text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold uppercase">Free</span>
-                                        </p>
-                                        <p class="text-sm font-semibold text-primary">{{ currencyCode }} {{ item.price.toFixed(2) }}</p>
-                                        <p 
-                                            v-if="getStockMessage(item.id)" 
-                                            class="text-xs font-medium mt-1"
-                                            :class="{
-                                                'text-red-600': getMaxAvailable(item.id) === 0,
-                                                'text-amber-600': getMaxAvailable(item.id) > 0 && getMaxAvailable(item.id) <= 3,
-                                                'text-gray-500': getMaxAvailable(item.id) > 3
-                                            }"
-                                        >
-                                            {{ getStockMessage(item.id) }}
-                                        </p>
+                                    <!-- Free Item Badge -->
+                                    <div 
+                                        v-if="selectedReward?.reward_type === 'free_item' && (selectedReward.menu_item_ids ? selectedReward.menu_item_ids.includes(item.id) : selectedReward.menu_item_id === item.id)" 
+                                        class="absolute top-3 left-3 z-20 bg-green-500 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-full shadow-sm"
+                                    >
+                                        Free
                                     </div>
-                                    <div class="flex items-center gap-3 ml-4">
-                                        <button 
-                                            type="button"
-                                            @click="removeItem(item)"
-                                            :disabled="!getQty(item.id)"
-                                            class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                                            </svg>
-                                        </button>
-                                        <span class="w-8 text-center font-bold text-lg">{{ getQty(item.id) }}</span>
-                                        <button 
-                                            type="button"
-                                            @click="addItem(item)"
-                                            :disabled="!canAddItem(item.id)"
-                                            :title="!canAddItem(item.id) ? getStockMessage(item.id) : ''"
-                                            class="w-9 h-9 flex items-center justify-center rounded-full transition-colors relative group"
-                                            :class="canAddItem(item.id) 
-                                                ? 'bg-primary text-white hover:bg-primary-hover' 
-                                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                            </svg>
-                                            <!-- Tooltip -->
-                                            <span 
-                                                v-if="!canAddItem(item.id)" 
-                                                class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap z-10"
+
+                                    <!-- Stock Warning Overlay -->
+                                    <div 
+                                        v-if="!canAddItem(item.id)" 
+                                        class="absolute inset-x-0 top-0 z-10 w-full h-48 bg-gray-900/10 backdrop-blur-[1px] flex items-center justify-center"
+                                    >
+                                        <span class="bg-gray-900/80 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                                            {{ getStockMessage(item.id) }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Image Area -->
+                                    <div class="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden">
+                                        <Carousel 
+                                            v-if="item.images && item.images.length > 0" 
+                                            :images="item.images" 
+                                            heightClass="h-full" 
+                                        />
+                                        <div v-else-if="item.image" class="w-full h-full">
+                                            <img 
+                                                :src="'/storage/' + item.image" 
+                                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                            />
+                                        </div>
+                                        <div v-else class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content Area -->
+                                    <div class="flex-1 p-4 flex flex-col">
+                                        <div class="flex-1 mb-2">
+                                            <h5 class="font-bold text-gray-900 line-clamp-1" :title="typeof item.name === 'string' ? item.name : getLocaleName(item.name)">
+                                                {{ getLocaleName(item.name) }}
+                                            </h5>
+                                            <p class="text-sm font-medium text-primary mt-1">
+                                                {{ currencyCode }} {{ item.price.toFixed(2) }}
+                                            </p>
+                                            <p v-if="item.description" class="text-xs text-gray-500 mt-1 line-clamp-2" :title="item.description">
+                                                {{ item.description }}
+                                            </p>
+
+                                        </div>
+
+                                        <!-- Controls -->
+                                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-gray-100 dark:border-gray-700">
+                                            <button 
+                                                type="button"
+                                                @click="removeItem(item)"
+                                                :disabled="!getQty(item.id)"
+                                                class="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                                                :class="getQty(item.id) 
+                                                    ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95' 
+                                                    : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
                                             >
-                                                <span class="block">{{ getStockMessage(item.id) }}</span>
-                                                <svg class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-3 h-2 text-gray-900" viewBox="0 0 12 6">
-                                                    <path fill="currentColor" d="M0 0l6 6 6-6z"/>
-                                                </svg>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                                            </button>
+                                            
+                                            <span class="font-bold text-gray-900 min-w-[1.5rem] text-center">
+                                                {{ getQty(item.id) > 0 ? getQty(item.id) : 0 }}
                                             </span>
-                                        </button>
+
+                                            <button 
+                                                type="button"
+                                                @click="addItem(item)"
+                                                :disabled="!canAddItem(item.id)"
+                                                class="w-8 h-8 flex items-center justify-center rounded-xl transition-all relative group/btn"
+                                                :class="canAddItem(item.id) 
+                                                    ? 'bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:scale-105 active:scale-95' 
+                                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -396,11 +423,15 @@ import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
+import Carousel from '@/Components/Carousel.vue';
 
 interface MenuItem {
     id: number;
     name: Record<string, string> | string;
+    description?: string;
     price: number;
+    image?: string;
+    images?: string[];
 }
 
 interface Category {
@@ -451,7 +482,7 @@ const props = withDefaults(defineProps<{
     rewards?: Reward[];
     tables?: Table[];
     currency?: string;
-    stockAvailability?: Record<number, { max_quantity: number; available: boolean }>;
+    stockAvailability?: Record<number, { max_quantity: number; available: boolean; is_tracked?: boolean }>;
 }>(), {
     menuCategories: () => [],
     customers: () => [],
@@ -597,6 +628,9 @@ const getStockMessage = (itemId: number): string => {
     const stockInfo = props.stockAvailability?.[itemId];
     if (!stockInfo) return '';
     
+    // Don't show stock message for items without ingredients/tracking
+    if (stockInfo.is_tracked === false) return '';
+
     const currentQty = getQty(itemId);
     const remaining = stockInfo.max_quantity - currentQty;
     
@@ -615,9 +649,7 @@ const getStockMessage = (itemId: number): string => {
     return `${stockInfo.max_quantity} available`;
 };
 
-const getMaxAvailable = (itemId: number): number => {
-    return props.stockAvailability?.[itemId]?.max_quantity ?? 999;
-};
+
 
 // Reward helpers
 const canRedeemReward = (reward: Reward): boolean => {

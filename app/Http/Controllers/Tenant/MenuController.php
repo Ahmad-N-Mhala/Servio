@@ -90,7 +90,7 @@ class MenuController extends Controller
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'max:5120'], // Multiple images
+            'images.*' => ['mimes:jpeg,png,jpg,gif,svg,webp,avif,heic,heif', 'max:10240'], // Multiple images, increased size limit to 10MB
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'ingredients' => ['nullable', 'array'],
@@ -123,7 +123,7 @@ class MenuController extends Controller
             $syncData = [];
             foreach ($request->ingredients as $ing) {
                 if (isset($ing['id']) && isset($ing['quantity'])) {
-                    $syncData[$ing['id']] = ['quantity' => $ing['quantity']];
+                    $syncData[$ing['id']] = ['quantity' => (float) $ing['quantity']];
                 }
             }
             $item->ingredients()->sync($syncData);
@@ -140,7 +140,7 @@ class MenuController extends Controller
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'new_images' => ['nullable', 'array'],
-            'new_images.*' => ['image', 'max:5120'],
+            'new_images.*' => ['mimes:jpeg,png,jpg,gif,svg,webp,avif,heic,heif', 'max:10240'],
             'kept_images' => ['nullable', 'array'],
             'kept_images.*' => ['string'],
             'sort_order' => ['nullable', 'integer'],
@@ -172,7 +172,7 @@ class MenuController extends Controller
             $syncData = [];
             foreach ($request->ingredients as $ing) {
                 if (isset($ing['id']) && isset($ing['quantity'])) {
-                    $syncData[$ing['id']] = ['quantity' => $ing['quantity']];
+                    $syncData[$ing['id']] = ['quantity' => (float) $ing['quantity']];
                 }
             }
             $item->ingredients()->sync($syncData);
