@@ -181,7 +181,8 @@ class OrderController extends Controller
             ->where('is_active', true)
             ->with([
                 'items' => function ($query) {
-                    $query->where('is_available', true);
+                    $query->where('is_available', true)
+                        ->with('ingredients'); // Load ingredients for stock check
                 }
             ])
             ->orderBy('sort_order')
@@ -194,6 +195,8 @@ class OrderController extends Controller
                         return $name['en'] ?? $name['ar'] ?? '';
                     }
                     return $name;
+                })->each(function ($item) {
+                    $item->append('inventory_status');
                 })->values();
 
                 return [
@@ -207,6 +210,10 @@ class OrderController extends Controller
                             'description' => $item->description,
                             'image' => $item->image,
                             'images' => $item->images,
+                            'inventory_status' => $item->inventory_status,
+                            'recipe' => $item->recipe ?? $item->ingredients->map(function ($i) {
+                                return ['ingredient_id' => $i->id, 'quantity' => $i->pivot->quantity];
+                            })->all(),
                         ];
                     }),
                 ];
@@ -246,6 +253,18 @@ class OrderController extends Controller
                     'menu_item_id' => $reward->menu_item_id, // Keep for legacy/fallback
                     'menu_item_ids' => $reward->menuItems->pluck('id')->toArray(),
                     'min_order_value' => $reward->min_order_value,
+                ];
+            });
+
+        // Get raw ingredient stocks for frontend validation
+        $ingredientStocks = \App\Models\Ingredient::where('restaurant_id', $restaurant->id)
+            ->get(['id', 'current_stock', 'name'])
+            ->mapWithKeys(function ($ing) {
+                return [
+                    $ing->id => [
+                        'current_stock' => (float) $ing->current_stock,
+                        'name' => $ing->name
+                    ]
                 ];
             });
 
@@ -295,6 +314,7 @@ class OrderController extends Controller
             'tables' => $tables,
             'currency' => $restaurant->currency ?? 'AED',
             'stockAvailability' => $menuItemStockInfo,
+            'ingredientStocks' => $ingredientStocks,
         ]);
     }
 
@@ -407,7 +427,7 @@ class OrderController extends Controller
             'waiter_id' => auth()->id(),
         ]);
 
-        // Create order items and Update Inventory
+        // Create order items
         foreach ($validated['items'] as $item) {
             $order->items()->create([
                 'menu_item_id' => $item['menu_item_id'],
@@ -415,67 +435,6 @@ class OrderController extends Controller
                 'unit_price' => $item['unit_price'],
                 'total_price' => $item['quantity'] * $item['unit_price'],
             ]);
-
-            // Deduct Inventory using FIFO (First-In, First-Out) Batch Logic
-            $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
-            if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
-                foreach ($menuItem->ingredients as $ingredient) {
-                    // Skip if pivot data is missing
-                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity)) {
-                        continue;
-                    }
-
-                    $neededQty = $ingredient->pivot->quantity * $item['quantity'];
-                    $remainingQty = $neededQty;
-
-                    // Get available batches (FIFO - oldest first)
-                    $batches = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
-                        ->where('quantity_remaining', '>', 0)
-                        ->orderBy('created_at', 'asc')
-                        ->lockForUpdate()
-                        ->get();
-
-                    $totalCost = 0;
-                    $batchesUsed = [];
-
-                    foreach ($batches as $batch) {
-                        if ($remainingQty <= 0)
-                            break;
-
-                        $deductFromBatch = min($remainingQty, $batch->quantity_remaining);
-                        $batch->decrement('quantity_remaining', $deductFromBatch);
-
-                        $totalCost += $deductFromBatch * $batch->cost_per_unit;
-                        $batchesUsed[] = "{$batch->batch_number} ({$deductFromBatch})";
-
-                        $remainingQty -= $deductFromBatch;
-                    }
-
-                    // Update ingredient cost to reflect FIFO
-                    $ingredient->updateCostFromFIFO();
-
-                    // Safety check: ensure we deducted the full amount
-                    if ($remainingQty > 0.0001) { // Small epsilon for floating point
-                        throw new \Exception("Critical Error: Unable to fulfill order. Insufficient stock for {$ingredient->name}. This should have been caught by validation.");
-                    }
-
-                    // Update ingredient's global stock
-                    // Manual update to ensure MongoDB persistence handles types correctly
-                    $ingredient->current_stock = (float) $ingredient->current_stock - (float) $neededQty;
-                    $ingredient->save();
-
-                    // Log Usage with batch details
-                    \App\Models\InventoryLog::create([
-                        'restaurant_id' => $restaurant->id,
-                        'ingredient_id' => $ingredient->id,
-                        'user_id' => auth()->id(),
-                        'action' => 'used_in_menu',
-                        'quantity_change' => -$neededQty,
-                        'new_stock_level' => $ingredient->current_stock,
-                        'notes' => 'Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
-                    ]);
-                }
-            }
         }
 
         // Handle Reward Redemption
@@ -521,6 +480,140 @@ class OrderController extends Controller
                 $order->update(['points_earned' => 0]);
             }
         }
+
+        // ====== INVENTORY DEDUCTION LOGIC ======
+        // Deduct Inventory when status moves from 'pending' to any active cooking/served state
+        if ($oldStatus === 'pending' && in_array($validated['status'], ['processing', 'completed', 'served'])) {
+            $order->load(['items.menuItem.ingredients']);
+
+            foreach ($order->items as $item) {
+                $menuItem = $item->menuItem;
+                if ($menuItem) {
+                    $recipe = $menuItem->recipe ?? []; // Use embedded recipe
+                    $hasRecipe = !empty($recipe);
+
+                    if ($hasRecipe) {
+                        // NEW LOGIC: Use embedded recipe
+                        foreach ($recipe as $component) {
+                            $ingId = $component['ingredient_id'] ?? null;
+                            $qtyNeeded = (float) ($component['quantity'] ?? 0);
+
+                            if ($ingId && $qtyNeeded > 0) {
+                                // Fetch ingredient
+                                $ingredient = \App\Models\Ingredient::find($ingId);
+
+                                if ($ingredient) {
+                                    $totalNeeded = $qtyNeeded * $item->quantity;
+
+                                    // Log debug
+                                    \Illuminate\Support\Facades\Log::info("Deducting Stock (Recipe) order #{$order->order_number}", [
+                                        'ing' => $ingredient->name,
+                                        'qty' => $totalNeeded
+                                    ]);
+
+                                    // Deduct from batches
+                                    $remainingQty = $totalNeeded;
+
+                                    // Robust Query: handle potentially mixed ID types if needed, but standard is string
+                                    $batches = \App\Models\IngredientBatch::where('ingredient_id', (string) $ingredient->id)
+                                        ->where('quantity_remaining', '>', 0)
+                                        ->orderBy('created_at', 'asc')->get();
+
+                                    $batchesUsed = [];
+                                    if ($batches->isEmpty()) {
+                                        \Illuminate\Support\Facades\Log::warning("No active batches found for ingredient {$ingredient->name} (ID: {$ingredient->id})");
+                                    }
+
+                                    foreach ($batches as $batch) {
+                                        if ($remainingQty <= 0)
+                                            break;
+
+                                        $deduct = min($remainingQty, (float) $batch->quantity_remaining);
+
+                                        // Manual update to ensure persistence
+                                        $batch->quantity_remaining = (float) $batch->quantity_remaining - $deduct;
+                                        $batch->save();
+
+                                        $remainingQty -= $deduct;
+                                        $batchesUsed[] = "{$batch->batch_number} ({$deduct})";
+                                    }
+
+                                    $ingredient->updateCostFromFIFO();
+                                    $ingredient = $ingredient->fresh();
+
+                                    // Manual update for global stock consistency
+                                    $ingredient->current_stock = (float) $ingredient->current_stock - $totalNeeded;
+                                    $ingredient->save();
+
+                                    \App\Models\InventoryLog::create([
+                                        'restaurant_id' => $order->restaurant_id,
+                                        'ingredient_id' => $ingredient->id,
+                                        'user_id' => auth()->id(),
+                                        'action' => 'used_in_menu',
+                                        'quantity_change' => -$totalNeeded,
+                                        'new_stock_level' => $ingredient->current_stock,
+                                        'notes' => 'Cooked Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
+                                    ]);
+                                }
+                            }
+                        }
+                    } elseif ($menuItem->ingredients->isNotEmpty()) {
+                        // OLD LOGIC FALLBACK
+                        foreach ($menuItem->ingredients as $ingredient) {
+                            $pivotQty = 0;
+                            if ($ingredient->pivot && isset($ingredient->pivot->quantity)) {
+                                $pivotQty = $ingredient->pivot->quantity;
+                            } else {
+                                $pivotRecord = \App\Models\MenuItemIngredient::where('menu_item_id', $menuItem->id)
+                                    ->where('ingredient_id', $ingredient->id)->first();
+                                if ($pivotRecord)
+                                    $pivotQty = $pivotRecord->quantity;
+                            }
+
+                            if ($pivotQty <= 0)
+                                continue;
+
+                            $neededQty = $pivotQty * $item->quantity;
+                            $remainingQty = $neededQty;
+
+                            // Deduct from batches
+                            $batches = \App\Models\IngredientBatch::where('ingredient_id', (string) $ingredient->id)
+                                ->where('quantity_remaining', '>', 0)
+                                ->orderBy('created_at', 'asc')->get();
+
+                            $batchesUsed = [];
+                            foreach ($batches as $batch) {
+                                if ($remainingQty <= 0)
+                                    break;
+
+                                $deduct = min($remainingQty, (float) $batch->quantity_remaining);
+                                $batch->quantity_remaining = (float) $batch->quantity_remaining - $deduct;
+                                $batch->save();
+
+                                $remainingQty -= $deduct;
+                                $batchesUsed[] = "{$batch->batch_number} ({$deduct})";
+                            }
+
+                            $ingredient->updateCostFromFIFO();
+                            $ingredient = $ingredient->fresh();
+                            $ingredient->current_stock = (float) $ingredient->current_stock - $neededQty;
+                            $ingredient->save();
+
+                            \App\Models\InventoryLog::create([
+                                'restaurant_id' => $order->restaurant_id,
+                                'ingredient_id' => $ingredient->id,
+                                'user_id' => auth()->id(),
+                                'action' => 'used_in_menu',
+                                'quantity_change' => -$neededQty,
+                                'new_stock_level' => $ingredient->current_stock,
+                                'notes' => 'Cooked Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+        // ====== END INVENTORY DEDUCTION ======
 
         return redirect()->back()->with('message', __('orders.status_updated'));
     }

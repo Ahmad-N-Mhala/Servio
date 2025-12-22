@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Ingredient;
 use Inertia\Inertia;
+use Illuminate\Validation\ValidationException;
 
 class InventoryController extends Controller
 {
@@ -28,7 +29,8 @@ class InventoryController extends Controller
             ->with([
                 'batches' => function ($query) {
                     $query->orderBy('created_at', 'asc');
-                }
+                },
+                'menuItems'
             ])
             ->when($request->search, function ($query, $search) {
                 $query->where('name.en', 'like', "%{$search}%")
@@ -69,6 +71,19 @@ class InventoryController extends Controller
         // Ensure name is array for translation
         if (is_string($validated['name'])) {
             $validated['name'] = ['en' => $validated['name'], 'ar' => $validated['name']];
+        }
+
+        // Check for duplicate names (EN and AR)
+        $duplicate = Ingredient::where('restaurant_id', $restaurant->id)
+            ->where(function ($query) use ($validated) {
+                $query->where('name.en', $validated['name']['en'])
+                    ->orWhere('name.ar', $validated['name']['ar']);
+            })->exists();
+
+        if ($duplicate) {
+            throw ValidationException::withMessages([
+                'name' => [__('inventory.duplicate_name')]
+            ]);
         }
 
         $ingredient = Ingredient::create($validated);
@@ -139,6 +154,22 @@ class InventoryController extends Controller
 
         if (is_string($request->name)) {
             $validated['name'] = ['en' => $request->name, 'ar' => $request->name];
+        }
+
+        // Check for duplicate names (EN and AR) if name is provided
+        if (isset($validated['name'])) {
+            $duplicate = Ingredient::where('restaurant_id', $ingredient->restaurant_id)
+                ->where('_id', '!=', $ingredient->id)
+                ->where(function ($query) use ($validated) {
+                    $query->where('name.en', $validated['name']['en'])
+                        ->orWhere('name.ar', $validated['name']['ar']);
+                })->exists();
+
+            if ($duplicate) {
+                throw ValidationException::withMessages([
+                    'name' => [__('inventory.duplicate_name')]
+                ]);
+            }
         }
 
         if (isset($validated['add_stock']) && $validated['add_stock'] > 0) {
@@ -220,6 +251,8 @@ class InventoryController extends Controller
 
     public function destroy(Ingredient $ingredient)
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete_inventory');
+
         $restaurant = request()->user()->currentRestaurant();
         if (!$restaurant && request()->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::orderBy('id')->first();
@@ -233,6 +266,18 @@ class InventoryController extends Controller
 
         if (!request()->user()->is_super_admin && !$hasAccess) {
             abort(403);
+        }
+
+        // Check if ingredient is used in any menu items
+        $usedInMenuItems = $ingredient->menuItems;
+
+        if ($usedInMenuItems->count() > 0) {
+            $menuItemNames = $usedInMenuItems->map(function ($item) {
+                // Get name in current locale if possible, or fallback
+                return $item->name;
+            })->implode(', ');
+
+            return redirect()->back()->with('error', "Cannot delete ingredient. It is currently used in the following menu items: {$menuItemNames}. Please remove it from these items first.");
         }
 
         $ingredient->delete();

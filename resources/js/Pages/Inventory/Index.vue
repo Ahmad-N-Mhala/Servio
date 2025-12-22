@@ -374,14 +374,25 @@ const closeCreateModal = () => {
 };
 
 const submitCreate = () => {
+    const options = {
+        onSuccess: () => closeCreateModal(),
+        onError: (errors) => {
+            if (errors.name) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: {
+                        message: errors.name,
+                        type: 'error',
+                        title: 'Validation Error'
+                    }
+                }));
+            }
+        }
+    };
+
     if (isEditing.value) {
-        form.put(route('inventory.update', form.id), {
-            onSuccess: () => closeCreateModal(),
-        });
+        form.put(route('inventory.update', form.id), options);
     } else {
-        form.post(route('inventory.store'), {
-            onSuccess: () => closeCreateModal(),
-        });
+        form.post(route('inventory.store'), options);
     }
 };
 
@@ -423,8 +434,31 @@ const closeHistoryModal = () => {
 };
 
 const deleteItem = (item: any) => {
+    // Check for active menu associations first
+    const menuItems = item.menu_items || item.menuItems || [];
+    
+    if (menuItems.length > 0) {
+        const names = menuItems.map((m: any) => getLocaleName(m.name)).join(', ');
+        
+        window.dispatchEvent(new CustomEvent('notify', {
+            detail: {
+                message: `Cannot delete this ingredient. It is currently used in menu items: ${names}. Please remove it from these items first.`,
+                title: 'Constraint Error',
+                type: 'error'
+            }
+        }));
+        
+        return;
+    }
+
     if (confirm('Are you sure you want to delete this specific ingredient?')) {
-        router.delete(route('inventory.destroy', item.id));
+        router.delete(route('inventory.destroy', item.id), {
+            preserveState: true,
+            preserveScroll: true,
+            onError: (errors) => {
+                console.log('Delete error:', errors);
+            }
+        });
     }
 };
 

@@ -128,10 +128,9 @@ class DashboardController extends Controller
         // -- Avg Completion Time Chart --
         $avgCompletionTimeChart = $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate);
 
-        // -- Low Stock --
-        $lowStockCount = Ingredient::where('restaurant_id', $restaurant->id)
-            ->whereRaw(['$expr' => ['$lte' => ['$current_stock', '$reorder_level']]])
-            ->count();
+        // -- Low Stock / Critical --
+        $criticalIngredients = $this->getCriticalIngredients($restaurant->id);
+        $lowStockCount = $criticalIngredients->count();
 
         // -- Inventory Value --
         $ingredientIds = Ingredient::where('restaurant_id', $restaurant->id)->pluck('id')->toArray();
@@ -224,10 +223,9 @@ class DashboardController extends Controller
             ->whereBetween('log_date', [$startDate, $endDate])
             ->sum('total_loss');
 
-        // Low Stock
-        $lowStockCount = Ingredient::where('restaurant_id', $restaurant->id)
-            ->whereRaw(['$expr' => ['$lte' => ['$current_stock', '$reorder_level']]])
-            ->count();
+        // Low Stock / Critical
+        $criticalIngredients = $this->getCriticalIngredients($restaurant->id);
+        $lowStockCount = $criticalIngredients->count();
 
         // Inventory Value (PHP Calculation)
         $ingredientIds = Ingredient::where('restaurant_id', $restaurant->id)->pluck('id')->toArray();
@@ -399,6 +397,42 @@ class DashboardController extends Controller
                 'minutes' => round((float) $avgMinutes, 1),
             ];
         })->values()->sortBy('date')->values();
+    }
+
+    /**
+     * Get ingredients that are either below reorder level or blocking a menu item.
+     */
+    private function getCriticalIngredients($restaurantId)
+    {
+        $ingredients = Ingredient::where('restaurant_id', $restaurantId)->get();
+        $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurantId)
+            ->where('is_available', true)
+            ->whereNotNull('recipe')
+            ->get(['id', 'name', 'recipe']);
+
+        $blockingIds = [];
+        foreach ($menuItems as $menuItem) {
+            $recipe = $menuItem->recipe;
+            if (is_array($recipe)) {
+                foreach ($recipe as $component) {
+                    $ingId = (string) ($component['ingredient_id'] ?? '');
+                    $qtyNeeded = (float) ($component['quantity'] ?? 0);
+
+                    $ingredient = $ingredients->firstWhere('id', $ingId);
+                    if ($ingredient && $ingredient->current_stock < $qtyNeeded) {
+                        $blockingIds[] = (string) $ingredient->id;
+                    }
+                }
+            }
+        }
+
+        $blockingIds = array_unique($blockingIds);
+
+        return $ingredients->filter(function ($item) use ($blockingIds) {
+            $isBelowReorder = $item->current_stock <= $item->reorder_level;
+            $isBlocking = in_array((string) $item->id, $blockingIds);
+            return $isBelowReorder || $isBlocking;
+        });
     }
 
     public function getDetails(Request $request)
@@ -628,30 +662,79 @@ class DashboardController extends Controller
                 break;
 
             case 'low_stock':
-                $title = 'Low Stock Items';
+                $title = __('dashboard.low_stock_items');
                 $columns = [
-                    ['key' => 'name', 'label' => 'Item Name'],
-                    ['key' => 'current_stock', 'label' => 'Current Stock'],
-                    ['key' => 'reorder_level', 'label' => 'Reorder Level'],
+                    ['key' => 'name', 'label' => __('dashboard.ingredient')],
+                    ['key' => 'affected_items', 'label' => __('dashboard.affected_items')],
+                    ['key' => 'current_stock', 'label' => __('dashboard.current_stock')],
+                    ['key' => 'reorder_level', 'label' => __('dashboard.reorder_level')],
                     ['key' => 'unit', 'label' => 'Unit'],
+                    ['key' => 'status_message', 'label' => __('dashboard.status')],
                 ];
 
-                $data = Ingredient::where('restaurant_id', $restaurant->id)
-                    ->whereRaw(['$expr' => ['$lte' => ['$current_stock', '$reorder_level']]])
-                    ->get()
-                    ->map(function ($item) {
-                        $name = $item->name;
-                        if (is_string($name) && str_starts_with($name, '{')) {
-                            $decoded = json_decode($name, true);
-                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                // Use the shared helper to get the base set of problematic ingredients
+                $ingredients = Ingredient::where('restaurant_id', $restaurant->id)->get();
+                $criticalIngredients = $this->getCriticalIngredients($restaurant->id);
+
+                $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
+                    ->where('is_available', true)
+                    ->whereNotNull('recipe')
+                    ->get(['id', 'name', 'recipe']);
+
+                $dependencyMap = [];
+                $blockingMap = [];
+
+                foreach ($menuItems as $menuItem) {
+                    $recipe = $menuItem->recipe;
+                    if (is_array($recipe)) {
+                        foreach ($recipe as $component) {
+                            $ingId = (string) ($component['ingredient_id'] ?? '');
+                            $qtyNeeded = (float) ($component['quantity'] ?? 0);
+
+                            $ingredient = $ingredients->firstWhere('id', $ingId);
+                            if ($ingredient) {
+                                $name = $menuItem->getTranslation('name', app()->getLocale()) ?: $menuItem->name;
+                                if (is_array($name)) {
+                                    $name = $name[app()->getLocale()] ?? $name['en'] ?? $name['ar'] ?? 'Unknown';
+                                }
+                                $dependencyMap[$ingId][] = $name;
+
+                                // If stock is less than needed for THIS recipe
+                                if ($ingredient->current_stock < $qtyNeeded) {
+                                    $blockingMap[$ingId][] = $name;
+                                }
+                            }
                         }
-                        return [
-                            'name' => $name,
-                            'current_stock' => $item->current_stock,
-                            'reorder_level' => $item->reorder_level,
-                            'unit' => $item->unit,
-                        ];
-                    });
+                    }
+                }
+
+                $data = $criticalIngredients->map(function ($item) use ($dependencyMap, $blockingMap) {
+                    $name = $item->getTranslation('name', app()->getLocale()) ?: $item->name;
+                    if (is_array($name)) {
+                        $name = $name[app()->getLocale()] ?? $name['en'] ?? $name['ar'] ?? 'Unknown';
+                    }
+
+                    $affected = array_unique($dependencyMap[(string) $item->id] ?? []);
+                    $blocked = array_unique($blockingMap[(string) $item->id] ?? []);
+                    $affectedStr = !empty($affected) ? implode(', ', $affected) : 'None';
+
+                    $statusParts = [];
+                    if ($item->current_stock <= $item->reorder_level) {
+                        $statusParts[] = __('dashboard.low_stock_status');
+                    }
+                    if (!empty($blocked)) {
+                        $statusParts[] = __('dashboard.critical_status', ['items' => implode(', ', $blocked)]);
+                    }
+
+                    return [
+                        'name' => $name,
+                        'affected_items' => $affectedStr,
+                        'current_stock' => $item->current_stock,
+                        'reorder_level' => $item->reorder_level,
+                        'unit' => $item->unit,
+                        'status_message' => !empty($statusParts) ? implode(' | ', $statusParts) : 'Attention Needed',
+                    ];
+                })->values();
                 break;
         }
 

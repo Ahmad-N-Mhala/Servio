@@ -167,7 +167,7 @@
                                     v-for="item in category.items" 
                                     :key="item.id"
                                     class="group flex flex-col bg-white border border-gray-100 dark:border-gray-700 hover:border-primary/50 hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-300 relative"
-                                    :class="{'opacity-75': !canAddItem(item.id) && getQty(item.id) === 0}"
+                                    :class="{'opacity-75': (!canAddItem(item.id) && getQty(item.id) === 0) || item.inventory_status?.sold_out}"
                                 >
                                     <!-- Free Item Badge -->
                                     <div 
@@ -179,11 +179,15 @@
 
                                     <!-- Stock Warning Overlay -->
                                     <div 
-                                        v-if="!canAddItem(item.id)" 
+                                        v-if="!canAddItem(item.id) || item.inventory_status?.sold_out" 
                                         class="absolute inset-x-0 top-0 z-10 w-full h-48 bg-gray-900/10 backdrop-blur-[1px] flex items-center justify-center"
                                     >
-                                        <span class="bg-gray-900/80 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-                                            {{ getStockMessage(item.id) }}
+                                        <span 
+                                            class="text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm"
+                                            :class="item.inventory_status?.sold_out ? 'bg-red-600' : 'bg-gray-900/80'"
+                                            :title="item.inventory_status?.sold_out ? 'Missing: ' + item.inventory_status.missing_ingredients.join(', ') : ''"
+                                        >
+                                            {{ item.inventory_status?.sold_out ? 'SOLD OUT' : getStockMessage(item.id) }}
                                         </span>
                                     </div>
 
@@ -241,9 +245,9 @@
                                             <button 
                                                 type="button"
                                                 @click="addItem(item)"
-                                                :disabled="!canAddItem(item.id)"
+                                                :disabled="!canAddItem(item.id) || item.inventory_status?.sold_out"
                                                 class="w-8 h-8 flex items-center justify-center rounded-xl transition-all relative group/btn"
-                                                :class="canAddItem(item.id) 
+                                                :class="canAddItem(item.id) && !item.inventory_status?.sold_out
                                                     ? 'bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:scale-105 active:scale-95' 
                                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                                             >
@@ -432,6 +436,12 @@ interface MenuItem {
     price: number;
     image?: string;
     images?: string[];
+    inventory_status?: {
+        sold_out: boolean;
+        low_stock: boolean;
+        missing_ingredients: string[];
+    };
+    recipe?: { ingredient_id: string; quantity: number }[];
 }
 
 interface Category {
@@ -445,6 +455,7 @@ interface CartItem {
     name: string;
     price: number;
     qty: number;
+    recipe?: { ingredient_id: string; quantity: number }[];
 }
 
 interface Customer {
@@ -483,13 +494,15 @@ const props = withDefaults(defineProps<{
     tables?: Table[];
     currency?: string;
     stockAvailability?: Record<number, { max_quantity: number; available: boolean; is_tracked?: boolean }>;
+    ingredientStocks?: Record<string, { current_stock: number; name: string }>;
 }>(), {
     menuCategories: () => [],
     customers: () => [],
     rewards: () => [],
     tables: () => [],
     currency: 'AED',
-    stockAvailability: () => ({})
+    stockAvailability: () => ({}),
+    ingredientStocks: () => ({})
 });
 
 const { locale } = useI18n();
@@ -599,7 +612,8 @@ const addItem = (item: MenuItem) => {
             id: item.id,
             name: getLocaleName(item.name),
             price: item.price,
-            qty: 1
+            qty: 1,
+            recipe: item.recipe // Store recipe for validation
         });
     }
 };
@@ -617,18 +631,76 @@ const removeItem = (item: MenuItem) => {
 
 // Stock availability helpers
 const canAddItem = (itemId: number): boolean => {
+    // 1. Check basic Sold Out status
+    const itemInMenu = categoriesList.value
+        .flatMap(c => c.items)
+        .find(i => i.id === itemId);
+        
+    if (itemInMenu?.inventory_status?.sold_out) return false;
+
+    // 2. Dynamic Ingredient Check
+    // If we have detailed ingredient stocks and the item has a recipe
+    if (props.ingredientStocks && Object.keys(props.ingredientStocks).length > 0) {
+        // Calculate projected usage for ALL ingredients in cart + this new item
+        const projectedUsage: Record<string, number> = {};
+
+        // A. Sum up existing cart usage
+        cart.value.forEach(cartItem => {
+            if (cartItem.recipe) {
+                cartItem.recipe.forEach(comp => {
+                    const current = projectedUsage[comp.ingredient_id] || 0;
+                    projectedUsage[comp.ingredient_id] = current + (comp.quantity * cartItem.qty);
+                });
+            }
+        });
+
+        // B. Add the item we want to add
+        // We need to find the recipe for this itemId (either from menu or cart)
+        const recipe = itemInMenu?.recipe;
+        
+        if (recipe) {
+            recipe.forEach(comp => {
+                const current = projectedUsage[comp.ingredient_id] || 0;
+                projectedUsage[comp.ingredient_id] = current + comp.quantity;
+            });
+        }
+
+        // C. specific check
+        // Iterate through all involved ingredients and check against stock
+        for (const [ingId, requiredQty] of Object.entries(projectedUsage)) {
+            const stockInfo = props.ingredientStocks[ingId];
+            if (stockInfo) {
+                if (requiredQty > stockInfo.current_stock) {
+                    return false; // Exceeds stock!
+                }
+            }
+        }
+    }
+
+    // 3. Fallback to Legacy Max Quantity
     const stockInfo = props.stockAvailability?.[itemId];
-    if (!stockInfo) return true; // If no stock info, allow (item has no ingredients)
+    if (!stockInfo) return true; 
     
+    // Only use legacy check if we didn't fail the dynamic check above
+    // (And if legacy check is relevant, e.g., for non-ingredient items)
     const currentQty = getQty(itemId);
     return currentQty < stockInfo.max_quantity;
 };
 
 const getStockMessage = (itemId: number): string => {
+    // Use dynamic check first
+    if (!canAddItem(itemId)) {
+         // Check if it's due to Sold Out status
+         const itemInMenu = categoriesList.value.flatMap(c => c.items).find(i => i.id === itemId);
+         if (itemInMenu?.inventory_status?.sold_out) return 'Sold Out';
+         
+         // If not sold out but can't add, it's low stock/max reached
+         return 'Max stock reached';
+    }
+
     const stockInfo = props.stockAvailability?.[itemId];
     if (!stockInfo) return '';
     
-    // Don't show stock message for items without ingredients/tracking
     if (stockInfo.is_tracked === false) return '';
 
     const currentQty = getQty(itemId);
@@ -647,6 +719,13 @@ const getStockMessage = (itemId: number): string => {
     }
     
     return `${stockInfo.max_quantity} available`;
+};
+
+const getSoldOutMessage = (item: MenuItem): string => {
+    if (item.inventory_status?.sold_out) {
+        return 'Sold Out';
+    }
+    return '';
 };
 
 

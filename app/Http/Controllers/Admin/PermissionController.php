@@ -46,7 +46,7 @@ class PermissionController extends Controller
             ],
             'inventory' => [
                 'label' => 'Inventory & Stock',
-                'permissions' => ['view_inventory', 'add_stock', 'deduct_stock', 'manage_suppliers', 'view_waste', 'record_waste']
+                'permissions' => ['view_inventory', 'add_stock', 'deduct_stock', 'manage_suppliers', 'view_waste', 'record_waste', 'delete_inventory']
             ],
             'loyalty' => [
                 'label' => 'Loyalty Program',

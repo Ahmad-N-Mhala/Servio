@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"6e7283a30199495e94e474392733f150","collectionName":"communication_bundles","type":"collection"}

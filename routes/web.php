@@ -180,5 +180,22 @@ Route::group([
 
         });
     });
+
+    Route::get('/debug-perms', function () {
+        $user = auth()->user();
+        if (!$user)
+            return 'Not logged in';
+
+        $roles = $user->getRoleNames();
+        $permissions = $user->getAllPermissions()->pluck('name');
+
+        return [
+            'user' => $user->email,
+            'roles' => $roles,
+            'permissions' => $permissions,
+            'can_delete_inventory' => $user->can('delete_inventory'),
+        ];
+    });
+
 });
 

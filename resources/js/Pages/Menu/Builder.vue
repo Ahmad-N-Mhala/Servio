@@ -85,6 +85,19 @@
                                     Edit
                                 </Button>
                                 <Button 
+                                    @click="confirmDeleteCategory(category)" 
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                >
+                                    <template #icon>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </template>
+                                    Delete
+                                </Button>
+                                <Button 
                                     @click="addItem(category)" 
                                     variant="success"
                                     size="sm"
@@ -138,6 +151,17 @@
                                     <span class="text-lg font-bold text-gradient">
                                         {{ item.currency }} {{ item.price }}
                                     </span>
+                                    
+                                    <!-- Inventory Status -->
+                                    <div v-if="item.inventory_status?.sold_out" class="group/tooltip relative">
+                                        <span class="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded uppercase">
+                                            {{ $t('menu.sold_out') }}
+                                        </span>
+                                        <!-- Tooltip -->
+                                        <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-black/80 text-white text-xs rounded p-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity z-10">
+                                            {{ $t('menu.missing') }}: {{ item.inventory_status.missing_ingredients.join(', ') }}
+                                        </div>
+                                    </div>
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                                         <button 
                                             @click="editItem(category, item)"
@@ -498,14 +522,25 @@ const closeCategoryModal = () => {
 };
 
 const submitCategory = () => {
+    const options = {
+        onSuccess: () => closeCategoryModal(),
+        onError: (errors) => {
+            if (errors.name) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: {
+                        message: errors.name,
+                        type: 'error',
+                        title: 'Validation Error'
+                    }
+                }));
+            }
+        }
+    };
+
     if (editingCategory.value) {
-        categoryForm.put(route('menu.categories.update', editingCategory.value.id), {
-            onSuccess: () => closeCategoryModal()
-        });
+        categoryForm.put(route('menu.categories.update', editingCategory.value.id), options);
     } else {
-        categoryForm.post(route('menu.categories.store'), {
-            onSuccess: () => closeCategoryModal()
-        });
+        categoryForm.post(route('menu.categories.store'), options);
     }
 };
 
@@ -520,6 +555,12 @@ const deleteCategory = () => {
         router.delete(route('menu.categories.destroy', editingCategory.value.id), {
             onSuccess: () => closeCategoryModal()
         });
+    }
+};
+
+const confirmDeleteCategory = (category: any) => {
+    if (confirm(t('common.confirm_delete') || 'Are you sure you want to delete this category?')) {
+        router.delete(route('menu.categories.destroy', category.id));
     }
 };
 
@@ -549,10 +590,32 @@ const openItemModal = (category: any, item: any = null) => {
              itemForm.kept_images = [item.image];
         }
 
-        itemForm.ingredients = item.ingredients ? item.ingredients.map((i: any) => ({
-            id: i.id,
-            quantity: i.pivot.quantity
-        })) : [];
+        // Populate ingredients from 'recipe' (new structure) or fallback to relation (old structure)
+        const sourceIngredients = item.recipe || item.ingredients;
+
+        itemForm.ingredients = sourceIngredients ? sourceIngredients.map((i: any) => {
+            // New structure: { ingredient_id: '...', quantity: Q }
+            // Old Relation structure: { id: '...', pivot: { quantity: Q } }
+            
+            // Check for direct quantity or pivot quantity
+            let qty = 0;
+            let id = null;
+
+            if (item.recipe) {
+                // If using new recipe field
+                qty = i.quantity;
+                id = i.ingredient_id;
+            } else {
+                 // Fallback to old relation
+                 qty = i.pivot?.quantity ?? i.quantity ?? 0;
+                 id = i.id;
+            }
+
+            return {
+                id: id,
+                quantity: qty
+            };
+        }) : [];
     } else {
         editingItem.value = null;
         itemForm._method = 'POST';
@@ -577,19 +640,34 @@ const closeItemModal = () => {
 };
 
 const submitItem = () => {
+    const options = {
+        onSuccess: () => closeItemModal(),
+        onError: (errors) => {
+            if (errors.name) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: {
+                        message: errors.name,
+                        type: 'error',
+                        title: 'Validation Error'
+                    }
+                }));
+            }
+        },
+        forceFormData: true,
+    };
+
     // Populate form files from ref
     if (editingItem.value) {
         itemForm.new_images = newFiles.value;
-        itemForm.post(route('menu.items.update', editingItem.value.id), {
-            onSuccess: () => closeItemModal(),
-            forceFormData: true,
-        });
+        if (!editingItem.value.id) {
+            console.error("Missing Item ID for update");
+            return;
+        }
+        itemForm._method = 'PUT'; // Set directly on form object
+        itemForm.post(route('menu.items.update', editingItem.value.id), options);
     } else {
         itemForm.images = newFiles.value;
-        itemForm.post(route('menu.items.store'), {
-            onSuccess: () => closeItemModal(),
-            forceFormData: true,
-        });
+        itemForm.post(route('menu.items.store'), options);
     }
 };
 

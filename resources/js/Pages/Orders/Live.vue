@@ -173,9 +173,19 @@
                                     <span class="text-sm text-gray-900 dark:text-white">{{ order.waiter?.name || '-' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(order.status)]">
-                                        {{ getStatusLabel(order.status) }}
-                                    </span>
+                                    <div class="flex items-center gap-1">
+                                        <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(order.status)]">
+                                            {{ getStatusLabel(order.status) }}
+                                        </span>
+                                        <div v-if="order.status === 'cancelled' && order.notes" class="group relative">
+                                            <svg class="w-4 h-4 text-red-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center">
+                                                {{ order.notes }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm font-bold text-primary">{{ currencyCode }} {{ formatMoney(order.total) }}</span>
@@ -310,6 +320,7 @@ interface Order {
     completed_at?: string;
     delivery_provider?: string;
     waiter?: { name: string };
+    notes?: string;
 }
 
 interface PaginatedOrders {

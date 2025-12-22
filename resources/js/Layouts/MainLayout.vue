@@ -875,6 +875,14 @@ onMounted(() => {
     const dir = currentLocale.value === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.setAttribute('dir', dir);
     locale.value = currentLocale.value;
+
+    window.addEventListener('notify', (event: any) => {
+        const { message, title, type } = event.detail;
+        toastMessage.value = message;
+        toastTitle.value = title || (type === 'error' ? 'Error' : 'Success');
+        toastType.value = type || 'success';
+        toastTrigger.value++;
+    });
 });
 </script>
 
