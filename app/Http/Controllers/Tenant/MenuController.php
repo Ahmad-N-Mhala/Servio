@@ -62,8 +62,9 @@ class MenuController extends Controller
         // Check for duplicate names (EN and AR)
         $duplicate = MenuCategory::where('restaurant_id', $restaurant->id)
             ->where(function ($query) use ($validated) {
-                $query->where('name.en', $validated['name']['en'])
-                    ->orWhere('name.ar', $validated['name']['ar']);
+                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
+                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
+                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
 
         if ($duplicate) {
@@ -96,8 +97,9 @@ class MenuController extends Controller
         $duplicate = MenuCategory::where('restaurant_id', $category->restaurant_id)
             ->where('_id', '!=', $category->id)
             ->where(function ($query) use ($validated) {
-                $query->where('name.en', $validated['name']['en'])
-                    ->orWhere('name.ar', $validated['name']['ar']);
+                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
+                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
+                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
 
         if ($duplicate) {
@@ -148,8 +150,9 @@ class MenuController extends Controller
         $duplicate = MenuItem::where('restaurant_id', $restaurant->id)
             ->where('menu_category_id', $validated['menu_category_id'])
             ->where(function ($query) use ($validated) {
-                $query->where('name.en', $validated['name']['en'])
-                    ->orWhere('name.ar', $validated['name']['ar']);
+                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
+                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
+                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
 
         if ($duplicate) {
@@ -234,8 +237,9 @@ class MenuController extends Controller
             ->where('_id', '!=', $item->id)
             ->where('menu_category_id', $validated['menu_category_id'])
             ->where(function ($query) use ($validated) {
-                $query->where('name.en', $validated['name']['en'])
-                    ->orWhere('name.ar', $validated['name']['ar']);
+                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
+                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
+                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
 
         if ($duplicate) {
@@ -259,7 +263,7 @@ class MenuController extends Controller
         // Update primary image (first one)
         $itemData['image'] = $finalImages[0] ?? null;
 
-        // Process Ingredients into 'recipe' field
+        // Process Ingredients into 'recipe' fieldcompa
         if ($request->has('ingredients')) {
             $rawIngredients = $request->input('ingredients');
             $ingredients = is_string($rawIngredients) ? json_decode($rawIngredients, true) : $rawIngredients;

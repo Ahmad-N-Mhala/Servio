@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Ingredient;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
+use MongoDB\BSON\ObjectId;
 
 class InventoryController extends Controller
 {
@@ -76,8 +77,9 @@ class InventoryController extends Controller
         // Check for duplicate names (EN and AR)
         $duplicate = Ingredient::where('restaurant_id', $restaurant->id)
             ->where(function ($query) use ($validated) {
-                $query->where('name.en', $validated['name']['en'])
-                    ->orWhere('name.ar', $validated['name']['ar']);
+                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
+                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
+                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
 
         if ($duplicate) {
@@ -127,17 +129,16 @@ class InventoryController extends Controller
 
         // Authorization Logic
         if ($request->user()->is_super_admin) {
-            // Allowed
-        } elseif ($restaurant && $ingredient->restaurant_id === $restaurant->id) {
-            // Allowed
+            // Super admins have full access
         } else {
+            // For regular users, check if they are associated with the restaurant that owns this ingredient
             $hasAccess = \Illuminate\Support\Facades\DB::table('restaurant_user')
                 ->where('email', $request->user()->email)
-                ->where('restaurant_id', $ingredient->restaurant_id)
+                ->where('restaurant_id', (string) $ingredient->restaurant_id)
                 ->exists();
 
             if (!$hasAccess) {
-                abort(403, 'This item does not belong to the active restaurant.');
+                abort(403, 'You do not have permission to modify this item.');
             }
         }
 
@@ -161,8 +162,9 @@ class InventoryController extends Controller
             $duplicate = Ingredient::where('restaurant_id', $ingredient->restaurant_id)
                 ->where('_id', '!=', $ingredient->id)
                 ->where(function ($query) use ($validated) {
-                    $query->where('name.en', $validated['name']['en'])
-                        ->orWhere('name.ar', $validated['name']['ar']);
+                    // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
+                    $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
+                        ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
                 })->exists();
 
             if ($duplicate) {
@@ -249,36 +251,49 @@ class InventoryController extends Controller
         return response()->json($logs);
     }
 
-    public function destroy(Ingredient $ingredient)
+    public function destroy($id)
     {
         \Illuminate\Support\Facades\Gate::authorize('delete_inventory');
 
-        $restaurant = request()->user()->currentRestaurant();
-        if (!$restaurant && request()->user()->is_super_admin) {
-            $restaurant = \App\Models\Restaurant::orderBy('id')->first();
+        $ingredient = Ingredient::findOrFail($id);
+
+        // Authorization Logic
+        if (!request()->user()->is_super_admin) {
+            $hasAccess = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('email', request()->user()->email)
+                ->where('restaurant_id', (string) $ingredient->restaurant_id)
+                ->exists();
+
+            if (!$hasAccess) {
+                abort(403, 'You do not have permission to delete this item.');
+            }
         }
-        $restaurantId = $restaurant?->id;
 
-        $hasAccess = \Illuminate\Support\Facades\DB::table('restaurant_user')
-            ->where('email', request()->user()->email)
-            ->where('restaurant_id', $ingredient->restaurant_id)
-            ->exists();
+        // Check if ingredient is used in any menu items (Robust Check for MongoDB)
+        // 1. Get IDs from pivot collection
+        $pivotItemIds = \Illuminate\Support\Facades\DB::table('menu_item_ingredients')
+            ->where('ingredient_id', new ObjectId($id))
+            ->pluck('menu_item_id')
+            ->map(fn($id) => (string) $id)
+            ->toArray();
 
-        if (!request()->user()->is_super_admin && !$hasAccess) {
-            abort(403);
-        }
+        // 2. Find MenuItems linked via pivot or embedded recipe
+        $menuItems = \App\Models\MenuItem::whereIn('_id', $pivotItemIds)
+            ->orWhere('recipe.ingredient_id', $id)
+            ->orWhere('recipe.ingredient_id', new ObjectId($id))
+            ->get();
 
-        // Check if ingredient is used in any menu items
-        $usedInMenuItems = $ingredient->menuItems;
-
-        if ($usedInMenuItems->count() > 0) {
-            $menuItemNames = $usedInMenuItems->map(function ($item) {
-                // Get name in current locale if possible, or fallback
-                return $item->name;
-            })->implode(', ');
+        if ($menuItems->count() > 0) {
+            $menuItemNames = $menuItems->map(function ($item) {
+                return $item->getTranslation('name', app()->getLocale()) ?: $item->name;
+            })->filter()->unique()->implode(', ');
 
             return redirect()->back()->with('error', "Cannot delete ingredient. It is currently used in the following menu items: {$menuItemNames}. Please remove it from these items first.");
         }
+
+        // Delete associated records from DB
+        \App\Models\IngredientBatch::where('ingredient_id', $id)->delete();
+        \App\Models\InventoryLog::where('ingredient_id', $id)->delete();
 
         $ingredient->delete();
 

@@ -26,6 +26,7 @@ class Ingredient extends Model
     ];
 
     protected $casts = [
+        'name' => 'array',
         'current_stock' => 'decimal:4',
         'cost' => 'decimal:2',
         'reorder_level' => 'decimal:4',
