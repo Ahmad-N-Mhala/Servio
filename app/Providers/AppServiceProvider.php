@@ -33,26 +33,23 @@ class AppServiceProvider extends ServiceProvider
             }
 
             try {
-                // Robust Way: Fetch all user roles for restaurants and filter in PHP 
-                // This avoids strict ObjectId vs String mismatch in DB::table queries
-                $pivotEntries = \Illuminate\Support\Facades\DB::table('restaurant_user')
-                    ->where('email', $user->email)
-                    ->get();
-
-                $pivotRole = null;
                 $targetId = (string) $restaurant->id;
 
-                foreach ($pivotEntries as $entry) {
-                    // Check ID match (handle object or array access)
-                    $rId = is_array($entry) ? $entry['restaurant_id'] : $entry->restaurant_id;
-                    if ((string) $rId === $targetId) {
-                        $pivotRole = is_array($entry) ? $entry['role'] : $entry->role;
-                        break;
-                    }
-                }
+                // Robust Way: Fetch user role for this restaurant via Eloquent
+                $restaurantWithPivot = $user->restaurants()
+                    ->where('id', $restaurant->id)
+                    ->first();
+                
+                $pivotRole = $restaurantWithPivot && $restaurantWithPivot->pivot ? $restaurantWithPivot->pivot->role : null;
 
                 if (!$pivotRole) {
-                    \Log::info("Gate: No pivot role found for user {$user->email} in restaurant {$targetId}");
+                    \Log::warning("Gate: No pivot role found for user {$user->email} in restaurant {$targetId}. Falling back to global roles.");
+                    
+                    // Fallback: Check if user has the permission via ANY of their global roles
+                    if ($user->hasPermissionTo($ability)) {
+                         return true;
+                    }
+                    
                     return null;
                 }
 

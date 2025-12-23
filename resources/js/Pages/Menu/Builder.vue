@@ -8,6 +8,7 @@
                     <p class="mt-1 text-gray-500 dark:text-gray-400">Manage your restaurant menu and categories</p>
                 </div>
                 <Button 
+                    v-if="hasPermission('create_category')"
                     @click="openCategoryModal()" 
                     variant="primary"
                     size="md"
@@ -73,6 +74,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <Button 
+                                    v-if="hasPermission('edit_category')"
                                     @click="editCategory(category)" 
                                     variant="ghost"
                                     size="sm"
@@ -85,6 +87,7 @@
                                     Edit
                                 </Button>
                                 <Button 
+                                    v-if="hasPermission('create_item')"
                                     @click="addItem(category)" 
                                     variant="success"
                                     size="sm"
@@ -124,6 +127,7 @@
                                     </span>
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button 
+                                            v-if="hasPermission('edit_item')"
                                             @click="editItem(category, item)"
                                             class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
                                         >
@@ -177,7 +181,7 @@
 
             <div class="flex justify-between pt-4">
                 <Button 
-                    v-if="editingCategory"
+                    v-if="editingCategory && hasPermission('delete_category')"
                     type="button" 
                     variant="danger" 
                     @click="deleteCategory"
@@ -285,7 +289,7 @@
 
             <div class="flex justify-between pt-4">
                 <Button 
-                    v-if="editingItem"
+                    v-if="editingItem && hasPermission('delete_item')"
                     type="button" 
                     variant="danger" 
                     @click="deleteItem"
@@ -309,6 +313,9 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
+import { usePermissions } from '@/Composables/usePermissions';
+
+const { hasPermission } = usePermissions();
 
 const { t, locale } = useI18n();
 const page = usePage();
