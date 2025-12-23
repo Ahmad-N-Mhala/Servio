@@ -27,25 +27,15 @@ class CheckRestaurantContext
 
         $restaurantId = session('active_restaurant_id');
 
-        // If no restaurant in session, auto-select the first one
-        if (!$restaurantId) {
-            $userEmail = $request->user()->email;
+            // If no restaurant in session, auto-select the first one
+            if (!$restaurantId) {
+                $firstRestaurant = $request->user()->restaurants()->first();
 
-            // Get IDs from pivot collection
-            $allowedIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
-                ->where('email', $userEmail)
-                ->pluck('restaurant_id')
-                ->toArray();
-
-            $firstRestaurant = !empty($allowedIds)
-                ? \App\Models\Restaurant::whereIn('id', $allowedIds)->first()
-                : null;
-
-            if (!$firstRestaurant) {
-                // User has no restaurants - redirect to login with error
-                auth()->logout();
-                return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
-            }
+                if (!$firstRestaurant) {
+                    // User has no restaurants - redirect to login with error
+                    auth()->logout();
+                    return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
+                }
 
             // Set the first restaurant as active and continue
             session(['active_restaurant_id' => $firstRestaurant->id]);
@@ -55,24 +45,14 @@ class CheckRestaurantContext
 
         // If restaurant is already in session, validate user still has access
         // Direct query to pivot collection works fine in Mongo for simple where
-        $hasAccess = \Illuminate\Support\Facades\DB::table('restaurant_user')
-            ->where('restaurant_id', $restaurantId)
-            ->where('email', $request->user()->email)
-            ->exists();
+        // If restaurant is already in session, validate user still has access
+        $hasAccess = $request->user()->restaurants()->where('id', $restaurantId)->exists();
 
         if (!$hasAccess) {
             // User lost access to current restaurant, try to switch to another
             session()->forget('active_restaurant_id');
 
-            $userEmail = $request->user()->email;
-            $allowedIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
-                ->where('email', $userEmail)
-                ->pluck('restaurant_id')
-                ->toArray();
-
-            $anotherRestaurant = !empty($allowedIds)
-                ? \App\Models\Restaurant::whereIn('id', $allowedIds)->first()
-                : null;
+            $anotherRestaurant = $request->user()->restaurants()->first();
 
             if ($anotherRestaurant) {
                 session(['active_restaurant_id' => $anotherRestaurant->id]);
