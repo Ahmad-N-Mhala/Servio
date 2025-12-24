@@ -16,5 +16,8 @@ return [
     'no_categories' => 'No categories yet. Create your first category to get started.',
     'create_first_category' => 'Create First Category',
     'no_items' => 'No items in this category yet.',
+    'missing' => 'Missing Ingredients',
+    'duplicate_name' => 'A category with this name already exists (English or Arabic).',
+    'duplicate_name_item' => 'An item with this name already exists in this category (English or Arabic).',
 ];
 

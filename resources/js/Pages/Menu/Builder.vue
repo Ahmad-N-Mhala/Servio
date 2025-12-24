@@ -113,6 +113,22 @@
                             >
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
+                                        <div class="mb-4 aspect-[4/3] bg-gray-50 rounded-lg overflow-hidden relative">
+                                            <Carousel 
+                                                v-if="item.images && item.images.length > 0" 
+                                                :images="item.images" 
+                                                heightClass="h-full" 
+                                            />
+                                            <img 
+                                                v-else-if="item.image" 
+                                                :src="'/storage/' + item.image" 
+                                                alt="Item Image" 
+                                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                                            />
+                                             <div v-else class="w-full h-full flex items-center justify-center text-gray-300">
+                                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            </div>
+                                        </div>
                                         <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
                                             {{ getItemName(item.name) }}
                                         </h3>
@@ -125,14 +141,35 @@
                                     <span class="text-lg font-bold text-gradient">
                                         {{ item.currency }} {{ item.price }}
                                     </span>
-                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    
+                                    <!-- Inventory Status -->
+                                    <div v-if="item.inventory_status?.sold_out" class="group/tooltip relative">
+                                        <span class="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded uppercase">
+                                            {{ $t('menu.sold_out') }}
+                                        </span>
+                                        <!-- Tooltip -->
+                                        <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-black/80 text-white text-xs rounded p-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity z-10">
+                                            {{ $t('menu.missing') }}: {{ item.inventory_status.missing_ingredients.join(', ') }}
+                                        </div>
+                                    </div>
+                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                                         <button 
                                             v-if="hasPermission('edit_item')"
                                             @click="editItem(category, item)"
                                             class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                                            title="Edit Item"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            @click="deleteItem(item)"
+                                            class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                                            title="Delete Item"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
                                     </div>
@@ -224,10 +261,51 @@
                     type="number"
                     step="0.01"
                     min="0"
+
                     required
                     :error="itemForm.errors.price"
                 />
-                <!-- Add image upload later if needed -->
+                
+                <!-- Images Section -->
+                 <div>
+                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Images</label>
+                     
+                     <!-- Image Slider Preview -->
+                     <div v-if="allPreviewImages.length > 0" class="mb-4">
+                         <Carousel :images="allPreviewImages" heightClass="h-48" />
+                     </div>
+                     
+                     <!-- Existing Images (Update Mode) -->
+                     <div v-if="editingItem && itemForm.kept_images.length > 0" class="mb-3 grid grid-cols-4 gap-2">
+                         <div v-for="(img, idx) in itemForm.kept_images" :key="idx" class="relative group">
+                             <img :src="'/storage/' + img" class="w-full h-20 object-cover rounded-lg border dark:border-gray-600" />
+                             <button 
+                                type="button" 
+                                @click="removeKeptImage(idx)"
+                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
+                             >
+                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                             </button>
+                         </div>
+                     </div>
+
+                     <input 
+                        type="file" 
+                        @change="handleImageUpload" 
+                        multiple
+                        accept="image/*"
+                        class="block w-full text-sm text-gray-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-full file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-primary/10 file:text-primary
+                          hover:file:bg-primary/20"
+                     />
+                     <div v-if="newFiles.length > 0" class="mt-2 text-xs text-gray-500">
+                         {{ newFiles.length }} file(s) selected
+                     </div>
+                     <div v-if="itemForm.errors.images" class="text-red-500 text-xs mt-1">{{ itemForm.errors.images }}</div>
+                </div>
             </div>
 
             <div>
@@ -340,21 +418,47 @@ const categoryForm = useForm({
 // Item State
 const showItemModal = ref(false);
 const editingItem = ref<any>(null);
+const newFiles = ref<File[]>([]); // Temp storage for selected files
+
 const itemForm = useForm({
     menu_category_id: null as number | null,
     name: { en: '', ar: '' },
     description: '',
     price: '',
-    image: null,
+    // Image handling
+    images: [] as File[],      // For Create: all images
+    new_images: [] as File[],  // For Update: newly added images
+    kept_images: [] as string[], // For Update: paths of images to keep
+    
     sort_order: 0,
     allergens: [],
-    ingredients: [] as any[]
+    ingredients: [] as any[],
+    _method: 'POST'
 });
 
 const newIngredientId = ref<number | null>(null);
 const newIngredientQty = ref<number | string>('');
 
 const getIngredient = (id: number) => props.ingredients.find((i: any) => i.id === id);
+
+const handleImageUpload = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        // Convert FileList to Array
+        newFiles.value = Array.from(target.files);
+        // Create previews
+        previewUrls.value = newFiles.value.map(file => URL.createObjectURL(file));
+    }
+};
+
+const previewUrls = ref<string[]>([]);
+const allPreviewImages = computed(() => {
+    return [...itemForm.kept_images, ...previewUrls.value];
+});
+
+const removeKeptImage = (index: number) => {
+    itemForm.kept_images.splice(index, 1);
+};
 
 const addIngredient = () => {
     if (!newIngredientId.value || !newIngredientQty.value) return;
@@ -411,14 +515,25 @@ const closeCategoryModal = () => {
 };
 
 const submitCategory = () => {
+    const options = {
+        onSuccess: () => closeCategoryModal(),
+        onError: (errors) => {
+            if (errors.name) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: {
+                        message: errors.name,
+                        type: 'error',
+                        title: 'Validation Error'
+                    }
+                }));
+            }
+        }
+    };
+
     if (editingCategory.value) {
-        categoryForm.put(route('menu.categories.update', editingCategory.value.id), {
-            onSuccess: () => closeCategoryModal()
-        });
+        categoryForm.put(route('menu.categories.update', editingCategory.value.id), options);
     } else {
-        categoryForm.post(route('menu.categories.store'), {
-            onSuccess: () => closeCategoryModal()
-        });
+        categoryForm.post(route('menu.categories.store'), options);
     }
 };
 
@@ -436,23 +551,67 @@ const deleteCategory = () => {
     }
 };
 
+const confirmDeleteCategory = (category: any) => {
+    if (confirm(t('common.confirm_delete') || 'Are you sure you want to delete this category?')) {
+        router.delete(route('menu.categories.destroy', category.id));
+    }
+};
+
 // Item Actions
 const openItemModal = (category: any, item: any = null) => {
     itemForm.menu_category_id = category.id;
+    newFiles.value = []; // Reset new files
+    previewUrls.value = []; // Reset previews
+    itemForm.images = [];
+    itemForm.new_images = [];
+    itemForm.kept_images = [];
     
     if (item) {
         editingItem.value = item;
+        itemForm._method = 'PUT';
         itemForm.name.en = item.name.en || item.name;
         itemForm.name.ar = item.name.ar || '';
         itemForm.description = item.description;
         itemForm.price = item.price;
         itemForm.sort_order = item.sort_order;
-        itemForm.ingredients = item.ingredients ? item.ingredients.map((i: any) => ({
-            id: i.id,
-            quantity: i.pivot.quantity
-        })) : [];
+        
+        // Populate kept_images
+        // Priority: item.images (array), then item.image (string)
+        if (item.images && Array.isArray(item.images)) {
+             itemForm.kept_images = [...item.images];
+        } else if (item.image) {
+             itemForm.kept_images = [item.image];
+        }
+
+        // Populate ingredients from 'recipe' (new structure) or fallback to relation (old structure)
+        const sourceIngredients = item.recipe || item.ingredients;
+
+        itemForm.ingredients = sourceIngredients ? sourceIngredients.map((i: any) => {
+            // New structure: { ingredient_id: '...', quantity: Q }
+            // Old Relation structure: { id: '...', pivot: { quantity: Q } }
+            
+            // Check for direct quantity or pivot quantity
+            let qty = 0;
+            let id = null;
+
+            if (item.recipe) {
+                // If using new recipe field
+                qty = i.quantity;
+                id = i.ingredient_id;
+            } else {
+                 // Fallback to old relation
+                 qty = i.pivot?.quantity ?? i.quantity ?? 0;
+                 id = i.id;
+            }
+
+            return {
+                id: id,
+                quantity: qty
+            };
+        }) : [];
     } else {
         editingItem.value = null;
+        itemForm._method = 'POST';
         // Keep category_id
         const catId = itemForm.menu_category_id;
         itemForm.reset();
@@ -465,18 +624,43 @@ const openItemModal = (category: any, item: any = null) => {
 const closeItemModal = () => {
     showItemModal.value = false;
     itemForm.reset();
+    newFiles.value = [];
+    previewUrls.value = [];
+    itemForm.images = [];
+    itemForm.new_images = [];
+    itemForm.kept_images = [];
     editingItem.value = null;
 };
 
 const submitItem = () => {
+    const options = {
+        onSuccess: () => closeItemModal(),
+        onError: (errors) => {
+            if (errors.name) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: {
+                        message: errors.name,
+                        type: 'error',
+                        title: 'Validation Error'
+                    }
+                }));
+            }
+        },
+        forceFormData: true,
+    };
+
+    // Populate form files from ref
     if (editingItem.value) {
-        itemForm.put(route('menu.items.update', editingItem.value.id), {
-            onSuccess: () => closeItemModal()
-        });
+        itemForm.new_images = newFiles.value;
+        if (!editingItem.value.id) {
+            console.error("Missing Item ID for update");
+            return;
+        }
+        itemForm._method = 'PUT'; // Set directly on form object
+        itemForm.post(route('menu.items.update', editingItem.value.id), options);
     } else {
-        itemForm.post(route('menu.items.store'), {
-            onSuccess: () => closeItemModal()
-        });
+        itemForm.images = newFiles.value;
+        itemForm.post(route('menu.items.store'), options);
     }
 };
 
@@ -488,13 +672,12 @@ const editItem = (category: any, item: any) => {
     openItemModal(category, item);
 };
 
-const deleteItem = () => {
-    if (!editingItem.value) return;
-
-    if (confirm(t('common.confirm_delete'))) {
-        router.delete(route('menu.items.destroy', editingItem.value.id), {
-            onSuccess: () => closeItemModal()
+const deleteItem = (item: any) => {
+    if (confirm('Are you sure you want to delete this menu item?')) {
+        itemForm.delete(route('menu.items.destroy', item.id), {
+            preserveScroll: true,
         });
     }
 };
+
 </script>

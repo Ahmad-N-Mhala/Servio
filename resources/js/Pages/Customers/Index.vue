@@ -87,7 +87,7 @@ const props = defineProps<{
     filters: any;
 }>();
 
-const search = ref(props.filters.search);
+const search = ref(props.filters.search || '');
 
 watch(search, debounce((value) => {
     router.get(route('customers.index'), { search: value }, { preserveState: true, replace: true });

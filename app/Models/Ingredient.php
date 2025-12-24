@@ -26,6 +26,7 @@ class Ingredient extends Model
     ];
 
     protected $casts = [
+        'name' => 'array',
         'current_stock' => 'decimal:4',
         'cost' => 'decimal:2',
         'reorder_level' => 'decimal:4',
@@ -34,7 +35,8 @@ class Ingredient extends Model
 
     public function menuItems(): BelongsToMany
     {
-        return $this->belongsToMany(MenuItem::class, 'menu_item_ingredients')
+        return $this->belongsToMany(MenuItem::class, null, 'ingredient_id', 'menu_item_id')
+            ->using(MenuItemIngredient::class)
             ->withPivot('quantity')
             ->withTimestamps();
     }

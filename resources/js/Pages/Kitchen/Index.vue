@@ -91,6 +91,13 @@
                                 </svg>
                                 <span v-else>Start Cooking</span>
                             </button>
+                            <button 
+                                @click="promptCancel(order)"
+                                :disabled="processingId === order.id"
+                                class="w-full py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2 mt-2"
+                            >
+                                Cancel Order
+                            </button>
                         </div>
                     </transition-group>
                 </div>
@@ -228,13 +235,43 @@
                 </div>
             </div>
         </div>
+
+        <!-- Cancel Order Modal -->
+        <Modal :show="!!cancellingOrder" @close="closeCancelModal">
+            <div class="p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4">Cancel Order #{{ cancellingOrder?.order_number }}</h2>
+                <p class="text-sm text-gray-500 mb-4">Please provide a reason for cancelling this order so the waiter can inform the customer.</p>
+                
+                <form @submit.prevent="submitCancel">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Cancellation</label>
+                        <textarea 
+                            v-model="cancelForm.cancellation_reason"
+                            rows="3"
+                            required
+                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                            placeholder="e.g. Out of stock, Customer request..."
+                        ></textarea>
+                        <p v-if="cancelForm.errors.cancellation_reason" class="text-sm text-red-600 mt-1">{{ cancelForm.errors.cancellation_reason }}</p>
+                    </div>
+
+                    <div class="flex justify-end gap-3">
+                        <Button type="button" variant="secondary" @click="closeCancelModal">Keep Order</Button>
+                        <Button type="submit" variant="danger" :loading="cancelForm.processing">Confirm Cancellation</Button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
     </MainLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import Modal from '@/Components/Modal.vue';
+import Input from '@/Components/Input.vue';
+import Button from '@/Components/Button.vue';
 
 const route = (window as any).route;
 
@@ -260,6 +297,30 @@ const pendingOrders = computed(() => filterOrders(props.orders.filter(o => o.sta
 const processingOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'processing')));
 const servedOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'served')));
 
+const cancellingOrder = ref<any>(null);
+const cancelForm = useForm({
+    status: 'cancelled',
+    cancellation_reason: ''
+});
+
+const promptCancel = (order: any) => {
+    cancellingOrder.value = order;
+    cancelForm.cancellation_reason = '';
+};
+
+const closeCancelModal = () => {
+    cancellingOrder.value = null;
+    cancelForm.reset();
+};
+
+const submitCancel = () => {
+    if (!cancellingOrder.value) return;
+
+    cancelForm.put(route('kitchen.status.update', cancellingOrder.value.id), {
+        onSuccess: () => closeCancelModal()
+    });
+};
+
 const updateStatus = (order: any, status: string) => {
     processingId.value = order.id;
 
@@ -278,7 +339,9 @@ let refreshInterval: any;
 
 onMounted(() => {
     refreshInterval = setInterval(() => {
-        router.reload({ only: ['orders', 'completedOrders'] });
+        if (!cancellingOrder.value) { // Don't refresh if modal is open
+             router.reload({ only: ['orders', 'completedOrders'] });
+        }
     }, 30000);
 });
 
@@ -286,6 +349,8 @@ onUnmounted(() => {
     if (refreshInterval) clearInterval(refreshInterval);
 });
 </script>
+
+
 
 <style scoped>
 .list-move,
