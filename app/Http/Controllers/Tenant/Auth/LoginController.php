@@ -39,17 +39,10 @@ class LoginController extends Controller
             }
 
             // Fetch available restaurants for this user
-            $allowedIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
-                ->where('email', $user->email)
-                ->pluck('restaurant_id')
-                ->toArray();
-
-            $restaurants = !empty($allowedIds)
-                ? \App\Models\Restaurant::whereIn('id', $allowedIds)->get()
-                : collect();
+            $restaurants = $user->restaurants()->get();
 
             // If user has 0 restaurants, redirect to onboarding or show error
-            if ($restaurants->isEmpty()) {
+            if ($restaurants->count() === 0) {
                 Auth::logout();
                 return back()->withErrors([
                     'email' => 'No restaurant access found for this account.',
@@ -75,6 +68,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return Inertia::location(route('login'));
     }
 }

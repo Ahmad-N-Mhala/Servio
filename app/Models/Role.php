@@ -55,4 +55,12 @@ class Role extends Model implements RoleContract
 
         return $role;
     }
+
+    /**
+     * A role belongs to some users of the model associated with its guard.
+     */
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'model_has_roles', 'role_id', 'model_id');
+    }
 }

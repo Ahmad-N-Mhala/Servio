@@ -48,7 +48,8 @@
                     <div class="px-3 mb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider" v-if="!isSidebarCollapsed">
                         General
                     </div>
-                     <Link 
+                    <Link 
+                        v-if="hasPermission('view_dashboard')"
                         :href="route('dashboard')" 
                         :class="[
                             'group flex items-center rounded-lg transition-all duration-200',
@@ -67,7 +68,7 @@
                 </div>
 
                 <!-- Operations Section -->
-                <div>
+                <div v-if="hasAnyPermission(['view_orders', 'view_kitchen', 'view_inventory', 'view_waste', 'view_pos'])">
                      <div 
                         @click="toggleMenu('operations')"
                         class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
@@ -88,7 +89,7 @@
 
                     <div v-show="isSidebarCollapsed || openMenus['operations']" class="space-y-0.5">
                         <!-- Sub-Group: Orders -->
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5" v-if="hasAnyPermission(['view_orders', 'view_kitchen', 'view_inventory', 'view_waste'])">
                              <button 
                                 @click="toggleMenu('operations.orders')"
                                 :class="[
@@ -179,7 +180,8 @@
                         </div>
 
                         <!-- POS -->
-                         <Link 
+                        <Link 
+                            v-if="hasPermission('view_pos')"
                             :href="route('pos.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -199,7 +201,7 @@
                 </div>
 
                 <!-- Management Section -->
-                <div>
+                <div v-if="hasAnyPermission(['view_menu', 'view_tables', 'view_staff'])">
                      <div 
                         @click="toggleMenu('management')"
                         class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
@@ -220,7 +222,7 @@
 
                     <div v-show="isSidebarCollapsed || openMenus['management']" class="space-y-0.5">
                          <!-- Sub-Group: Restaurant -->
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5" v-if="hasAnyPermission(['view_menu', 'view_tables'])">
                              <button 
                                 @click="toggleMenu('management.restaurant')"
                                 :class="[
@@ -249,6 +251,7 @@
                             </button>
                              <div v-show="openMenus['management.restaurant'] && !isSidebarCollapsed" class="pl-9 space-y-0.5">
                                 <Link 
+                                    v-if="hasPermission('view_menu')"
                                     :href="route('menu.index')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
                                     :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/menu')}"
@@ -259,6 +262,7 @@
                                     {{ $t('nav.menu') }}
                                 </Link>
                                 <Link 
+                                    v-if="hasPermission('view_tables')"
                                     :href="route('tables.index')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
                                     :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/tables')}"
@@ -273,6 +277,7 @@
 
                         <!-- Staff -->
                         <Link 
+                            v-if="hasPermission('view_staff')"
                             :href="route('staff.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -292,7 +297,7 @@
                 </div>
 
                 <!-- Growth / Marketing Section -->
-                <div>
+                <div v-if="hasAnyPermission(['view_customers', 'view_loyalty', 'view_delivery_settings', 'view_communication', 'view_sales_reports', 'view_expense_reports'])">
                      <div 
                         @click="toggleMenu('growth')"
                         class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
@@ -314,6 +319,7 @@
                     <div v-show="isSidebarCollapsed || openMenus['growth']" class="space-y-0.5">
                         <!-- Customers -->
                         <Link 
+                            v-if="hasPermission('view_customers')"
                             :href="route('customers.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -331,7 +337,7 @@
                         </Link>
                         
                          <!-- Sub-Group: Loyalty -->
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5" v-if="hasPermission('view_loyalty')">
                              <button 
                                 @click="toggleMenu('growth.loyalty')"
                                 :class="[
@@ -370,6 +376,7 @@
                                     Overview
                                 </Link>
                                 <Link 
+                                    v-if="hasPermission('manage_earning_rules')"
                                     :href="route('loyalty.earning-methods.index')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
                                     :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/earning-methods')}"
@@ -384,6 +391,7 @@
 
                         <!-- Delivery Integrations -->
                         <Link 
+                            v-if="hasPermission('view_delivery_settings')"
                             :href="route('integrations.delivery.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -402,6 +410,7 @@
 
                         <!-- Communication -->
                         <Link 
+                            v-if="hasPermission('view_communication')"
                             :href="route('communication.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -419,7 +428,7 @@
                         </Link>
 
                         <!-- Financial (Sub-Group) -->
-                        <div class="space-y-0.5">
+                        <div class="space-y-0.5" v-if="hasAnyPermission(['view_sales_reports', 'view_expense_reports'])">
                             <button 
                                 @click="toggleMenu('growth.financial')"
                                 :class="[
@@ -449,6 +458,7 @@
                             
                             <div v-show="openMenus['growth.financial'] && !isSidebarCollapsed" class="pl-9 space-y-0.5">
                                 <Link 
+                                    v-if="hasPermission('view_expense_reports')"
                                     :href="route('monthly-expenses.index')"
                                     :class="[
                                         'flex items-center rounded-lg transition-all duration-200',
@@ -462,7 +472,8 @@
                                     </svg>
                                     <span v-if="!isSidebarCollapsed">Monthly Expenses</span>
                                 </Link>
-                                <!-- <Link 
+                                <Link 
+                                    v-if="hasPermission('view_sales_reports')"
                                     :href="route('reports.sales')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
                                     :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/reports')}"
@@ -734,6 +745,9 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
 import Toast from '@/Components/Toast.vue';
+import { usePermissions } from '@/Composables/usePermissions';
+
+const { hasPermission, hasAnyPermission } = usePermissions();
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);

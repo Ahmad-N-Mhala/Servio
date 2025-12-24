@@ -42,7 +42,8 @@ class User extends Authenticatable
 
     public function restaurants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Restaurant::class, 'restaurant_user', 'email', 'restaurant_id', 'email', 'id');
+        return $this->belongsToMany(Restaurant::class, 'restaurant_user', 'email', 'restaurant_id', 'email', 'id')
+            ->withPivot('role');
     }
 
     public function currentRestaurant()
@@ -58,10 +59,7 @@ class User extends Authenticatable
 
         // For regular users, find restaurants via the pivot collection 'restaurant_user'
         // Get all restaurant IDs for this user email
-        // Note: In MongoDB, we query the 'restaurant_user' collection directly
-        $allowedRestaurantIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
-            ->where('email', $this->email)
-            ->pluck('restaurant_id')
+        $allowedRestaurantIds = $this->restaurants->pluck('id')
             ->map(function ($id) {
                 return (string) $id;
             })

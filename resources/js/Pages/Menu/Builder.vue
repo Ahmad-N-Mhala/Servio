@@ -8,6 +8,7 @@
                     <p class="mt-1 text-gray-500 dark:text-gray-400">Manage your restaurant menu and categories</p>
                 </div>
                 <Button 
+                    v-if="hasPermission('create_category')"
                     @click="openCategoryModal()" 
                     variant="primary"
                     size="md"
@@ -73,6 +74,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <Button 
+                                    v-if="hasPermission('edit_category')"
                                     @click="editCategory(category)" 
                                     variant="ghost"
                                     size="sm"
@@ -85,19 +87,7 @@
                                     Edit
                                 </Button>
                                 <Button 
-                                    @click="confirmDeleteCategory(category)" 
-                                    variant="ghost"
-                                    size="sm"
-                                    class="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                >
-                                    <template #icon>
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </template>
-                                    Delete
-                                </Button>
-                                <Button 
+                                    v-if="hasPermission('create_item')"
                                     @click="addItem(category)" 
                                     variant="success"
                                     size="sm"
@@ -164,6 +154,7 @@
                                     </div>
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                                         <button 
+                                            v-if="hasPermission('edit_item')"
                                             @click="editItem(category, item)"
                                             class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
                                             title="Edit Item"
@@ -227,7 +218,7 @@
 
             <div class="flex justify-between pt-4">
                 <Button 
-                    v-if="editingCategory"
+                    v-if="editingCategory && hasPermission('delete_category')"
                     type="button" 
                     variant="danger" 
                     @click="deleteCategory"
@@ -376,7 +367,7 @@
 
             <div class="flex justify-between pt-4">
                 <Button 
-                    v-if="editingItem"
+                    v-if="editingItem && hasPermission('delete_item')"
                     type="button" 
                     variant="danger" 
                     @click="deleteItem"
@@ -400,7 +391,9 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
-import Carousel from '@/Components/Carousel.vue';
+import { usePermissions } from '@/Composables/usePermissions';
+
+const { hasPermission } = usePermissions();
 
 const { t, locale } = useI18n();
 const page = usePage();
