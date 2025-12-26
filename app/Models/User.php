@@ -57,12 +57,14 @@ class User extends Authenticatable
             return null;
         }
 
+        //TODO: 
         // For regular users, find restaurants via the pivot collection 'restaurant_user'
         // Get all restaurant IDs for this user email
-        $allowedRestaurantIds = $this->restaurants->pluck('id')
-            ->map(function ($id) {
-                return (string) $id;
-            })
+        // FIX: Use manual query because the relationship is broken
+        $allowedRestaurantIds = \Illuminate\Support\Facades\DB::connection('mongodb')
+            ->table('restaurant_user')
+            ->where('email', $this->email)
+            ->pluck('restaurant_id')
             ->toArray();
 
         // Check active session

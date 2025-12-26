@@ -29,7 +29,19 @@ class CheckRestaurantContext
 
             // If no restaurant in session, auto-select the first one
             if (!$restaurantId) {
-                $firstRestaurant = $request->user()->restaurants()->first();
+                //TODO:
+                // FIX: Use manual query
+                $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
+                    ->table('restaurant_user')
+                    ->where('email', $request->user()->email)
+                    ->pluck('restaurant_id')
+                    ->toArray();
+                
+                \Illuminate\Support\Facades\Log::info('CheckRestaurantContext: User ' . $request->user()->email . ' has pivot IDs: ' . json_encode($pivotIds));
+
+                $firstRestaurant = !empty($pivotIds) 
+                    ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first() 
+                    : null;
 
                 if (!$firstRestaurant) {
                     // User has no restaurants - redirect to login with error
@@ -46,13 +58,23 @@ class CheckRestaurantContext
         // If restaurant is already in session, validate user still has access
         // Direct query to pivot collection works fine in Mongo for simple where
         // If restaurant is already in session, validate user still has access
-        $hasAccess = $request->user()->restaurants()->where('id', $restaurantId)->exists();
+        // FIX: Use manual query
+        $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
+            ->table('restaurant_user')
+            ->where('email', $request->user()->email)
+            ->pluck('restaurant_id')
+            ->toArray();
+
+        $hasAccess = in_array($restaurantId, $pivotIds);
 
         if (!$hasAccess) {
             // User lost access to current restaurant, try to switch to another
             session()->forget('active_restaurant_id');
 
-            $anotherRestaurant = $request->user()->restaurants()->first();
+            // FIX: Use manual query (reusing pivotIds from above)
+            $anotherRestaurant = !empty($pivotIds) 
+                ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first() 
+                : null;
 
             if ($anotherRestaurant) {
                 session(['active_restaurant_id' => $anotherRestaurant->id]);

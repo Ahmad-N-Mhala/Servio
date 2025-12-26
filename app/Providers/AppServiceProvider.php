@@ -35,12 +35,16 @@ class AppServiceProvider extends ServiceProvider
             try {
                 $targetId = (string) $restaurant->id;
 
-                // Robust Way: Fetch user role for this restaurant via Eloquent
-                $restaurantWithPivot = $user->restaurants()
-                    ->where('id', $restaurant->id)
+                //TODO: 
+                // Robust Way: Fetch user role for this restaurant via manual query
+                // FIX: Use manual query because relationship is broken
+                $pivot = \Illuminate\Support\Facades\DB::connection('mongodb')
+                    ->table('restaurant_user')
+                    ->where('email', $user->email)
+                    ->where('restaurant_id', $targetId)
                     ->first();
                 
-                $pivotRole = $restaurantWithPivot && $restaurantWithPivot->pivot ? $restaurantWithPivot->pivot->role : null;
+                $pivotRole = $pivot ? $pivot['role'] : null;
 
                 if (!$pivotRole) {
                     \Log::warning("Gate: No pivot role found for user {$user->email} in restaurant {$targetId}. Falling back to global roles.");
