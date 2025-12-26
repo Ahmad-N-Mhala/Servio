@@ -17,7 +17,7 @@ class MenuController extends Controller
 {
     public function index(): Response
     {
-        \Illuminate\Support\Facades\Gate::authorize('menu_management');
+        \Illuminate\Support\Facades\Gate::authorize('view_menu');
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
@@ -51,6 +51,7 @@ class MenuController extends Controller
 
     public function storeCategory(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('create_category');
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
@@ -86,6 +87,7 @@ class MenuController extends Controller
 
     public function updateCategory(Request $request, MenuCategory $category)
     {
+        \Illuminate\Support\Facades\Gate::authorize('edit_category');
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
@@ -115,6 +117,7 @@ class MenuController extends Controller
 
     public function destroyCategory(MenuCategory $category)
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete_category');
         // Find all items in this category
         $items = MenuItem::where('menu_category_id', $category->id)->get();
 
@@ -132,6 +135,7 @@ class MenuController extends Controller
 
     public function storeItem(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('create_item');
         $validated = $request->validate([
             'menu_category_id' => ['required', 'exists:menu_categories,id'],
             'name' => ['required', 'array'],
@@ -213,6 +217,7 @@ class MenuController extends Controller
 
     public function updateItem(Request $request, MenuItem $item)
     {
+        \Illuminate\Support\Facades\Gate::authorize('edit_item');
         \Illuminate\Support\Facades\Log::info('Update Item Request Data:', $request->all());
 
         $validated = $request->validate([
@@ -302,6 +307,7 @@ class MenuController extends Controller
 
     public function destroyItem(MenuItem $item)
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete_item');
         // Delete pivot associations
         \App\Models\MenuItemIngredient::where('menu_item_id', $item->id)->delete();
 

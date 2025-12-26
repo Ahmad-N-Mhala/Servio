@@ -10,21 +10,80 @@ class PermissionController extends Controller
 {
     public function index()
     {
-        $roles = config('roles.display_names');
-        $permissions = config('permissions');
+        $dbRoles = \App\Models\Role::all();
+        $configNames = config('roles.display_names', []);
 
-        // Get current permissions for each role directly from Spatie models
+        $roles = [];
         $rolePermissions = [];
-        foreach (array_keys($roles) as $roleName) {
-            $role = \App\Models\Role::findByName($roleName, 'web');
-            $rolePermissions[$roleName] = $role ? $role->permissions->pluck('name')->toArray() : [];
+        $locale = app()->getLocale();
+
+        foreach ($dbRoles as $role) {
+            $label = $configNames[$role->name] ?? null;
+
+            if (!$label) {
+                // Check DB display_name
+                if (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name))) {
+                    // Cast to array ensuring access
+                    $display = (array) $role->display_name;
+                    $label = $display[$locale] ?? $display['en'] ?? ucwords(str_replace('_', ' ', $role->name));
+                } else {
+                    $label = ucwords(str_replace('_', ' ', $role->name));
+                }
+            }
+
+            $roles[$role->name] = $label;
+            $rolePermissions[$role->name] = $role->permissions->pluck('name')->toArray();
         }
+
+        $permissions = config('permissions');
 
         return inertia('Admin/Permissions/Index', [
             'roles' => $roles,
             'permissions' => $permissions,
             'rolePermissions' => $rolePermissions,
         ]);
+    }
+
+    public function storeRole(Request $request)
+    {
+        $validated = $request->validate([
+            'name_en' => 'required|string|max:255',
+            'name_ar' => 'required|string|max:255',
+        ]);
+
+        // Generate system name (slug) from English name
+        $name = \Illuminate\Support\Str::slug($validated['name_en'], '_');
+
+        if (\App\Models\Role::where('name', $name)->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['name_en' => 'Role already exists (slug collision). Try a different English name.']);
+        }
+
+        \App\Models\Role::create([
+            'name' => $name,
+            'guard_name' => 'web',
+            'display_name' => [
+                'en' => $validated['name_en'],
+                'ar' => $validated['name_ar']
+            ]
+        ]);
+
+        return back()->with('success', 'Role created successfully.');
+    }
+
+    public function destroyRole($roleName)
+    {
+        $role = \App\Models\Role::where('name', $roleName)->firstOrFail();
+
+        if ($role->name === 'owner') {
+            return back()->withErrors(['error' => 'Cannot delete the Owner role.']);
+        }
+
+        $role->delete();
+
+        // Also cleanup pivot
+        DB::connection('mongodb')->table('role_has_permissions')->where('role_id', $role->id)->delete();
+
+        return back()->with('success', 'Role deleted successfully.');
     }
 
     public function update(Request $request)
@@ -37,22 +96,32 @@ class PermissionController extends Controller
         $roleName = $validated['role'];
         $permissions = $validated['permissions'];
 
+        \Log::info("Updating permissions for role: {$roleName}", ['perms' => $permissions]);
+
         try {
             $role = \App\Models\Role::findByName($roleName, 'web');
-            
-            // Sync permissions directly
-            // We need to ensure the permission models exist (they should be seeded, but safe to check)
-            $permsToSync = [];
-            foreach ($permissions as $permName) {
-                $permsToSync[] = $permName;
+            \Log::info("Role found: " . $role->id);
+
+            // Force clear permissions to handle MongoDB mix of embedded/pivot
+            $role->unset('permission_id');
+            $role->save();
+
+            DB::connection('mongodb')->table('role_has_permissions')->where('role_id', $role->id)->delete();
+            try {
+                DB::connection('mongodb')->table('role_has_permissions')->where('role_id', new \MongoDB\BSON\ObjectId($role->id))->delete();
+            } catch (\Exception $e) {
             }
 
-            $role->syncPermissions($permsToSync);
+            // Sync permissions directly
+            $role->syncPermissions($permissions);
+            \Log::info("syncPermissions called for role: {$roleName}");
 
             // Clear cache to apply changes immediately
             app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+            \Log::info("Permissions cache cleared");
 
         } catch (\Exception $e) {
+            \Log::error("Failed to update permissions: " . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Failed to update permissions: ' . $e->getMessage()]);
         }
 

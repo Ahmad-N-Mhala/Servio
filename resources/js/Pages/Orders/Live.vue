@@ -18,7 +18,7 @@
                         </div>
                     </div>
                     
-                    <a :href="exportUrl" target="_blank" class="inline-flex">
+                    <a v-if="hasPermission('export_reports')" :href="exportUrl" target="_blank" class="inline-flex">
                         <Button class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -27,7 +27,7 @@
                         </Button>
                     </a>
 
-                    <Link :href="route('orders.create')">
+                    <Link v-if="hasPermission('create_order')" :href="route('orders.create')">
                         <Button>
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -55,7 +55,7 @@
                     </div>
                     <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('orders.no_orders') }}</h4>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('orders.create_first_order') }}</p>
-                    <Link :href="route('orders.create')">
+                    <Link v-if="hasPermission('create_order')" :href="route('orders.create')">
                         <Button>{{ $t('orders.create_first_order') }}</Button>
                     </Link>
                 </div>
@@ -217,7 +217,7 @@
                                             <div class="py-1">
                                                 <!-- Process Action -->
                                                 <button 
-                                                    v-if="order.status === 'pending'"
+                                                    v-if="order.status === 'pending' && hasPermission('edit_order')"
                                                     @click="handleAction(order.id, 'processing')"
                                                     class="w-full text-left px-4 py-2.5 text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 transition-colors"
                                                 >
@@ -229,7 +229,7 @@
                                                 
                                                 <!-- Complete Action -->
                                                 <button 
-                                                    v-if="order.status === 'processing'"
+                                                    v-if="order.status === 'processing' && hasPermission('edit_order')"
                                                     @click="handleAction(order.id, 'completed')"
                                                     class="w-full text-left px-4 py-2.5 text-sm text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-3 transition-colors"
                                                 >
@@ -241,7 +241,7 @@
                                                 
                                                 <!-- View Bill Action -->
                                                 <a 
-                                                    v-if="order.status === 'completed'"
+                                                    v-if="order.status === 'completed' && hasPermission('print_bill')"
                                                     :href="route('orders.bill', order.id)"
                                                     target="_blank"
                                                     @click="closeDropdown"
@@ -255,7 +255,7 @@
                                                 
                                                 <!-- Cancel Action -->
                                                 <button 
-                                                    v-if="order.status === 'pending' || order.status === 'processing'"
+                                                    v-if="(order.status === 'pending' || order.status === 'processing') && hasPermission('cancel_order')"
                                                     @click="handleAction(order.id, 'cancelled', $t('orders.confirm_cancel'))"
                                                     class="w-full text-left px-4 py-2.5 text-sm text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-3 transition-colors"
                                                 >
@@ -270,6 +270,7 @@
                                                 
                                                 <!-- Delete Action -->
                                                 <button 
+                                                    v-if="hasPermission('delete_order')"
                                                     @click="handleAction(order.id, 'deleted', $t('orders.confirm_delete'))"
                                                     class="w-full text-left px-4 py-2.5 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
                                                 >
@@ -306,7 +307,9 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Pagination from '@/Components/Pagination.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
+import { usePermissions } from '@/Composables/usePermissions';
 
+const { hasPermission } = usePermissions();
 const { t } = useI18n();
 
 interface Order {
@@ -377,12 +380,22 @@ const closeDropdown = () => {
 };
 
 // Add and remove click listener using Vue lifecycle hooks
+let refreshInterval: any = null;
+
 onMounted(() => {
     document.addEventListener('click', closeDropdown);
+    
+    // Auto-refresh every 10 seconds to keep orders live
+    refreshInterval = setInterval(() => {
+        // Only refresh if not interacting with a specific modal? 
+        // We use partial reload to be efficient. reload() preserves scroll/state by default.
+        router.reload({ only: ['orders'] });
+    }, 10000);
 });
 
 onUnmounted(() => {
     document.removeEventListener('click', closeDropdown);
+    if (refreshInterval) clearInterval(refreshInterval);
 });
 
 const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {

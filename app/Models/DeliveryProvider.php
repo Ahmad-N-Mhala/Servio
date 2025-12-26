@@ -19,6 +19,11 @@ class DeliveryProvider extends Model
         'requires_api_secret',
         'requires_store_id',
         'requires_webhook_secret',
+        'requires_client_id',
+        'requires_client_secret',
+        'requires_username',
+        'requires_password',
+        'webhook_url_template',
         'configuration_fields',
         'is_active',
         'sort_order',
@@ -29,6 +34,10 @@ class DeliveryProvider extends Model
         'requires_api_secret' => 'boolean',
         'requires_store_id' => 'boolean',
         'requires_webhook_secret' => 'boolean',
+        'requires_client_id' => 'boolean',
+        'requires_client_secret' => 'boolean',
+        'requires_username' => 'boolean',
+        'requires_password' => 'boolean',
         'configuration_fields' => 'array',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
@@ -47,7 +56,7 @@ class DeliveryProvider extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->whereIn('is_active', [true, 1, '1']);
     }
 
     /**

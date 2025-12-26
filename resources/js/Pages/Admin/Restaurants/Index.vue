@@ -14,10 +14,22 @@
             >
                 <!-- Header Actions -->
                 <template #header-actions>
-                    <Link :href="route('admin.restaurants.create')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/30 text-center whitespace-nowrap flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Add New Restaurant
-                    </Link>
+                    <div class="flex items-center gap-3">
+                        <select 
+                            v-model="selectedRestaurant" 
+                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                        >
+                            <option value="">All Restaurants</option>
+                            <option v-for="option in restaurantOptions" :key="option.id" :value="option.id">
+                                {{ option.name }}
+                            </option>
+                        </select>
+                        
+                        <Link :href="route('admin.restaurants.create')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/30 text-center whitespace-nowrap flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Add New Restaurant
+                        </Link>
+                    </div>
                 </template>
 
                 <!-- Name & Owner Column -->
@@ -154,14 +166,22 @@ const props = defineProps<{
     };
     filters: {
         search?: string;
+        restaurant_id?: string;
     };
+    restaurantOptions: Array<{ id: number; name: string }>;
 }>();
 
 const search = ref(props.filters.search || '');
+const selectedRestaurant = ref(props.filters.restaurant_id || '');
 
-watch(search, debounce((value: string) => {
-    router.get(route('admin.restaurants.index'), { search: value }, { preserveState: true, replace: true });
-}, 300));
+const handleSearch = debounce(() => {
+    router.get(route('admin.restaurants.index'), { 
+        search: search.value,
+        restaurant_id: selectedRestaurant.value 
+    }, { preserveState: true, replace: true });
+}, 300);
+
+watch([search, selectedRestaurant], handleSearch);
 
 const showOwnerModal = ref(false);
 const selectedOwner = ref<any>(null);

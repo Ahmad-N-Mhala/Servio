@@ -9,15 +9,44 @@ class RestaurantController extends Controller
 {
     public function index(Request $request)
     {
-        $query = \App\Models\Restaurant::with(['owner', 'subscription.plan'])->where('status', '!=', 'deleted');
+        $query = \App\Models\Restaurant::with(['subscription.plan'])->where('status', '!=', 'deleted');
 
         if ($request->input('search')) {
             $query->where('name', 'like', '%' . $request->input('search') . '%');
         }
 
+        if ($request->input('restaurant_id')) {
+            $query->where('id', $request->input('restaurant_id'));
+        }
+
+        $restaurantOptions = \App\Models\Restaurant::select('id', 'name')
+            ->where('status', '!=', 'deleted')
+            ->orderBy('name')
+            ->get();
+
+        $restaurants = $query->latest()->paginate(10)->appends([
+            'search' => $request->input('search'),
+            'restaurant_id' => $request->input('restaurant_id')
+        ]);
+
+        // Manually attach owner to avoid MongoDB Relation issues with Pivot filtering
+        $restaurants->getCollection()->transform(function ($restaurant) {
+            $ownerPivot = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('restaurant_id', $restaurant->id)
+                ->where('role', 'owner')
+                ->first();
+
+            $restaurant->owner = $ownerPivot
+                ? \App\Models\User::where('email', $ownerPivot->email)->first()
+                : null;
+
+            return $restaurant;
+        });
+
         return inertia('Admin/Restaurants/Index', [
-            'restaurants' => $query->latest()->paginate(10)->withQueryString(),
-            'filters' => $request->only(['search']),
+            'restaurants' => $restaurants,
+            'filters' => $request->only(['search', 'restaurant_id']),
+            'restaurantOptions' => $restaurantOptions,
         ]);
     }
 

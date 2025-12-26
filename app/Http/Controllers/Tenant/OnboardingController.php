@@ -116,7 +116,7 @@ class OnboardingController extends Controller
             session(['active_restaurant_id' => $restaurant->id]);
 
             // Redirect to dashboard
-            return redirect()->route('dashboard');
+            return redirect($user->getLandingRoute());
 
         } catch (\Exception $e) {
             DB::rollBack();

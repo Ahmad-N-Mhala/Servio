@@ -33,5 +33,37 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->prependToGroup('web', \App\Http\Middleware\InitializeTenancyByDomainOrFail::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'You do not have permission to view this page.'], 403);
+            }
+
+            $user = $request->user();
+            if ($user) {
+                return \Inertia\Inertia::render('Error/Forbidden', [
+                    'message' => 'You do not have permission to view this page.',
+                    'landing_url' => $user->getLandingRoute(),
+                ])->toResponse($request)->setStatusCode(403);
+            }
+
+            return redirect()->route('login')
+                ->with('error', 'You must be logged in to access this page.');
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'You do not have permission to view this page.'], 403);
+            }
+
+            $user = $request->user();
+            if ($user) {
+                return \Inertia\Inertia::render('Error/Forbidden', [
+                    'message' => 'You do not have permission to view this page.',
+                    'landing_url' => $user->getLandingRoute(),
+                ])->toResponse($request)->setStatusCode(403);
+            }
+
+            return redirect()->route('login')
+                ->with('error', 'You must be logged in to access this page.');
+        });
     })->create();

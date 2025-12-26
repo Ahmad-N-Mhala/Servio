@@ -270,7 +270,6 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
-import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
 
 const route = (window as any).route;
@@ -342,7 +341,7 @@ onMounted(() => {
         if (!cancellingOrder.value) { // Don't refresh if modal is open
              router.reload({ only: ['orders', 'completedOrders'] });
         }
-    }, 30000);
+    }, 5000);
 });
 
 onUnmounted(() => {

@@ -101,43 +101,77 @@
                                     <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            Logo URL
-                                        </label>
-                                        <input 
-                                            v-model="form.logo_url" 
-                                            type="url" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                            placeholder="https://example.com/logo.png"
-                                        />
-                                        <p v-if="errors.logo_url" class="mt-1 text-sm text-red-600">{{ errors.logo_url }}</p>
+                                <div class="mt-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Logo Image
+                                    </label>
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-500 transition-colors bg-gray-50 hover:bg-white">
+                                        <div class="space-y-1 text-center">
+                                            <div v-if="!logoPreview && !form.logo_url" class="mx-auto h-12 w-12 text-gray-400">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </div>
+                                            <img v-else :src="logoPreview || form.logo_url" class="mx-auto h-24 w-24 object-contain rounded-lg shadow-sm" />
+                                            
+                                            <div class="flex text-sm text-gray-600 justify-center">
+                                                <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                                    <span>Upload a new file</span>
+                                                    <input type="file" class="sr-only" accept="image/*" @change="handleLogoChange">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500">
+                                                PNG, JPG, GIF up to 2MB
+                                            </p>
+                                        </div>
                                     </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            API Documentation URL
-                                        </label>
-                                        <input 
-                                            v-model="form.api_documentation_url" 
-                                            type="url" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                            placeholder="https://developers.example.com"
-                                        />
-                                        <p v-if="errors.api_documentation_url" class="mt-1 text-sm text-red-600">{{ errors.api_documentation_url }}</p>
-                                    </div>
+                                    <p v-if="errors.logo" class="mt-1 text-sm text-red-600">{{ errors.logo }}</p>
                                 </div>
 
-                                <!-- Logo Preview -->
-                                <div v-if="form.logo_url" class="mt-6 p-4 bg-gray-50 rounded-lg">
-                                    <p class="text-sm font-medium text-gray-700 mb-2">Logo Preview:</p>
-                                    <div class="h-20 w-20 bg-white rounded-lg shadow-sm flex items-center justify-center p-2">
-                                        <img :src="form.logo_url" :alt="form.name" class="max-h-full max-w-full object-contain" />
-                                    </div>
+                                <div class="mt-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        API Documentation URL
+                                    </label>
+                                    <input 
+                                        v-model="form.api_documentation_url" 
+                                        type="url" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder="https://developers.example.com"
+                                    />
+                                    <p v-if="errors.api_documentation_url" class="mt-1 text-sm text-red-600">{{ errors.api_documentation_url }}</p>
                                 </div>
                             </div>
 
+                            <!-- Integration Settings (Orders & Webhooks) -->
+                            <div class="pt-6 border-t border-gray-200">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                        </svg>
+                                    </div>
+                                    Order Reception & Webhooks
+                                </h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Webhook URL Template
+                                        </label>
+                                        <input 
+                                            v-model="form.webhook_url_template" 
+                                            type="text" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                                            placeholder="https://api.restofy.com/webhooks/delivery/{provider}/{store_id}"
+                                        />
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            This is the callback URL we provide to the delivery platform to receive orders.
+                                        </p>
+                                        <p v-if="errors.webhook_url_template" class="mt-1 text-sm text-red-600">{{ errors.webhook_url_template }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- Configuration Requirements -->
                             <div class="pt-6 border-t border-gray-200">
                                 <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -151,41 +185,125 @@
                                 </h4>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-all" :class="{ 'border-blue-500 bg-blue-50': form.requires_api_key }">
-                                        <input 
-                                            v-model="form.requires_api_key" 
-                                            type="checkbox" 
-                                            class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                                        />
-                                        <span class="ml-3 text-sm font-medium text-gray-900">Requires API Key</span>
-                                    </label>
+                                    <!-- Store ID -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-all" :class="{ 'border-green-500 bg-green-50': form.requires_store_id }">
+                                            <input v-model="form.requires_store_id" type="checkbox" class="w-5 h-5 text-green-600 rounded focus:ring-green-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires Store ID</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            The specific ID for this restaurant branch on the delivery platform.
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
 
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-purple-500 transition-all" :class="{ 'border-purple-500 bg-purple-50': form.requires_api_secret }">
-                                        <input 
-                                            v-model="form.requires_api_secret" 
-                                            type="checkbox" 
-                                            class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
-                                        />
-                                        <span class="ml-3 text-sm font-medium text-gray-900">Requires API Secret</span>
-                                    </label>
+                                    <!-- API Key -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition-all" :class="{ 'border-blue-500 bg-blue-50': form.requires_api_key }">
+                                            <input v-model="form.requires_api_key" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires API Key</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            The unique access token or key provided by the delivery platform.
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
 
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 transition-all" :class="{ 'border-green-500 bg-green-50': form.requires_store_id }">
-                                        <input 
-                                            v-model="form.requires_store_id" 
-                                            type="checkbox" 
-                                            class="w-5 h-5 text-green-600 rounded focus:ring-green-500"
-                                        />
-                                        <span class="ml-3 text-sm font-medium text-gray-900">Requires Store ID</span>
-                                    </label>
+                                    <!-- API Secret -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-500 transition-all" :class="{ 'border-indigo-500 bg-indigo-50': form.requires_api_secret }">
+                                            <input v-model="form.requires_api_secret" type="checkbox" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires API Secret</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            The secret key used to sign requests or authenticate (often paired with API Key).
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
 
-                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-orange-500 transition-all" :class="{ 'border-orange-500 bg-orange-50': form.requires_webhook_secret }">
-                                        <input 
-                                            v-model="form.requires_webhook_secret" 
-                                            type="checkbox" 
-                                            class="w-5 h-5 text-orange-600 rounded focus:ring-orange-500"
-                                        />
-                                        <span class="ml-3 text-sm font-medium text-gray-900">Requires Webhook Secret</span>
-                                    </label>
+                                    <!-- Client ID (OAuth) -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-purple-500 transition-all" :class="{ 'border-purple-500 bg-purple-50': form.requires_client_id }">
+                                            <input v-model="form.requires_client_id" type="checkbox" class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires Client ID</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            The OAuth Client ID used to generate access tokens (common for UberEats).
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Client Secret (OAuth) -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-pink-500 transition-all" :class="{ 'border-pink-500 bg-pink-50': form.requires_client_secret }">
+                                            <input v-model="form.requires_client_secret" type="checkbox" class="w-5 h-5 text-pink-600 rounded focus:ring-pink-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires Client Secret</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            The OAuth Client Secret used to authenticate for tokens.
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Username -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-cyan-500 transition-all" :class="{ 'border-cyan-500 bg-cyan-50': form.requires_username }">
+                                            <input v-model="form.requires_username" type="checkbox" class="w-5 h-5 text-cyan-600 rounded focus:ring-cyan-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires Username</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            Login username for the platform's API (if required).
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Password -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-red-500 transition-all" :class="{ 'border-red-500 bg-red-50': form.requires_password }">
+                                            <input v-model="form.requires_password" type="checkbox" class="w-5 h-5 text-red-600 rounded focus:ring-red-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires Password</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            Login password for authentication.
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Webhook Secret -->
+                                    <div class="relative group">
+                                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-orange-500 transition-all" :class="{ 'border-orange-500 bg-orange-50': form.requires_webhook_secret }">
+                                            <input v-model="form.requires_webhook_secret" type="checkbox" class="w-5 h-5 text-orange-600 rounded focus:ring-orange-500" />
+                                            <span class="ml-3 text-sm font-medium text-gray-900">Requires Webhook Secret</span>
+                                            <div class="ml-auto text-gray-400 hover:text-gray-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                        </label>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                                            The secret used to verify that incoming orders are genuinely from the provider.
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -271,7 +389,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 const props = defineProps<{
@@ -280,39 +398,58 @@ const props = defineProps<{
 
 const route = (window as any).route;
 
-const form = ref({
+const form = useForm({
     name: props.provider.name,
     slug: props.provider.slug,
     description: props.provider.description || '',
+    logo: null as File | null,
     logo_url: props.provider.logo_url || '',
     api_documentation_url: props.provider.api_documentation_url || '',
-    requires_api_key: props.provider.requires_api_key,
-    requires_api_secret: props.provider.requires_api_secret,
-    requires_store_id: props.provider.requires_store_id,
-    requires_webhook_secret: props.provider.requires_webhook_secret,
-    is_active: props.provider.is_active,
+    requires_api_key: Boolean(props.provider.requires_api_key),
+    requires_api_secret: Boolean(props.provider.requires_api_secret),
+    requires_client_id: Boolean(props.provider.requires_client_id),
+    requires_client_secret: Boolean(props.provider.requires_client_secret),
+    requires_username: Boolean(props.provider.requires_username),
+    requires_password: Boolean(props.provider.requires_password),
+    requires_store_id: Boolean(props.provider.requires_store_id),
+    requires_webhook_secret: Boolean(props.provider.requires_webhook_secret),
+    webhook_url_template: props.provider.webhook_url_template || '',
+    is_active: Boolean(props.provider.is_active),
     sort_order: props.provider.sort_order || 0,
 });
+
+const logoPreview = ref<string | null>(null);
+
+const handleLogoChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        const file = target.files[0];
+        form.logo = file;
+        logoPreview.value = URL.createObjectURL(file);
+    }
+};
 
 const errors = ref<Record<string, string>>({});
 const processing = ref(false);
 
 const submit = () => {
     processing.value = true;
-    errors.value = {};
-
-    const url = route('admin.delivery-providers.update', props.provider.id);
-    router.post(url, {
-        ...form.value,
+    
+    // Using Inertia useForm with spoofed PUT method and forced FormData
+    // Since Inertia useForm doesn't support merging data in post easily, we manually invoke
+    
+    form.transform((data) => ({
+        ...data,
         _method: 'PUT',
-    }, {
-        onError: (err) => {
+    })).post(route('admin.delivery-providers.update', props.provider.id), {
+        forceFormData: true,
+        onError: (err: any) => {
             errors.value = err;
             processing.value = false;
         },
         onFinish: () => {
             processing.value = false;
-        },
+        }
     });
 };
 

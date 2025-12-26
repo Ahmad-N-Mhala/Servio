@@ -15,15 +15,24 @@ return new class extends Migration {
             $table->string('name'); // e.g., "Talabat", "Noon Food", "Careem NOW"
             $table->string('slug')->unique(); // e.g., "talabat", "noon", "careem"
             $table->text('description')->nullable();
-            $table->string('logo_url')->nullable(); // URL or path to logo
+            $table->string('logo_url')->nullable(); // Store file path or URL
             $table->string('api_documentation_url')->nullable();
 
-            // Configuration requirements
-            $table->boolean('requires_api_key')->default(true);
-            $table->boolean('requires_api_secret')->default(true);
+            // Configuration requirements (What credentials we need from the RESTAURANT)
+            $table->boolean('requires_api_key')->default(false);
+            $table->boolean('requires_api_secret')->default(false);
+            $table->boolean('requires_client_id')->default(false); // OAuth
+            $table->boolean('requires_client_secret')->default(false); // OAuth
+            $table->boolean('requires_username')->default(false); // Legacy/Basic
+            $table->boolean('requires_password')->default(false); // Legacy/Basic
             $table->boolean('requires_store_id')->default(true);
             $table->boolean('requires_webhook_secret')->default(false);
-            $table->json('configuration_fields')->nullable(); // Additional custom fields
+            $table->json('configuration_fields')->nullable(); // Additional custom fields definition
+
+            // Integration Settings (How WE connect to THEM or THEY connect to US)
+            $table->string('webhook_url_template')->nullable(); // e.g. https://api.restofy.com/webhooks/delivery/{provider}/{store_id}
+            $table->json('supported_webhook_events')->nullable(); // ['order.created', 'order.cancelled', etc.]
+            $table->json('api_settings')->nullable(); // Internal setting for Auth type, API Base URL, etc.
 
             // Status and ordering
             $table->boolean('is_active')->default(true);

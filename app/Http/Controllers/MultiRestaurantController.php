@@ -108,7 +108,7 @@ class MultiRestaurantController extends Controller
         // Set the active restaurant in the session
         session(['active_restaurant_id' => $restaurant->id]);
 
-        return redirect()->route('dashboard');
+        return redirect($request->user()->getLandingRoute());
     }
     public function create()
     {
@@ -214,7 +214,7 @@ class MultiRestaurantController extends Controller
             // Setup Session
             session(['active_restaurant_id' => $restaurant->id]);
 
-            return redirect()->route('dashboard')->with('success', 'Restaurant created successfully!');
+            return redirect($user->getLandingRoute())->with('success', 'Restaurant created successfully!');
 
         } catch (\Exception $e) {
             if ($useTransactions) {

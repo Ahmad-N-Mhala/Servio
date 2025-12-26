@@ -34,26 +34,29 @@ class AppServiceProvider extends ServiceProvider
 
             try {
                 $targetId = (string) $restaurant->id;
+                $cacheKey = "user_role_{$user->id}_{$targetId}";
+                static $roleCache = [];
 
-                //TODO: 
-                // Robust Way: Fetch user role for this restaurant via manual query
-                // FIX: Use manual query because relationship is broken
-                $pivot = \Illuminate\Support\Facades\DB::connection('mongodb')
-                    ->table('restaurant_user')
-                    ->where('email', $user->email)
-                    ->where('restaurant_id', $targetId)
-                    ->first();
-                
-                $pivotRole = $pivot ? $pivot['role'] : null;
+                if (!isset($roleCache[$cacheKey])) {
+                    $pivot = \Illuminate\Support\Facades\DB::connection('mongodb')
+                        ->table('restaurant_user')
+                        ->where('email', $user->email)
+                        ->where('restaurant_id', $targetId)
+                        ->first();
+
+                    $roleCache[$cacheKey] = $pivot ? (isset($pivot->role) ? $pivot->role : null) : null;
+                }
+
+                $pivotRole = $roleCache[$cacheKey];
 
                 if (!$pivotRole) {
                     \Log::warning("Gate: No pivot role found for user {$user->email} in restaurant {$targetId}. Falling back to global roles.");
-                    
+
                     // Fallback: Check if user has the permission via ANY of their global roles
                     if ($user->hasPermissionTo($ability)) {
-                         return true;
+                        return true;
                     }
-                    
+
                     return null;
                 }
 

@@ -39,7 +39,15 @@ class LoginController extends Controller
             }
 
             // Fetch available restaurants for this user
-            $restaurants = $user->restaurants()->get();
+            // FIX: Use manual query as Eloquent relationship might fail on ID types
+            $restaurantIds = \Illuminate\Support\Facades\DB::connection('mongodb')
+                ->table('restaurant_user')
+                ->where('email', $user->email)
+                ->pluck('restaurant_id')
+                ->map(fn($id) => (string) $id) // Ensure strings
+                ->toArray();
+
+            $restaurants = \App\Models\Restaurant::whereIn('id', $restaurantIds)->get();
 
             // If user has 0 restaurants, redirect to onboarding or show error
             if ($restaurants->count() === 0) {
@@ -53,7 +61,7 @@ class LoginController extends Controller
             // Users can switch restaurants using the header dropdown
             $restaurant = $restaurants->first();
             session(['active_restaurant_id' => $restaurant->id]);
-            return redirect()->route('dashboard');
+            return redirect()->intended($user->getLandingRoute());
         }
 
         return back()->withErrors([

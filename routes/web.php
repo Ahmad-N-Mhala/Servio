@@ -63,6 +63,8 @@ Route::group([
                 ->middleware('permission:view_dashboard');
             Route::get('/dashboard/details', [DashboardController::class, 'getDetails'])->name('dashboard.details')
                 ->middleware('permission:view_analytics');
+            Route::get('/dashboard/export', [DashboardController::class, 'export'])->name('dashboard.export')
+                ->middleware('permission:export_reports');
 
             // Menu Management
             Route::prefix('menu')->name('menu.')->group(function () {
@@ -178,6 +180,8 @@ Route::group([
                     ->middleware('permission:view_delivery_settings');
                 Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update')
                     ->middleware('permission:toggle_providers');
+                Route::delete('/delivery/{provider}', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'destroy'])->name('delivery.destroy')
+                    ->middleware('permission:toggle_providers');
             });
 
             // Waste & Inventory
@@ -224,6 +228,7 @@ Route::group([
             Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);
             Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
             Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
+            Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index']);
 
             // Delivery Providers Management
             Route::get('delivery-providers', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'index'])->name('delivery-providers.index');
@@ -237,6 +242,8 @@ Route::group([
             // Permissions Management
             Route::get('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('permissions.index');
             Route::post('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'update'])->name('permissions.update');
+            Route::post('roles', [\App\Http\Controllers\Admin\PermissionController::class, 'storeRole'])->name('roles.store');
+            Route::delete('roles/{role}', [\App\Http\Controllers\Admin\PermissionController::class, 'destroyRole'])->name('roles.destroy');
 
             // Profile Routes
             Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');

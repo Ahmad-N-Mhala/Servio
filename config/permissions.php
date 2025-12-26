@@ -3,27 +3,27 @@
 return [
     'dashboard' => [
         'label' => 'Dashboard',
-        'permissions' => ['view_dashboard', 'view_analytics']
+        'permissions' => ['view_dashboard', 'view_analytics', 'export_reports']
     ],
     'pos' => [
         'label' => 'POS System',
-        'permissions' => ['pos_system', 'view_pos', 'create_order', 'discount_order', 'void_order']
+        'permissions' => ['view_pos', 'pos_system', 'create_order', 'discount_order', 'void_order']
     ],
     'orders' => [
         'label' => 'Order Management',
-        'permissions' => ['view_orders', 'edit_order', 'cancel_order', 'delete_order', 'print_bill']
+        'permissions' => ['view_orders', 'create_order', 'edit_order', 'cancel_order', 'delete_order', 'print_bill']
     ],
     'kitchen' => [
         'label' => 'Kitchen Display',
-        'permissions' => ['view_kitchen', 'update_item_status', 'complete_order']
+        'permissions' => ['view_kitchen', 'update_item_status']
     ],
     'menu' => [
         'label' => 'Menu Management',
-        'permissions' => ['menu_management', 'view_menu', 'create_category', 'edit_category', 'delete_category', 'create_item', 'edit_item', 'delete_item']
+        'permissions' => ['view_menu', 'create_category', 'edit_category', 'delete_category', 'create_item', 'edit_item', 'delete_item']
     ],
     'tables' => [
         'label' => 'Table Management',
-        'permissions' => ['view_tables', 'create_table', 'edit_table', 'delete_table', 'manage_zones']
+        'permissions' => ['view_tables', 'create_table', 'edit_table', 'delete_table']
     ],
     'customers' => [
         'label' => 'Customer Management',
@@ -31,11 +31,15 @@ return [
     ],
     'staff' => [
         'label' => 'Staff Management',
-        'permissions' => ['view_staff', 'create_staff', 'edit_staff', 'delete_staff', 'manage_permissions']
+        'permissions' => ['view_staff', 'create_staff', 'edit_staff', 'delete_staff']
     ],
     'inventory' => [
         'label' => 'Inventory & Stock',
-        'permissions' => ['view_inventory', 'add_stock', 'deduct_stock', 'manage_suppliers', 'view_waste', 'record_waste']
+        'permissions' => ['view_inventory', 'add_stock', 'deduct_stock', 'delete_inventory']
+    ],
+    'waste' => [
+        'label' => 'Waste Management',
+        'permissions' => ['view_waste', 'record_waste', 'delete_waste']
     ],
     'loyalty' => [
         'label' => 'Loyalty Program',
@@ -43,18 +47,18 @@ return [
     ],
     'delivery' => [
         'label' => 'Delivery Integrations',
-        'permissions' => ['view_delivery_settings', 'toggle_providers', 'manage_menus_sync']
+        'permissions' => ['view_delivery_settings', 'toggle_providers']
     ],
     'communication' => [
         'label' => 'Communication & Marketing',
-        'permissions' => ['view_communication', 'purchase_sms_bundles', 'send_campaigns', 'manage_templates']
+        'permissions' => ['view_communication', 'purchase_sms_bundles', 'manage_templates']
     ],
     'finance' => [
         'label' => 'Finance & Reports',
-        'permissions' => ['view_sales_reports', 'view_expense_reports', 'view_staff_performance', 'export_reports']
+        'permissions' => ['view_sales_reports', 'view_expense_reports']
     ],
     'settings' => [
         'label' => 'System Settings',
-        'permissions' => ['view_settings', 'update_restaurant_profile', 'manage_billing', 'manage_printers']
+        'permissions' => ['view_settings', 'manage_billing']
     ],
 ];

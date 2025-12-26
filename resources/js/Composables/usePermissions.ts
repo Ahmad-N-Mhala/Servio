@@ -2,19 +2,19 @@ import { usePage } from '@inertiajs/vue3';
 
 export function usePermissions() {
     const hasPermission = (permission: string) => {
-        const user = usePage().props.auth.user;
-        if (!user || !user.permissions) {
+        const { auth } = usePage().props as any;
+        if (!auth?.user?.permissions) {
             return false;
         }
-        return user.permissions.includes(permission);
+        return auth.user.permissions.includes(permission);
     };
 
     const hasRole = (role: string) => {
-        const user = usePage().props.auth.user;
-        if (!user || !user.roles) {
+        const { auth } = usePage().props as any;
+        if (!auth?.user?.roles) {
             return false;
         }
-        return user.roles.includes(role);
+        return auth.user.roles.includes(role);
     };
 
     const hasAnyPermission = (permissions: string[]) => {

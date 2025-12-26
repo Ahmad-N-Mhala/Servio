@@ -33,6 +33,7 @@
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No menu categories yet</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('menu.no_categories') }}</p>
                     <Button 
+                        v-if="hasPermission('create_category')"
                         @click="openCategoryModal()"
                         variant="primary"
                         size="lg"
@@ -164,6 +165,7 @@
                                             </svg>
                                         </button>
                                         <button 
+                                            v-if="hasPermission('delete_item')"
                                             @click="deleteItem(item)"
                                             class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
                                             title="Delete Item"
@@ -517,7 +519,7 @@ const closeCategoryModal = () => {
 const submitCategory = () => {
     const options = {
         onSuccess: () => closeCategoryModal(),
-        onError: (errors) => {
+        onError: (errors: any) => {
             if (errors.name) {
                 window.dispatchEvent(new CustomEvent('notify', {
                     detail: {
@@ -551,11 +553,7 @@ const deleteCategory = () => {
     }
 };
 
-const confirmDeleteCategory = (category: any) => {
-    if (confirm(t('common.confirm_delete') || 'Are you sure you want to delete this category?')) {
-        router.delete(route('menu.categories.destroy', category.id));
-    }
-};
+
 
 // Item Actions
 const openItemModal = (category: any, item: any = null) => {
@@ -635,7 +633,7 @@ const closeItemModal = () => {
 const submitItem = () => {
     const options = {
         onSuccess: () => closeItemModal(),
-        onError: (errors) => {
+        onError: (errors: any) => {
             if (errors.name) {
                 window.dispatchEvent(new CustomEvent('notify', {
                     detail: {

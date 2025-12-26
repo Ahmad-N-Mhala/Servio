@@ -60,7 +60,7 @@
             >
                 <!-- Header Actions -->
                 <template #header-actions>
-                    <Button variant="primary" size="md" @click="openAddModal">
+                    <Button v-if="hasPermission('create_staff')" variant="primary" size="md" @click="openCreateModal">
                         <template #icon>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -102,12 +102,21 @@
                 <!-- Actions Column -->
                 <template #actions="{ row }">
                     <button 
+                        v-if="hasPermission('edit_staff')"
+                        @click="openEditModal(row)"
+                        class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium mr-2"
+                    >
+                        Edit
+                    </button>
+                    <button 
+                        v-if="hasPermission('edit_staff')"
                         @click="toggleActive(row)"
                         :class="['px-3 py-1.5 rounded-lg text-xs font-medium transition-colors mr-2', row.is_active ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-green-100 text-green-700 hover:bg-green-200']"
                     >
                         {{ row.is_active ? 'Deactivate' : 'Activate' }}
                     </button>
                     <button 
+                        v-if="hasPermission('delete_staff')"
                         @click="deleteStaff(row.id)"
                         class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs font-medium"
                     >
@@ -117,8 +126,8 @@
             </Table>
         </div>
 
-        <!-- Add Staff Modal -->
-        <Modal :show="showAddModal" title="Add Staff Member" size="md" @close="closeAddModal">
+        <!-- Add/Edit Staff Modal -->
+        <Modal :show="showAddModal" :title="editingId ? 'Edit Staff Member' : 'Add Staff Member'" size="md" @close="closeAddModal">
             <form @submit.prevent="submitForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
@@ -157,7 +166,7 @@
                     <p v-if="form.errors.role" class="mt-1 text-sm text-red-600">{{ form.errors.role }}</p>
                 </div>
 
-                <div class="pt-2 text-sm text-gray-500">
+                <div class="pt-2 text-sm text-gray-500" v-if="!editingId">
                     <p>* A temporary password will be generated and shown after creation.</p>
                 </div>
             </form>
@@ -165,7 +174,7 @@
             <template #footer>
                 <Button variant="ghost" @click="closeAddModal">Cancel</Button>
                 <Button variant="primary" @click="submitForm" :loading="form.processing">
-                    Add Staff Member
+                    {{ editingId ? 'Save Changes' : 'Add Staff Member' }}
                 </Button>
             </template>
         </Modal>
@@ -182,6 +191,9 @@ import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import Modal from '@/Components/Modal.vue';
 import Table from '@/Components/Table.vue';
+import { usePermissions } from '@/Composables/usePermissions';
+
+const { hasPermission } = usePermissions();
 
 interface StaffMember {
     id: number;
@@ -237,6 +249,7 @@ const columns = [
 ];
 
 const showAddModal = ref(false);
+const editingId = ref<number | null>(null);
 
 // Search state managed here for server-side search integration
 const params = ref({
@@ -274,8 +287,18 @@ const paginationMeta = computed(() => {
     return props.staff; 
 });
 
-const openAddModal = () => {
+const openCreateModal = () => {
+    editingId.value = null;
     form.reset();
+    form.clearErrors();
+    showAddModal.value = true;
+};
+
+const openEditModal = (staff: StaffMember) => {
+    editingId.value = staff.id;
+    form.name = staff.name;
+    form.email = staff.email;
+    form.role = staff.role;
     form.clearErrors();
     showAddModal.value = true;
 };
@@ -283,6 +306,7 @@ const openAddModal = () => {
 const closeAddModal = () => {
     showAddModal.value = false;
     form.reset();
+    editingId.value = null;
 };
 
 const submitForm = () => {
@@ -317,11 +341,15 @@ const submitForm = () => {
         return;
     }
 
-    form.post(route('staff.store'), {
-        onSuccess: () => {
-            closeAddModal();
-        }
-    });
+    if (editingId.value) {
+        form.put(route('staff.update', editingId.value), {
+            onSuccess: () => closeAddModal()
+        });
+    } else {
+        form.post(route('staff.store'), {
+            onSuccess: () => closeAddModal()
+        });
+    }
 };
 
 const getInitials = (name: string): string => {

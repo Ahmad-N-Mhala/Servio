@@ -51,13 +51,20 @@ class DeliveryProviderController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:delivery_providers,slug',
             'description' => 'nullable|string',
-            'logo_url' => 'nullable|string|max:500',
+            'logo' => 'nullable|image|max:2048', // File upload
             'api_documentation_url' => 'nullable|url|max:500',
             'requires_api_key' => 'boolean',
             'requires_api_secret' => 'boolean',
+            'requires_client_id' => 'boolean',
+            'requires_client_secret' => 'boolean',
+            'requires_username' => 'boolean',
+            'requires_password' => 'boolean',
             'requires_store_id' => 'boolean',
             'requires_webhook_secret' => 'boolean',
             'configuration_fields' => 'nullable|array',
+            'webhook_url_template' => 'nullable|string',
+            'supported_webhook_events' => 'nullable|array',
+            'api_settings' => 'nullable|array',
             'is_active' => 'boolean',
             'sort_order' => 'nullable|integer|min:0',
         ]);
@@ -66,6 +73,14 @@ class DeliveryProviderController extends Controller
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
         }
+
+        // Handle File Upload
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('delivery-providers', 'public');
+            $validated['logo_url'] = $path;
+        }
+
+        unset($validated['logo']); // Remove file object from data array
 
         DeliveryProvider::create($validated);
 
@@ -88,16 +103,30 @@ class DeliveryProviderController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:delivery_providers,slug,' . $deliveryProvider->id,
             'description' => 'nullable|string',
-            'logo_url' => 'nullable|string|max:500',
+            'logo' => 'nullable|image|max:2048', // Allow file upload
+            'logo_url' => 'nullable|string|max:500', // Allow keeping existing URL
             'api_documentation_url' => 'nullable|url|max:500',
             'requires_api_key' => 'boolean',
             'requires_api_secret' => 'boolean',
+            'requires_client_id' => 'boolean',
+            'requires_client_secret' => 'boolean',
+            'requires_username' => 'boolean',
+            'requires_password' => 'boolean',
             'requires_store_id' => 'boolean',
             'requires_webhook_secret' => 'boolean',
+            'webhook_url_template' => 'nullable|string',
             'configuration_fields' => 'nullable|array',
             'is_active' => 'boolean',
             'sort_order' => 'nullable|integer|min:0',
         ]);
+
+        // Handle File Upload
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('delivery-providers', 'public');
+            $validated['logo_url'] = $path;
+        }
+
+        unset($validated['logo']); // Remove file object
 
         $deliveryProvider->update($validated);
 

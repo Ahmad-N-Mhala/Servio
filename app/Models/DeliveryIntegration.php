@@ -18,6 +18,10 @@ class DeliveryIntegration extends Model
         'api_key',
         'api_secret',
         'store_id',
+        'client_id',
+        'client_secret',
+        'username',
+        'password',
         'webhook_secret',
         'settings',
         'is_enabled',
@@ -28,8 +32,10 @@ class DeliveryIntegration extends Model
         'settings' => 'array',
         'is_enabled' => 'boolean',
         'auto_accept_orders' => 'boolean',
-        'api_secret' => 'encrypted', // Encrypt sensitive data
+        'api_secret' => 'encrypted',
         'api_key' => 'encrypted',
+        'client_secret' => 'encrypted',
+        'password' => 'encrypted',
         'webhook_secret' => 'encrypted',
     ];
 

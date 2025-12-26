@@ -67,6 +67,23 @@
                     <span class="text-sm" v-if="!isSidebarCollapsed">Restaurants</span>
                 </Link>
 
+                <!-- Users -->
+                <Link 
+                    :href="route('admin.users.index')" 
+                    :class="[
+                        'group flex items-center rounded-lg transition-all duration-200',
+                        isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
+                        $page.url.includes('/admin/users') 
+                            ? 'bg-primary/10 text-primary font-medium' 
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                    ]"
+                >
+                    <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span class="text-sm" v-if="!isSidebarCollapsed">Users</span>
+                </Link>
+
                 <!-- Configurations Section -->
                 <div>
                      <div 
@@ -466,8 +483,8 @@ const switchRestaurant = (restaurant: any) => {
 
 // Watch for flash messages
 watch(() => page.props.flash, (flash: any) => {
-    if (flash?.message) {
-        toastMessage.value = flash.message;
+    if (flash?.message || flash?.success) {
+        toastMessage.value = flash.message || flash.success;
         toastTitle.value = 'Success';
         toastType.value = 'success';
         toastTrigger.value++;

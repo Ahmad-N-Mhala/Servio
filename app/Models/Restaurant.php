@@ -51,7 +51,8 @@ class Restaurant extends Model
 
     public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'restaurant_user');
+        return $this->belongsToMany(User::class, 'restaurant_user', 'restaurant_id', 'email', 'id', 'email')
+            ->withPivot('role', 'is_active');
     }
 
     public function orders(): HasMany
@@ -76,7 +77,7 @@ class Restaurant extends Model
 
     public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'restaurant_user', 'restaurant_id', 'email', 'id', 'email')->limit(1);
+        return $this->users()->wherePivot('role', 'owner');
     }
 
 }

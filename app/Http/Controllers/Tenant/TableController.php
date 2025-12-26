@@ -12,6 +12,7 @@ class TableController extends Controller
 {
     public function index()
     {
+        \Illuminate\Support\Facades\Gate::authorize('view_tables');
         $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
         $tables = Table::where('restaurant_id', $restaurant->id)
             ->orderBy('name')
@@ -24,6 +25,7 @@ class TableController extends Controller
 
     public function store(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('create_table');
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
@@ -46,6 +48,7 @@ class TableController extends Controller
 
     public function update(Request $request, Table $table)
     {
+        \Illuminate\Support\Facades\Gate::authorize('edit_table');
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
@@ -60,6 +63,7 @@ class TableController extends Controller
 
     public function destroy(Table $table)
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete_table');
         $table->delete();
         return redirect()->back()->with('message', 'Table deleted successfully');
     }

@@ -21,6 +21,8 @@ class LoyaltyController extends Controller
 
     public function index(Request $request): Response
     {
+        \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
+
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
         // Customers Query
@@ -77,6 +79,7 @@ class LoyaltyController extends Controller
 
     public function showCustomer(Customer $customer): Response
     {
+        \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
         $customer->load([
             'loyaltyPoints',
             'pointTransactions' => function ($query) {
@@ -95,6 +98,7 @@ class LoyaltyController extends Controller
 
     public function storeReward(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
@@ -131,6 +135,7 @@ class LoyaltyController extends Controller
 
     public function updateReward(Request $request, Reward $reward)
     {
+        \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
@@ -161,6 +166,7 @@ class LoyaltyController extends Controller
 
     public function deleteReward(Reward $reward)
     {
+        \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
         $reward->delete();
 
         return redirect()->back()->with('message', __('loyalty.reward_deleted'));
@@ -168,6 +174,7 @@ class LoyaltyController extends Controller
 
     public function adjustPoints(Request $request, Customer $customer)
     {
+        \Illuminate\Support\Facades\Gate::authorize('adjust_points');
         $validated = $request->validate([
             'points' => ['required', 'integer'],
             'description' => ['required', 'string'],

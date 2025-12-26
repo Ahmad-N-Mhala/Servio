@@ -24,23 +24,24 @@ class StaffController extends Controller
         $ownerEmails = [];
 
         // 1. Check Owner Email from restaurant record
-        if ($restaurant->email) {
+        if ($restaurant->email && is_string($restaurant->email)) {
             $ownerEmails[] = $restaurant->email;
         }
 
         // 2. Check Owner from pivot table
-        // Use value() or pluck()->first()
-        $pivotOwner = \Illuminate\Support\Facades\DB::table('restaurant_user')
-            ->where('restaurant_id', $restaurant->id)
+        $pivotOwners = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('restaurant_id', (string) $restaurant->id)
             ->where('role', 'owner')
             ->pluck('email')
-            ->first();
+            ->toArray();
 
-        if ($pivotOwner) {
-            $ownerEmails[] = $pivotOwner;
+        foreach ($pivotOwners as $email) {
+            if (is_string($email)) {
+                $ownerEmails[] = $email;
+            }
         }
 
-        $ownerEmails = array_unique($ownerEmails);
+        $ownerEmails = array_unique(array_filter($ownerEmails));
 
         if (!empty($ownerEmails)) {
             $ownerUsers = User::whereIn('email', $ownerEmails)->get();
@@ -70,7 +71,8 @@ class StaffController extends Controller
 
         // Staff Query
         $staffQuery = Staff::with('user')
-            ->where('restaurant_id', $restaurant->id);
+            ->where('restaurant_id', $restaurant->id)
+            ->whereHas('user');
 
         // Search
         if ($request->filled('search')) {
@@ -136,6 +138,9 @@ class StaffController extends Controller
             'email_verified_at' => now(),
         ]);
 
+        // Force add restaurant_id to user as requested
+        $user->forceFill(['restaurant_id' => $restaurant->id])->save();
+
         $staff = Staff::create([
             'user_id' => $user->id,
             'restaurant_id' => $restaurant->id,
@@ -146,6 +151,16 @@ class StaffController extends Controller
 
         $user->assignRole($validated['role']);
 
+        // Add to restaurant_user pivot table
+        \Illuminate\Support\Facades\DB::table('restaurant_user')->insert([
+            'email' => $validated['email'],
+            'restaurant_id' => (string) $restaurant->id,
+            'role' => $validated['role'],
+            // MongoDB supports timestamps; useful to have
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         // TODO: Send invitation email with password
 
         return back()->with('success', 'Staff member added successfully. Password: ' . $password);
@@ -154,14 +169,49 @@ class StaffController extends Controller
     public function update(Request $request, Staff $staff)
     {
         $validated = $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'unique:users,email,' . $staff->user_id],
             'role' => ['sometimes', config('roles.validation_rule')],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
-        $staff->update($validated);
+        $user = $staff->user;
+        $oldEmail = $user->email;
 
-        if (isset($validated['role'])) {
-            $staff->user->syncRoles([$validated['role']]);
+        // Update User details
+        $userUpdateData = [];
+        if (isset($validated['name']))
+            $userUpdateData['name'] = $validated['name'];
+        if (isset($validated['email']))
+            $userUpdateData['email'] = $validated['email'];
+
+        if (!empty($userUpdateData)) {
+            $user->update($userUpdateData);
+        }
+
+        // Update Staff details
+        if (isset($validated['is_active'])) {
+            $staff->update(['is_active' => $validated['is_active']]);
+        }
+
+        // Update Pivot Table (Role and Email)
+        if (isset($validated['role']) || isset($validated['email'])) {
+            $query = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('email', $oldEmail) // Use old email to find the record
+                ->where('restaurant_id', (string) $staff->restaurant_id);
+
+            $pivotUpdates = ['updated_at' => now()];
+
+            if (isset($validated['role'])) {
+                $pivotUpdates['role'] = $validated['role'];
+                $user->syncRoles([$validated['role']]);
+            }
+
+            if (isset($validated['email'])) {
+                $pivotUpdates['email'] = $validated['email'];
+            }
+
+            $query->update($pivotUpdates);
         }
 
         return back()->with('success', 'Staff member updated successfully');
@@ -169,7 +219,34 @@ class StaffController extends Controller
 
     public function destroy(Staff $staff)
     {
+        // 1. Check for Last Owner
+        if ($staff->role === 'owner') {
+            // Count owners for this restaurant
+            $ownerCount = Staff::where('restaurant_id', $staff->restaurant_id)
+                ->where('role', 'owner')
+                ->count();
+
+            if ($ownerCount <= 1) {
+                return back()->with('error', 'Cannot delete the only owner of the restaurant.');
+            }
+        }
+
+        // 2. Remove from restaurant_user pivot
+        \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $staff->user->email)
+            ->where('restaurant_id', (string) $staff->restaurant_id)
+            ->delete();
+
+        // 3. Delete the User record
+        // Note: This permanently deletes the user account. 
+        // If the user belongs to OTHER restaurants, this logic shouldn't be used, but per request "remove from DB":
+        if ($staff->user) {
+            $staff->user->delete();
+        }
+
+        // 4. Delete Staff record
         $staff->delete();
-        return back()->with('success', 'Staff member removed successfully');
+
+        return back()->with('success', 'Staff member and user account removed successfully');
     }
 }
