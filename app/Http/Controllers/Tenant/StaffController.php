@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use App\Mail\WelcomeEmail;
 
 class StaffController extends Controller
 {
@@ -161,9 +164,18 @@ class StaffController extends Controller
             'updated_at' => now(),
         ]);
 
-        // TODO: Send invitation email with password
+        // Send invitation email with password reset link
+        $token = Password::createToken($user);
+        $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
-        return back()->with('success', 'Staff member added successfully. Password: ' . $password);
+        try {
+            Mail::to($user->email)->send(new WelcomeEmail($user, $restaurant->name, $resetUrl));
+        } catch (\Exception $e) {
+            // Log error but don't fail the request completely
+            \Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Staff member added successfully. An invitation email has been sent.');
     }
 
     public function update(Request $request, Staff $staff)

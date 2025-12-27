@@ -167,5 +167,19 @@ class User extends Authenticatable
 
         return route('profile.edit'); // Ultimate fallback
     }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $resetUrl = route('password.reset', ['token' => $token, 'email' => $this->email]);
+
+        \Illuminate\Support\Facades\Mail::to($this->email)
+            ->send(new \App\Mail\PasswordResetEmail($resetUrl, $this));
+    }
 }
 
