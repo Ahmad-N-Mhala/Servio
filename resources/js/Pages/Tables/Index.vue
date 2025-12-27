@@ -18,12 +18,17 @@
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <div v-for="table in tables" :key="table.id" class="glass-card p-6 rounded-2xl relative group bg-white dark:bg-gray-800">
                     <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button v-if="hasPermission('edit_table')" @click="openModal(table)" class="text-blue-500 hover:text-blue-700 bg-gray-100 p-1.5 rounded-lg">
+                        <button v-if="hasPermission('view_tables')" @click="viewQrCode(table)" class="text-purple-500 hover:text-purple-700 bg-gray-100 p-1.5 rounded-lg" title="View QR Code">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                            </svg>
+                        </button>
+                        <button v-if="hasPermission('edit_table')" @click="openModal(table)" class="text-blue-500 hover:text-blue-700 bg-gray-100 p-1.5 rounded-lg" title="Edit Table">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </button>
-                        <button v-if="hasPermission('delete_table')" @click="deleteTable(table)" class="text-red-500 hover:text-red-700 bg-gray-100 p-1.5 rounded-lg">
+                        <button v-if="hasPermission('delete_table')" @click="deleteTable(table)" class="text-red-500 hover:text-red-700 bg-gray-100 p-1.5 rounded-lg" title="Delete Table">
                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -45,7 +50,7 @@
                 </div>
             </div>
 
-            <!-- Modal -->
+            <!-- Edit/Create Modal -->
             <Modal :show="showModal" @close="closeModal">
                 <div class="p-6">
                     <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">{{ form.id ? 'Edit Table' : 'New Table' }}</h2>
@@ -78,6 +83,77 @@
                 </div>
             </Modal>
 
+            <!-- QR Code Modal -->
+            <Modal :show="showQrModal" @close="closeQrModal">
+                <div class="p-6">
+                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">QR Code - {{ selectedTable?.name }}</h2>
+                    
+                    <div class="text-center">
+                        <!-- QR Code Display -->
+                        <div class="bg-white p-6 rounded-xl inline-block mb-6">
+                            <img 
+                                :src="`data:image/svg+xml;base64,${qrCodeSvg}`" 
+                                v-if="qrCodeSvg"
+                                alt="QR Code" 
+                                class="w-64 h-64 mx-auto"
+                            />
+                            <div v-else class="w-64 h-64 flex items-center justify-center bg-gray-100 rounded-lg">
+                                <svg class="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Table Info -->
+                        <div class="mb-6 text-left bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                                <span class="font-semibold">Table:</span> {{ selectedTable?.name }}
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                                <span class="font-semibold">Location:</span> {{ selectedTable?.location || 'Main Hall' }}
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                                <span class="font-semibold">Capacity:</span> {{ selectedTable?.capacity }} seats
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 break-all">
+                                <span class="font-semibold">URL:</span> {{ selectedTable?.qr_code_url }}
+                            </p>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="mb-6 text-left bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                            <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">How to use:</h3>
+                            <ol class="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+                                <li>Download the QR code</li>
+                                <li>Print it on paper or display on a screen</li>
+                                <li>Place it on the table</li>
+                                <li>Customers scan to order</li>
+                            </ol>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 justify-center">
+                            <Button @click="downloadQrCode" class="bg-green-600 hover:bg-green-700">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download PNG
+                            </Button>
+                            <Button v-if="hasPermission('edit_table')" @click="regenerateQrCode" variant="secondary" class="bg-orange-600 hover:bg-orange-700 text-white">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Regenerate
+                            </Button>
+                            <Button variant="secondary" @click="closeQrModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">
+                                Close
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
+
         </div>
     </MainLayout>
 </template>
@@ -97,6 +173,10 @@ const props = defineProps<{
 }>();
 
 const showModal = ref(false);
+const showQrModal = ref(false);
+const selectedTable = ref<any>(null);
+const qrCodeSvg = ref('');
+
 const form = useForm({
     id: null,
     name: '',
@@ -138,6 +218,50 @@ const submit = () => {
 const deleteTable = (table: any) => {
     if (confirm('Are you sure you want to delete this table?')) {
         router.delete(route('tables.destroy', table.id));
+    }
+};
+
+const viewQrCode = async (table: any) => {
+    selectedTable.value = table;
+    showQrModal.value = true;
+    qrCodeSvg.value = '';
+
+    // Generate QR code using a library or fetch from backend
+    try {
+        const QRCode = (await import('qrcode')).default;
+        const svg = await QRCode.toString(table.qr_code_url, {
+            type: 'svg',
+            width: 300,
+            margin: 2,
+            errorCorrectionLevel: 'H',
+        });
+        qrCodeSvg.value = btoa(svg);
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+    }
+};
+
+const closeQrModal = () => {
+    showQrModal.value = false;
+    selectedTable.value = null;
+    qrCodeSvg.value = '';
+};
+
+const downloadQrCode = () => {
+    if (selectedTable.value) {
+        window.location.href = route('tables.qr-code', selectedTable.value.id);
+    }
+};
+
+const regenerateQrCode = () => {
+    if (selectedTable.value && confirm('Are you sure you want to regenerate the QR code? The old QR code will no longer work.')) {
+        router.post(route('tables.regenerate-qr', selectedTable.value.id), {}, {
+            onSuccess: () => {
+                closeQrModal();
+                // Reload page to get new QR code
+                router.reload();
+            },
+        });
     }
 };
 

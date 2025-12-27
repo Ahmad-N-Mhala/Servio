@@ -69,4 +69,84 @@ class POSController extends Controller
 
         return redirect()->back()->with('message', 'Order settled and table marked available.');
     }
+    public function update(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'items' => ['sometimes', 'array'],
+            'items.*.id' => ['required', 'string'],
+            'items.*.quantity' => ['required', 'integer', 'min:0'],
+            'discount_type' => ['required', 'string', 'in:fixed,percent'],
+            'discount_value' => ['required', 'numeric', 'min:0'],
+            'additional_charge_type' => ['required', 'string', 'in:fixed,percent'],
+            'additional_charge_value' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        // 1. Update Items
+        if ($request->has('items')) {
+            foreach ($validated['items'] as $itemData) {
+                // Find via relation to ensure it belongs to order
+                $orderItem = $order->items()->where('_id', $itemData['id'])->first();
+                if ($orderItem) {
+                    if ($itemData['quantity'] <= 0) {
+                        $orderItem->delete();
+                    } else {
+                        // Use unit_price from item (or fallback to menu item price if item has 0 but we want to be safe, ideally item has it)
+                        // If item unit_price is 0 (old bug), we try to get from menu item relation if loaded? 
+                        // But relation might not be loaded on $orderItem here. Best to rely on stored unit_price or fetch fresh?
+                        // Let's rely on stored. If stored is 0, total_price is 0.
+                        $price = $orderItem->unit_price;
+                        if ($price <= 0 && $orderItem->menuItem) {
+                            $price = $orderItem->menuItem->price;
+                            $orderItem->unit_price = $price; // fix it
+                        }
+
+                        $orderItem->update([
+                            'quantity' => $itemData['quantity'],
+                            'total_price' => $itemData['quantity'] * $price,
+                            'unit_price' => $price
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 2. Recalculate Subtotal
+        $subtotal = $order->items()->get()->sum('total_price');
+
+        // 3. Recalculate Tax (Assuming 5%)
+        $tax = $subtotal * 0.05;
+
+        // 4. Calculate Discount
+        $discountAmount = 0;
+        if ($validated['discount_type'] === 'percent') {
+            $discountAmount = $subtotal * ($validated['discount_value'] / 100);
+        } else {
+            $discountAmount = (float) $validated['discount_value'];
+        }
+
+        // 5. Calculate Extra Charge
+        $extraChargeAmount = 0;
+        if ($validated['additional_charge_type'] === 'percent') {
+            $extraChargeAmount = $subtotal * ($validated['additional_charge_value'] / 100);
+        } else {
+            $extraChargeAmount = (float) $validated['additional_charge_value'];
+        }
+
+        // 6. Final Total
+        $total = $subtotal + $tax + $extraChargeAmount - $discountAmount;
+
+        $order->update([
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'discount_amount' => $discountAmount,
+            'discount_type' => $validated['discount_type'],
+            'discount_value' => $validated['discount_value'],
+            'additional_charge' => $extraChargeAmount,
+            'additional_charge_type' => $validated['additional_charge_type'],
+            'additional_charge_value' => $validated['additional_charge_value'],
+            'total' => max(0, $total),
+        ]);
+
+        return redirect()->back()->with('message', 'Order updated successfully.');
+    }
 }

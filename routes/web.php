@@ -43,6 +43,13 @@ Route::group([
     Route::get('/onboard', [OnboardingController::class, 'show'])->name('onboard');
     Route::post('/onboard', [OnboardingController::class, 'store'])->name('onboard.store');
 
+    // QR Code Ordering (Public Routes)
+    Route::prefix('qr')->name('qr.')->group(function () {
+        Route::get('/menu/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'showMenu'])->name('menu');
+        Route::post('/order/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'placeOrder'])->name('order');
+        Route::get('/order/{token}/{orderNumber}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'getOrderStatus'])->name('order.status');
+    });
+
     // Authenticated Routes
     Route::middleware(['auth'])->group(function () {
         // Profile Routes (Tenant/User)
@@ -108,6 +115,10 @@ Route::group([
             // Tables
             Route::resource('tables', \App\Http\Controllers\Tenant\TableController::class)
                 ->middleware('permission:view_tables'); // Basic view, controller should handle create/edit checks or we add here
+            Route::get('tables/{table}/qr-code', [\App\Http\Controllers\Tenant\TableController::class, 'downloadQrCode'])->name('tables.qr-code')
+                ->middleware('permission:view_tables');
+            Route::post('tables/{table}/regenerate-qr', [\App\Http\Controllers\Tenant\TableController::class, 'regenerateQrCode'])->name('tables.regenerate-qr')
+                ->middleware('permission:edit_table');
 
             // Loyalty
             Route::prefix('loyalty')->name('loyalty.')->group(function () {
@@ -156,6 +167,8 @@ Route::group([
                 Route::get('/', [\App\Http\Controllers\Tenant\POSController::class, 'index'])->name('index')
                     ->middleware('permission:view_pos');
                 Route::post('/{order}/settle', [\App\Http\Controllers\Tenant\POSController::class, 'settle'])->name('settle')
+                    ->middleware('permission:pos_system');
+                Route::put('/{order}', [\App\Http\Controllers\Tenant\POSController::class, 'update'])->name('update')
                     ->middleware('permission:pos_system');
             });
 

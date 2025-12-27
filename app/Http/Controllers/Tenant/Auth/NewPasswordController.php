@@ -47,6 +47,7 @@ class NewPasswordController extends Controller
             function ($user, string $password) {
                 $user->forceFill([
                     'password' => Hash::make($password),
+                    'password_set_at' => now(), // Mark password as actively set
                 ])->setRememberToken(Str::random(60));
 
                 $user->save();

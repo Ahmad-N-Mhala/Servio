@@ -187,7 +187,9 @@
                 @if($order->restaurant->city) , {{ $order->restaurant->city }} @endif
                 @if($order->restaurant->country) , {{ $order->restaurant->country }} @endif
                 @if($order->restaurant->phone) <br> Tel: {{ $order->restaurant->phone }} @endif
-                @if($order->restaurant->email) <br> {{ $order->restaurant->email }} @endif
+                @if($order->restaurant->email) <br>
+                    {{ is_array($order->restaurant->email) ? (current($order->restaurant->email)) : $order->restaurant->email }}
+                @endif
             </div>
         </div>
 
@@ -242,8 +244,12 @@
                             @endif
                         </td>
                         <td class="text-center">{{ $item->quantity }}</td>
-                        <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                        <td class="text-right">{{ number_format($item->total_price, 2) }}</td>
+                        <td class="text-right">{{ $order->currency ?? 'AED' }}
+                            {{ number_format($item->unit_price > 0 ? $item->unit_price : ($item->menuItem->price ?? 0), 2) }}
+                        </td>
+                        <td class="text-right">{{ $order->currency ?? 'AED' }}
+                            {{ number_format($item->total_price > 0 ? $item->total_price : ($item->quantity * ($item->menuItem->price ?? 0)), 2) }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -274,7 +280,8 @@
                     </tr>
                     @if($order->tax > 0)
                         <tr>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Tax</td>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Tax
+                                ({{ $order->subtotal > 0 ? round(($order->tax / $order->subtotal) * 100) : 0 }}%)</td>
                             <td style="text-align: right; padding: 5px 0; border: none;">
                                 {{ $order->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}
                             </td>
@@ -282,9 +289,27 @@
                     @endif
                     @if($order->discount_amount > 0)
                         <tr>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">Discount</td>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">
+                                Discount
+                                @if($order->discount_type === 'percent')
+                                    ({{ (float) $order->discount_value }}%)
+                                @endif
+                            </td>
                             <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">
                                 -{{ $order->currency ?? 'AED' }} {{ number_format($order->discount_amount, 2) }}
+                            </td>
+                        </tr>
+                    @endif
+                    @if($order->additional_charge > 0)
+                        <tr>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #4f46e5;">
+                                Extra Charge
+                                @if($order->additional_charge_type === 'percent')
+                                    ({{ (float) $order->additional_charge_value }}%)
+                                @endif
+                            </td>
+                            <td style="text-align: right; padding: 5px 0; border: none; color: #4f46e5;">
+                                +{{ $order->currency ?? 'AED' }} {{ number_format($order->additional_charge, 2) }}
                             </td>
                         </tr>
                     @endif

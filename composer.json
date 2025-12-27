@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.9",
         "mcamara/laravel-localization": "^2.0",
         "mongodb/laravel-mongodb": "^5.5",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.0",
         "spatie/laravel-translatable": "^6.0",
         "stancl/tenancy": "^3.0",

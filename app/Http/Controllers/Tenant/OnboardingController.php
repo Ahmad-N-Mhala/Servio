@@ -51,7 +51,23 @@ class OnboardingController extends Controller
 
         $plan = Plan::findOrFail($validated['plan_id']);
 
-        DB::beginTransaction();
+        // Check if plan is free (price = 0)
+        $planPrice = $validated['billing_cycle'] === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+        $isFree = $planPrice == 0;
+
+        // Determine if we can use transactions
+        $useTransactions = true;
+        try {
+            DB::beginTransaction();
+        } catch (\Exception $e) {
+            if (str_contains($e->getMessage(), 'replica set member')) {
+                $useTransactions = false;
+                \Log::warning('MongoDB Transaction skipped: Server is running as standalone instance.');
+            } else {
+                throw $e;
+            }
+        }
+
         try {
             // 1. Create User (Central)
             $user = \App\Models\User::create([
@@ -59,12 +75,12 @@ class OnboardingController extends Controller
                 'email' => $validated['email'],
                 'phone' => $validated['phone'],
                 'password' => bcrypt($validated['password']),
+                'password_set_at' => now(), // User is actively setting their password
                 'email_verified_at' => now(), // Auto-verify for now
             ]);
 
             // Assign Owner Role
             $user->assignRole('owner');
-
 
             // 2. Create Restaurant (Central)
             $restaurant = \App\Models\Restaurant::create([
@@ -85,14 +101,11 @@ class OnboardingController extends Controller
             ]);
 
             // 4. Create Staff Record
-            // Note: Staff model uses restaurant_id field, make sure it is provided
-            // Temporarily switching off Global Scope if needed, or manually setting ID
             $staff = new \App\Models\Staff();
             $staff->restaurant_id = $restaurant->id;
             $staff->user_id = $user->id;
             $staff->role = 'owner';
             $staff->is_active = true;
-            $staff->joined_at = now();
             $staff->joined_at = now();
             $staff->save();
 
@@ -107,7 +120,21 @@ class OnboardingController extends Controller
                 'is_active' => true,
             ]);
 
-            DB::commit();
+            // 6. Create Subscription
+            // For free plans, create active subscription immediately
+            // For paid plans, this would normally be created after payment
+            \App\Models\Subscription::create([
+                'restaurant_id' => $restaurant->id,
+                'plan_id' => $plan->id,
+                'status' => $isFree ? 'active' : 'pending', // Active for free, pending for paid
+                'billing_cycle' => $validated['billing_cycle'],
+                'starts_at' => now(),
+                'ends_at' => $validated['billing_cycle'] === 'yearly' ? now()->addYear() : now()->addMonth(),
+            ]);
+
+            if ($useTransactions) {
+                DB::commit();
+            }
 
             // Auto-login the user
             \Illuminate\Support\Facades\Auth::login($user);
@@ -115,13 +142,22 @@ class OnboardingController extends Controller
             // Set active restaurant session
             session(['active_restaurant_id' => $restaurant->id]);
 
-            // Redirect to dashboard
-            return redirect($user->getLandingRoute());
+            // For free plans, redirect to dashboard
+            // For paid plans, redirect to payment (not implemented yet)
+            if ($isFree) {
+                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Your account has been created successfully.');
+            } else {
+                // TODO: Implement payment flow for paid plans
+                // For now, just activate the subscription
+                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Your account has been created successfully.');
+            }
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            if ($useTransactions) {
+                DB::rollBack();
+            }
             \Log::error('Onboarding failed: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Onboarding failed. Please try again.']);
+            return back()->withErrors(['error' => 'Onboarding failed: ' . $e->getMessage()]);
         }
     }
 

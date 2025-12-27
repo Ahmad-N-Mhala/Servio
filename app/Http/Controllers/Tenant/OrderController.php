@@ -33,12 +33,15 @@ class OrderController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'ilike', "%{$search}%")
-                    ->orWhere('customer_name', 'ilike', "%{$search}%")
-                    ->orWhere('customer_phone', 'ilike', "%{$search}%")
-                    ->orWhere('delivery_provider', 'ilike', "%{$search}%")
-                    ->orWhere('status', 'ilike', "%{$search}%")
-                    ->orWhereRaw('CAST(total AS TEXT) ilike ?', ["%{$search}%"]);
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%")
+                    ->orWhere('delivery_provider', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%");
+
+                if (is_numeric($search)) {
+                    $q->orWhere('total', (float) $search);
+                }
             });
         }
 
@@ -84,12 +87,15 @@ class OrderController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'ilike', "%{$search}%")
-                    ->orWhere('customer_name', 'ilike', "%{$search}%")
-                    ->orWhere('customer_phone', 'ilike', "%{$search}%")
-                    ->orWhere('delivery_provider', 'ilike', "%{$search}%")
-                    ->orWhere('status', 'ilike', "%{$search}%")
-                    ->orWhereRaw('CAST(total AS TEXT) ilike ?', ["%{$search}%"]);
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%")
+                    ->orWhere('delivery_provider', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%");
+
+                if (is_numeric($search)) {
+                    $q->orWhere('total', (float) $search);
+                }
             });
         }
 

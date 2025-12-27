@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'password_set_at',
         'is_super_admin',
     ];
 
@@ -31,6 +32,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'password_set_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -166,6 +168,27 @@ class User extends Authenticatable
         }
 
         return route('profile.edit'); // Ultimate fallback
+    }
+
+    /**
+     * Check if the user has actively set their password.
+     *
+     * @return bool
+     */
+    public function hasActivePassword(): bool
+    {
+        return $this->password_set_at !== null;
+    }
+
+    /**
+     * Mark the password as actively set by the user.
+     *
+     * @return void
+     */
+    public function markPasswordAsSet(): void
+    {
+        $this->password_set_at = now();
+        $this->save();
     }
 
     /**

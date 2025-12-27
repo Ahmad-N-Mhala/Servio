@@ -7,6 +7,7 @@ use App\Models\Restaurant;
 use App\Models\Table;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TableController extends Controller
 {
@@ -16,7 +17,18 @@ class TableController extends Controller
         $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
         $tables = Table::where('restaurant_id', $restaurant->id)
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($table) {
+                return [
+                    'id' => $table->id,
+                    'name' => $table->name,
+                    'capacity' => $table->capacity,
+                    'status' => $table->status,
+                    'location' => $table->location,
+                    'qr_code_token' => $table->qr_code_token,
+                    'qr_code_url' => $table->qr_code_url,
+                ];
+            });
 
         return Inertia::render('Tables/Index', [
             'tables' => $tables,
@@ -66,5 +78,35 @@ class TableController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('delete_table');
         $table->delete();
         return redirect()->back()->with('message', 'Table deleted successfully');
+    }
+
+    /**
+     * Download QR code for a table
+     */
+    public function downloadQrCode(Table $table)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('view_tables');
+
+        $qrCode = QrCode::format('png')
+            ->size(300)
+            ->margin(2)
+            ->errorCorrection('H')
+            ->generate($table->qr_code_url);
+
+        return response($qrCode)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="table-' . $table->name . '-qr.png"');
+    }
+
+    /**
+     * Regenerate QR code for a table
+     */
+    public function regenerateQrCode(Table $table)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('edit_table');
+
+        $table->regenerateQrCode();
+
+        return redirect()->back()->with('message', 'QR code regenerated successfully');
     }
 }

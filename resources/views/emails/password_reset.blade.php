@@ -49,13 +49,20 @@
 
         .button {
             display: inline-block;
-            background-color: #4F46E5;
-            color: #ffffff;
+            background-color: #ffffff;
+            color: #4F46E5;
             font-size: 16px;
             font-weight: bold;
             padding: 12px 24px;
             text-decoration: none;
             border-radius: 4px;
+            border: 2px solid #4F46E5;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #4F46E5;
+            color: #ffffff;
         }
 
         .footer {

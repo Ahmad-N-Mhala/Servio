@@ -39,6 +39,11 @@ class Order extends Model
         'payment_status',
         'payment_method',
         'waiter_id',
+        'additional_charge',
+        'discount_type',
+        'discount_value',
+        'additional_charge_type',
+        'additional_charge_value',
     ];
 
     protected $casts = [
@@ -46,6 +51,9 @@ class Order extends Model
         'discount_amount' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
+        'additional_charge' => 'decimal:2',
+        'discount_value' => 'decimal:2',
+        'additional_charge_value' => 'decimal:2',
         'points_earned' => 'integer',
         'points_redeemed' => 'integer',
         'completed_at' => 'datetime',

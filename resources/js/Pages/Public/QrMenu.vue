@@ -1,0 +1,477 @@
+<template>
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <!-- Header -->
+        <div class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">{{ restaurant.name }}</h1>
+                        <p class="text-sm text-gray-600 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            Table: {{ table.name }}
+                        </p>
+                    </div>
+                    <button 
+                        v-if="cart.length > 0"
+                        @click="showCart = true" 
+                        class="relative bg-primary text-white px-5 py-3 rounded-xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 hover:scale-105"
+                    >
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span class="font-semibold">{{ cartItemCount }}</span>
+                        </div>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                            {{ cartItemCount }}
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+            <div v-if="categories.length === 0" class="text-center py-12">
+                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <p class="text-gray-500 text-lg">No menu items available at the moment.</p>
+            </div>
+
+            <div v-for="category in categories" :key="category.id" class="mb-8">
+                <h2 class="text-lg font-bold text-gray-500 uppercase tracking-wide mb-4 sticky top-20 bg-gradient-to-br from-gray-50 to-gray-100 py-2 z-10">
+                    {{ getTranslatedName(category.name) }}
+                </h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div 
+                        v-for="item in category.items" 
+                        :key="item.id"
+                        class="group flex flex-col bg-white border border-gray-100 hover:border-primary/50 hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-300 relative"
+                    >
+                        <!-- Item Image -->
+                        <div class="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden">
+                            <img 
+                                v-if="item.image" 
+                                :src="item.image" 
+                                :alt="getTranslatedName(item.name)"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <div v-else class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Content Area -->
+                        <div class="flex-1 p-4 flex flex-col">
+                            <div class="flex-1 mb-2">
+                                <h5 class="font-bold text-gray-900 line-clamp-1" :title="getTranslatedName(item.name)">
+                                    {{ getTranslatedName(item.name) }}
+                                </h5>
+                                <p class="text-sm font-medium text-primary mt-1">
+                                    {{ restaurant.currency }} {{ item.price.toFixed(2) }}
+                                </p>
+                                <p v-if="item.description" class="text-xs text-gray-500 mt-1 line-clamp-2" :title="item.description">
+                                    {{ item.description }}
+                                </p>
+                            </div>
+
+                            <!-- Controls -->
+                            <div class="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-gray-100">
+                                <button 
+                                    type="button"
+                                    @click="removeItem(item)"
+                                    :disabled="!getQty(item.id)"
+                                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                                    :class="getQty(item.id) 
+                                        ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95' 
+                                        : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                    </svg>
+                                </button>
+                                
+                                <span class="font-bold text-gray-900 min-w-[1.5rem] text-center">
+                                    {{ getQty(item.id) > 0 ? getQty(item.id) : 0 }}
+                                </span>
+
+                                <button 
+                                    type="button"
+                                    @click="addItem(item)"
+                                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:scale-105 active:scale-95"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Cart Button (Mobile) -->
+        <div v-if="cart.length > 0 && !showCart" class="fixed bottom-6 right-6 z-40 md:hidden">
+            <button 
+                @click="showCart = true"
+                class="bg-primary text-white p-4 rounded-full shadow-2xl hover:bg-primary-hover transition-all hover:scale-110 relative"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                    {{ cartItemCount }}
+                </span>
+            </button>
+        </div>
+
+        <!-- Cart Modal -->
+        <div v-if="showCart" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center transition-all duration-300">
+            <div 
+                class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300"
+                :class="{'translate-y-0': showCart, 'translate-y-full': !showCart}"
+            >
+                <!-- Cart Header -->
+                <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white rounded-t-3xl sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-primary/10 p-2.5 rounded-xl">
+                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Current Order</h2>
+                            <p class="text-sm text-gray-500">{{ cartItemCount }} items</p>
+                        </div>
+                    </div>
+                    <button 
+                        @click="showCart = false" 
+                        class="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Cart Items -->
+                <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50/50">
+                    <div v-if="cart.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-1">Your cart is empty</h3>
+                        <p class="text-gray-500 max-w-xs">Looks like you haven't added anything to your order yet.</p>
+                        <button 
+                            @click="showCart = false"
+                            class="mt-6 px-6 py-2.5 bg-white border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            Browse Menu
+                        </button>
+                    </div>
+
+                    <div v-else class="space-y-4">
+                        <div 
+                            v-for="(item, index) in cart" 
+                            :key="index"
+                            class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                        >
+                            <div class="flex justify-between items-start gap-4 mb-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-lg mb-1">{{ item.name }}</h3>
+                                    <p class="text-primary font-bold">{{ restaurant.currency }} {{ (item.price * item.quantity).toFixed(2) }}</p>
+                                </div>
+                                <button 
+                                    @click="removeFromCart(index)"
+                                    class="text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Remove item"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="flex items-end justify-between gap-4">
+                                <!-- Notes Input -->
+                                <div class="flex-1">
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </div>
+                                        <input 
+                                            v-model="item.notes"
+                                            type="text"
+                                            placeholder="Add notes (e.g. no onion)"
+                                            class="w-full pl-9 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all placeholder-gray-400"
+                                        />
+                                    </div>
+                                </div>
+
+                                <!-- Qty Controls -->
+                                <div class="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
+                                    <button 
+                                        @click="decrementQuantity(index)"
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm hover:text-primary active:scale-95 transition-all disabled:opacity-50"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                        </svg>
+                                    </button>
+                                    <span class="w-10 text-center font-bold text-gray-900">{{ item.quantity }}</span>
+                                    <button 
+                                        @click="incrementQuantity(index)"
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white shadow-sm shadow-primary/30 hover:bg-primary-hover active:scale-95 transition-all"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info Card -->
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
+                            <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                Your Details <span class="text-xs font-normal text-gray-500 ml-auto">(Optional)</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <input 
+                                    v-model="customerName"
+                                    type="text"
+                                    placeholder="Name"
+                                    class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                />
+                                <input 
+                                    v-model="customerPhone"
+                                    type="tel"
+                                    placeholder="Phone Number"
+                                    class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Summary -->
+                <div v-if="cart.length > 0" class="bg-white border-t border-gray-100 p-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20">
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between items-center text-gray-500 text-sm">
+                            <span>Subtotal</span>
+                            <span>{{ restaurant.currency }} {{ subtotal.toFixed(2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-500 text-sm">
+                            <span>Tax (5%)</span>
+                            <span>{{ restaurant.currency }} {{ tax.toFixed(2) }}</span>
+                        </div>
+                        <div class="pt-3 flex justify-between items-center border-t border-dashed border-gray-200">
+                            <span class="font-bold text-gray-900 text-lg">Total</span>
+                            <span class="font-bold text-primary text-2xl">{{ restaurant.currency }} {{ total.toFixed(2) }}</span>
+                        </div>
+                    </div>
+
+                    <button 
+                        @click="placeOrder"
+                        :disabled="placing"
+                        class="w-full bg-primary hover:bg-primary-hover disabled:opacity-75 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/30 flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
+                    >
+                        <svg v-if="placing" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span v-if="placing">Placing Order...</span>
+                        <div v-else class="flex items-center gap-2">
+                            <span>Place Order</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </div>
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-4">By placing this order you agree to our terms of service</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Modal -->
+        <div v-if="showConfirmation" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Order Placed!</h2>
+                <p class="text-gray-600 mb-6">Your order has been sent to the kitchen.</p>
+                <div class="bg-gradient-to-r from-primary/10 to-purple-100 rounded-xl p-6 mb-6">
+                    <p class="text-sm text-gray-600 mb-1">Order Number</p>
+                    <p class="text-3xl font-bold text-primary">{{ orderNumber }}</p>
+                </div>
+                <button 
+                    @click="closeConfirmation"
+                    class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/30"
+                >
+                    Continue Browsing
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+
+const props = defineProps<{
+    table: {
+        id: string;
+        name: string;
+        token: string;
+    };
+    restaurant: {
+        name: string;
+        currency: string;
+        locale: string;
+    };
+    categories: any[];
+}>();
+
+const cart = ref<any[]>([]);
+const showCart = ref(false);
+const showConfirmation = ref(false);
+const placing = ref(false);
+const customerName = ref('');
+const customerPhone = ref('');
+const orderNumber = ref('');
+
+const cartItemCount = computed(() => {
+    return cart.value.reduce((sum, item) => sum + item.quantity, 0);
+});
+
+const subtotal = computed(() => {
+    return cart.value.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+});
+
+const tax = computed(() => {
+    return subtotal.value * 0.05; // 5% tax
+});
+
+const total = computed(() => {
+    return subtotal.value + tax.value;
+});
+
+const getTranslatedName = (name: any) => {
+    if (typeof name === 'string') return name;
+    return name[props.restaurant.locale] || name['en'] || Object.values(name)[0] || '';
+};
+
+const getQty = (itemId: string) => {
+    const item = cart.value.find(cartItem => cartItem.id === itemId);
+    return item ? item.quantity : 0;
+};
+
+const addItem = (item: any) => {
+    const existingItem = cart.value.find(cartItem => cartItem.id === item.id);
+    
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        cart.value.push({
+            id: item.id,
+            name: getTranslatedName(item.name),
+            price: item.price,
+            quantity: 1,
+            notes: '',
+        });
+    }
+};
+
+const removeItem = (item: any) => {
+    const existingItem = cart.value.find(cartItem => cartItem.id === item.id);
+    
+    if (existingItem) {
+        if (existingItem.quantity > 1) {
+            existingItem.quantity--;
+        } else {
+            const index = cart.value.findIndex(cartItem => cartItem.id === item.id);
+            cart.value.splice(index, 1);
+        }
+    }
+};
+
+const removeFromCart = (index: number) => {
+    cart.value.splice(index, 1);
+};
+
+const incrementQuantity = (index: number) => {
+    cart.value[index].quantity++;
+};
+
+const decrementQuantity = (index: number) => {
+    if (cart.value[index].quantity > 1) {
+        cart.value[index].quantity--;
+    } else {
+        removeFromCart(index);
+    }
+};
+
+const placeOrder = async () => {
+    if (cart.value.length === 0) return;
+
+    placing.value = true;
+
+    try {
+        const response = await fetch((window as any).route('qr.order', props.table.token), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+            body: JSON.stringify({
+                items: cart.value.map(item => ({
+                    id: item.id,
+                    quantity: item.quantity,
+                    notes: item.notes || null,
+                })),
+                customer_name: customerName.value || null,
+                customer_phone: customerPhone.value || null,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            orderNumber.value = data.order.order_number;
+            showCart.value = false;
+            showConfirmation.value = true;
+            cart.value = [];
+            customerName.value = '';
+            customerPhone.value = '';
+        } else {
+            alert('Failed to place order. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error placing order:', error);
+        alert('An error occurred. Please try again.');
+    } finally {
+        placing.value = false;
+    }
+};
+
+const closeConfirmation = () => {
+    showConfirmation.value = false;
+};
+</script>
