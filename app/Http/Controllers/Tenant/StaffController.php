@@ -233,13 +233,20 @@ class StaffController extends Controller
     {
         // 1. Check for Last Owner
         if ($staff->role === 'owner') {
-            // Count owners for this restaurant
+            // Count owners for this restaurant from Staff table
             $ownerCount = Staff::where('restaurant_id', $staff->restaurant_id)
                 ->where('role', 'owner')
                 ->count();
 
-            if ($ownerCount <= 1) {
-                return back()->with('error', 'Cannot delete the only owner of the restaurant.');
+            // Also check the pivot table for accuracy
+            $pivotOwnerCount = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('restaurant_id', (string) $staff->restaurant_id)
+                ->where('role', 'owner')
+                ->count();
+
+            // Use the maximum finding to be safe
+            if ($ownerCount <= 1 || $pivotOwnerCount <= 1) {
+                return back()->with('error', 'Cannot delete the only owner of the restaurant. There must be at least one owner per restaurant.');
             }
         }
 
@@ -249,16 +256,21 @@ class StaffController extends Controller
             ->where('restaurant_id', (string) $staff->restaurant_id)
             ->delete();
 
-        // 3. Delete the User record
-        // Note: This permanently deletes the user account. 
-        // If the user belongs to OTHER restaurants, this logic shouldn't be used, but per request "remove from DB":
-        if ($staff->user) {
-            $staff->user->delete();
+        // 3. Check if user belongs to other restaurants before deleting the User account
+        $otherAssociations = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $staff->user->email)
+            ->count();
+
+        if ($otherAssociations === 0) {
+            // User has no other restaurants, safe to delete user account
+            if ($staff->user) {
+                $staff->user->delete();
+            }
         }
 
         // 4. Delete Staff record
         $staff->delete();
 
-        return back()->with('success', 'Staff member and user account removed successfully');
+        return back()->with('success', 'Staff member removed successfully');
     }
 }

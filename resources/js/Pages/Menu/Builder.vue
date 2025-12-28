@@ -208,15 +208,13 @@
                 />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('common.description') }}</label>
-                <textarea 
-                    v-model="categoryForm.description"
-                    rows="3"
-                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                    placeholder="Optional description..."
-                ></textarea>
-            </div>
+            <Input
+                v-model="categoryForm.description"
+                label="Description"
+                type="textarea"
+                rows="3"
+                placeholder="Optional description..."
+            />
 
             <div class="flex justify-between pt-4">
                 <Button 
@@ -310,31 +308,26 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('common.description') }}</label>
-                <textarea 
-                    v-model="itemForm.description"
-                    rows="3"
-                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                    placeholder="Ingredients, details..."
-                ></textarea>
-            </div>
+            <Input
+                v-model="itemForm.description"
+                label="Description"
+                type="textarea"
+                rows="3"
+                placeholder="Ingredients, details..."
+            />
 
             <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h4 class="font-medium text-gray-900 dark:text-white mb-3">Recipe / Ingredients</h4>
                 <div class="space-y-3">
                     <div class="flex gap-2">
-                        <div class="flex-1">
-                             <select 
-                                v-model="newIngredientId" 
-                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary"
-                             >
-                                 <option :value="null">Select Ingredient...</option>
-                                 <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
-                                    {{ getCategoryName(ing.name) }} ({{ ing.unit }})
-                                 </option>
-                             </select>
-                        </div>
+                        <Select
+                            v-model="newIngredientId"
+                            placeholder="Select Ingredient..."
+                        >
+                            <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
+                                {{ getCategoryName(ing.name) }} ({{ ing.unit }})
+                            </option>
+                        </Select>
                         <div class="w-32">
                             <Input 
                                 v-model="newIngredientQty" 
@@ -393,6 +386,8 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
+import Carousel from '@/Components/Carousel.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 
 const { hasPermission } = usePermissions();

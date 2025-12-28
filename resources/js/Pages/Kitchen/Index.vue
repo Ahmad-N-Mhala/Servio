@@ -159,7 +159,7 @@
                             </div>
 
                             <button 
-                                @click="updateStatus(order, 'served')"
+                                @click="updateStatus(order, 'ready')"
                                 :disabled="processingId === order.id"
                                 class="w-full py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                             >
@@ -167,18 +167,18 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span v-else>Serve Order</span>
+                                <span v-else>Order Ready</span>
                             </button>
                         </div>
                     </transition-group>
                 </div>
 
-                <!-- Served Orders -->
+                <!-- Ready / Served Orders -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <span class="h-3 w-3 rounded-full bg-green-500"></span>
-                            Served
+                            Ready / Served
                             <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 {{ servedOrders.length }}
                             </span>
@@ -186,7 +186,7 @@
                     </div>
 
                     <div v-if="servedOrders.length === 0" class="glass-card p-8 text-center rounded-2xl border-2 border-dashed border-gray-200">
-                        <p class="text-gray-500">No served orders</p>
+                        <p class="text-gray-500">No completed orders</p>
                     </div>
 
                     <transition-group name="list" tag="div" class="space-y-4">
@@ -197,7 +197,10 @@
                                     <p class="text-sm text-gray-500">{{ new Date(order.created_at).toLocaleTimeString() }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">
+                                    <span v-if="order.status === 'ready'" class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-yellow-100 text-yellow-700 animate-pulse">
+                                        Ready for Pickup
+                                    </span>
+                                    <span v-else class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">
                                         Served
                                     </span>
                                 </div>
@@ -294,7 +297,7 @@ const filterOrders = (orders: any[]) => {
 
 const pendingOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'pending')));
 const processingOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'processing')));
-const servedOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'served')));
+const servedOrders = computed(() => filterOrders(props.orders.filter(o => o.status === 'served' || o.status === 'ready')));
 
 const cancellingOrder = ref<any>(null);
 const cancelForm = useForm({
@@ -341,7 +344,7 @@ onMounted(() => {
         if (!cancellingOrder.value) { // Don't refresh if modal is open
              router.reload({ only: ['orders', 'completedOrders'] });
         }
-    }, 5000);
+    }, 2000);
 });
 
 onUnmounted(() => {

@@ -7,7 +7,7 @@ return [
     ],
     'pos' => [
         'label' => 'POS System',
-        'permissions' => ['view_pos', 'pos_system', 'create_order', 'discount_order', 'void_order']
+        'permissions' => ['view_pos', 'pos_system', 'create_order', 'discount_order', 'void_order', 'view_cash_register_history']
     ],
     'orders' => [
         'label' => 'Order Management',
@@ -60,5 +60,9 @@ return [
     'settings' => [
         'label' => 'System Settings',
         'permissions' => ['view_settings', 'manage_billing']
+    ],
+    'service' => [
+        'label' => 'Waiter Service',
+        'permissions' => ['deliver_orders']
     ],
 ];

@@ -95,6 +95,12 @@
                                         <input v-model="form.zip_code" type="text" id="zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <div v-if="form.errors.zip_code" class="text-red-500 text-xs mt-1">{{ form.errors.zip_code }}</div>
                                     </div>
+
+                                    <div class="md:col-span-2">
+                                        <label for="google_map_location" class="block text-sm font-medium text-gray-700">Google Map Location (Optional)</label>
+                                        <input v-model="form.google_map_location" type="url" id="google_map_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="https://maps.google.com/...">
+                                        <div v-if="form.errors.google_map_location" class="text-red-500 text-xs mt-1">{{ form.errors.google_map_location }}</div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -112,6 +118,36 @@
                                             {{ props.restaurant.owner_email }}
                                         </div>
                                         <p class="text-xs text-gray-500 mt-1">To change this email, use the field below.</p>
+                                    </div>
+                                    
+                                     <div>
+                                        <label for="new_owner_name" class="block text-sm font-medium text-gray-700">
+                                            Owner Name
+                                            <span class="text-gray-500 font-normal">(Leave blank to keep current)</span>
+                                        </label>
+                                        <input 
+                                            v-model="form.new_owner_name" 
+                                            type="text" 
+                                            id="new_owner_name" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            placeholder="Enter new name"
+                                        >
+                                        <div v-if="(form.errors as any).new_owner_name" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_name }}</div>
+                                    </div>
+                                    
+                                     <div>
+                                        <label for="new_owner_phone" class="block text-sm font-medium text-gray-700">
+                                            Owner Phone
+                                            <span class="text-gray-500 font-normal">(Leave blank to keep current)</span>
+                                        </label>
+                                        <input 
+                                            v-model="form.new_owner_phone" 
+                                            type="text" 
+                                            id="new_owner_phone" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            placeholder="Enter new phone"
+                                        >
+                                        <div v-if="(form.errors as any).new_owner_phone" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_phone }}</div>
                                     </div>
 
                                     <div>
@@ -341,6 +377,7 @@ const props = defineProps<{
         country: string | null;
         state: string | null;
         zip_code: string | null;
+        google_map_location?: string | null;
         earning_method_type?: string; 
         earning_points?: number;
         earning_method_name_en?: string;
@@ -371,6 +408,7 @@ const form = useForm({
     country: props.restaurant.country || '',
     state: props.restaurant.state,
     zip_code: props.restaurant.zip_code,
+    google_map_location: props.restaurant.google_map_location || '',
 
     // Loyalty/Earning Method fields - comprehensive
     earning_method_type: props.restaurant.earning_method_type || 'order_total',
@@ -383,7 +421,9 @@ const form = useForm({
     earning_max_points: props.restaurant.earning_max_points || null,
     earning_is_active: props.restaurant.earning_is_active !== undefined ? props.restaurant.earning_is_active : true,
     // New owner management fields
+    new_owner_name: '',
     new_owner_email: '',
+    new_owner_phone: '',
     new_owner_password: '',
 });
 

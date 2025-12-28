@@ -172,6 +172,36 @@ Route::group([
                     ->middleware('permission:pos_system');
             });
 
+            // Waiter Service
+            Route::prefix('service')->name('service.')->group(function () {
+                Route::get('/delivery', [\App\Http\Controllers\Tenant\OrderDeliveryController::class, 'index'])->name('delivery')
+                    ->middleware('permission:deliver_orders');
+                Route::get('/delivery/check', [\App\Http\Controllers\Tenant\OrderDeliveryController::class, 'checkNewOrders'])->name('delivery.check')
+                    ->middleware('permission:deliver_orders');
+                Route::post('/delivery/{order}/serve', [\App\Http\Controllers\Tenant\OrderDeliveryController::class, 'markAsServed'])->name('serve')
+                    ->middleware('permission:deliver_orders');
+            });
+
+            // Cash Register
+            Route::prefix('cash-register')->name('cash-register.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'index'])->name('index')
+                    ->middleware('permission:view_pos');
+                Route::get('/history', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'history'])->name('history')
+                    ->middleware('permission:view_cash_register_history');
+                Route::get('/{cashRegister}/export', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'export'])->name('export')
+                    ->middleware('permission:view_cash_register_history');
+                Route::post('/open', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'open'])->name('open')
+                    ->middleware('permission:pos_system');
+                Route::post('/{cashRegister}/close', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'close'])->name('close')
+                    ->middleware('permission:pos_system');
+                Route::post('/{cashRegister}/withdraw', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'withdraw'])->name('withdraw')
+                    ->middleware('permission:pos_system');
+                Route::post('/{cashRegister}/deposit', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'deposit'])->name('deposit')
+                    ->middleware('permission:pos_system');
+                Route::post('/record-sale', [\App\Http\Controllers\Tenant\CashRegisterController::class, 'recordSale'])->name('record-sale')
+                    ->middleware('permission:pos_system');
+            });
+
             // Communication
             Route::prefix('communication')->name('communication.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\CommunicationController::class, 'index'])->name('index')
@@ -238,6 +268,7 @@ Route::group([
             Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
             Route::resource('restaurants', \App\Http\Controllers\Admin\RestaurantController::class);
+            Route::post('restaurants/{id}/restore', [\App\Http\Controllers\Admin\RestaurantController::class, 'restore'])->name('restaurants.restore');
             Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);
             Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
             Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);

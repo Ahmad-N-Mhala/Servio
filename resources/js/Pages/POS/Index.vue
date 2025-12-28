@@ -1,11 +1,71 @@
 <template>
     <MainLayout>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Cash Register Status Bar -->
+            <div v-if="currentRegister" class="mb-6 glass-card rounded-xl p-4 border border-primary/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium">Cash Register Balance</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(currentBalance) }}</p>
+                        </div>
+                        <div class="ml-4 pl-4 border-l border-gray-200">
+                            <p class="text-xs text-gray-500">Opened</p>
+                            <p class="text-sm font-medium text-gray-700">{{ formatTime(currentRegister.opened_at) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button @click="showWithdrawModal = true" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Withdraw
+                        </button>
+                        <button @click="showDepositModal = true" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Deposit
+                        </button>
+                        <button @click="showCloseModal = true" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                            Close Register
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Open Register Prompt -->
+            <div v-else class="mb-6 glass-card rounded-xl p-4 border-2 border-dashed border-yellow-300 bg-yellow-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <p class="text-sm font-bold text-yellow-900">Cash Register Not Open</p>
+                            <p class="text-xs text-yellow-700">Open your cash register to process cash payments</p>
+                        </div>
+                    </div>
+                    <button @click="showOpenModal = true" class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
+                        Open Register
+                    </button>
+                </div>
+            </div>
+
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Point of Sale</h1>
                     <p class="mt-1 text-sm text-gray-500">Settle bills and clear tables</p>
                 </div>
+                <Link 
+                    v-if="hasPermission('view_cash_register_history')"
+                    :href="route('cash-register.history')" 
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    View History
+                </Link>
             </div>
 
             <div class="flex gap-8 h-[calc(100vh-12rem)]">
@@ -210,14 +270,21 @@
                                     <button 
                                         v-for="method in ['cash', 'card', 'online']" 
                                         :key="method"
-                                        @click="paymentMethod = method"
-                                        :class="['py-2 px-2 rounded-lg flex flex-col items-center gap-0.5 border transition-all',
+                                        @click="selectPaymentMethod(method)"
+                                        :disabled="method === 'cash' && !currentRegister"
+                                        :class="['py-2 px-2 rounded-lg flex flex-col items-center gap-0.5 border transition-all relative',
                                             paymentMethod === method 
                                                 ? 'bg-primary/5 border-primary text-primary ring-1 ring-primary' 
+                                                : method === 'cash' && !currentRegister
+                                                ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
                                                 : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600'
                                         ]"
+                                        :title="method === 'cash' && !currentRegister ? 'Cash register must be open to accept cash payments' : ''"
                                     >
                                         <span class="text-[10px] font-bold uppercase">{{ method }}</span>
+                                        <svg v-if="method === 'cash' && !currentRegister" class="w-3 h-3 text-red-500 absolute top-1 right-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" />
+                                        </svg>
                                     </button>
                                 </div>
                                 <button 
@@ -254,22 +321,216 @@
                 </div>
             </div>
         </div>
+
+        <!-- Cash Register Modals -->
+        <!-- Open Register Modal -->
+        <div v-if="showOpenModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Open Cash Register</h3>
+                <form @submit.prevent="submitOpen">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Opening Balance</label>
+                            <input
+                                v-model="openForm.opening_balance"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="0.00"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                            <textarea
+                                v-model="openForm.opening_notes"
+                                rows="3"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Any notes about the opening balance..."
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @click="closeOpenModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" :disabled="openForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover disabled:opacity-50">
+                            {{ openForm.processing ? 'Opening...' : 'Open Register' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Close Register Modal -->
+        <div v-if="showCloseModal && currentRegister" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Close Cash Register</h3>
+                <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Expected Balance</p>
+                            <p class="text-xl font-bold text-gray-900">{{ formatCurrency(currentBalance) }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Difference</p>
+                            <p class="text-xl font-bold" :class="{
+                                'text-green-600': calculateDifference() > 0,
+                                'text-red-600': calculateDifference() < 0,
+                                'text-gray-600': calculateDifference() === 0
+                            }">
+                                {{ calculateDifference() > 0 ? '+' : '' }}{{ formatCurrency(calculateDifference()) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <form @submit.prevent="submitClose">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Actual Closing Balance</label>
+                            <input
+                                v-model="closeForm.closing_balance"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Count the cash in the register..."
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Closing Notes (Optional)</label>
+                            <textarea
+                                v-model="closeForm.closing_notes"
+                                rows="3"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Any notes about the closing..."
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @click="closeCloseModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" :disabled="closeForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
+                            {{ closeForm.processing ? 'Closing...' : 'Close Register' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Withdraw Modal -->
+        <div v-if="showWithdrawModal && currentRegister" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Withdraw Cash</h3>
+                <div class="bg-blue-50 rounded-xl p-4 mb-4">
+                    <p class="text-sm text-blue-700">Current Balance: <span class="font-bold">{{ formatCurrency(currentBalance) }}</span></p>
+                </div>
+                <form @submit.prevent="submitWithdraw">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount to Withdraw</label>
+                            <input
+                                v-model="withdrawForm.amount"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                :max="currentBalance"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="0.00"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Withdrawal <span class="text-red-500">*</span></label>
+                            <textarea
+                                v-model="withdrawForm.notes"
+                                rows="3"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., Bank deposit, petty cash, etc..."
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @click="closeWithdrawModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" :disabled="withdrawForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
+                            {{ withdrawForm.processing ? 'Processing...' : 'Withdraw' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Deposit Modal -->
+        <div v-if="showDepositModal && currentRegister" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Add Cash</h3>
+                <form @submit.prevent="submitDeposit">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount to Add</label>
+                            <input
+                                v-model="depositForm.amount"
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="0.00"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Deposit <span class="text-red-500">*</span></label>
+                            <textarea
+                                v-model="depositForm.notes"
+                                rows="3"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., Change from bank, returned cash, etc..."
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @click="closeDepositModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" :disabled="depositForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50">
+                            {{ depositForm.processing ? 'Processing...' : 'Add Cash' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </MainLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, usePage, Link } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import { usePermissions } from '@/Composables/usePermissions';
 
 const page = usePage();
 const currentCurrency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+const { hasPermission } = usePermissions();
 
 const props = defineProps<{
     orders: any[];
     tables: any[];
-    // ...
+    currentRegister: any;
+    currentBalance: number;
 }>();
+
+// Cash Register Modals
+const showOpenModal = ref(false);
+const showCloseModal = ref(false);
+const showWithdrawModal = ref(false);
+const showDepositModal = ref(false);
 
 const searchQuery = ref('');
 const selectedOrder = ref<any>(null);
@@ -429,6 +690,14 @@ const updateOrder = () => {
     });
 };
 
+const selectPaymentMethod = (method: string) => {
+    if (method === 'cash' && !props.currentRegister) {
+        // Don't allow selecting cash if register is not open
+        return;
+    }
+    paymentMethod.value = method;
+};
+
 const settleBill = () => {
     if (!selectedOrder.value || !paymentMethod.value) return;
     
@@ -453,4 +722,136 @@ const settleBill = () => {
         }
     });
 };
+
+// Helper functions for cash register
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-AE', { 
+        style: 'currency', 
+        currency: currentCurrency.value 
+    }).format(value || 0);
+};
+
+const formatTime = (date: string) => {
+    return new Date(date).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+// Cash Register Forms
+const openForm = ref({
+    opening_balance: '',
+    opening_notes: '',
+    processing: false,
+});
+
+const closeForm = ref({
+    closing_balance: '',
+    closing_notes: '',
+    processing: false,
+});
+
+const withdrawForm = ref({
+    amount: '',
+    notes: '',
+    processing: false,
+});
+
+const depositForm = ref({
+    amount: '',
+    notes: '',
+    processing: false,
+});
+
+// Cash Register Functions
+const submitOpen = () => {
+    openForm.value.processing = true;
+    router.post(route('cash-register.open'), {
+        opening_balance: openForm.value.opening_balance,
+        opening_notes: openForm.value.opening_notes,
+    }, {
+        onSuccess: () => {
+            closeOpenModal();
+        },
+        onFinish: () => {
+            openForm.value.processing = false;
+        },
+    });
+};
+
+const submitClose = () => {
+    if (!props.currentRegister) return;
+    closeForm.value.processing = true;
+    router.post(route('cash-register.close', props.currentRegister.id), {
+        closing_balance: closeForm.value.closing_balance,
+        closing_notes: closeForm.value.closing_notes,
+    }, {
+        onSuccess: () => {
+            closeCloseModal();
+        },
+        onFinish: () => {
+            closeForm.value.processing = false;
+        },
+    });
+};
+
+const submitWithdraw = () => {
+    if (!props.currentRegister) return;
+    withdrawForm.value.processing = true;
+    router.post(route('cash-register.withdraw', props.currentRegister.id), {
+        amount: withdrawForm.value.amount,
+        notes: withdrawForm.value.notes,
+    }, {
+        onSuccess: () => {
+            closeWithdrawModal();
+        },
+        onFinish: () => {
+            withdrawForm.value.processing = false;
+        },
+    });
+};
+
+const submitDeposit = () => {
+    if (!props.currentRegister) return;
+    depositForm.value.processing = true;
+    router.post(route('cash-register.deposit', props.currentRegister.id), {
+        amount: depositForm.value.amount,
+        notes: depositForm.value.notes,
+    }, {
+        onSuccess: () => {
+            closeDepositModal();
+        },
+        onFinish: () => {
+            depositForm.value.processing = false;
+        },
+    });
+};
+
+const closeOpenModal = () => {
+    showOpenModal.value = false;
+    openForm.value = { opening_balance: '', opening_notes: '', processing: false };
+};
+
+const closeCloseModal = () => {
+    showCloseModal.value = false;
+    closeForm.value = { closing_balance: '', closing_notes: '', processing: false };
+};
+
+const closeWithdrawModal = () => {
+    showWithdrawModal.value = false;
+    withdrawForm.value = { amount: '', notes: '', processing: false };
+};
+
+const closeDepositModal = () => {
+    showDepositModal.value = false;
+    depositForm.value = { amount: '', notes: '', processing: false };
+};
+
+const calculateDifference = () => {
+    if (!closeForm.value.closing_balance) return 0;
+    return parseFloat(closeForm.value.closing_balance) - props.currentBalance;
+};
+
+// Add route helper
+const route = (window as any).route;
 </script>

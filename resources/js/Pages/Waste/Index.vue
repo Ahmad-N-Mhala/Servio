@@ -23,11 +23,11 @@
             >
                 <template #header-actions>
                     <div class="flex items-center gap-4">
-                        <input 
+                        <Input 
                             type="date" 
                             v-model="params.date"
-                            class="rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-10"
-                        >
+                            placeholder="Select date"
+                        />
                         <Button @click="openAddModal" variant="primary">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -95,29 +95,35 @@
         <!-- Add Waste Modal -->
         <Modal :show="showAddModal" @close="closeAddModal" title="Log Ingredient Waste">
             <form @submit.prevent="submitAdd" class="space-y-4">
-                <div>
-                     <label class="block text-sm font-medium text-gray-700 mb-1">Select Ingredient</label>
-                     <select v-model="addForm.ingredient_id" @change="addForm.ingredient_batch_id = ''" class="w-full rounded-xl border-gray-300 focus:ring-primary focus:border-primary" required>
-                         <option value="" disabled>Select an ingredient</option>
-                         <option v-for="item in ingredients" :key="item.id" :value="item.id">
-                             {{ getLocaleName(item.name) }} (Total: {{ item.current_stock }} {{ item.unit }})
-                         </option>
-                     </select>
-                     <p v-if="ingredients.length === 0" class="mt-2 text-sm text-red-600">
-                         No ingredients found. Please add ingredients in the 
-                         <a :href="route('inventory.index')" class="font-semibold underline hover:text-red-800">Inventory page</a> first.
-                     </p>
-                </div>
+                <Select
+                    v-model="addForm.ingredient_id"
+                    @update:modelValue="addForm.ingredient_batch_id = ''"
+                    label="Select Ingredient"
+                    placeholder="Select an ingredient"
+                    required
+                >
+                    <option v-for="item in ingredients" :key="item.id" :value="item.id">
+                        {{ getLocaleName(item.name) }} (Total: {{ item.current_stock }} {{ item.unit }})
+                        <span v-if="!item.is_active"> - Inactive</span>
+                    </option>
+                </Select>
+                <p v-if="ingredients.length === 0" class="mt-2 text-sm text-red-600">
+                    No ingredients found for this restaurant. Please add ingredients in the 
+                    <a :href="route('inventory.index')" class="font-semibold underline hover:text-red-800">Inventory page</a> first.
+                </p>
 
                 <div v-if="addForm.ingredient_id">
-                     <label class="block text-sm font-medium text-gray-700 mb-1">Select Batch</label>
-                     <select v-model="addForm.ingredient_batch_id" class="w-full rounded-xl border-gray-300 focus:ring-primary focus:border-primary" required>
-                         <option value="" disabled>Select a batch (FIFO)</option>
-                         <option v-for="batch in availableBatches" :key="batch.id" :value="batch.id">
-                             {{ batch.batch_number }} — Qty: {{ Number(batch.quantity_remaining) }} — Cost: {{ formatCurrency(batch.cost_per_unit) }}
-                         </option>
-                     </select>
-                     <p v-if="availableBatches.length === 0" class="text-xs text-red-500 mt-1">No active batches available for this ingredient.</p>
+                    <Select
+                        v-model="addForm.ingredient_batch_id"
+                        label="Select Batch"
+                        placeholder="Select a batch (FIFO)"
+                        required
+                    >
+                        <option v-for="batch in availableBatches" :key="batch.id" :value="batch.id">
+                            {{ batch.batch_number }} — Qty: {{ Number(batch.quantity_remaining) }} — Cost: {{ formatCurrency(batch.cost_per_unit) }}
+                        </option>
+                    </Select>
+                    <p v-if="availableBatches.length === 0" class="text-xs text-red-500 mt-1">No active batches available for this ingredient.</p>
                 </div>
 
                 <Input 
@@ -128,10 +134,12 @@
                     step="0.01"
                     required
                 />
-                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-                    <textarea v-model="addForm.notes" class="w-full rounded-xl border-gray-300 focus:ring-primary focus:border-primary" rows="2"></textarea>
-                </div>
+                <Input
+                    v-model="addForm.notes"
+                    label="Notes (Optional)"
+                    type="textarea"
+                    rows="2"
+                />
                 <div class="flex justify-end gap-3 mt-6">
                     <Button type="button" variant="secondary" @click="closeAddModal">Cancel</Button>
                     <Button type="submit" :loading="addForm.processing" variant="danger">Log Waste</Button>
@@ -173,6 +181,7 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
 import Table from '@/Components/Table.vue';
 
 const props = defineProps<{

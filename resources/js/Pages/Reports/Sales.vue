@@ -8,11 +8,19 @@
                 </div>
                 
                 <!-- Date Filter -->
-                <div class="flex gap-2">
-                    <input type="date" v-model="filters.start_date" class="rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <span class="self-center text-gray-400">to</span>
-                    <input type="date" v-model="filters.end_date" class="rounded-lg border-gray-300 focus:ring-primary focus:border-primary">
-                    <button @click="applyFilters" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">Apply</button>
+                <div class="flex gap-2 items-center">
+                    <Input 
+                        type="date" 
+                        v-model="filters.start_date"
+                        placeholder="Start date"
+                    />
+                    <span class="text-gray-400">to</span>
+                    <Input 
+                        type="date" 
+                        v-model="filters.end_date"
+                        placeholder="End date"
+                    />
+                    <Button @click="applyFilters" variant="primary">Apply</Button>
                 </div>
             </div>
 
@@ -69,6 +77,8 @@
 import { computed, ref } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import Input from '@/Components/Input.vue';
+import Button from '@/Components/Button.vue';
 import {
   Chart as ChartJS,
   Title,

@@ -203,6 +203,25 @@
                             </svg>
                             <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.pos') }}</span>
                         </Link>
+                        
+                        <!-- Order Delivery (Waiter) -->
+                        <Link 
+                            v-if="hasPermission('deliver_orders')"
+                            :href="route('service.delivery')" 
+                            :class="[
+                                'group flex items-center rounded-lg transition-all duration-200',
+                                isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
+                                $page.url.includes('/service/delivery') 
+                                    ? 'bg-green-100 text-green-700 font-medium dark:bg-green-900/30 dark:text-green-400' 
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                            ]"
+                            :title="isSidebarCollapsed ? 'Order Delivery' : ''"
+                        >
+                            <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">Order Delivery</span>
+                        </Link>
                     </div>
                 </div>
 
@@ -772,7 +791,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, Transition, onMounted, watch } from 'vue';
+import { ref, computed, Transition, onMounted, watch, onUnmounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
@@ -953,6 +972,67 @@ onMounted(() => {
         toastType.value = type || 'success';
         toastTrigger.value++;
     });
+});
+// Global Notification Logic
+const pollInterval = ref<any>(null);
+
+onMounted(async () => {
+    // Only polling for users with delivery permission
+    if (hasPermission('deliver_orders')) {
+        const checkForOrders = async () => {
+            try {
+                const res = await fetch(route('service.delivery.check'));
+                if (!res.ok) return;
+                
+                const data = await res.json();
+                const currentIds = new Set(data.ids as string[]);
+                
+                // Load known IDs
+                let knownIds = new Set<string>();
+                try {
+                     const stored = localStorage.getItem('known_ready_orders');
+                     if (stored) knownIds = new Set(JSON.parse(stored));
+                } catch (e) {}
+                
+                let hasNew = false;
+                for (const id of currentIds) {
+                    if (!knownIds.has(id)) {
+                        hasNew = true;
+                        break;
+                    }
+                }
+
+                if (hasNew) {
+                    // Vibrate
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        try {
+                            navigator.vibrate([200, 100, 200, 100, 200]);
+                        } catch(e) {}
+                    }
+                    
+                    // Show Toast
+                    toastType.value = 'success';
+                    toastTitle.value = 'Order Ready';
+                    toastMessage.value = 'New orders are ready for pickup!';
+                    toastTrigger.value++;
+                }
+                
+                // Save current state
+                localStorage.setItem('known_ready_orders', JSON.stringify([...currentIds]));
+
+            } catch (e) {}
+        };
+
+        // Initial check
+        checkForOrders();
+
+        // Start polling
+        pollInterval.value = setInterval(checkForOrders, 3000);
+    }
+});
+
+onUnmounted(() => {
+    if (pollInterval.value) clearInterval(pollInterval.value);
 });
 </script>
 

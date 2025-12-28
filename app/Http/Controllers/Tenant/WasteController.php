@@ -40,9 +40,8 @@ class WasteController extends Controller
             ->limit(50)
             ->get();
 
-        // Fetch ingredients for the dropdown
+        // Fetch ingredients for the dropdown - Show ALL ingredients (active and inactive)
         $ingredients = \App\Models\Ingredient::where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
             ->with([
                 'batches' => function ($query) {
                     $query->where('quantity_remaining', '>', 0)
@@ -51,10 +50,29 @@ class WasteController extends Controller
             ])
             ->get();
 
+        // Transform ingredients to ensure proper data structure for frontend
+        $ingredientsData = $ingredients->map(function ($ingredient) {
+            return [
+                'id' => (string) $ingredient->id,
+                'name' => $ingredient->name,
+                'unit' => $ingredient->unit,
+                'current_stock' => $ingredient->current_stock,
+                'is_active' => $ingredient->is_active,
+                'batches' => $ingredient->batches->map(function ($batch) {
+                    return [
+                        'id' => (string) $batch->id,
+                        'batch_number' => $batch->batch_number,
+                        'quantity_remaining' => $batch->quantity_remaining,
+                        'cost_per_unit' => $batch->cost_per_unit,
+                    ];
+                })->toArray()
+            ];
+        })->toArray();
+
         return Inertia::render('Waste/Index', [
             'logs' => $logs,
             'wasteActivityLogs' => $wasteActivityLogs,
-            'ingredients' => $ingredients,
+            'ingredients' => $ingredientsData,
             'filters' => $request->only(['date'])
         ]);
     }
@@ -108,9 +126,11 @@ class WasteController extends Controller
             $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
-        DB::transaction(function () use ($validated, $restaurant) {
-            $ingredient = \App\Models\Ingredient::lockForUpdate()->findOrFail($validated['ingredient_id']);
-            $batch = \App\Models\IngredientBatch::lockForUpdate()->findOrFail($validated['ingredient_batch_id']);
+        // Note: MongoDB transactions require replica sets
+        // Executing without transaction wrapper for standalone MongoDB instances
+        try {
+            $ingredient = \App\Models\Ingredient::findOrFail($validated['ingredient_id']);
+            $batch = \App\Models\IngredientBatch::findOrFail($validated['ingredient_batch_id']);
 
             // Validate batch belongs to ingredient
             if ($batch->ingredient_id !== $ingredient->id) {
@@ -163,7 +183,16 @@ class WasteController extends Controller
                 'new_stock_level' => $ingredient->fresh()->current_stock,
                 'notes' => "Waste logged from Batch #{$batch->batch_number}: " . ($validated['notes'] ?? ''),
             ]);
-        });
+        } catch (\Exception $e) {
+            \Log::error('Waste log creation failed', [
+                'error' => $e->getMessage(),
+                'ingredient_id' => $validated['ingredient_id'] ?? null,
+            ]);
+
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to create waste log: ' . $e->getMessage()
+            ])->withInput();
+        }
 
         return redirect()->back()->with('message', 'Waste log created and stock updated.');
     }

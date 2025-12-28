@@ -22,10 +22,10 @@ class KitchenController extends Controller
     {
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
 
-        // Fetch active orders (pending, processing)
+        // Fetch active orders (pending, processing, ready, served)
         // Ordered by FIFO (First In, First Out)
         $orders = Order::where('restaurant_id', $restaurant->id)
-            ->whereIn('status', ['pending', 'processing', 'served'])
+            ->whereIn('status', ['pending', 'processing', 'ready', 'served'])
             ->with(['items.menuItem', 'customer', 'table'])
             ->orderBy('created_at', 'asc')
             ->get();
@@ -47,7 +47,7 @@ class KitchenController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,processing,completed,cancelled,served'],
+            'status' => ['required', 'in:pending,processing,completed,cancelled,served,ready'],
             'cancellation_reason' => ['nullable', 'string', 'required_if:status,cancelled'],
         ]);
 
@@ -62,7 +62,7 @@ class KitchenController extends Controller
 
         // ====== INVENTORY DEDUCTION LOGIC (Duplicated from OrderController to ensure consistency) ======
         // Deduct Inventory when status moves from 'pending' to any active cooking/served state
-        if ($oldStatus === 'pending' && in_array($status, ['processing', 'completed', 'served'])) {
+        if ($oldStatus === 'pending' && in_array($status, ['processing', 'completed', 'served', 'ready'])) {
             $order->load(['items.menuItem.ingredients']);
 
             foreach ($order->items as $item) {
