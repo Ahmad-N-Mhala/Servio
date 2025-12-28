@@ -15,7 +15,11 @@ class WasteController extends Controller
 {
     public function index(Request $request)
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = $request->user()->currentRestaurant();
+
+        if (!$restaurant && $request->user()->is_super_admin) {
+            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
+        }
 
         // Fetch logs with ingredient details, including deleted ones
         $query = WasteLog::withTrashed()
@@ -98,7 +102,11 @@ class WasteController extends Controller
             'notes' => 'nullable|string'
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = $request->user()->currentRestaurant();
+
+        if (!$restaurant && $request->user()->is_super_admin) {
+            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
+        }
 
         DB::transaction(function () use ($validated, $restaurant) {
             $ingredient = \App\Models\Ingredient::lockForUpdate()->findOrFail($validated['ingredient_id']);

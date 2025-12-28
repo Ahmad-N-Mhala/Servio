@@ -48,6 +48,30 @@
                     </div>
                 </template>
 
+                <!-- Country with Hover Location -->
+                <template #cell-country="{ row }">
+                    <div class="group relative cursor-help">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-gray-700">{{ row.country || 'N/A' }}</span>
+                            <!-- Info Icon for clear affordance -->
+                            <svg v-if="row.country" class="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </div>
+                        
+                        <!-- Tooltip -->
+                        <div v-if="row.address || row.city || row.state" class="absolute left-0 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none transform translate-y-1 group-hover:translate-y-0">
+                            <div class="font-bold border-b border-gray-700 pb-1 mb-1 text-gray-300">Full Location</div>
+                            <div class="space-y-0.5">
+                                <div v-if="row.address"><span class="text-gray-400">Address:</span> {{ row.address }}</div>
+                                <div v-if="row.city"><span class="text-gray-400">City:</span> {{ row.city }}</div>
+                                <div v-if="row.state"><span class="text-gray-400">State:</span> {{ row.state }}</div>
+                                <div v-if="row.zip_code"><span class="text-gray-400">Zip:</span> {{ row.zip_code }}</div>
+                            </div>
+                            <!-- Arrow -->
+                            <div class="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                        </div>
+                    </div>
+                </template>
+
                 <!-- Status Column -->
                 <template #cell-status="{ row }">
                     <span 
@@ -155,6 +179,7 @@ import { debounce } from 'lodash';
 
 const columns = [
     { key: 'name', label: 'Name & Owner', sortable: true },
+    { key: 'country', label: 'Country', sortable: true },
     { key: 'status', label: 'Status', sortable: true, align: 'center' as const },
     { key: 'subscription.plan.name', label: 'Plan', sortable: false },
 ];

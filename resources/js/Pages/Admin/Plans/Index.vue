@@ -34,7 +34,7 @@
                             <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-full uppercase tracking-wide">{{ plan.slug }}</span>
                         </div>
                         <div class="text-right">
-                            <p class="text-2xl font-bold text-gray-900">AED {{ plan.price_monthly }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ currency }} {{ convertPrice(plan.price_monthly) }}</p>
                             <p class="text-xs text-gray-400">/month</p>
                         </div>
                     </div>
@@ -85,10 +85,10 @@
 
                 <div class="space-y-6">
                     <div class="bg-primary-50 rounded-xl p-6 text-center">
-                        <p class="text-4xl font-extrabold text-primary">AED {{ selectedPlan.price_monthly }}</p>
+                        <p class="text-4xl font-extrabold text-primary">{{ currency }} {{ convertPrice(selectedPlan.price_monthly) }}</p>
                         <p class="text-sm text-primary-600 font-medium">per month</p>
                         <div class="mt-2 text-sm text-gray-500">
-                            or AED {{ selectedPlan.price_yearly }} / year
+                            or {{ currency }} {{ convertPrice(selectedPlan.price_yearly) }} / year
                         </div>
                     </div>
 
@@ -124,9 +124,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
 import Modal from '@/Components/Modal.vue';
+
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+const currencyRate = computed(() => (page.props.current_restaurant as any)?.currency_rate || 1);
+
+const convertPrice = (amount: any) => {
+    return (Number(amount || 0) * currencyRate.value).toFixed(2);
+};
 
 const props = defineProps<{
     plans: any;

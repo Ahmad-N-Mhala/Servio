@@ -22,7 +22,7 @@
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                     <p class="text-sm font-medium text-gray-500">Total Spent</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ customer.total_spent }} AED</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ customer.total_spent }} {{ currency }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                     <p class="text-sm font-medium text-gray-500">Total Orders</p>
@@ -124,8 +124,12 @@
 </template>
 
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import { computed } from 'vue';
+
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const props = defineProps<{
     customer: any;

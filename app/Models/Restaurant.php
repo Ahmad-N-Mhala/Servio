@@ -27,12 +27,39 @@ class Restaurant extends Model
         'settings',
         'sms_balance',
         'email_balance',
+        'state',
+        'zip_code',
+        'google_map_location',
         'status',
     ];
 
     protected $casts = [
         'settings' => 'array',
     ];
+
+    protected $appends = ['phone_code', 'currency_rate'];
+
+    public function getPhoneCodeAttribute($value = null)
+    {
+        $country = \App\Models\Country::where('name', $this->country)->first();
+        return $country ? $country->dial_code : '+971';
+    }
+
+    public function getCurrencyRateAttribute($value = null)
+    {
+        $country = \App\Models\Country::where('name', $this->country)->first();
+        return $country ? (float) $country->rate : 1.0;
+    }
+
+    public function getCurrencyAttribute($value)
+    {
+        // Fix for legacy data: if currency is AED but country is not UAE, derive from country
+        if ($value === 'AED' && $this->country && $this->country !== 'United Arab Emirates') {
+            $country = \App\Models\Country::where('name', $this->country)->first();
+            return $country ? $country->currency : $value;
+        }
+        return $value;
+    }
 
     public function staff(): HasMany
     {

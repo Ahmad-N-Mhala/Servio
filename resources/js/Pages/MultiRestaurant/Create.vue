@@ -60,6 +60,55 @@
                             />
                         </div>
 
+                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
+                            <h3 class="text-lg font-bold text-gray-900">Location Details</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                    <div class="w-full rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500 sm:text-sm">
+                                        {{ form.country }} <span class="text-xs text-gray-400 ml-2">(Auto-detected)</span>
+                                    </div>
+                                </div>
+
+                                <Input
+                                    v-model="form.state"
+                                    label="State / Province"
+                                    type="text"
+                                    placeholder="e.g. Dubai"
+                                    required
+                                    :error="form.errors.state"
+                                />
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Input
+                                    v-model="form.city"
+                                    label="City"
+                                    type="text"
+                                    placeholder="e.g. Downtown"
+                                    required
+                                    :error="form.errors.city"
+                                />
+                                <Input
+                                    v-model="form.zip_code"
+                                    label="Zip / Postal Code"
+                                    type="text"
+                                    placeholder="e.g. 00000"
+                                    :error="form.errors.zip_code"
+                                />
+                            </div>
+
+                            <Input
+                                v-model="form.address"
+                                label="Street Name / Address"
+                                type="text"
+                                placeholder="e.g. Sheikh Zayed Road, Building 5"
+                                required
+                                :error="form.errors.address"
+                            />
+                        </div>
+
                         <!-- Loyalty Setup -->
                         <div class="pt-6 sm:pt-8 border-t border-gray-100">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 tracking-tight">Loyalty Program Setup</h3>
@@ -100,16 +149,16 @@
                                 </div>
 
                                 <div class="mt-4 bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
-                                     <Input
+                                    <Input
                                         v-model="form.earning_points"
-                                        :label="form.earning_method_type === 'order_total' ? 'Points per 1 AED Spent' : 'Points per Visit'"
+                                        :label="form.earning_method_type === 'order_total' ? 'Points per 1 ' + currency + ' Spent' : 'Points per Visit'"
                                         type="number"
                                         min="1"
                                         required
                                         :error="(form.errors as any).earning_points"
                                     />
                                     <p class="text-xs text-gray-500 mt-2 font-medium">
-                                        {{ form.earning_method_type === 'order_total' ? 'Tip: Set to 1 for basic 1 point = 1 AED.' : 'Tip: Set to 10 for standard visit reward.' }}
+                                        {{ form.earning_method_type === 'order_total' ? 'Tip: Set to 1 for basic 1 point = 1 ' + currency + '.' : 'Tip: Set to 10 for standard visit reward.' }}
                                     </p>
                                 </div>
                             </div>
@@ -138,17 +187,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import Logo from '@/Components/Logo.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
 import Toast from '@/Components/Toast.vue';
 
+const props = defineProps<{
+    defaultCountry?: string;
+}>();
+
 const form = useForm({
     restaurant_name: '',
+    
+    // Location Details
+    country: props.defaultCountry || 'United Arab Emirates',
+    state: '',
+    city: '',
+    address: '',
+    zip_code: '',
+
     earning_method_type: 'order_total',
     earning_points: 1,
+});
+
+const currency = computed(() => {
+    // Simple mapping, expand as needed or fetch from backend config
+    if (form.country === 'United Arab Emirates') return 'AED';
+    if (form.country === 'Saudi Arabia') return 'SAR';
+    if (form.country === 'United States') return 'USD';
+    return 'Currency';
 });
 
 // Toast state for interactive feedback

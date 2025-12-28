@@ -71,7 +71,7 @@
                         <div class="mb-8 p-6 bg-gray-50 rounded-2xl group-hover:bg-primary-50 transition-colors duration-300">
                              <div class="flex items-baseline justify-center">
                                 <span class="text-4xl font-extrabold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                                    {{ plan.currency }} {{ Math.floor(form.billing_cycle === 'yearly' ? plan.price_yearly : plan.price_monthly) }}
+                                    {{ currentCountryData.currency }} {{ getConvertedPrice(form.billing_cycle === 'yearly' ? plan.price_yearly : plan.price_monthly) }}
                                 </span>
                                 <span class="text-gray-500 ml-1 font-medium">/{{ form.billing_cycle === 'yearly' ? 'year' : 'month' }}</span>
                             </div>
@@ -134,6 +134,17 @@
                             Back to Plans
                         </button>
 
+                        <!-- Global Error Alert -->
+                        <div v-if="(form.errors as any).error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 animate-fade-in">
+                            <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-bold text-red-800">Registration Error</h3>
+                                <p class="text-sm text-red-700 mt-1">{{ (form.errors as any).error }}</p>
+                            </div>
+                        </div>
+
                         <div class="mb-8">
                             <h2 class="text-2xl font-bold text-gray-900">Finish Setting Up</h2>
                             <p class="text-gray-500 mt-1">You selected the <span class="text-indigo-600 font-bold">{{ selectedPlan?.name }}</span> plan.</p>
@@ -152,6 +163,86 @@
                                 />
                             </div>
 
+                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-4">
+                                <h3 class="text-lg font-bold text-gray-900">Location Details</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Country <span class="text-red-500">*</span></label>
+                                        <select 
+                                            v-model="form.country" 
+                                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
+                                            required
+                                        >
+                                            <option value="" disabled>Select Country</option>
+                                            <option v-for="country in countries" :key="country" :value="country">{{ country }}</option>
+                                        </select>
+                                        <div v-if="form.errors.country" class="text-red-500 text-xs mt-1">{{ form.errors.country }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">State / Province <span class="text-red-500">*</span></label>
+                                        <select 
+                                            v-model="form.state" 
+                                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
+                                            required
+                                        >
+                                            <option value="" disabled>Select State</option>
+                                            <option v-for="state in availableStates" :key="state" :value="state">{{ state }}</option>
+                                        </select>
+                                        <div v-if="form.errors.state" class="text-red-500 text-xs mt-1">{{ form.errors.state }}</div>
+
+                                        <!-- Custom State Input -->
+                                        <div v-if="form.state === 'Other'" class="mt-3 animate-fade-in">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Enter State Name <span class="text-red-500">*</span></label>
+                                            <input 
+                                                v-model="form.state_custom"
+                                                type="text"
+                                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                     <Input
+                                        v-model="form.google_map_location"
+                                        label="Google Map Location (Optional)"
+                                        type="url"
+                                        placeholder="https://maps.google.com/..."
+                                        :error="form.errors.google_map_location"
+                                    />
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Input
+                                        v-model="form.city"
+                                        label="City"
+                                        type="text"
+                                        placeholder="e.g. Downtown"
+                                        required
+                                        :error="form.errors.city"
+                                    />
+                                    <Input
+                                        v-model="form.zip_code"
+                                        label="Zip / Postal Code"
+                                        type="text"
+                                        placeholder="e.g. 00000"
+                                        :error="form.errors.zip_code"
+                                    />
+                                </div>
+
+                                <Input
+                                    v-model="form.address"
+                                    label="Street Name / Address"
+                                    type="text"
+                                    placeholder="e.g. Sheikh Zayed Road, Building 5"
+                                    required
+                                    :error="form.errors.address"
+                                />
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <Input
                                     v-model="form.name"
@@ -164,7 +255,7 @@
                                     v-model="form.phone"
                                     label="Phone Number"
                                     type="tel"
-                                    placeholder="+971 50 123 4567"
+                                    placeholder="e.g. +1 234 567 8900"
                                     required
                                     :error="form.errors.phone"
                                 />
@@ -176,6 +267,7 @@
                                     label="Email"
                                     type="email"
                                     required
+                                    autocomplete="new-password"
                                     :error="form.errors.email"
                                 />
                             </div>
@@ -186,6 +278,7 @@
                                     label="Password"
                                     type="password"
                                     required
+                                    autocomplete="new-password"
                                     :error="form.errors.password"
                                 />
                                 <Input
@@ -193,6 +286,7 @@
                                     label="Confirm Password"
                                     type="password"
                                     required
+                                    autocomplete="new-password"
                                     :error="form.errors.password_confirmation"
                                 />
                             </div>
@@ -239,14 +333,14 @@
                                     <div class="mt-4 bg-gray-50 p-4 rounded-xl">
                                          <Input
                                             v-model="form.earning_points"
-                                            :label="form.earning_method_type === 'order_total' ? 'Points per 1 AED Spent' : 'Points per Visit'"
+                                            :label="form.earning_method_type === 'order_total' ? `Points per 1 ${currentCountryData.currency} Spent` : 'Points per Visit'"
                                             type="number"
                                             min="1"
                                             required
                                             :error="(form.errors as any).earning_points"
                                         />
                                         <p class="text-xs text-gray-500 mt-2">
-                                            {{ form.earning_method_type === 'order_total' ? 'Example: If set to 1, a 100 AED order earns 100 points.' : 'Example: If set to 10, every visit earns 10 points regardless of spend.' }}
+                                            {{ form.earning_method_type === 'order_total' ? `Example: If set to 1, a 100 ${currentCountryData.currency} order earns 100 points.` : 'Example: If set to 10, every visit earns 10 points regardless of spend.' }}
                                         </p>
                                     </div>
                                 </div>
@@ -272,16 +366,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import Logo from '@/Components/Logo.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
 
-defineProps<{
+const props = defineProps<{
     plans: any[];
     availableFeatures: Record<string, string>;
+    defaultCountry: string;
+    countries: any[]; // Now receiving countries from backend
 }>();
+
+// Use countries from props instead of hardcoded array
+const countriesData = computed(() => props.countries);
+
+const countries = computed(() => countriesData.value.map((c: any) => c.name));
 
 const step = ref(1);
 const selectedPlan = ref<any>(null);
@@ -290,6 +391,16 @@ const form = useForm({
     restaurant_name: '',
     plan_id: null as number | null,
     billing_cycle: 'monthly',
+    
+    // Location Details
+    country: props.defaultCountry || 'United Arab Emirates',
+    state: '',
+    state_custom: '', // Temporary field for "Other" input
+    city: '',
+    address: '',
+    zip_code: '',
+    google_map_location: '',
+
     name: '',
     phone: '',
     email: '',
@@ -298,6 +409,61 @@ const form = useForm({
     earning_method_type: 'order_total',
     earning_points: 1,
 });
+
+// Computed properties for dynamic localization
+const currentCountryData = computed(() => {
+    return countriesData.value.find((c: any) => c.name === form.country) || countriesData.value[0];
+});
+
+// Computed states list that includes 'Other'
+const availableStates = computed(() => {
+    const states = currentCountryData.value.states || [];
+    return [...states, 'Other'];
+});
+
+// Watch country change to update phone prefix
+watch(() => form.country, (newCountry, oldCountry) => {
+    const newCountryData = countriesData.value.find((c: any) => c.name === newCountry);
+    const oldCountryData = countriesData.value.find((c: any) => c.name === oldCountry);
+    
+    // Reset state when country changes
+    form.state = '';
+    form.state_custom = '';
+
+    if (newCountryData) {
+        let currentPhone = form.phone || '';
+        let oldPrefix = oldCountryData ? oldCountryData.dial_code : '';
+
+        // Clean user input by removing the old prefix if present
+        if (oldPrefix && currentPhone.startsWith(oldPrefix)) {
+            // Remove prefix and any immediate whitespace
+            const numberPart = currentPhone.substring(oldPrefix.length).trim();
+            form.phone = newCountryData.dial_code + ' ' + numberPart;
+        } else if (!currentPhone || currentPhone.trim() === '') {
+             // If empty, just set the new prefix
+            form.phone = newCountryData.dial_code + ' ';
+        } else {
+            // If it has some other content that doesnt match old prefix (e.g. user manually typed),
+            // we try to keep it but prepend/replace prefix if it looks like a full number
+            // For now, let's just prepend if it doesn't start with '+'.
+            if (!currentPhone.startsWith('+')) {
+                 form.phone = newCountryData.dial_code + ' ' + currentPhone.trim();
+            }
+            // If it starts with +, we assume user knows what they are doing or it's already correct.
+        }
+    }
+}, { immediate: true });
+
+const getConvertedPrice = (priceInAED: number) => {
+    const rate = currentCountryData.value.rate;
+    const converted = priceInAED * rate;
+    // Format nicely: no decimals if large number, 2 decimals if small
+    // Special case for IDR (large numbers, no decimals usually needed)
+    if (currentCountryData.value.code === 'ID') {
+         return Math.floor(converted).toLocaleString();
+    }
+    return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(2);
+};
 
 const getPlanDescription = (slug: string) => {
     switch(slug) {
@@ -309,15 +475,15 @@ const getPlanDescription = (slug: string) => {
 };
 
 const planPriceDisplay = (plan: any) => {
-    const price = Math.floor(form.billing_cycle === 'yearly' ? plan.price_yearly : plan.price_monthly);
+    const basePrice = form.billing_cycle === 'yearly' ? plan.price_yearly : plan.price_monthly;
+    const convertedPrice = getConvertedPrice(basePrice);
     const period = form.billing_cycle === 'yearly' ? 'year' : 'month';
-    return `${plan.currency} ${price}/${period}`;
+    return `${currentCountryData.value.currency} ${convertedPrice}/${period}`;
 };
 
 const selectPlan = (plan: any) => {
     selectedPlan.value = plan;
     form.plan_id = plan.id;
-    // Don't auto-advance, let user click Continue
 };
 
 const continueToSetup = () => {
@@ -326,7 +492,31 @@ const continueToSetup = () => {
 };
 
 const submit = () => {
-    form.post((window as any).route('onboard.store'));
+    form.transform((data) => ({
+        ...data,
+        state: data.state === 'Other' ? data.state_custom : data.state,
+        // Ensure empty string is converted to null for nullable URL field if needed
+        google_map_location: data.google_map_location || null,
+    })).post((window as any).route('onboard.store'), {
+        preserveScroll: true,
+        onError: (errors) => {
+            console.error('Onboarding validation errors:', errors);
+            // Scroll to the first error
+            const firstErrorKey = Object.keys(errors)[0];
+            if (firstErrorKey) {
+                // If it's a global error 'error', scroll to top
+                if (firstErrorKey === 'error') {
+                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Try to scroll to specific input if possible, or just top of form
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                }
+            }
+        },
+        onFinish: () => {
+             // Optional: Stop loading state if needed manually, but form.processing handles it
+        }
+    });
 };
 </script>
 

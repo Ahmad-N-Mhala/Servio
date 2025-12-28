@@ -68,19 +68,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Table from '@/Components/Table.vue';
 import debounce from 'lodash/debounce';
 
-const columns = [
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+
+const columns = computed(() => [
     { key: 'name', label: 'Customer', sortable: true }, // Slot cell-name
     { key: 'contact', label: 'Contact', sortable: false }, // Slot cell-contact
     { key: 'loyalty_tier', label: 'Loyalty Tier', sortable: true }, // Slot cell-loyalty_tier
     { key: 'loyalty_points.balance', label: 'Points', sortable: true }, // Slot cell-loyalty_points.balance
-    { key: 'total_spent', label: 'Total Spent', sortable: true, format: 'currency' as const, currency: 'AED' },
-];
+    { key: 'total_spent', label: 'Total Spent', sortable: true, format: 'currency' as const, currency: currency.value },
+]);
 
 const props = defineProps<{
     customers: any;

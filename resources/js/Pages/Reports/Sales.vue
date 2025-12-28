@@ -97,6 +97,7 @@ const props = defineProps<{
 
 const page = usePage();
 const isRtl = computed(() => page.props.isRtl as boolean);
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const filters = ref({
     start_date: props.filters.start_date,
@@ -113,7 +114,7 @@ const applyFilters = () => {
 };
 
 const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(value);
+    return new Intl.NumberFormat('en-AE', { style: 'currency', currency: currency.value }).format(value);
 };
 
 const chartData = computed(() => ({

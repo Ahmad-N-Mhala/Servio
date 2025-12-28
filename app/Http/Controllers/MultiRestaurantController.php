@@ -112,7 +112,38 @@ class MultiRestaurantController extends Controller
     }
     public function create()
     {
-        return Inertia::render('MultiRestaurant/Create');
+        $defaultCountry = $this->getCountryFromIp(request()->ip());
+        return Inertia::render('MultiRestaurant/Create', [
+            'defaultCountry' => $defaultCountry
+        ]);
+    }
+
+    /**
+     * Attempt to determine country name from IP address.
+     * Defaults to 'United Arab Emirates' if detection fails or is local.
+     */
+    private function getCountryFromIp(?string $ip): string
+    {
+        if (!$ip || in_array($ip, ['127.0.0.1', '::1'])) {
+            return 'United Arab Emirates';
+        }
+
+        try {
+            // Use a public free API for demonstration (ip-api.com)
+            // Timeout set to 3 seconds to avoid blocking
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['status']) && $data['status'] === 'success' && isset($data['country'])) {
+                    return $data['country'];
+                }
+            }
+        } catch (\Exception $e) {
+            // Be silent on failure
+        }
+
+        return 'United Arab Emirates';
     }
 
     public function store(Request $request)
@@ -121,6 +152,12 @@ class MultiRestaurantController extends Controller
             'restaurant_name' => ['required', 'string', 'max:255'],
             'earning_method_type' => ['required', 'in:order_total,visit'],
             'earning_points' => ['required', 'integer', 'min:1'],
+            // Location Details
+            'country' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:255'],
+            'zip_code' => ['nullable', 'string', 'max:20'],
         ]);
 
         $user = Auth::user();
@@ -160,11 +197,19 @@ class MultiRestaurantController extends Controller
 
         try {
             // 1. Create Restaurant
+            $countryObj = \App\Models\Country::where('name', $validated['country'])->first();
+            $currency = $countryObj ? $countryObj->currency : 'AED';
+
             $restaurant = Restaurant::create([
                 'name' => $validated['restaurant_name'],
                 'slug' => \Illuminate\Support\Str::slug($validated['restaurant_name']) . '-' . \Illuminate\Support\Str::random(6),
-                'currency' => 'AED',
+                'currency' => $currency,
                 'locale' => 'en',
+                'country' => $validated['country'],
+                'state' => $validated['state'],
+                'city' => $validated['city'],
+                'address' => $validated['address'],
+                'zip_code' => $validated['zip_code'] ?? null,
             ]);
 
             // 2. Link User to Restaurant via Pivot
@@ -198,7 +243,7 @@ class MultiRestaurantController extends Controller
             ]);
 
             // 5. Create Subscription (using same plan and billing cycle as existing)
-            \App\Models\Subscription::create([
+            \App\Models\RestaurantSubscription::create([
                 'restaurant_id' => $restaurant->id,
                 'plan_id' => $plan->id,
                 'status' => 'active',

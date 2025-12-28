@@ -45,7 +45,7 @@ echo "Attached Restaurants: " . $restaurants->count() . "\n";
 foreach ($restaurants as $restaurant) {
     echo "Restaurant: {$restaurant->name} ({$restaurant->id})\n";
     echo "Pivot Data (Eloquent): " . json_encode($restaurant->pivot) . "\n";
-    
+
     // Check Raw DB for this association
     $rawPivot = DB::connection('mongodb')->table('restaurant_user')
         ->where('email', $email)
@@ -61,10 +61,10 @@ $restaurant = $user->restaurants->first();
 if ($restaurant) {
     session(['active_restaurant_id' => $restaurant->id]);
     echo "Set active_restaurant_id to: {$restaurant->id}\n";
-    
+
     $canViewDashboard = $user->can('view_dashboard');
     echo "Can 'view_dashboard'? " . ($canViewDashboard ? 'YES' : 'NO') . "\n";
-    
+
     if (!$canViewDashboard) {
         echo "Debug: Why NO?\n";
         // Manually run the logic from AppServiceProvider
@@ -72,16 +72,16 @@ if ($restaurant) {
             ->where('email', $user->email)
             ->where('restaurant_id', $restaurant->id)
             ->first();
-            
+
         if ($pivotEntry) {
-             $roleName = is_array($pivotEntry) ? $pivotEntry['role'] : $pivotEntry->role;
-             echo "Pivot Role Found: {$roleName}\n";
-             $role = Role::findByName($roleName, 'web');
-             if ($role) {
-                 echo "Role '{$roleName}' has 'view_dashboard'? " . ($role->hasPermissionTo('view_dashboard') ? 'Yes' : 'No') . "\n";
-             } else {
-                 echo "Role '{$roleName}' NOT FOUND in DB.\n";
-             }
+            $roleName = is_array($pivotEntry) ? $pivotEntry['role'] : $pivotEntry->role;
+            echo "Pivot Role Found: {$roleName}\n";
+            $role = Role::findByName($roleName, 'web');
+            if ($role) {
+                echo "Role '{$roleName}' has 'view_dashboard'? " . ($role->hasPermissionTo('view_dashboard') ? 'Yes' : 'No') . "\n";
+            } else {
+                echo "Role '{$roleName}' NOT FOUND in DB.\n";
+            }
         } else {
             echo "Pivot Entry NOT FOUND in AppServiceProvider logic.\n";
         }

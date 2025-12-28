@@ -169,7 +169,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (AED) *</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Amount ({{ currency }}) *</label>
                                     <input
                                         v-model="form.amount"
                                         type="number"
@@ -249,9 +249,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { ref, reactive, computed } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const props = defineProps<{
     expenses: any[];
@@ -335,7 +338,7 @@ const closeModal = () => {
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AE', {
         style: 'currency',
-        currency: 'AED',
+        currency: currency.value,
     }).format(amount);
 };
 </script>

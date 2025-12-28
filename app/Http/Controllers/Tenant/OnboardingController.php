@@ -28,11 +28,46 @@ class OnboardingController extends Controller
             ->reject(fn($domain) => in_array($domain, ['127.0.0.1']))
             ->first(fn($domain) => $domain === 'localhost') ?? collect(config('tenancy.central_domains'))->reject(fn($domain) => in_array($domain, ['127.0.0.1', 'localhost']))->first() ?? 'localhost';
 
+        // Auto-detect country from IP
+        $defaultCountry = $this->getCountryFromIp(request()->ip());
+
+        $countries = \App\Models\Country::all();
+
         return Inertia::render('Onboarding/Index', [
             'plans' => $plans,
             'baseDomain' => $baseDomain,
             'availableFeatures' => config('features'),
+            'defaultCountry' => $defaultCountry,
+            'countries' => $countries,
         ]);
+    }
+
+    /**
+     * Attempt to determine country name from IP address.
+     * Defaults to 'United Arab Emirates' if detection fails or is local.
+     */
+    private function getCountryFromIp(?string $ip): string
+    {
+        if (!$ip || in_array($ip, ['127.0.0.1', '::1'])) {
+            return 'United Arab Emirates';
+        }
+
+        try {
+            // Use a public free API for demonstration (ip-api.com)
+            // In production, use a dedicated package or paid service
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['status']) && $data['status'] === 'success' && isset($data['country'])) {
+                    return $data['country'];
+                }
+            }
+        } catch (\Exception $e) {
+            // Be silent on failure
+        }
+
+        return 'United Arab Emirates';
     }
 
     public function store(Request $request)
@@ -47,26 +82,38 @@ class OnboardingController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'earning_method_type' => ['required', 'in:order_total,visit'],
             'earning_points' => ['required', 'integer', 'min:1'],
+            // Location Details
+            'country' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:255'], // Street Name
+            'zip_code' => ['nullable', 'string', 'max:20'],
+            'google_map_location' => ['nullable', 'url', 'max:500'],
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
 
-        // Check if plan is free (price = 0)
+        // Check if plan is free (ensure strictly numeric zero)
         $planPrice = $validated['billing_cycle'] === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
-        $isFree = $planPrice == 0;
+        // Treat as free if price is 0 or less (e.g. 0.00) OR FORCE BYPASS
+        $isFree = true; // (float) $planPrice <= 0; // Forces bypass of payment for all plans during development
 
-        // Determine if we can use transactions
-        $useTransactions = true;
+        // Determine if we can use transactions (Database Transactions)
+        // FORCE DISABLE TRANSACTIONS for standalone MongoDB support
+        $useTransactions = false;
+
+        /* 
+        // Transaction logic disabled to support standalone MongoDB
         try {
             DB::beginTransaction();
         } catch (\Exception $e) {
-            if (str_contains($e->getMessage(), 'replica set member')) {
-                $useTransactions = false;
-                \Log::warning('MongoDB Transaction skipped: Server is running as standalone instance.');
-            } else {
-                throw $e;
-            }
+             // ...
         }
+        */
+
+        // Lookup selected country to get currency
+        $selectedCountry = \App\Models\Country::where('name', $validated['country'])->first();
+        $currency = $selectedCountry ? $selectedCountry->currency : 'AED';
 
         try {
             // 1. Create User (Central)
@@ -86,8 +133,14 @@ class OnboardingController extends Controller
             $restaurant = \App\Models\Restaurant::create([
                 'name' => $validated['restaurant_name'],
                 'slug' => Str::slug($validated['restaurant_name']) . '-' . Str::random(6),
-                'currency' => 'AED',
+                'currency' => $currency, // Dynamic currency based on country
                 'locale' => 'en', // Default locale
+                'country' => $validated['country'],
+                'state' => $validated['state'],
+                'city' => $validated['city'],
+                'address' => $validated['address'],
+                'zip_code' => $validated['zip_code'] ?? null,
+                'google_map_location' => $validated['google_map_location'] ?? null,
             ]);
 
             // 3. Link User to Restaurant via Pivot
@@ -121,8 +174,7 @@ class OnboardingController extends Controller
             ]);
 
             // 6. Create Subscription
-            // For free plans, create active subscription immediately
-            // For paid plans, this would normally be created after payment
+            // For free plans, create active subscription immediately and bypass payment
             \App\Models\Subscription::create([
                 'restaurant_id' => $restaurant->id,
                 'plan_id' => $plan->id,
@@ -130,10 +182,19 @@ class OnboardingController extends Controller
                 'billing_cycle' => $validated['billing_cycle'],
                 'starts_at' => now(),
                 'ends_at' => $validated['billing_cycle'] === 'yearly' ? now()->addYear() : now()->addMonth(),
+                // Generate a dummy ID to satisfy unique index constraint on MongoDB where nulls collide
+                'stripe_subscription_id' => 'sub_free_' . Str::random(16),
             ]);
 
             if ($useTransactions) {
-                DB::commit();
+                try {
+                    DB::commit();
+                } catch (\Exception $e) {
+                    // If commit fails due to transaction support, ignore it as operations likely ran in standalone mode
+                    if (!Str::contains($e->getMessage(), ['replica set member', 'mongos', 'Transaction numbers'])) {
+                        throw $e;
+                    }
+                }
             }
 
             // Auto-login the user
@@ -142,109 +203,43 @@ class OnboardingController extends Controller
             // Set active restaurant session
             session(['active_restaurant_id' => $restaurant->id]);
 
-            // For free plans, redirect to dashboard
-            // For paid plans, redirect to payment (not implemented yet)
+            // Redirect Logic
             if ($isFree) {
-                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Your account has been created successfully.');
+                // CASE 1: FREE PLAN -> No Payment Required
+                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Your free account has been created successfully.');
             } else {
-                // TODO: Implement payment flow for paid plans
-                // For now, just activate the subscription
-                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Your account has been created successfully.');
+                // CASE 2: PAID PLAN -> Should Redirect to Payment Gateway
+                // TODO: Integrate Stripe Checkout here.
+                // For now, we fall back to dashboard but with meaningful message/state (or auto-activate in dev)
+
+                // In a real scenario:
+                // return redirect()->route('payment.checkout', ['subscription_id' => ...]);
+
+                // Current Dev Fallback (Bypass Payment):
+                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Account created. (Payment simulation skipped)');
             }
 
         } catch (\Exception $e) {
             if ($useTransactions) {
-                DB::rollBack();
+                try {
+                    DB::rollBack();
+                } catch (\Exception $eRollback) {
+                    // Ignore rollback errors
+                }
             }
             \Log::error('Onboarding failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Onboarding failed: ' . $e->getMessage()]);
         }
     }
 
-    public function success(Request $request)
-    {
-        // BYPASS STRIPE: Get tenant_id directly from request
-        $tenantId = $request->query('tenant_id');
-
-        if (!$tenantId) {
-            return redirect()->route('onboard')->with('error', 'Tenant ID missing.');
-        }
-
-        try {
-            $tenant = Tenant::findOrFail($tenantId);
-
-            // Initialize tenancy if not already done (though we might be on central domain here)
-            // For seeding, we need to initialize
-            tenancy()->initialize($tenant);
-
-            // Check if already migrated to avoid re-running on refresh
-            // A simple check is if the user exists
-            $userExists = false;
-            try {
-                $userExists = \App\Models\User::where('email', $tenant->data['owner_email'])->exists();
-            } catch (\Exception $e) {
-                // Table might not exist yet
-            }
-
-            if (!$userExists) {
-                DB::transaction(function () use ($tenant) {
-                    $tenant->run(function () use ($tenant) {
-                        $this->migrateTenantDatabase();
-                        $this->seedTenantDatabase($tenant);
-                    });
-
-                    $tenant->update([
-                        'subscription_status' => 'active',
-                        'subscription_ends_at' => now()->add($tenant->data['billing_cycle'] === 'yearly' ? 1 : 0, 'year')->addMonth(),
-                    ]);
-                });
-            }
-
-            return Inertia::render('Onboarding/Success', [
-                'subdomain' => $tenant->identifier,
-                'domain' => $tenant->domains->first()->domain,
-            ]);
-        } catch (\Exception $e) {
-            return redirect()->route('onboard')->with('error', 'Setup failed: ' . $e->getMessage());
-        }
-    }
-
     protected function migrateTenantDatabase(): void
     {
-        Artisan::call('tenants:migrate', [
-            '--tenants' => [tenant('id')],
-        ]);
+        // Deprecated: Single DB architecture usage
     }
 
     protected function seedTenantDatabase(Tenant $tenant): void
     {
-        Artisan::call('db:seed', [
-            '--class' => \Database\Seeders\RoleSeeder::class,
-        ]);
-
-        $user = \App\Models\User::create([
-            'name' => $tenant->data['owner_name'],
-            'email' => $tenant->data['owner_email'],
-            'password' => $tenant->data['owner_password'],
-            'email_verified_at' => now(),
-        ]);
-
-        $restaurant = \App\Models\Restaurant::create([
-            'name' => $tenant->identifier,
-            'slug' => Str::slug($tenant->identifier),
-            'currency' => 'AED',
-            'locale' => app()->getLocale(),
-        ]);
-
-        \App\Models\Staff::create([
-            'user_id' => $user->id,
-            'restaurant_id' => $restaurant->id,
-            'role' => 'owner',
-            'is_active' => true,
-            'joined_at' => now(),
-        ]);
-
-        $user->assignRole('owner');
+        // Deprecated: Single DB architecture usage
     }
 }
 

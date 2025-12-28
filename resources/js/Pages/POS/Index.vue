@@ -60,12 +60,12 @@
                                 <span class="text-xs" :class="selectedOrder?.id === order.id ? 'text-white/80' : 'text-gray-400'">
                                     {{ order.items.length }} Items • {{ order.customer_name || 'Guest' }}
                                 </span>
-                            </div>
                             <span class="font-bold text-xl" :class="{ 'text-white': selectedOrder?.id === order.id }">
-                                {{ order.currency }} {{ order.total }}
+                                {{ order.currency || currentCurrency }} {{ order.total }}
                             </span>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <!-- Right Column: Bill Details & Payment -->
@@ -100,7 +100,7 @@
                                     </div>
                                 </div>
                                 <span class="font-medium text-gray-900 min-w-[4rem] text-right">
-                                    {{ selectedOrder.currency }} {{ (item.quantity * item.unit_price).toFixed(2) }}
+                                    {{ selectedOrder.currency || currentCurrency }} {{ (item.quantity * item.unit_price).toFixed(2) }}
                                 </span>
                             </div>
                             <div v-if="editableItems.length === 0" class="text-center text-gray-400 text-sm py-4">
@@ -168,11 +168,11 @@
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500">Subtotal</span>
-                                    <span class="text-xs font-medium text-gray-900">{{ selectedOrder.currency }} {{ totals.subtotal.toFixed(2) }}</span>
+                                    <span class="text-xs font-medium text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.subtotal.toFixed(2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500">Tax</span>
-                                    <span class="text-xs font-medium text-gray-900">{{ selectedOrder.currency }} {{ totals.tax.toFixed(2) }}</span>
+                                    <span class="text-xs font-medium text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.tax.toFixed(2) }}</span>
                                 </div>
                                 <div v-if="totals.discountAmount > 0" class="flex justify-between items-center text-red-600">
                                     <span class="text-xs">
@@ -180,7 +180,7 @@
                                         <span v-if="discountType === 'percent'" class="ml-1 text-[10px] bg-red-50 px-1 rounded">({{ discountValue }}%)</span>
                                         <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'discount'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">Edit</button>
                                     </span>
-                                    <span class="text-xs font-bold">- {{ selectedOrder.currency }} {{ totals.discountAmount.toFixed(2) }}</span>
+                                    <span class="text-xs font-bold">- {{ selectedOrder.currency || currentCurrency }} {{ totals.discountAmount.toFixed(2) }}</span>
                                 </div>
                                 <div v-if="totals.additionalChargeAmount > 0" class="flex justify-between items-center text-blue-600">
                                     <span class="text-xs">
@@ -188,11 +188,11 @@
                                         <span v-if="additionalChargeType === 'percent'" class="ml-1 text-[10px] bg-blue-50 px-1 rounded">({{ additionalChargeValue }}%)</span>
                                          <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'extra'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">Edit</button>
                                     </span>
-                                    <span class="text-xs font-bold">+ {{ selectedOrder.currency }} {{ totals.additionalChargeAmount.toFixed(2) }}</span>
+                                    <span class="text-xs font-bold">+ {{ selectedOrder.currency || currentCurrency }} {{ totals.additionalChargeAmount.toFixed(2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
                                     <span class="text-base font-bold text-gray-900">Total Amount</span>
-                                    <span class="text-xl font-bold text-gray-900">{{ selectedOrder.currency }} {{ totals.total.toFixed(2) }}</span>
+                                    <span class="text-xl font-bold text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.total.toFixed(2) }}</span>
                                 </div>
                             </div>
                             
@@ -234,7 +234,7 @@
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                     <span v-else>
-                                        {{ paymentMethod ? `Settle ${selectedOrder.currency} ${totals.total.toFixed(2)}` : 'Select Payment Method' }}
+                                        {{ paymentMethod ? `Settle ${selectedOrder.currency || currentCurrency} ${totals.total.toFixed(2)}` : 'Select Payment Method' }}
                                     </span>
                                 </button>
                             </div>
@@ -259,12 +259,16 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+
+const page = usePage();
+const currentCurrency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const props = defineProps<{
     orders: any[];
     tables: any[];
+    // ...
 }>();
 
 const searchQuery = ref('');
@@ -365,21 +369,8 @@ const totals = computed(() => {
 
 const hasUnsavedChanges = computed(() => {
      if (!selectedOrder.value) return false;
-     // Check items equality
-     // Simplified check: total mismatch
-     // return Math.abs(totals.value.total - selectedOrder.value.total) > 0.01;
-     // Better: simply if we are editing?
-     // Let's use the updateOrder explicitly as the 'Save' action.
-     // Settle is disabled if changes pending?
-     // Actually, let's allow 'Update' to be pressed. 
-     // We can compare serialized items?
-     // For now, let's assume if adjustmentMode is 'none', we are mostly synced unless items changed.
-     // Let's rely on the Update button.
-     return false; // managing complexity. The 'Update Bill' button appears if items changed? 
-     // Let's just make 'Update' always available if items changed?
-     // Implementing simple check:
      const currentTotal = totals.value.total;
-     const savedTotal = parseFloat(selectedOrder.value.total);
+     const savedTotal = Number(selectedOrder.value.total);
      return Math.abs(currentTotal - savedTotal) > 0.01; 
 });
 

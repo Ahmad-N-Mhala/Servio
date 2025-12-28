@@ -195,7 +195,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    AED {{ customer.total_spent || '0.00' }}
+                                    {{ currency }} {{ customer.total_spent || '0.00' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button class="text-primary hover:text-primary-hover">View Details</button>
@@ -255,7 +255,7 @@
                     />
                     <Input 
                         v-model="rewardForm.min_order_value"
-                        label="Min Order Amount (AED)"
+                        :label="'Min Order Amount (' + currency + ')'"
                         type="number"
                         min="0"
                         step="0.01"
@@ -344,7 +344,7 @@
                             min="1"
                             placeholder="e.g. 50"
                             required
-                            prefix="AED"
+                            :prefix="currency"
                             :error="rewardForm.errors.discount_value"
                         />
                         <p class="mt-1 text-xs text-gray-500">Fixed deduction amount.</p>
@@ -396,7 +396,7 @@
                             class="h-5 w-5 text-primary border-gray-300 rounded focus:ring-primary"
                         >
                         <span class="ml-3 text-sm text-gray-700 font-medium">{{ getLocaleName(item.name) }}</span>
-                        <span class="ml-auto text-xs text-gray-400">AED {{ item.price }}</span>
+                        <span class="ml-auto text-xs text-gray-400">{{ currency }} {{ item.price }}</span>
                     </label>
                     <div v-if="filteredModalItems.length === 0" class="p-4 text-center text-gray-500 text-sm">
                         No items found
@@ -414,7 +414,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
@@ -442,6 +442,9 @@ const props = withDefaults(defineProps<{
     menuItems: () => [],
     filters: () => ({})
 });
+
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const { locale } = useI18n();
 const route = (window as any).route;
@@ -538,7 +541,7 @@ const formatRewardValue = (reward: any) => {
         case 'discount_percentage':
             return `${reward.discount_value}% Off`;
         case 'discount_fixed':
-            return `AED ${reward.discount_value} Off`;
+            return `${currency.value} ${reward.discount_value} Off`;
         case 'free_item':
             return 'Free Item';
         case 'cashback':

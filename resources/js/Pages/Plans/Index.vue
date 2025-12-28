@@ -72,11 +72,11 @@
                             <!-- Pricing -->
                             <div class="text-center mb-8">
                                 <div class="flex items-baseline justify-center gap-2">
-                                    <span class="text-4xl font-bold text-gray-900">{{ plan.currency }}{{ plan.price_monthly }}</span>
+                                    <span class="text-4xl font-bold text-gray-900">{{ currency }}{{ convertPrice(plan.price_monthly) }}</span>
                                     <span class="text-gray-600">/month</span>
                                 </div>
                                 <p class="text-sm text-gray-500 mt-2">
-                                    or {{ plan.currency }}{{ plan.price_yearly }}/year (Save {{ calculateYearlySavings(plan) }}%)
+                                    or {{ currency }}{{ convertPrice(plan.price_yearly) }}/year (Save {{ calculateYearlySavings(plan) }}%)
                                 </p>
                             </div>
 
@@ -142,8 +142,17 @@
 </template>
 
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+const currencyRate = computed(() => (page.props.current_restaurant as any)?.currency_rate || 1);
+
+const convertPrice = (amount: number) => {
+    return (Number(amount) * currencyRate.value).toFixed(2);
+};
 
 const props = defineProps<{
     plans: any[];

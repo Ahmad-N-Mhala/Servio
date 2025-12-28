@@ -31,13 +31,13 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="price_monthly" class="block text-sm font-medium text-gray-700">Monthly Price (AED)</label>
+                                    <label for="price_monthly" class="block text-sm font-medium text-gray-700">Monthly Price ({{ currency }})</label>
                                     <input v-model="form.price_monthly" type="number" step="0.01" id="price_monthly" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                     <div v-if="form.errors.price_monthly" class="text-red-500 text-xs mt-1">{{ form.errors.price_monthly }}</div>
                                 </div>
 
                                 <div>
-                                    <label for="price_yearly" class="block text-sm font-medium text-gray-700">Yearly Price (AED)</label>
+                                    <label for="price_yearly" class="block text-sm font-medium text-gray-700">Yearly Price ({{ currency }})</label>
                                     <input v-model="form.price_yearly" type="number" step="0.01" id="price_yearly" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                     <div v-if="form.errors.price_yearly" class="text-red-500 text-xs mt-1">{{ form.errors.price_yearly }}</div>
                                 </div>
@@ -105,7 +105,11 @@
 
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm, Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 defineProps<{
     availableFeatures: Record<string, string>;

@@ -64,21 +64,36 @@
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Location Details</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="md:col-span-2">
-                                        <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                                        <label for="address" class="block text-sm font-medium text-gray-700">Street Name / Address</label>
                                         <input v-model="form.address" type="text" id="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <div v-if="form.errors.address" class="text-red-500 text-xs mt-1">{{ form.errors.address }}</div>
                                     </div>
                                     
                                     <div>
+                                        <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+                                        <select v-model="form.country" id="country" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                            <option value="" disabled>Select Country</option>
+                                            <option v-for="c in countries" :key="c" :value="c">{{ c }}</option>
+                                        </select>
+                                        <div v-if="form.errors.country" class="text-red-500 text-xs mt-1">{{ form.errors.country }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label for="state" class="block text-sm font-medium text-gray-700">State / Province</label>
+                                        <input v-model="form.state" type="text" id="state" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        <div v-if="form.errors.state" class="text-red-500 text-xs mt-1">{{ form.errors.state }}</div>
+                                    </div>
+
+                                    <div>
                                         <label for="city" class="block text-sm font-medium text-gray-700">City</label>
                                         <input v-model="form.city" type="text" id="city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                         <div v-if="form.errors.city" class="text-red-500 text-xs mt-1">{{ form.errors.city }}</div>
                                     </div>
-                                    
+
                                     <div>
-                                        <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
-                                        <input v-model="form.country" type="text" id="country" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <div v-if="form.errors.country" class="text-red-500 text-xs mt-1">{{ form.errors.country }}</div>
+                                        <label for="zip_code" class="block text-sm font-medium text-gray-700">Zip / Postal Code</label>
+                                        <input v-model="form.zip_code" type="text" id="zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        <div v-if="form.errors.zip_code" class="text-red-500 text-xs mt-1">{{ form.errors.zip_code }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -228,7 +243,7 @@
                                             >
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700">For Every (Currency Amount)</label>
+                                            <label class="block text-sm font-medium text-gray-700">For Every ({{ form.currency || 'Currency Unit' }})</label>
                                             <input 
                                                 v-model="form.earning_currency_amount" 
                                                 type="number" 
@@ -324,6 +339,8 @@ const props = defineProps<{
         address: string | null;
         city: string | null;
         country: string | null;
+        state: string | null;
+        zip_code: string | null;
         earning_method_type?: string; 
         earning_points?: number;
         earning_method_name_en?: string;
@@ -336,6 +353,12 @@ const props = defineProps<{
     };
 }>();
 
+const countries = [
+    'United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Bahrain', 'Oman',
+    'United States', 'United Kingdom', 'Canada', 'Australia', 'India', 'Pakistan',
+    'Egypt', 'Jordan', 'Lebanon', 'Germany', 'France', 'Italy', 'Spain'
+];
+
 const form = useForm({
     name: props.restaurant.name,
     slug: props.restaurant.slug,
@@ -345,7 +368,10 @@ const form = useForm({
     status: props.restaurant.status || 'active',
     address: props.restaurant.address,
     city: props.restaurant.city,
-    country: props.restaurant.country,
+    country: props.restaurant.country || '',
+    state: props.restaurant.state,
+    zip_code: props.restaurant.zip_code,
+
     // Loyalty/Earning Method fields - comprehensive
     earning_method_type: props.restaurant.earning_method_type || 'order_total',
     earning_points: props.restaurant.earning_points || 1,

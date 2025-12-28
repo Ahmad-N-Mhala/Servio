@@ -57,11 +57,8 @@ class HandleInertiaRequests extends Middleware
                 ? \App\Models\Restaurant::select(['id', 'name'])->get()
                 : [],
             'current_restaurant' => function () use ($request) {
-                if ($request->user() && $request->user()->is_super_admin) {
-                    $restaurantId = session('active_restaurant_id');
-                    if ($restaurantId) {
-                        return \App\Models\Restaurant::find($restaurantId);
-                    }
+                if ($request->user()) {
+                    return $request->user()->currentRestaurant();
                 }
                 return null;
             },

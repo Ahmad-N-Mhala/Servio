@@ -19,7 +19,7 @@ class InventoryController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         if (!$restaurant && $request->user()->is_super_admin) {
-            $restaurant = \App\Models\Restaurant::orderBy('id')->first();
+            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
         if (!$restaurant) {
@@ -51,7 +51,7 @@ class InventoryController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         if (!$restaurant && $request->user()->is_super_admin) {
-            $restaurant = \App\Models\Restaurant::orderBy('id')->first();
+            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
         if (!$restaurant) {
@@ -73,6 +73,9 @@ class InventoryController extends Controller
         if (is_string($validated['name'])) {
             $validated['name'] = ['en' => $validated['name'], 'ar' => $validated['name']];
         }
+
+        // Ensure reorder_level is not null for decimal casting
+        $validated['reorder_level'] = $validated['reorder_level'] ?? 0;
 
         // Check for duplicate names (EN and AR)
         $duplicate = Ingredient::where('restaurant_id', $restaurant->id)
@@ -124,7 +127,7 @@ class InventoryController extends Controller
 
         $restaurant = $request->user()->currentRestaurant();
         if (!$restaurant && $request->user()->is_super_admin) {
-            $restaurant = \App\Models\Restaurant::orderBy('id')->first();
+            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
         // Authorization Logic
@@ -155,6 +158,11 @@ class InventoryController extends Controller
 
         if (is_string($request->name)) {
             $validated['name'] = ['en' => $request->name, 'ar' => $request->name];
+        }
+
+        // Ensure reorder_level is not null for decimal casting
+        if (array_key_exists('reorder_level', $validated) && is_null($validated['reorder_level'])) {
+            $validated['reorder_level'] = 0;
         }
 
         // Check for duplicate names (EN and AR) if name is provided

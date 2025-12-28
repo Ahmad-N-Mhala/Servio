@@ -103,6 +103,10 @@
                              {{ getLocaleName(item.name) }} (Total: {{ item.current_stock }} {{ item.unit }})
                          </option>
                      </select>
+                     <p v-if="ingredients.length === 0" class="mt-2 text-sm text-red-600">
+                         No ingredients found. Please add ingredients in the 
+                         <a :href="route('inventory.index')" class="font-semibold underline hover:text-red-800">Inventory page</a> first.
+                     </p>
                 </div>
 
                 <div v-if="addForm.ingredient_id">
@@ -163,7 +167,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
@@ -179,6 +183,8 @@ const props = defineProps<{
 
 const { locale } = useI18n();
 const route = (window as any).route;
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const columns = [
     { key: 'log_date', label: 'Date', sortable: true, format: 'date' as const },
@@ -201,7 +207,7 @@ const getLocaleName = (name: any) => {
 };
 
 const formatCurrency = (amount: any) => {
-    return new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(Number(amount));
+    return new Intl.NumberFormat('en-AE', { style: 'currency', currency: currency.value }).format(Number(amount));
 };
 
 // State
@@ -239,9 +245,9 @@ const addForm = useForm({
 
 const availableBatches = computed(() => {
     if (!addForm.ingredient_id) return [];
-    // Ensure strict comparison works by matching types
-    const selectedId = Number(addForm.ingredient_id);
-    const ingredient = props.ingredients.find((i: any) => i.id === selectedId);
+    // Handle both string and number IDs (MongoDB returns strings)
+    const selectedId = String(addForm.ingredient_id);
+    const ingredient = props.ingredients.find((i: any) => String(i.id) === selectedId);
     return ingredient?.batches || [];
 });
 

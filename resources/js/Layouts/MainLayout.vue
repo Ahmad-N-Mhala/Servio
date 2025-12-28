@@ -494,7 +494,7 @@
                         </div>
 
                         <!-- System Section -->
-                        <div v-if="hasAnyPermission(['view_settings', 'manage_billing'])">
+                        <div v-if="hasAnyPermission(['manage_billing'])">
                             <div class="px-3 mb-1 mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider" v-if="!isSidebarCollapsed">
                                 System
                             </div>
@@ -515,25 +515,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                 </svg>
                                 <span class="text-sm" v-if="!isSidebarCollapsed">Billing & Plans</span>
-                            </Link>
-
-                            <Link 
-                                v-if="hasPermission('view_settings')"
-                                :href="route('profile.edit')"
-                                :class="[
-                                    'group flex items-center rounded-lg transition-all duration-200',
-                                    isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
-                                    $page.url.includes('/profile') 
-                                        ? 'bg-primary/10 text-primary font-medium' 
-                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
-                                ]"
-                                :title="isSidebarCollapsed ? 'Settings' : ''"
-                            >
-                                <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span class="text-sm" v-if="!isSidebarCollapsed">Settings</span>
                             </Link>
                         </div>
                     </div>

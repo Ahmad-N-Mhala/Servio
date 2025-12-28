@@ -65,6 +65,8 @@ class RestaurantController extends Controller
             'currency' => 'required|string|size:3',
             'address' => 'nullable|string',
             'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'zip_code' => 'nullable|string',
             'country' => 'nullable|string',
             'earning_method_type' => 'nullable|string|in:order_total,visit',
             'earning_points' => 'nullable|numeric|min:1',
@@ -129,6 +131,8 @@ class RestaurantController extends Controller
                 'status' => 'required|string|in:active,suspended',
                 'address' => 'nullable|string',
                 'city' => 'nullable|string',
+                'state' => 'nullable|string',
+                'zip_code' => 'nullable|string',
                 'country' => 'nullable|string',
                 'earning_method_type' => 'nullable|string|in:order_total,visit',
                 'earning_points' => 'nullable|numeric|min:1',
@@ -230,16 +234,31 @@ class RestaurantController extends Controller
 
     public function destroy(\App\Models\Restaurant $restaurant)
     {
-        // 1. Update status to deleted
-        $restaurant->update(['status' => 'deleted']);
+        try {
+            // 1. Get emails of all users associated with this restaurant
+            $userEmails = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('restaurant_id', $restaurant->id)
+                ->pluck('email');
 
-        // 2. Deactivate all users associated with this restaurant
-        // utilizing the restaurant_user pivot table
-        \Illuminate\Support\Facades\DB::table('restaurant_user')
-            ->where('restaurant_id', $restaurant->id)
-            ->update(['is_active' => false]);
+            // 2. Delete the users from the central 'users' table
+            \App\Models\User::whereIn('email', $userEmails)->delete();
 
-        return redirect()->route('admin.restaurants.index')
-            ->with('success', 'Restaurant deleted and users deactivated.');
+            // 3. Delete from the pivot table 'restaurant_user'
+            \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('restaurant_id', $restaurant->id)
+                ->delete();
+
+            // 4. Delete related staff records
+            \App\Models\Staff::where('restaurant_id', $restaurant->id)->delete();
+
+            // 5. Delete the restaurant record itself
+            $restaurant->delete();
+
+            return redirect()->route('admin.restaurants.index')
+                ->with('success', 'Restaurant and all associated users have been permanently deleted.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.restaurants.index')
+                ->with('error', 'Failed to delete restaurant: ' . $e->getMessage());
+        }
     }
 }

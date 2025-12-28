@@ -244,10 +244,10 @@
                             @endif
                         </td>
                         <td class="text-center">{{ $item->quantity }}</td>
-                        <td class="text-right">{{ $order->currency ?? 'AED' }}
+                        <td class="text-right">{{ $order->restaurant->currency ?? 'AED' }}
                             {{ number_format($item->unit_price > 0 ? $item->unit_price : ($item->menuItem->price ?? 0), 2) }}
                         </td>
-                        <td class="text-right">{{ $order->currency ?? 'AED' }}
+                        <td class="text-right">{{ $order->restaurant->currency ?? 'AED' }}
                             {{ number_format($item->total_price > 0 ? $item->total_price : ($item->quantity * ($item->menuItem->price ?? 0)), 2) }}
                         </td>
                     </tr>
@@ -275,7 +275,7 @@
                     <tr>
                         <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Subtotal</td>
                         <td style="text-align: right; padding: 5px 0; border: none; width: 120px;">
-                            {{ $order->currency ?? 'AED' }} {{ number_format($order->subtotal, 2) }}
+                            {{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->subtotal, 2) }}
                         </td>
                     </tr>
                     @if($order->tax > 0)
@@ -283,7 +283,7 @@
                             <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Tax
                                 ({{ $order->subtotal > 0 ? round(($order->tax / $order->subtotal) * 100) : 0 }}%)</td>
                             <td style="text-align: right; padding: 5px 0; border: none;">
-                                {{ $order->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}
+                                {{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}
                             </td>
                         </tr>
                     @endif
@@ -296,7 +296,7 @@
                                 @endif
                             </td>
                             <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">
-                                -{{ $order->currency ?? 'AED' }} {{ number_format($order->discount_amount, 2) }}
+                                -{{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->discount_amount, 2) }}
                             </td>
                         </tr>
                     @endif
@@ -309,14 +309,15 @@
                                 @endif
                             </td>
                             <td style="text-align: right; padding: 5px 0; border: none; color: #4f46e5;">
-                                +{{ $order->currency ?? 'AED' }} {{ number_format($order->additional_charge, 2) }}
+                                +{{ $order->restaurant->currency ?? 'AED' }}
+                                {{ number_format($order->additional_charge, 2) }}
                             </td>
                         </tr>
                     @endif
                 </table>
                 <div class="grand-total" style="text-align: right;">
                     <span style="font-size: 14px; font-weight: normal; color: #666; margin-right: 15px;">Total</span>
-                    {{ $order->currency ?? 'AED' }} {{ number_format($order->total, 2) }}
+                    {{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->total, 2) }}
                 </div>
             </div>
         </div>

@@ -46,12 +46,12 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                             <div class="relative">
-                                <span class="absolute left-3 top-2.5 text-gray-500 font-medium">+971</span>
+                                <span class="absolute left-3 top-2.5 text-gray-500 font-medium">{{ phoneCode }}</span>
                                 <input 
                                     v-model="phoneInput"
                                     type="tel"
                                     placeholder="50 123 4567"
-                                    maxlength="9"
+                                    maxlength="15"
                                     @input="handlePhoneInput"
                                     @blur="lookupCustomer"
                                     class="w-full pl-14 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
@@ -422,7 +422,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm, Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
@@ -507,10 +507,12 @@ const props = withDefaults(defineProps<{
 
 const { locale } = useI18n();
 const route = (window as any).route;
+const page = usePage();
 
 // Computed
 const categoriesList = computed(() => props.menuCategories || []);
-const currencyCode = computed(() => props.currency || 'AED');
+const currencyCode = computed(() => (page.props.current_restaurant as any)?.currency || props.currency || 'AED');
+const phoneCode = computed(() => (page.props.current_restaurant as any)?.phone_code || '+971');
 const availableRewards = computed(() => props.rewards || []);
 const tablesList = computed(() => props.tables || []);
 
@@ -546,9 +548,9 @@ const handlePhoneInput = (e: Event) => {
     // Update the display value
     phoneInput.value = value;
     
-    // Update the form value with full format (+971...)
+    // Update the form value with full format based on restaurant country
     if (value) {
-        form.customer_phone = '+971' + value;
+        form.customer_phone = phoneCode.value + value;
     } else {
         form.customer_phone = '';
     }
@@ -579,7 +581,7 @@ const lookupCustomer = () => {
         selectedCustomer.value = null;
         form.customer_id = null;
         // Keep the entered phone number in form
-        form.customer_phone = '+971' + phoneInput.value;
+        form.customer_phone = phoneCode.value + phoneInput.value;
     }
 };
 

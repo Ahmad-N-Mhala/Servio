@@ -183,6 +183,7 @@ const topMenuItems = computed(() => page.props.top_menu_items as any[]);
 const avgCompletionTime = computed(() => page.props.avg_completion_time as any[]);
 const wasteChart = computed(() => page.props.waste_chart as any[]);
 const dateRange = computed(() => page.props.date_range as any);
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const showDetailsModal = ref(false);
 const loadingDetails = ref(false);
@@ -233,7 +234,7 @@ let wasteChartInstance: Chart | null = null;
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AE', {
         style: 'currency',
-        currency: 'AED',
+        currency: currency.value,
     }).format(amount);
 };
 

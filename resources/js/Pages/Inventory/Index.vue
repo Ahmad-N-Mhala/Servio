@@ -7,6 +7,7 @@
                 :data="filteredIngredients"
                 v-model:search="search"
                 :title="$t('inventory.title', 'Inventory Management')"
+                :currency="currency"
             >
                 <template #header-actions>
                     <Button @click="openCreateModal">
@@ -286,7 +287,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
@@ -299,30 +300,23 @@ import { usePermissions } from '@/Composables/usePermissions';
 const { hasPermission } = usePermissions();
 const { locale } = useI18n();
 const route = (window as any).route;
+const page = usePage();
 
 const props = defineProps<{
     ingredients: any[];
 }>();
 
-const columns = [
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+
+const columns = computed(() => [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'current_stock', label: 'Current Stock', sortable: true },
     { key: 'unit', label: 'Unit', sortable: true },
-    { key: 'cost', label: 'Cost/Unit', sortable: true, format: 'currency' as const, currency: 'AED' },
-    { key: 'total_value', label: 'Total Value', sortable: true, format: 'currency' as const, currency: 'AED' },
-];
+    { key: 'cost', label: 'Cost/Unit', sortable: true, format: 'currency' as const, currency: currency.value },
+    { key: 'total_value', label: 'Total Value', sortable: true, format: 'currency' as const, currency: currency.value },
+]);
 
 const search = ref('');
-
-const filteredIngredients = computed(() => {
-    if (!search.value) return props.ingredients;
-    const q = search.value.toLowerCase();
-    return props.ingredients.filter((item: any) => {
-        const name = getLocaleName(item.name).toLowerCase();
-        return name.includes(q);
-    });
-});
-
 const showCreateModal = ref(false);
 const showStockModal = ref(false);
 const showHistoryModal = ref(false);
@@ -332,43 +326,61 @@ const selectedItem = ref<any>(null);
 const historyLogs = ref<any[]>([]);
 const selectedIngredientBatches = ref<any[]>([]);
 
-const form = useForm({
+const form = useForm<any>({
     id: null,
     name: '',
-    unit: '',
     current_stock: 0,
+    unit: '',
     cost: 0,
-    reorder_level: 0,
-    expiration_date: '',
+    reorder_level: null,
+    expiration_date: null,
 });
 
-const stockForm = useForm({
+const stockForm = useForm<any>({
+    id: null,
     add_stock: 0,
     added_cost: 0,
-    expiration_date: '',
+    expiration_date: null,
 });
 
 const getLocaleName = (name: any) => {
-    if (!name) return '';
-    if (typeof name === 'string') return name;
-    return name[locale.value] || name['en'] || name['ar'] || 'Unknown';
+    if (typeof name === 'object' && name !== null) {
+        return name[locale.value] || name['en'] || Object.values(name)[0] || '';
+    }
+    return name;
 };
 
+const filteredIngredients = computed(() => {
+    if (!search.value) return props.ingredients;
+    const query = search.value.toLowerCase();
+    return props.ingredients.filter((item: any) => {
+        const name = getLocaleName(item.name).toLowerCase();
+        return name.includes(query);
+    });
+});
+
+const formatCurrency = (amount: number) => {
+    // Use a generic locale or derive from currency
+    const localeMap: Record<string, string> = {
+        'AED': 'en-AE',
+        'USD': 'en-US',
+        'EUR': 'en-EU',
+        'GBP': 'en-GB',
+        'SAR': 'ar-SA',
+    };
+    const locale = localeMap[currency.value] || 'en-US';
+    
+    return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency.value,
+    }).format(amount);
+};
+
+// Modal Actions
 const openCreateModal = () => {
     isEditing.value = false;
     form.reset();
-    form.current_stock = 0;
-    showCreateModal.value = true;
-};
-
-const openEditModal = (item: any) => {
-    isEditing.value = true;
-    form.id = item.id;
-    form.name = getLocaleName(item.name);
-    form.unit = item.unit;
-    form.current_stock = item.current_stock;
-    form.cost = item.cost;
-    form.reorder_level = item.reorder_level;
+    form.clearErrors();
     showCreateModal.value = true;
 };
 
@@ -377,111 +389,87 @@ const closeCreateModal = () => {
     form.reset();
 };
 
-const submitCreate = () => {
-    const options = {
-        onSuccess: () => closeCreateModal(),
-        onError: (errors: any) => {
-            if (errors.name) {
-                window.dispatchEvent(new CustomEvent('notify', {
-                    detail: {
-                        message: errors.name,
-                        type: 'error',
-                        title: 'Validation Error'
-                    }
-                }));
-            }
-        }
-    };
+const openEditModal = (item: any) => {
+    isEditing.value = true;
+    selectedItem.value = item;
+    form.clearErrors();
+    form.id = item.id;
+    form.name = getLocaleName(item.name); 
+    form.current_stock = item.current_stock;
+    form.unit = item.unit;
+    form.cost = item.cost;
+    form.reorder_level = item.reorder_level;
+    showCreateModal.value = true;
+};
 
+const submitCreate = () => {
     if (isEditing.value) {
-        form.put(route('inventory.update', form.id), options);
+        form.put(route('inventory.update', form.id), {
+            preserveScroll: true,
+            onSuccess: () => closeCreateModal(),
+        });
     } else {
-        form.post(route('inventory.store'), options);
+        form.post(route('inventory.store'), {
+            preserveScroll: true,
+            onSuccess: () => closeCreateModal(),
+        });
+    }
+};
+
+const deleteItem = (item: any) => {
+    if (confirm('Are you sure you want to delete this item? This cannot be undone.')) {
+        router.delete(route('inventory.destroy', item.id), {
+            preserveScroll: true,
+        });
     }
 };
 
 const openAddStockModal = (item: any) => {
     selectedItem.value = item;
     stockForm.reset();
-    stockForm.added_cost = item.cost; // Prefill with current cost
+    stockForm.clearErrors();
+    stockForm.id = item.id;
+    stockForm.added_cost = item.cost; 
     showStockModal.value = true;
 };
 
 const closeStockModal = () => {
     showStockModal.value = false;
     stockForm.reset();
-    selectedItem.value = null;
 };
 
 const submitAddStock = () => {
-    stockForm.put(route('inventory.update', selectedItem.value.id), {
+    // Using update route to add stock as per controller logic
+    stockForm.put(route('inventory.update', stockForm.id), {
+        preserveScroll: true,
         onSuccess: () => closeStockModal(),
     });
 };
 
 const openHistoryModal = async (item: any) => {
     selectedItem.value = item;
-    showHistoryModal.value = true;
     historyLogs.value = [];
+    showHistoryModal.value = true;
     try {
         const response = await axios.get(route('inventory.history', item.id));
         historyLogs.value = response.data;
-    } catch (error) {
-        console.error("Failed to load history", error);
+    } catch (e) {
+        console.error("Failed to load history", e);
     }
 };
 
 const closeHistoryModal = () => {
     showHistoryModal.value = false;
-    selectedItem.value = null;
-    historyLogs.value = [];
-};
-
-const deleteItem = (item: any) => {
-    // Check for active menu associations first
-    const menuItems = item.menu_items || item.menuItems || [];
-    
-    if (menuItems.length > 0) {
-        const names = menuItems.map((m: any) => getLocaleName(m.name)).join(', ');
-        
-        window.dispatchEvent(new CustomEvent('notify', {
-            detail: {
-                message: `Cannot delete this ingredient. It is currently used in menu items: ${names}. Please remove it from these items first.`,
-                title: 'Constraint Error',
-                type: 'error'
-            }
-        }));
-        
-        return;
-    }
-
-    if (confirm('Are you sure you want to delete this specific ingredient?')) {
-        router.delete(route('inventory.destroy', item.id), {
-            preserveState: true,
-            preserveScroll: true,
-            onError: (errors) => {
-                console.log('Delete error:', errors);
-            }
-        });
-    }
 };
 
 const openBatchesModal = (item: any) => {
     selectedItem.value = item;
+    // content is loaded via with('batches') in controller
     selectedIngredientBatches.value = item.batches || [];
     showBatchesModal.value = true;
 };
 
 const closeBatchesModal = () => {
     showBatchesModal.value = false;
-    selectedItem.value = null;
-    selectedIngredientBatches.value = [];
-};
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-AE', {
-        style: 'currency',
-        currency: 'AED',
-    }).format(amount);
 };
 </script>

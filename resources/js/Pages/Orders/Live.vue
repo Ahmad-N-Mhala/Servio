@@ -299,7 +299,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
@@ -311,6 +311,7 @@ import { usePermissions } from '@/Composables/usePermissions';
 
 const { hasPermission } = usePermissions();
 const { t } = useI18n();
+const page = usePage();
 
 interface Order {
     id: number;
@@ -451,7 +452,7 @@ const ordersList = computed(() => {
 });
 
 const ordersCount = computed(() => ordersList.value.length);
-const currencyCode = computed(() => props.currency || 'AED');
+const currencyCode = computed(() => (page.props.current_restaurant as any)?.currency || props.currency || 'AED');
 
 const paginationMeta = computed(() => {
     if (props.orders?.meta) {

@@ -16,6 +16,7 @@ class RestaurantSubscription extends Model
         'starts_at',
         'ends_at',
         'status',
+        'billing_cycle',
     ];
 
     protected $casts = [
