@@ -53,6 +53,7 @@ class EarningMethodController extends Controller
         return Inertia::render('Loyalty/EarningMethods', [
             'methods' => $methods,
             'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
+            'settings' => $restaurant->settings ?? [],
         ]);
     }
 

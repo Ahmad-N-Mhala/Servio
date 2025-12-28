@@ -46,6 +46,32 @@
                                 </div>
                             </div>
 
+                            <!-- Subscription Plan -->
+                            <div class="pt-2">
+                                <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Subscription</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Select Plan</label>
+                                        <select v-model="form.plan_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                            <option value="" disabled>Select a plan</option>
+                                            <option v-for="plan in plans" :key="plan.id" :value="plan.id">
+                                                {{ plan.name }} ({{ plan.price_monthly }}/mo)
+                                            </option>
+                                        </select>
+                                        <div v-if="form.errors.plan_id" class="text-red-500 text-xs mt-1">{{ form.errors.plan_id }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Billing Cycle</label>
+                                        <select v-model="form.billing_cycle" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="yearly">Yearly</option>
+                                        </select>
+                                        <div v-if="form.errors.billing_cycle" class="text-red-500 text-xs mt-1">{{ form.errors.billing_cycle }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Owner Account -->
                             <div class="pt-2">
                                 <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Owner Account</h3>
@@ -184,12 +210,25 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm, Link } from '@inertiajs/vue3';
 
+defineProps<{
+    plans: Array<{
+        id: number;
+        name: string;
+        price_monthly: number;
+        price_yearly: number;
+    }>;
+}>();
+
 const form = useForm({
     name: '',
     slug: '',
     email: '',
     phone: '',
     currency: 'AED',
+    
+    // Subscription
+    plan_id: '',
+    billing_cycle: 'monthly',
     
     // Owner Details
     owner_name: '',

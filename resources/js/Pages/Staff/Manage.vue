@@ -3,9 +3,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" :dir="isRtl ? 'rtl' : 'ltr'">
             
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 <!-- Total Staff -->
-                <div class="glass-card rounded-2xl p-6 card-hover">
+                <div class="glass-card rounded-2xl p-6 card-hover bg-white dark:bg-gray-800 shadow-sm border border-gray-100">
                     <div class="flex items-center gap-4">
                         <div class="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30">
                             <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,14 +13,14 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Staff</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ totalStaff }}</p>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Staff</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Active Staff -->
-                <div class="glass-card rounded-2xl p-6 card-hover">
+                <div class="glass-card rounded-2xl p-6 card-hover bg-white dark:bg-gray-800 shadow-sm border border-gray-100">
                     <div class="flex items-center gap-4">
                         <div class="p-3 rounded-xl bg-green-100 dark:bg-green-900/30">
                             <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,23 +28,28 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ activeCount }}</p>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.active }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Roles -->
-                <div class="glass-card rounded-2xl p-6 card-hover">
+                <!-- Dynamic Role Cards -->
+                <div 
+                    v-for="(count, role) in stats.by_role" 
+                    :key="role"
+                    class="glass-card rounded-2xl p-6 card-hover bg-white dark:bg-gray-800 shadow-sm border border-gray-100"
+                >
                     <div class="flex items-center gap-4">
-                        <div class="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/30">
-                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <div :class="['p-3 rounded-xl', getRoleIconBg(role)]">
+                            <!-- Helper to pick icon based on role (optional, using generic user icon for now or tailored) -->
+                            <svg class="w-6 h-6" :class="getRoleIconColor(role)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Roles</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ roles?.length || 4 }}</p>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ formatRole(String(role)) }}</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ count }}</p>
                         </div>
                     </div>
                 </div>
@@ -224,6 +229,11 @@ interface PaginatedStaff {
 
 const props = withDefaults(defineProps<{
     staff?: PaginatedStaff;
+    stats?: {
+        total: number;
+        active: number;
+        by_role: Record<string, number>;
+    };
     roles?: string[];
     filters?: {
         search?: string;
@@ -232,6 +242,7 @@ const props = withDefaults(defineProps<{
     };
 }>(), {
     staff: () => ({ data: [] }),
+    stats: () => ({ total: 0, active: 0, by_role: {} }),
     roles: () => ['owner', 'manager', 'head_chef', 'kitchen_staff', 'waiter', 'cashier', 'delivery_driver'],
     filters: () => ({})
 });
@@ -274,9 +285,6 @@ const form = useForm({
 });
 
 const staffList = computed(() => props.staff?.data || []);
-const staffCount = computed(() => staffList.value.length);
-const totalStaff = computed(() => props.staff?.total || props.staff?.meta?.total || staffCount.value);
-const activeCount = computed(() => staffList.value.filter(s => s.is_active).length);
 
 // Adapter for Table component pagination
 const paginationMeta = computed(() => {
@@ -378,6 +386,34 @@ const getRoleClass = (role: string): string => {
         delivery_driver: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
     };
     return classes[role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400';
+};
+
+const getRoleIconBg = (role: string): string => {
+    const roleKey = String(role);
+    const bgs: Record<string, string> = {
+        owner: 'bg-purple-100 dark:bg-purple-900/30',
+        manager: 'bg-blue-100 dark:bg-blue-900/30',
+        head_chef: 'bg-orange-100 dark:bg-orange-900/30',
+        kitchen_staff: 'bg-yellow-100 dark:bg-yellow-900/30',
+        waiter: 'bg-green-100 dark:bg-green-900/30',
+        cashier: 'bg-teal-100 dark:bg-teal-900/30',
+        delivery_driver: 'bg-indigo-100 dark:bg-indigo-900/30',
+    };
+    return bgs[roleKey] || 'bg-gray-100 dark:bg-gray-800';
+};
+
+const getRoleIconColor = (role: string): string => {
+    const roleKey = String(role);
+    const colors: Record<string, string> = {
+        owner: 'text-purple-600 dark:text-purple-400',
+        manager: 'text-blue-600 dark:text-blue-400',
+        head_chef: 'text-orange-600 dark:text-orange-400',
+        kitchen_staff: 'text-yellow-600 dark:text-yellow-400',
+        waiter: 'text-green-600 dark:text-green-400',
+        cashier: 'text-teal-600 dark:text-teal-400',
+        delivery_driver: 'text-indigo-600 dark:text-indigo-400',
+    };
+    return colors[roleKey] || 'text-gray-600 dark:text-gray-400';
 };
 
 const toggleActive = (member: StaffMember) => {

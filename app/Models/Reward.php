@@ -34,6 +34,7 @@ class Reward extends Model
         'valid_until',
         'is_active',
         'sort_order',
+        'design',
     ];
 
     protected $casts = [
@@ -47,6 +48,7 @@ class Reward extends Model
         'valid_until' => 'date',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'design' => 'array',
     ];
 
     public function restaurant(): BelongsTo

@@ -12,24 +12,24 @@ class SubscriptionController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Restaurant::with([
-            'subscription' => function ($query) {
-                $query->with('plan')->latest();
-            }
-        ])->select(['id', 'name', 'email', 'phone', 'created_at']);
+        $query = RestaurantSubscription::with(['restaurant', 'plan']);
 
         if ($request->input('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->input('search') . '%')
-                    ->orWhere('email', 'like', '%' . $request->input('search') . '%');
+            $search = $request->input('search');
+            $query->whereHas('restaurant', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
 
-        // Get all available plans for the dropdown
+        // Sort by starts_at desc by default
+        $query->orderBy('starts_at', 'desc');
+
+        // Get all available plans for the dropdown (in case filters/modals need it)
         $plans = Plan::where('is_active', true)->get();
 
         return inertia('Admin/Subscriptions/Index', [
-            'restaurants' => $query->paginate(20)->withQueryString(),
+            'subscriptions' => $query->paginate(20)->withQueryString(),
             'plans' => $plans,
             'filters' => $request->only(['search']),
         ]);

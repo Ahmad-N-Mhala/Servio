@@ -69,13 +69,19 @@ class LoyaltyController extends Controller
             ->orderBy('name.en', 'asc') // Mongo object sort syntax
             ->get(['id', 'name']);
 
+        $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->first();
+
         return Inertia::render('Loyalty/Index', [
             'customers' => $customers,
             'rewards' => $rewards,
             'menuItems' => $menuItems,
+            'settings' => $restaurant->settings ?? [],
+            'earningMethod' => $earningMethod,
             'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
+
+    // ... showCustomer, storeReward, updateReward, deleteReward, adjustPoints methods unchanged ...
 
     public function showCustomer(Customer $customer): Response
     {
@@ -195,5 +201,113 @@ class LoyaltyController extends Controller
         }
 
         return redirect()->back()->with('message', __('loyalty.points_adjusted'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('manage_rewards'); // Re-use permission for now
+
+        $validated = $request->validate([
+            'loyalty_program_name' => ['nullable', 'string', 'max:50'],
+            'loyalty_card_title' => ['nullable', 'string', 'max:50'],
+            'loyalty_card_description' => ['nullable', 'string', 'max:100'],
+            'loyalty_theme_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+            'loyalty_text_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+            'loyalty_terms' => ['nullable', 'string', 'max:500'],
+            'loyalty_qr_link' => ['nullable', 'url', 'max:255'],
+            // Basic file validation, in real app would handle storage proper
+            'loyalty_logo' => ['nullable', 'image', 'max:2048'],
+            'loyalty_banner' => ['nullable', 'image', 'max:5120'],
+
+            // Earning Method Fields
+            'earning_method_type' => ['nullable', 'string', 'in:order_total,visit'],
+            'earning_points' => ['nullable', 'numeric', 'min:1'],
+            'earning_currency_amount' => ['nullable', 'numeric', 'min:0.01'],
+        ]);
+
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+
+        $currentSettings = $restaurant->settings ?? [];
+
+        // Handle File Uploads (naive implementation for local serve)
+        if ($request->hasFile('loyalty_logo')) {
+            $path = $request->file('loyalty_logo')->store('loyalty/logos', 'public');
+            $currentSettings['loyalty_logo'] = '/storage/' . $path;
+        }
+
+        if ($request->hasFile('loyalty_banner')) {
+            $path = $request->file('loyalty_banner')->store('loyalty/banners', 'public');
+            $currentSettings['loyalty_banner'] = '/storage/' . $path;
+        }
+
+        // Update other fields
+        $fields = ['loyalty_program_name', 'loyalty_card_title', 'loyalty_card_description', 'loyalty_theme_color', 'loyalty_text_color', 'loyalty_terms', 'loyalty_qr_link'];
+        foreach ($fields as $field) {
+            if ($request->has($field)) { // Only update if present in request
+                $currentSettings[$field] = $validated[$field] ?? null;
+            }
+        }
+
+        $restaurant->settings = $currentSettings;
+        $restaurant->save();
+
+        // Update Earning Method
+        if ($request->has('earning_method_type')) {
+            \App\Models\EarningMethod::updateOrCreate(
+                ['restaurant_id' => $restaurant->id],
+                [
+                    'name' => $request->earning_method_type === 'order_total' ? 'Points per Spend' : 'Points per Visit',
+                    'type' => $request->earning_method_type,
+                    'points' => $request->earning_points ?? 1,
+                    'is_active' => true,
+                    // If order_total, use currency_amount, else null
+                    'currency_amount' => $request->earning_method_type === 'order_total' ? ($request->earning_currency_amount ?? 1) : null,
+                ]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Loyalty card updated successfully.');
+    }
+    public function updateRewardDesign(Request $request, Reward $reward)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
+
+        $validated = $request->validate([
+            'loyalty_program_name' => ['nullable', 'string', 'max:50'], // Mapped to Title
+            'loyalty_card_title' => ['nullable', 'string', 'max:50'], // Mapped to Subtitle
+            'loyalty_card_description' => ['nullable', 'string', 'max:100'],
+            'loyalty_theme_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+            'loyalty_text_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+            'loyalty_terms' => ['nullable', 'string', 'max:500'],
+            'loyalty_qr_link' => ['nullable', 'url', 'max:255'],
+            'loyalty_logo' => ['nullable', 'image', 'max:2048'],
+            'loyalty_banner' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $currentDesign = $reward->design ?? [];
+
+        // Handle File Uploads
+        if ($request->hasFile('loyalty_logo')) {
+            $path = $request->file('loyalty_logo')->store('loyalty/rewards/logos', 'public');
+            $currentDesign['loyalty_logo'] = '/storage/' . $path;
+        }
+
+        if ($request->hasFile('loyalty_banner')) {
+            $path = $request->file('loyalty_banner')->store('loyalty/rewards/banners', 'public');
+            $currentDesign['loyalty_banner'] = '/storage/' . $path;
+        }
+
+        // Update generic fields
+        $fields = ['loyalty_program_name', 'loyalty_card_title', 'loyalty_card_description', 'loyalty_theme_color', 'loyalty_text_color', 'loyalty_terms', 'loyalty_qr_link'];
+        foreach ($fields as $field) {
+            if ($request->has($field)) {
+                $currentDesign[$field] = $validated[$field] ?? null;
+            }
+        }
+
+        $reward->design = $currentDesign;
+        $reward->save();
+
+        return redirect()->back()->with('success', 'Reward design updated successfully.');
     }
 }

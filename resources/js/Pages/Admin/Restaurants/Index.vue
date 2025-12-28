@@ -70,6 +70,14 @@
                             <span v-if="row.city" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                                 🏙️ {{ row.city }}
                             </span>
+                            <a 
+                                v-if="row.google_map_location" 
+                                :href="row.google_map_location" 
+                                target="_blank" 
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors border border-blue-100"
+                            >
+                                📍 Map
+                            </a>
                         </div>
                     </div>
                 </template>

@@ -38,16 +38,10 @@
                     <div class="text-sm text-gray-500">{{ row.email }}</div>
                 </template>
 
-                <!-- Loyalty Tier Column -->
-                <template #cell-loyalty_tier="{ value }">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize"
-                        :class="{
-                            'bg-yellow-100 text-yellow-800': value === 'gold',
-                            'bg-gray-100 text-gray-800': value === 'silver',
-                            'bg-orange-100 text-orange-800': value === 'bronze',
-                            'bg-purple-100 text-purple-800': value === 'platinum'
-                        }">
-                        {{ value || 'Bronze' }}
+                <!-- Orders Count / Visits Column -->
+                <template #cell-orders_count="{ value }">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ value || 0 }} Visits
                     </span>
                 </template>
 
@@ -80,7 +74,7 @@ const currency = computed(() => (page.props.current_restaurant as any)?.currency
 const columns = computed(() => [
     { key: 'name', label: 'Customer', sortable: true }, // Slot cell-name
     { key: 'contact', label: 'Contact', sortable: false }, // Slot cell-contact
-    { key: 'loyalty_tier', label: 'Loyalty Tier', sortable: true }, // Slot cell-loyalty_tier
+    { key: 'orders_count', label: 'Total Visits', sortable: true, align: 'center' as const },
     { key: 'loyalty_points.balance', label: 'Points', sortable: true }, // Slot cell-loyalty_points.balance
     { key: 'total_spent', label: 'Total Spent', sortable: true, format: 'currency' as const, currency: currency.value },
 ]);

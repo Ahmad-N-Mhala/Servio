@@ -66,7 +66,10 @@ class RestaurantController extends Controller
 
     public function create()
     {
-        return inertia('Admin/Restaurants/Create');
+        $plans = \App\Models\Plan::where('is_active', true)->get();
+        return inertia('Admin/Restaurants/Create', [
+            'plans' => $plans
+        ]);
     }
 
     public function store(Request $request)
@@ -94,10 +97,14 @@ class RestaurantController extends Controller
             // Loyalty
             'earning_method_type' => 'nullable|string|in:order_total,visit',
             'earning_points' => 'nullable|numeric|min:1',
+
+            // Subscription
+            'plan_id' => 'required|exists:plans,id',
+            'billing_cycle' => 'required|in:monthly,yearly',
         ]);
 
         try {
-            \DB::beginTransaction();
+            // \DB::beginTransaction();
 
             // 1. Create Restaurant
             $restaurantData = $request->only([
@@ -142,13 +149,28 @@ class RestaurantController extends Controller
                 'currency_amount' => ($request->earning_method_type ?? 'order_total') === 'order_total' ? 1 : null,
             ]);
 
-            \DB::commit();
+            // 5. Create Subscription
+            if ($request->has('plan_id')) {
+                $plan = \App\Models\Plan::find($request->plan_id);
+                if ($plan) {
+                    \App\Models\RestaurantSubscription::create([
+                        'restaurant_id' => $restaurant->id,
+                        'plan_id' => $plan->id,
+                        'status' => 'active', // Admin created, so assume active/paid/free bypass
+                        'billing_cycle' => $request->billing_cycle ?? 'monthly',
+                        'starts_at' => now(),
+                        'ends_at' => ($request->billing_cycle ?? 'monthly') === 'yearly' ? now()->addYear() : now()->addMonth(),
+                    ]);
+                }
+            }
+
+            // \DB::commit();
 
             return redirect()->route('admin.restaurants.index')
                 ->with('success', 'Restaurant and Owner account created successfully.');
 
         } catch (\Exception $e) {
-            \DB::rollBack();
+            // \DB::rollBack();
             return back()->with('error', 'Creation failed: ' . $e->getMessage())->withInput();
         }
     }
@@ -219,7 +241,7 @@ class RestaurantController extends Controller
                 'new_owner_password' => 'nullable|string|min:8',
             ]);
 
-            \DB::beginTransaction();
+            // \DB::beginTransaction();
 
             $restaurant->update($validated);
 
@@ -286,13 +308,13 @@ class RestaurantController extends Controller
                 }
             }
 
-            \DB::commit();
+            // \DB::commit();
 
             return redirect()->route('admin.restaurants.index')
                 ->with('success', 'Restaurant and Owner details updated successfully.');
 
         } catch (\Exception $e) {
-            \DB::rollBack();
+            // \DB::rollBack();
             return back()->with('error', 'Update failed: ' . $e->getMessage())->withInput();
         }
     }

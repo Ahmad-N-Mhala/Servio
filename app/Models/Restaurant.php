@@ -12,7 +12,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Restaurant extends Model
 {
-    use HasFactory, HasTranslations, SoftDeletes;
+    use HasFactory, HasTranslations, SoftDeletes, \App\Traits\TracksDeletes;
 
     protected $fillable = [
         'name',

@@ -136,6 +136,10 @@ Route::group([
                     ->middleware('permission:manage_rewards');
                 Route::post('/customers/{customer}/adjust-points', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'adjustPoints'])->name('customers.adjust-points')
                     ->middleware('permission:adjust_points');
+                Route::post('/settings', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateSettings'])->name('settings.update')
+                    ->middleware('permission:manage_rewards');
+                Route::post('/rewards/{reward}/design', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateRewardDesign'])->name('rewards.update-design')
+                    ->middleware('permission:manage_rewards');
 
                 Route::resource('earning-methods', \App\Http\Controllers\Tenant\EarningMethodController::class)
                     ->except(['create', 'edit', 'show'])
@@ -273,6 +277,10 @@ Route::group([
             Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
             Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
             Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index']);
+            Route::post('users/{id}/restore', [\App\Http\Controllers\Admin\DeletedDataController::class, 'restoreUser'])->name('users.restore');
+
+            // Deleted Data
+            Route::get('deleted-data', [\App\Http\Controllers\Admin\DeletedDataController::class, 'index'])->name('deleted-data.index');
 
             // Delivery Providers Management
             Route::get('delivery-providers', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'index'])->name('delivery-providers.index');

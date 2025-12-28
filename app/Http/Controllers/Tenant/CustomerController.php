@@ -30,6 +30,12 @@ class CustomerController extends Controller
 
         $customers = $query->paginate(10)->withQueryString();
 
+        // Calculate order count manually for the current page to avoid MongoDB withCount limitations
+        $customers->getCollection()->transform(function ($customer) {
+            $customer->orders_count = $customer->orders()->count();
+            return $customer;
+        });
+
         return Inertia::render('Customers/Index', [
             'customers' => $customers,
             'filters' => $request->only(['search'])

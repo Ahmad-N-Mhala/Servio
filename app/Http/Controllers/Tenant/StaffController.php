@@ -116,8 +116,18 @@ class StaffController extends Controller
             })
             ->withQueryString();
 
+        // Calculate Stats
+        $allStaff = Staff::where('restaurant_id', $restaurant->id)->get();
+
+        $stats = [
+            'total' => $allStaff->count(),
+            'active' => $allStaff->where('is_active', true)->count(),
+            'by_role' => $allStaff->groupBy('role')->map->count(),
+        ];
+
         return Inertia::render('Staff/Manage', [
             'staff' => $staff,
+            'stats' => $stats,
             'roles' => array_keys(config('roles.display_names')),
             'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
