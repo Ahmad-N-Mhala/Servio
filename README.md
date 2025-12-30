@@ -1,4 +1,4 @@
-# 🍽️ RestaurFy - Multi-Tenant Restaurant Management System
+# 🍽️ Servio - Multi-Tenant Restaurant Management System
 
 A comprehensive multi-tenant restaurant management application built with Laravel and Vue.js.
 
@@ -16,10 +16,13 @@ A comprehensive multi-tenant restaurant management application built with Larave
 
 ### Prerequisites
 
-- PHP 8.1+
 - MongoDB (running locally or via Atlas)
 - Node.js 18+
 - Composer
+
+### Description
+
+Servio is an all-in-one restaurant management platform designed to streamline operations from kitchen to table. It features multi-tenancy support, comprehensive inventory management with FIFO tracking, real-time sales reporting, and a modern, localized interface for staff and administrators.
 
 ### Installation
 
@@ -87,7 +90,7 @@ For detailed setup instructions, troubleshooting, and more, see [SETUP_GUIDE.md]
 ## 📁 Project Structure
 
 ```
-RestoFy-main/
+Servio/
 ├── app/                 # Application logic
 ├── database/
 │   ├── backups/        # Database backups

@@ -25,8 +25,4 @@ return [
     // Integrations & Communication
     'delivery_integration' => 'Delivery Provider Integration',
     'communication' => 'Communication & Messaging',
-
-    // Advanced Features
-    'multi_restaurant' => 'Multi-Restaurant Management',
-    'api_access' => 'API Access',
 ];

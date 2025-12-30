@@ -300,7 +300,16 @@ Route::group([
             // Profile Routes
             Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
-            Route::put('/password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('password.update');
+            // Localization
+            Route::get('localization', [\App\Http\Controllers\Admin\LocalizationController::class, 'index'])->name('localization.index');
+            Route::post('localization', [\App\Http\Controllers\Admin\LocalizationController::class, 'update'])->name('localization.update');
+
+            // System Communication (Email & SMS)
+            Route::get('email-templates', [\App\Http\Controllers\Admin\CommunicationController::class, 'indexEmail'])->name('email.index');
+            Route::get('sms-templates', [\App\Http\Controllers\Admin\CommunicationController::class, 'indexSms'])->name('sms.index');
+            Route::post('communication-templates', [\App\Http\Controllers\Admin\CommunicationController::class, 'store'])->name('communication.store');
+            Route::put('communication-templates/{template}', [\App\Http\Controllers\Admin\CommunicationController::class, 'update'])->name('communication.update');
+            Route::delete('communication-templates/{template}', [\App\Http\Controllers\Admin\CommunicationController::class, 'destroy'])->name('communication.destroy');
 
 
         });

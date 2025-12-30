@@ -1,8 +1,13 @@
 {
-    "name": "restaurfy/restaurfy",
+    "name": "ahmad-n-mhala/servio",
     "type": "project",
-    "description": "RestaurFy - Multi-tenant Restaurant Management SaaS",
-    "keywords": ["laravel", "saas", "multi-tenant", "restaurant"],
+    "description": "Servio - The Ultimate Restaurant Management System",
+    "keywords": [
+        "laravel",
+        "saas",
+        "multi-tenant",
+        "restaurant"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",

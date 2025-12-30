@@ -162,7 +162,7 @@
                             <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
                                 {{ getLocaleName(category.name) }}
                             </h4>
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div 
                                     v-for="item in category.items" 
                                     :key="item.id"
@@ -200,7 +200,7 @@
                                         />
                                         <div v-else-if="item.image" class="w-full h-full">
                                             <img 
-                                                :src="'/storage/' + item.image" 
+                                                :src="item.image.startsWith('http') ? item.image : '/storage/' + item.image" 
                                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                                             />
                                         </div>
@@ -723,12 +723,6 @@ const getStockMessage = (itemId: number): string => {
     return `${stockInfo.max_quantity} available`;
 };
 
-const getSoldOutMessage = (item: MenuItem): string => {
-    if (item.inventory_status?.sold_out) {
-        return 'Sold Out';
-    }
-    return '';
-};
 
 
 

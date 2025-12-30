@@ -46,20 +46,27 @@
                     {{ getTranslatedName(category.name) }}
                 </h2>
                 
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div 
                         v-for="item in category.items" 
                         :key="item.id"
                         class="group flex flex-col bg-white border border-gray-100 hover:border-primary/50 hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-300 relative"
                     >
                         <!-- Item Image -->
+                        <!-- Item Image -->
                         <div class="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden">
-                            <img 
-                                v-if="item.image" 
-                                :src="item.image" 
-                                :alt="getTranslatedName(item.name)"
-                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            <Carousel 
+                                v-if="item.images && item.images.length > 0" 
+                                :images="item.images" 
+                                heightClass="h-full" 
                             />
+                            <div v-else-if="item.image" class="w-full h-full">
+                                <img 
+                                    :src="item.image.startsWith('http') ? item.image : '/storage/' + item.image" 
+                                    :alt="getTranslatedName(item.name)"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                            </div>
                             <div v-else class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
                                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -334,6 +341,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import Carousel from '@/Components/Carousel.vue';
 
 const props = defineProps<{
     table: {

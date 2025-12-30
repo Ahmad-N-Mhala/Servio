@@ -114,15 +114,16 @@
                             >
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
-                                        <div class="mb-4 aspect-[4/3] bg-gray-50 rounded-lg overflow-hidden relative">
-                                            <Carousel 
-                                                v-if="item.images && item.images.length > 0" 
-                                                :images="item.images" 
-                                                heightClass="h-full" 
-                                            />
+                                        <div class="mb-4 aspect-[4/3] bg-gray-50 rounded-lg overflow-hidden relative group-hover:shadow-inner transition-shadow">
+                                            <div v-if="item.images && item.images.length > 0" class="h-full w-full">
+                                                <Carousel 
+                                                    :images="item.images" 
+                                                    heightClass="h-full" 
+                                                />
+                                            </div>
                                             <img 
                                                 v-else-if="item.image" 
-                                                :src="'/storage/' + item.image" 
+                                                :src="item.image.startsWith('http') ? item.image : '/storage/' + item.image" 
                                                 alt="Item Image" 
                                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                                             />
@@ -265,46 +266,71 @@
                     required
                     :error="itemForm.errors.price"
                 />
-                
-                <!-- Images Section -->
-                 <div>
-                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Images</label>
-                     
-                     <!-- Image Slider Preview -->
-                     <div v-if="allPreviewImages.length > 0" class="mb-4">
-                         <Carousel :images="allPreviewImages" heightClass="h-48" />
-                     </div>
-                     
-                     <!-- Existing Images (Update Mode) -->
-                     <div v-if="editingItem && itemForm.kept_images.length > 0" class="mb-3 grid grid-cols-4 gap-2">
-                         <div v-for="(img, idx) in itemForm.kept_images" :key="idx" class="relative group">
-                             <img :src="'/storage/' + img" class="w-full h-20 object-cover rounded-lg border dark:border-gray-600" />
-                             <button 
-                                type="button" 
-                                @click="removeKeptImage(idx)"
-                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors"
-                             >
-                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                             </button>
+                               <!-- Images Section -->
+                <div class="col-span-full space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Item Images</label>
+                        <div class="flex gap-2">
+                             <input 
+                                type="file" 
+                                ref="fileInputRef"
+                                @change="handleImageUpload" 
+                                multiple
+                                accept="image/*"
+                                class="hidden"
+                            />
+                            <button type="button" @click="fileInputRef?.click()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                Upload Local
+                            </button>
+                            <button type="button" @click="showUnsplashPicker = true" class="text-xs bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                From Unsplash
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Unified Image Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 min-h-[160px]">
+                         <!-- Kept Images (Existing) -->
+                        <div v-for="(img, idx) in itemForm.kept_images" :key="'kept-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-gray-200">
+                             <img :src="img.startsWith('http') ? img : '/storage/' + img" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                 <button 
+                                    type="button" 
+                                    @click="removeKeptImage(idx)"
+                                    class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-all shadow-lg"
+                                    title="Delete Image"
+                                 >
+                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                 </button>
+                             </div>
+                             <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 text-white text-[10px] rounded backdrop-blur-sm">Existing</div>
                          </div>
-                     </div>
-
-                     <input 
-                        type="file" 
-                        @change="handleImageUpload" 
-                        multiple
-                        accept="image/*"
-                        class="block w-full text-sm text-gray-500
-                          file:mr-4 file:py-2 file:px-4
-                          file:rounded-full file:border-0
-                          file:text-sm file:font-semibold
-                          file:bg-primary/10 file:text-primary
-                          hover:file:bg-primary/20"
-                     />
-                     <div v-if="newFiles.length > 0" class="mt-2 text-xs text-gray-500">
-                         {{ newFiles.length }} file(s) selected
-                     </div>
-                     <div v-if="itemForm.errors.images" class="text-red-500 text-xs mt-1">{{ itemForm.errors.images }}</div>
+                         
+                         <!-- New Added Images -->
+                        <div v-for="(url, idx) in previewUrls" :key="'new-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-primary/30">
+                             <img :src="url" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                 <button 
+                                    type="button" 
+                                    @click="removeNewImage(idx)"
+                                    class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-all shadow-lg"
+                                    title="Remove Image"
+                                 >
+                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                 </button>
+                             </div>
+                             <div class="absolute top-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-[10px] rounded backdrop-blur-sm">New</div>
+                         </div>
+                         
+                         <!-- Empty State Placeholder -->
+                         <div v-if="itemForm.kept_images.length === 0 && newFiles.length === 0" class="col-span-full flex flex-col items-center justify-center text-gray-400 py-8">
+                            <svg class="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span class="text-sm">No images added yet</span>
+                         </div>
+                    </div>
+                    <div v-if="itemForm.errors.images" class="text-red-500 text-xs mt-1">{{ itemForm.errors.images }}</div>
                 </div>
             </div>
 
@@ -376,6 +402,13 @@
             </div>
         </form>
     </Modal>
+
+    <!-- Unsplash Picker Modal -->
+    <UnsplashPicker 
+        :show="showUnsplashPicker"
+        @close="showUnsplashPicker = false"
+        @select="handleUnsplashSelect"
+    />
 </template>
 
 <script setup lang="ts">
@@ -388,6 +421,7 @@ import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
 import Select from '@/Components/Select.vue';
 import Carousel from '@/Components/Carousel.vue';
+import UnsplashPicker from '@/Components/UnsplashPicker.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 
 const { hasPermission } = usePermissions();
@@ -433,25 +467,56 @@ const itemForm = useForm({
     _method: 'POST'
 });
 
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
 const newIngredientId = ref<number | null>(null);
 const newIngredientQty = ref<number | string>('');
 
 const getIngredient = (id: number) => props.ingredients.find((i: any) => i.id === id);
 
-const handleImageUpload = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files) {
-        // Convert FileList to Array
-        newFiles.value = Array.from(target.files);
-        // Create previews
-        previewUrls.value = newFiles.value.map(file => URL.createObjectURL(file));
+const showUnsplashPicker = ref(false);
+
+const handleUnsplashSelect = async (image: any) => {
+    try {
+        const imageUrl = image.urls.regular;
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `unsplash-${image.id}.jpg`, { type: 'image/jpeg' });
+        
+        // Add to newFiles
+        newFiles.value = [...newFiles.value, file];
+        
+        // Add to previews
+        previewUrls.value = [...previewUrls.value, URL.createObjectURL(file)];
+        
+    } catch (e) {
+        console.error('Error processing unsplash image:', e);
+        alert('Failed to load image from Unsplash.');
     }
 };
 
+const handleImageUpload = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files) {
+        // Convert FileList to Array and Append
+        const addedFiles = Array.from(target.files);
+        newFiles.value = [...newFiles.value, ...addedFiles];
+        
+        // Create previews and Append
+        const addedPreviews = addedFiles.map(file => URL.createObjectURL(file));
+        previewUrls.value = [...previewUrls.value, ...addedPreviews];
+        
+        // Reset Input
+        target.value = '';
+    }
+};
+
+const removeNewImage = (index: number) => {
+    newFiles.value.splice(index, 1);
+    previewUrls.value.splice(index, 1);
+};
+
 const previewUrls = ref<string[]>([]);
-const allPreviewImages = computed(() => {
-    return [...itemForm.kept_images, ...previewUrls.value];
-});
 
 const removeKeptImage = (index: number) => {
     itemForm.kept_images.splice(index, 1);

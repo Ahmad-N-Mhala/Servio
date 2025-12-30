@@ -25,14 +25,14 @@
                 <button 
                     type="button"
                     @click.stop="prev"
-                    class="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-all transform active:scale-95"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm sm:opacity-0 sm:group-hover:opacity-100 opacity-100 hover:bg-black/50 text-white transition-all transform active:scale-95 z-10"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                 </button>
                 <button 
                     type="button"
                     @click.stop="next"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-all transform active:scale-95"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm sm:opacity-0 sm:group-hover:opacity-100 opacity-100 hover:bg-black/50 text-white transition-all transform active:scale-95 z-10"
                 >
                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>

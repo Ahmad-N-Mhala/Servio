@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="color-scheme" content="light only">
-    <title inertia>{{ config('app.name', 'RestaurFy') }}</title>
+    <title inertia>{{ config('app.name', 'Servio') }}</title>
     @routes
     @vite(['resources/js/app.ts'])
     @inertiaHead

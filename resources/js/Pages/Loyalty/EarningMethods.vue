@@ -46,42 +46,56 @@
                 <div 
                     v-for="method in methodsList" 
                     :key="method.id"
-                    class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 p-6 flex flex-col"
+                    class="glass-card p-6 rounded-2xl border border-gray-100 hover:border-primary/30 transition-all group relative overflow-hidden"
                 >
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-2">
-                             <div class="p-2 rounded-lg" :class="getTypeColor(method.type)">
-                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getTypeIcon(method.type)" />
-                                 </svg>
-                             </div>
-                             <span class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ getTypeLabel(method.type) }}</span>
+                    <!-- Hover Actions -->
+                    <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
+                        <button @click="openModal(method)" class="text-purple-500 hover:text-purple-700 bg-white/90 p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Design Preview">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                        </button>
+                        <button @click="openModal(method)" class="text-blue-500 hover:text-blue-700 bg-white/90 p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Edit Configuration">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                        <button @click="deleteMethod(method)" class="text-red-500 hover:text-red-700 bg-white/90 p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Delete Method">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-purple-100 transition-transform group-hover:scale-110 duration-300">
+                             <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="getTypeIcon(method.type)" />
+                             </svg>
                         </div>
-                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full" :class="method.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full border" :class="method.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100'">
                              {{ method.is_active ? 'Active' : 'Inactive' }}
                         </span>
                     </div>
 
-                    <h3 class="text-xl font-bold text-gray-900 mb-1">{{ getLocaleName(method.name) }}</h3>
-                    <p class="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{{ method.description || 'No description provided' }}</p>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">{{ getLocaleName(method.name) }}</h3>
+                    <p class="text-sm text-gray-500 line-clamp-2 mb-6 h-10">{{ method.description || 'No description provided' }}</p>
 
-                    <div class="mt-auto bg-gray-50 rounded-xl p-4 mb-6">
-                        <div class="text-sm text-gray-500 mb-1">Earning Rule</div>
-                        <div class="flex items-baseline gap-1">
-                            <span class="text-2xl font-bold text-primary">{{ method.points }}</span>
-                            <span class="font-semibold text-gray-900">Points</span>
-                            <span v-if="method.type === 'order_total'" class="text-sm text-gray-500">per {{ method.currency_amount || 1 }} Currency</span>
-                            <span v-if="method.type === 'visit'" class="text-sm text-gray-500">per Visit</span>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100 bg-gray-50/50 -mx-6 -mb-6 px-6 py-4">
+                        <span class="text-sm font-medium text-gray-600 flex items-center gap-2">
+                            {{ getTypeLabel(method.type) }}
+                        </span>
+                        <div class="flex flex-col items-end">
+                            <span class="text-lg font-bold text-gray-900 leading-none">
+                                {{ method.points }} Pts
+                            </span>
+                            <span v-if="method.type === 'order_total'" class="text-[10px] text-gray-500 uppercase font-medium tracking-wide">
+                                per {{ method.currency_amount || 1 }} {{ currency }}
+                            </span>
+                             <span v-else class="text-[10px] text-gray-500 uppercase font-medium tracking-wide">
+                                per Visit
+                            </span>
                         </div>
-                    </div>
-
-                    <div class="flex gap-3 pt-4 border-t border-gray-100">
-                        <button @click="openModal(method)" class="flex-1 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
-                            Edit Configuration
-                        </button>
-                        <button @click="deleteMethod(method)" class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors" title="Delete Method">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -104,7 +118,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
@@ -129,6 +143,8 @@ const props = withDefaults(defineProps<{
 
 const { locale } = useI18n();
 const route = (window as any).route;
+const page = usePage();
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const showModal = ref(false);
 const editingMethod = ref<any>(null);
@@ -163,16 +179,6 @@ const getTypeLabel = (type: string) => {
         visit: 'Per Visit'
     };
     return labels[type] || type;
-};
-
-const getTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-        order_total: 'bg-blue-100 text-blue-600',
-        visit: 'bg-indigo-100 text-indigo-600',
-        referral: 'bg-purple-100 text-purple-600',
-        review: 'bg-yellow-100 text-yellow-600'
-    };
-    return colors[type] || 'bg-gray-100 text-gray-600';
 };
 
 const getTypeIcon = (type: string) => {

@@ -164,6 +164,16 @@ class RestaurantController extends Controller
                 }
             }
 
+            // Send Welcome/Creation Notification
+            // Try System Template First
+            $commService = app(\App\Services\CommunicationService::class);
+            $commService->sendNotification('restaurant_created', $user, [
+                'restaurant_name' => $restaurant->name,
+                'link' => route('login'), // Or setup link
+                'owner_email' => $user->email,
+                'owner_password' => $request->owner_password,
+            ]);
+
             // \DB::commit();
 
             return redirect()->route('admin.restaurants.index')

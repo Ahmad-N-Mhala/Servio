@@ -9,9 +9,9 @@
    Design System Variables
    ======================================== */
 :root {
-    --primary: #4F46E5;
-    --primary-hover: #4338CA;
-    --primary-soft: rgba(79, 70, 229, 0.1);
+    --primary: #10B981;
+    --primary-hover: #059669;
+    --primary-soft: rgba(16, 185, 129, 0.1);
     --secondary: #2D3748;
     --bg-light: #f8fafc;
     --bg-dark: #f8fafc;
@@ -177,11 +177,11 @@ textarea:focus {
 
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
     }
 
     50% {
-        box-shadow: 0 0 20px 5px rgba(79, 70, 229, 0.2);
+        box-shadow: 0 0 20px 5px rgba(16, 185, 129, 0.2);
     }
 }
 
@@ -340,7 +340,7 @@ textarea:focus {
    Gradient Utilities
    ======================================== */
 .gradient-primary {
-    background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 }
 
 .gradient-primary-soft {
@@ -365,15 +365,15 @@ textarea:focus {
 
 .gradient-mesh {
     background:
-        radial-gradient(at 40% 20%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
         radial-gradient(at 80% 0%, rgba(147, 51, 234, 0.08) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(79, 70, 229, 0.08) 0px, transparent 50%);
+        radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
 }
 
 .text-gradient {
-    background: linear-gradient(135deg, #4F46E5 0%, #4338CA 50%, #6366F1 100%);
+    background: linear-gradient(135deg, #10B981 0%, #059669 50%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -383,15 +383,15 @@ textarea:focus {
    Glow Effects
    ======================================== */
 .glow-primary {
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 .glow-primary-sm {
-    box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
 }
 
 .hover-glow:hover {
-    box-shadow: 0 0 25px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
 }
 
 .glow-accent {
@@ -439,7 +439,7 @@ textarea:focus {
 
 .menu-item-active {
     position: relative;
-    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
 }
 
 .menu-item-active::before {
@@ -450,7 +450,7 @@ textarea:focus {
     transform: translateY(-50%);
     width: 4px;
     height: 60%;
-    background: linear-gradient(180deg, #4F46E5 0%, #4338CA 100%);
+    background: linear-gradient(180deg, #10B981 0%, #059669 100%);
     border-radius: 0 4px 4px 0;
 }
 
@@ -539,7 +539,7 @@ textarea:focus {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #4F46E5, #4338CA, #6366F1);
+    background: linear-gradient(90deg, #10B981, #059669, #059669);
     border-radius: 8px 8px 0 0;
 }
 

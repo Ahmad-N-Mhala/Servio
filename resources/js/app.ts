@@ -22,7 +22,7 @@ if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = (token as HTMLMetaElement).content;
 }
 
-const appName = import.meta.env.VITE_APP_NAME || 'RestaurFy';
+const appName = import.meta.env.VITE_APP_NAME || 'Servio';
 
 const i18n = createI18n({
     legacy: false,

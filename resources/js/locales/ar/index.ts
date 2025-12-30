@@ -17,7 +17,7 @@ export default {
         add_item: 'إضافة عنصر خام',
     },
     dashboard: {
-        welcome: 'مرحباً بك في RestaurFy',
+        welcome: 'مرحباً بك في Servio',
         subtitle: 'إدارة عمليات مطعمك',
         total_orders: 'إجمالي الطلبات',
         today_orders: 'طلبات اليوم',
