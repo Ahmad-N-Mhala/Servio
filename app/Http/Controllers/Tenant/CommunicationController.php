@@ -17,7 +17,9 @@ class CommunicationController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Ensure default bundles exist
         if (CommunicationBundle::count() === 0) {
@@ -80,7 +82,9 @@ class CommunicationController extends Controller
 
     public function purchaseBundle(Request $request, CommunicationBundle $bundle)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         if ($bundle->type === 'sms') {
             $restaurant->increment('sms_balance', $bundle->quantity);
@@ -116,7 +120,9 @@ class CommunicationController extends Controller
             'timing_time' => 'required|date_format:H:i',
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         CommunicationTemplate::create(array_merge($validated, [
             'restaurant_id' => $restaurant->id,

@@ -14,7 +14,9 @@ class OrderDeliveryController extends Controller
      */
     public function index(Request $request)
     {
-        $restaurant = $request->user()->currentRestaurant();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $readyOrders = Order::with(['items.menuItem', 'table'])
             ->where('restaurant_id', $restaurant->id)
@@ -33,7 +35,7 @@ class OrderDeliveryController extends Controller
     public function markAsServed(Request $request, Order $order)
     {
         // Ensure the order belongs to the current restaurant
-        $currentRestaurant = $request->user()->currentRestaurant();
+        $currentRestaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
         if (!$currentRestaurant || $order->restaurant_id !== $currentRestaurant->id) {
             abort(403);
         }
@@ -72,7 +74,7 @@ class OrderDeliveryController extends Controller
             return response()->json(['ids' => []]);
         }
 
-        $restaurant = $request->user()->currentRestaurant();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
         if (!$restaurant) {
             return response()->json(['ids' => []]);
         }

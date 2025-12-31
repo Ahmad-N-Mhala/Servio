@@ -23,7 +23,9 @@ class OrderController extends Controller
 
     public function index(Request $request): Response
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
@@ -77,7 +79,9 @@ class OrderController extends Controller
 
     public function export(Request $request)
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
@@ -160,7 +164,9 @@ class OrderController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('pos_system');
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Get tables with availability status
         $tables = \App\Models\Table::where('restaurant_id', $restaurant->id)
@@ -346,13 +352,19 @@ class OrderController extends Controller
             'reward_id' => ['nullable', 'exists:rewards,id'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Note: MongoDB transactions require replica sets, so we execute without transaction wrapper
         // Update table status if dine-in
         if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
             $table = \App\Models\Table::find($validated['table_id']);
             if ($table) {
+                // Ensure table belongs to restaurant
+                if ($table->restaurant_id != $restaurant->id) {
+                    abort(403, 'Table does not belong to this restaurant');
+                }
                 $table->update(['status' => 'occupied']);
             }
         }

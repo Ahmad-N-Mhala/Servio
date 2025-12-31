@@ -20,7 +20,9 @@ class KitchenController extends Controller
 
     public function index(): Response
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Fetch active orders (pending, processing, ready, served)
         // Ordered by FIFO (First In, First Out)

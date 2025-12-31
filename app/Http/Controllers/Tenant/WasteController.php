@@ -17,8 +17,13 @@ class WasteController extends Controller
     {
         $restaurant = $request->user()->currentRestaurant();
 
-        if (!$restaurant && $request->user()->is_super_admin) {
-            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
+        // Enforce strict context - removed implicit fallback for super admin
+        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        }
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant context not found');
         }
 
         // Fetch logs with ingredient details, including deleted ones
@@ -122,8 +127,13 @@ class WasteController extends Controller
 
         $restaurant = $request->user()->currentRestaurant();
 
-        if (!$restaurant && $request->user()->is_super_admin) {
-            $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
+        // Enforce strict context - removed implicit fallback for super admin
+        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        }
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant context not found');
         }
 
         // Note: MongoDB transactions require replica sets

@@ -12,7 +12,9 @@ class DeliveryIntegrationController extends Controller
 {
     public function index()
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Get existing integrations
         $integrations = DeliveryIntegration::where('restaurant_id', $restaurant->id)->get();
@@ -88,7 +90,9 @@ class DeliveryIntegrationController extends Controller
             }
         }
 
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $integration = DeliveryIntegration::updateOrCreate(
             [
@@ -137,7 +141,9 @@ class DeliveryIntegrationController extends Controller
 
     public function destroy(Request $request, $provider)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $integration = DeliveryIntegration::where('restaurant_id', $restaurant->id)
             ->where('provider', $provider)

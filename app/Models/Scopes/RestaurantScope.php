@@ -14,7 +14,7 @@ class RestaurantScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (session()->has('active_restaurant_id')) {
-            $builder->where($model->qualifyColumn('restaurant_id'), session('active_restaurant_id'));
+            $builder->where('restaurant_id', session('active_restaurant_id'));
         }
     }
 }

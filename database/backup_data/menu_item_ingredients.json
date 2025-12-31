@@ -1,0 +1,30 @@
+[
+    {
+        "menu_item_id": {
+            "$oid": "694abb045adaff86060a6d1f"
+        },
+        "ingredient_id": {
+            "$oid": "694ab4a05adaff86060a6d15"
+        },
+        "quantity": 3,
+        "updated_at": "2025-12-23T15:53:40.391000Z",
+        "created_at": "2025-12-23T15:53:40.391000Z",
+        "id": {
+            "$oid": "694abb045adaff86060a6d20"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "694abc795adaff86060a6d24"
+        },
+        "ingredient_id": {
+            "$oid": "694abc5e5adaff86060a6d21"
+        },
+        "quantity": 2,
+        "updated_at": "2025-12-23T15:59:53.324000Z",
+        "created_at": "2025-12-23T15:59:53.324000Z",
+        "id": {
+            "$oid": "694abc795adaff86060a6d25"
+        }
+    }
+]

@@ -36,12 +36,25 @@
                     :data="deletedUsers.data"
                     :pagination="deletedUsers"
                     title="Deleted Users"
-                    :search-enabled="false"
+                    v-model:search="search"
                 >
                     <template #cell-name="{ row }">
                         <div class="flex flex-col">
                             <span class="font-medium text-gray-900">{{ row.name }}</span>
                             <span class="text-xs text-gray-500">{{ row.email }}</span>
+                        </div>
+                    </template>
+
+                    <template #cell-restaurant="{ row }">
+                        <div class="flex flex-wrap gap-1">
+                            <span 
+                                v-for="restaurant in row.restaurants" 
+                                :key="restaurant.id"
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                                {{ restaurant.name }}
+                            </span>
+                            <span v-if="!row.restaurants || row.restaurants.length === 0" class="text-gray-400 text-xs text-center">-</span>
                         </div>
                     </template>
 
@@ -53,13 +66,13 @@
 
                     <template #cell-deleted_by="{ row }">
                         <div class="text-sm">
-                            <div v-if="row.deleted_by_name" class="font-medium text-gray-900">
-                                {{ row.deleted_by_name }}
-                            </div>
-                            <div v-if="row.deleted_by" class="text-xs text-gray-500">
+                            <div v-if="row.deleted_by" class="font-medium text-gray-900">
                                 {{ row.deleted_by }}
                             </div>
-                            <span v-else class="text-xs text-gray-400 italic">Unknown</span>
+                            <div v-if="row.deleted_by_name && row.deleted_by !== row.deleted_by_name" class="text-xs text-gray-500">
+                                {{ row.deleted_by_name }}
+                            </div>
+                            <span v-if="!row.deleted_by && !row.deleted_by_name" class="text-xs text-gray-400 italic">Unknown</span>
                         </div>
                     </template>
 
@@ -81,7 +94,7 @@
                     :data="deletedRestaurants.data"
                     :pagination="deletedRestaurants"
                     title="Deleted Restaurants"
-                    :search-enabled="false"
+                    v-model:search="search"
                 >
                     <template #cell-name="{ row }">
                         <div class="flex flex-col">
@@ -98,13 +111,13 @@
 
                     <template #cell-deleted_by="{ row }">
                         <div class="text-sm">
-                            <div v-if="row.deleted_by_name" class="font-medium text-gray-900">
-                                {{ row.deleted_by_name }}
-                            </div>
-                             <div v-if="row.deleted_by" class="text-xs text-gray-500">
+                            <div v-if="row.deleted_by" class="font-medium text-gray-900">
                                 {{ row.deleted_by }}
                             </div>
-                             <span v-else class="text-xs text-gray-400 italic">Unknown</span>
+                            <div v-if="row.deleted_by_name && row.deleted_by !== row.deleted_by_name" class="text-xs text-gray-500">
+                                {{ row.deleted_by_name }}
+                            </div>
+                             <span v-if="!row.deleted_by && !row.deleted_by_name" class="text-xs text-gray-400 italic">Unknown</span>
                         </div>
                     </template>
 
@@ -123,10 +136,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Table from '@/Components/Table.vue';
 import { router } from '@inertiajs/vue3';
+// @ts-ignore
+import debounce from 'lodash/debounce';
 
 const props = defineProps<{
     deletedUsers: {
@@ -137,12 +152,28 @@ const props = defineProps<{
         data: any[];
         links: any[];
     };
+    filters?: {
+        search?: string;
+    };
 }>();
 
 const activeTab = ref('users');
+const search = ref(props.filters?.search || '');
+
+watch(
+    search,
+    debounce((value: string) => {
+        router.get(
+            route('admin.deleted-data.index'),
+            { search: value },
+            { preserveState: true, replace: true }
+        );
+    }, 300)
+);
 
 const userColumns = [
     { key: 'name', label: 'User Details', sortable: false },
+    { key: 'restaurant', label: 'Restaurant', sortable: false },
     { key: 'deleted_at', label: 'Deleted At', sortable: true },
     { key: 'deleted_by', label: 'Deleted By', sortable: false },
     { key: 'actions', label: 'Actions', sortable: false, align: 'right' as const },

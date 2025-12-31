@@ -16,7 +16,9 @@ class POSController extends Controller
 {
     public function index(): Response
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         \Log::info('POS Index - Restaurant ID: ' . $restaurant->id);
 

@@ -1,0 +1,102 @@
+[
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694abaf65adaff86060a6d1e",
+        "name": "{\"en\":\"beef\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "222.00"
+        },
+        "currency": "AED",
+        "images": "[\"menu-items\\\/q3kaBUo5AnVPCKpig51xigL0Os8PR9LcHqIa7Z3V.jpg\"]",
+        "image": "menu-items\/q3kaBUo5AnVPCKpig51xigL0Os8PR9LcHqIa7Z3V.jpg",
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": "2025-12-27T12:00:04.676000Z",
+        "created_at": "2025-12-27T12:00:04.676000Z",
+        "id": {
+            "$oid": "694fca447b83a4bfd50194fa"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694abaf65adaff86060a6d1e",
+        "name": "{\"en\":\"ds\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "20.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": "2025-12-27T12:03:54.823000Z",
+        "created_at": "2025-12-27T12:03:54.823000Z",
+        "id": {
+            "$oid": "694fcb2a7b83a4bfd50194ff"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694fcb2e7b83a4bfd5019500",
+        "name": "{\"en\":\"ds\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "8.00"
+        },
+        "currency": "AED",
+        "images": "[\"menu-items\\\/xTIRQ7lQRsP6dab6YuK4XglosJ7TRRkmT7vwnWbB.jpg\",\"menu-items\\\/haa3DzCxtDuRmC0RG2LmC2PsIp0ltPftzuANydsr.jpg\"]",
+        "image": "menu-items\/xTIRQ7lQRsP6dab6YuK4XglosJ7TRRkmT7vwnWbB.jpg",
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": "2025-12-31T04:44:20.726000Z",
+        "created_at": "2025-12-27T12:04:04.056000Z",
+        "id": {
+            "$oid": "694fcb347b83a4bfd5019501"
+        }
+    },
+    {
+        "restaurant_id": "69503e50eaf319e883077714",
+        "menu_category_id": "695041f9eaf319e883077719",
+        "name": "{\"en\":\"ds\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "2.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": "2025-12-27T20:32:08.072000Z",
+        "created_at": "2025-12-27T20:32:08.072000Z",
+        "id": {
+            "$oid": "69504248eaf319e88307771a"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694fcb2e7b83a4bfd5019500",
+        "name": "{\"en\":\"y\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "9.00"
+        },
+        "currency": "AED",
+        "images": "[\"menu-items\\\/KF41Fp3QqAIfFdNEigBHJVmewbFEkML1bnGQAd1h.jpg\",\"menu-items\\\/9ANeDw1iVlvKOagjMEfCInauLpOpFZKVVnrgntvw.jpg\"]",
+        "image": "menu-items\/KF41Fp3QqAIfFdNEigBHJVmewbFEkML1bnGQAd1h.jpg",
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": "2025-12-30T19:17:34.740000Z",
+        "created_at": "2025-12-30T19:17:34.740000Z",
+        "id": {
+            "$oid": "6954254eed481145dc0e0e02"
+        }
+    }
+]

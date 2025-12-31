@@ -13,7 +13,9 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $query = Customer::where('restaurant_id', $restaurant->id)
             ->with(['loyaltyPoints'])
@@ -45,8 +47,8 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         // Ensure customer belongs to tenant
-        $restaurantId = (\App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first())->id;
-        if ($customer->restaurant_id !== $restaurantId) {
+        $restaurantId = session('active_restaurant_id');
+        if ((string) $customer->restaurant_id !== (string) $restaurantId) {
             abort(403);
         }
 

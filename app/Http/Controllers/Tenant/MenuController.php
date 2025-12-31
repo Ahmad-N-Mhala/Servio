@@ -19,7 +19,9 @@ class MenuController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_menu');
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
@@ -58,7 +60,9 @@ class MenuController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Check for duplicate names (EN and AR)
         $duplicate = MenuCategory::where('restaurant_id', $restaurant->id)
@@ -85,9 +89,21 @@ class MenuController extends Controller
         return redirect()->back()->with('message', __('menu.category_created'));
     }
 
+    // updateCategory relies on model binding which is generally safe if policies are good, 
+    // but the model binding doesn't enforce tenancy by itself unless scoped. 
+    // However, the update method uses $category->restaurant_id for duplicate check, which is okay.
+    // Ideally we should verify $category->restaurant_id === session('active_restaurant_id') but
+    // let's stick to replacing the manual lookups for now.
+
     public function updateCategory(Request $request, MenuCategory $category)
     {
         \Illuminate\Support\Facades\Gate::authorize('edit_category');
+
+        // Security check: Ensure category belongs to active restaurant
+        if ($category->restaurant_id != session('active_restaurant_id')) {
+            abort(403, 'Unauthorized access to this category.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
@@ -118,6 +134,11 @@ class MenuController extends Controller
     public function destroyCategory(MenuCategory $category)
     {
         \Illuminate\Support\Facades\Gate::authorize('delete_category');
+
+        if ($category->restaurant_id != session('active_restaurant_id')) {
+            abort(403, 'Unauthorized access to this category.');
+        }
+
         // Find all items in this category
         $items = MenuItem::where('menu_category_id', $category->id)->get();
 
@@ -148,7 +169,9 @@ class MenuController extends Controller
             'ingredients' => ['nullable', 'array'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Check for duplicate names (EN and AR) within the same category
         $duplicate = MenuItem::where('restaurant_id', $restaurant->id)

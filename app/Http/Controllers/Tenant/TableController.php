@@ -14,7 +14,10 @@ class TableController extends Controller
     public function index()
     {
         \Illuminate\Support\Facades\Gate::authorize('view_tables');
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
+
         $tables = Table::where('restaurant_id', $restaurant->id)
             ->orderBy('name')
             ->get()
@@ -45,7 +48,9 @@ class TableController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         Table::create([
             'restaurant_id' => $restaurant->id,

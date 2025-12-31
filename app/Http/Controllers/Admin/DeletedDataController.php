@@ -12,17 +12,38 @@ class DeletedDataController extends Controller
 {
     public function index(Request $request)
     {
-        $deletedUsers = User::onlyTrashed()
-            ->orderBy('deleted_at', 'desc')
-            ->paginate(10, ['*'], 'users_page');
+        $search = $request->input('search');
 
-        $deletedRestaurants = Restaurant::onlyTrashed()
-            ->orderBy('deleted_at', 'desc')
-            ->paginate(10, ['*'], 'restaurants_page');
+        $usersQuery = User::onlyTrashed()->with('restaurants');
+
+        if ($search) {
+            $usersQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $deletedUsers = $usersQuery->orderBy('deleted_at', 'desc')
+            ->paginate(10, ['*'], 'users_page')
+            ->withQueryString();
+
+        $restaurantsQuery = Restaurant::onlyTrashed();
+
+        if ($search) {
+            $restaurantsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $deletedRestaurants = $restaurantsQuery->orderBy('deleted_at', 'desc')
+            ->paginate(10, ['*'], 'restaurants_page')
+            ->withQueryString();
 
         return Inertia::render('Admin/DeletedData/Index', [
             'deletedUsers' => $deletedUsers,
             'deletedRestaurants' => $deletedRestaurants,
+            'filters' => $request->only('search'),
         ]);
     }
 

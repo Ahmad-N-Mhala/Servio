@@ -23,7 +23,9 @@ class LoyaltyController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         // Customers Query
         $customersQuery = Customer::where('restaurant_id', $restaurant->id)
@@ -120,7 +122,9 @@ class LoyaltyController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $data = $validated;
         unset($data['menu_item_ids']);
@@ -157,6 +161,11 @@ class LoyaltyController extends Controller
             'is_active' => ['boolean'],
         ]);
 
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant || (string) $reward->restaurant_id !== (string) $restaurant->id) {
+            abort(403, 'Unauthorized');
+        }
+
         $data = $validated;
         unset($data['menu_item_ids']);
         $data['min_order_value'] = $data['min_order_value'] ?? 0;
@@ -173,6 +182,10 @@ class LoyaltyController extends Controller
     public function deleteReward(Reward $reward)
     {
         \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant || (string) $reward->restaurant_id !== (string) $restaurant->id) {
+            abort(403, 'Unauthorized');
+        }
         $reward->delete();
 
         return redirect()->back()->with('message', __('loyalty.reward_deleted'));
@@ -185,6 +198,11 @@ class LoyaltyController extends Controller
             'points' => ['required', 'integer'],
             'description' => ['required', 'string'],
         ]);
+
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant || (string) $customer->restaurant_id !== (string) $restaurant->id) {
+            abort(403, 'Unauthorized');
+        }
 
         $loyaltyPoints = $customer->loyaltyPoints()->firstOrCreate([
             'customer_id' => $customer->id,
@@ -225,7 +243,9 @@ class LoyaltyController extends Controller
             'earning_currency_amount' => ['nullable', 'numeric', 'min:0.01'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
 
         $currentSettings = $restaurant->settings ?? [];
 

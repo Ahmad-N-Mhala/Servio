@@ -12,6 +12,8 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $restaurantId = session('active_restaurant_id');
+        if (!$restaurantId)
+            abort(404, 'Restaurant context not found');
 
         // Date Range (Default: Last 30 Days)
         $startDate = $request->input('start_date', now()->subDays(30)->startOfDay());

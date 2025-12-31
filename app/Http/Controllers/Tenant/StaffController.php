@@ -21,7 +21,11 @@ class StaffController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant context not found');
+        }
 
         // Ensure Owner is in Staff list
         $ownerEmails = [];
@@ -117,7 +121,11 @@ class StaffController extends Controller
             ->withQueryString();
 
         // Calculate Stats
-        $allStaff = Staff::where('restaurant_id', $restaurant->id)->get();
+        $restaurantId = (string) $restaurant->id;
+        $allStaff = Staff::withoutGlobalScopes()
+            ->where('restaurant_id', $restaurantId)
+            ->whereHas('user')
+            ->get();
 
         $stats = [
             'total' => $allStaff->count(),
@@ -141,7 +149,11 @@ class StaffController extends Controller
             'role' => ['required', config('roles.validation_rule')],
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant) {
+            abort(404, 'Restaurant context not found');
+        }
+
         $password = Str::random(12);
 
         $user = User::create([

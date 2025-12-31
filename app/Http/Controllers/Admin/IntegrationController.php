@@ -14,15 +14,27 @@ class IntegrationController extends Controller
         $query = DeliveryIntegration::with('restaurant');
 
         if ($request->input('search')) {
-            $query->where('provider', 'like', '%' . $request->input('search') . '%')
-                ->orWhereHas('restaurant', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->input('search') . '%');
-                });
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('provider', 'like', '%' . $search . '%')
+                    ->orWhere('api_key', 'like', '%' . $search . '%')
+                    ->orWhereHas('restaurant', function ($subQ) use ($search) {
+                        $subQ->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if ($request->filled('sort_field')) {
+            $sortField = $request->input('sort_field');
+            $sortDirection = $request->input('sort_direction', 'asc');
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->latest();
         }
 
         return inertia('Admin/Integrations/Index', [
-            'integrations' => $query->latest()->paginate(20)->withQueryString(),
-            'filters' => $request->only(['search']),
+            'integrations' => $query->paginate(20)->withQueryString(),
+            'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
 

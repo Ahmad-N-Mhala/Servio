@@ -1,0 +1,464 @@
+[
+    {
+        "migration": "2014_00_00_000001_create_restaurants_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db2"
+        }
+    },
+    {
+        "migration": "2014_00_00_000002_create_users_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db3"
+        }
+    },
+    {
+        "migration": "2024_01_01_000000_create_plans_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db4"
+        }
+    },
+    {
+        "migration": "2024_01_01_100002_create_customers_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db5"
+        }
+    },
+    {
+        "migration": "2024_01_01_100003_create_staff_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db6"
+        }
+    },
+    {
+        "migration": "2024_01_01_100004_create_menu_categories_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db7"
+        }
+    },
+    {
+        "migration": "2024_01_01_100005_create_menu_items_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db8"
+        }
+    },
+    {
+        "migration": "2024_01_01_100006_create_orders_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076db9"
+        }
+    },
+    {
+        "migration": "2024_01_01_100007_create_order_items_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dba"
+        }
+    },
+    {
+        "migration": "2024_01_01_100008_create_subscriptions_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dbb"
+        }
+    },
+    {
+        "migration": "2024_01_01_100009_create_payments_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dbc"
+        }
+    },
+    {
+        "migration": "2024_01_01_100010_create_permission_tables",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dbd"
+        }
+    },
+    {
+        "migration": "2024_01_01_100012_create_loyalty_points_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dbe"
+        }
+    },
+    {
+        "migration": "2024_01_01_100013_create_rewards_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dbf"
+        }
+    },
+    {
+        "migration": "2024_01_01_100014_create_reward_redemptions_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc0"
+        }
+    },
+    {
+        "migration": "2024_01_01_100015_create_point_transactions_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc1"
+        }
+    },
+    {
+        "migration": "2025_11_22_124629_create_sessions_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc2"
+        }
+    },
+    {
+        "migration": "2025_12_06_075449_create_earning_methods_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc3"
+        }
+    },
+    {
+        "migration": "2025_12_06_081121_add_conditions_to_earning_methods_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc4"
+        }
+    },
+    {
+        "migration": "2025_12_06_082447_add_currency_amount_to_earning_methods_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc5"
+        }
+    },
+    {
+        "migration": "2025_12_06_113916_create_restaurant_tables_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc6"
+        }
+    },
+    {
+        "migration": "2025_12_06_113922_add_type_and_table_id_to_orders_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc7"
+        }
+    },
+    {
+        "migration": "2025_12_06_131636_create_password_reset_tokens_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc8"
+        }
+    },
+    {
+        "migration": "2025_12_06_164500_add_payment_status_to_orders_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dc9"
+        }
+    },
+    {
+        "migration": "2025_12_14_000000_create_communication_features_tables",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dca"
+        }
+    },
+    {
+        "migration": "2025_12_14_100000_create_communication_templates_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dcb"
+        }
+    },
+    {
+        "migration": "2025_12_14_103000_update_templates_channels",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dcc"
+        }
+    },
+    {
+        "migration": "2025_12_14_110000_add_timing_to_templates",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dcd"
+        }
+    },
+    {
+        "migration": "2025_12_14_153031_create_delivery_integrations_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dce"
+        }
+    },
+    {
+        "migration": "2025_12_14_155054_add_delivery_info_to_orders_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dcf"
+        }
+    },
+    {
+        "migration": "2025_12_14_161714_create_restaurant_user_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dd0"
+        }
+    },
+    {
+        "migration": "2025_12_14_170020_add_is_super_admin_to_users_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bc5de34597d4076dd1"
+        }
+    },
+    {
+        "migration": "2025_12_14_182434_create_role_permissions_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd2"
+        }
+    },
+    {
+        "migration": "2025_12_14_183000_create_restaurant_subscriptions_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd3"
+        }
+    },
+    {
+        "migration": "2025_12_15_080631_add_performance_indexes_to_tables",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd5"
+        }
+    },
+    {
+        "migration": "2025_12_15_084933_add_status_to_restaurants_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd6"
+        }
+    },
+    {
+        "migration": "2025_12_15_091140_add_phone_to_users_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd7"
+        }
+    },
+    {
+        "migration": "2025_12_15_094247_add_description_to_plans_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd8"
+        }
+    },
+    {
+        "migration": "2025_12_15_153938_add_min_order_value_to_rewards_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dd9"
+        }
+    },
+    {
+        "migration": "2025_12_15_155024_add_discount_and_redemption_to_orders_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dda"
+        }
+    },
+    {
+        "migration": "2025_12_15_182552_create_ingredients_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076ddb"
+        }
+    },
+    {
+        "migration": "2025_12_15_182601_create_menu_item_ingredients_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076ddc"
+        }
+    },
+    {
+        "migration": "2025_12_15_214500_create_reward_menu_item_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076ddd"
+        }
+    },
+    {
+        "migration": "2025_12_15_221000_create_waste_logs_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dde"
+        }
+    },
+    {
+        "migration": "2025_12_16_165741_ensure_roles_exist",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076de6"
+        }
+    },
+    {
+        "migration": "2025_12_16_180751_update_waste_logs_to_use_ingredients",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076de7"
+        }
+    },
+    {
+        "migration": "2025_12_16_182009_add_soft_deletes_to_waste_logs_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076de8"
+        }
+    },
+    {
+        "migration": "2025_12_16_184004_add_audit_fields_to_waste_logs",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076de9"
+        }
+    },
+    {
+        "migration": "2025_12_16_184534_create_ingredient_batches_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dea"
+        }
+    },
+    {
+        "migration": "2025_12_16_184557_add_batch_id_to_waste_logs",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076deb"
+        }
+    },
+    {
+        "migration": "2025_12_16_185224_rename_initial_batches",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dec"
+        }
+    },
+    {
+        "migration": "2025_12_16_193110_add_birth_date_to_customers",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076ded"
+        }
+    },
+    {
+        "migration": "2025_12_16_220000_create_inventory_logs_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076dee"
+        }
+    },
+    {
+        "migration": "2025_12_19_143219_add_limits_to_plans_table",
+        "batch": 1,
+        "id": {
+            "$oid": "694576bd5de34597d4076def"
+        }
+    },
+    {
+        "migration": "2025_12_19_173235_create_monthly_expenses_table",
+        "batch": 2,
+        "id": {
+            "$oid": "69458c8b647cff10860c0a42"
+        }
+    },
+    {
+        "migration": "2025_12_21_091508_add_waiter_id_to_orders_table",
+        "batch": 3,
+        "id": {
+            "$oid": "6947bab4d6c51fc7c80970c2"
+        }
+    },
+    {
+        "migration": "2025_12_15_044120_create_delivery_providers_table",
+        "batch": 4,
+        "id": {
+            "$oid": "694ecdfcc5ce967471071242"
+        }
+    },
+    {
+        "migration": "2025_12_27_113124_add_password_set_at_to_users_table",
+        "batch": 5,
+        "id": {
+            "$oid": "694fc3d434df793e1b065762"
+        }
+    },
+    {
+        "migration": "2025_12_27_114816_add_qr_code_to_tables",
+        "batch": 6,
+        "id": {
+            "$oid": "694fc7b8e2546e8c0c0b4b92"
+        }
+    },
+    {
+        "migration": "2025_12_27_185038_add_location_details_to_restaurants_table",
+        "batch": 7,
+        "id": {
+            "$oid": "69502aac10a472d853065572"
+        }
+    },
+    {
+        "migration": "2025_12_27_191148_add_google_map_location_to_restaurants_table",
+        "batch": 8,
+        "id": {
+            "$oid": "69502fb16d446a9d330002d2"
+        }
+    },
+    {
+        "migration": "2025_12_27_194119_create_countries_table",
+        "batch": 9,
+        "id": {
+            "$oid": "695036a022cba170450726d2"
+        }
+    },
+    {
+        "migration": "2025_12_28_000000_cleanup_unused_tables",
+        "batch": 10,
+        "id": {
+            "$oid": "69503cfd434eaf64c20db712"
+        }
+    },
+    {
+        "migration": "2025_12_28_084907_create_cash_registers_table",
+        "batch": 11,
+        "id": {
+            "$oid": "6950ef9a0c09d39d0a097322"
+        }
+    },
+    {
+        "migration": "2025_12_28_084939_create_cash_transactions_table",
+        "batch": 11,
+        "id": {
+            "$oid": "6950ef9a0c09d39d0a097323"
+        }
+    },
+    {
+        "migration": "2025_12_30_203209_make_restaurant_id_nullable_in_communication_templates_table",
+        "batch": 12,
+        "id": {
+            "$oid": "695436ec16c87d3829059822"
+        }
+    }
+]
