@@ -173,10 +173,12 @@ const props = withDefaults(defineProps<{
     rowKey?: string;
     currency?: string;
     highlightRow?: (row: any) => boolean;
+    serverSide?: boolean;
 }>(), {
     emptyMessage: 'No items to display',
     rowKey: 'id',
-    currency: 'AED'
+    currency: 'AED',
+    serverSide: false
 });
 
 const emit = defineEmits<{
@@ -188,7 +190,8 @@ const sortKey = ref<string>('');
 const sortDirection = ref<'asc' | 'desc'>('asc');
 
 const sortedData = computed(() => {
-    if (!sortKey.value) return props.data;
+    // If server-side sorting is enabled or no sort key, return original data
+    if (props.serverSide || !sortKey.value) return props.data;
 
     return [...props.data].sort((a, b) => {
         const aVal = getCellValue(a, sortKey.value);

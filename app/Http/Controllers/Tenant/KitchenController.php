@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\LoyaltyService;
+use App\Events\OrderUpdated;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -43,6 +44,7 @@ class KitchenController extends Controller
         return Inertia::render('Kitchen/Index', [
             'orders' => $orders,
             'completedOrders' => $completedOrders,
+            'restaurant_id' => $restaurant->id,
         ]);
     }
 
@@ -187,6 +189,9 @@ class KitchenController extends Controller
 
         // Note: Loyalty points are automatically processed by Order model observer
         // when status changes to 'completed'
+
+        // Broadcast order status changed event for real-time updates
+        broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'status_changed'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.status_updated'));
     }

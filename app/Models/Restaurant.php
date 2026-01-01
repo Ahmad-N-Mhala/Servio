@@ -32,6 +32,7 @@ class Restaurant extends Model
         'zip_code',
         'google_map_location',
         'status',
+        'logo',
     ];
 
     protected $casts = [

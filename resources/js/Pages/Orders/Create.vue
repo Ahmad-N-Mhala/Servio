@@ -338,15 +338,33 @@
                         <div 
                             v-for="item in cart" 
                             :key="item.id" 
-                            class="flex justify-between items-center py-2 border-b border-gray-100"
+                            class="py-3 border-b border-gray-100 last:border-0"
                         >
-                            <div>
-                                <span class="font-medium">{{ item.name }}</span>
-                                <span class="font-medium">{{ item.name }}</span>
-                                <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">1 FREE</span>
-                                <span class="text-gray-500 ml-2">× {{ item.qty }}</span>
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-medium">{{ item.name }}</span>
+                                        <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">1 FREE</span>
+                                        <span class="text-gray-500">× {{ item.qty }}</span>
+                                    </div>
+                                    <div v-if="item.notes" class="mt-1 text-xs text-gray-600 italic bg-amber-50 px-2 py-1 rounded">
+                                        📝 {{ item.notes }}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button 
+                                        type="button"
+                                        @click="openNotesModal(item)"
+                                        class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                                        title="Add/Edit Note"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <span class="font-semibold min-w-[4rem] text-right">{{ currencyCode }} {{ (item.price * item.qty).toFixed(2) }}</span>
+                                </div>
                             </div>
-                            <span class="font-semibold">{{ currencyCode }} {{ (item.price * item.qty).toFixed(2) }}</span>
                         </div>
                     </div>
                     
@@ -417,6 +435,36 @@
                 </div>
             </form>
         </div>
+
+        <!-- Item Notes Modal -->
+        <Modal :show="showNotesModal" @close="closeNotesModal" title="Item Special Instructions" size="md">
+            <div class="space-y-4">
+                <div v-if="editingCartItem">
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600">Item:</p>
+                        <p class="font-semibold text-gray-900">{{ editingCartItem.name }} × {{ editingCartItem.qty }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Special Instructions</label>
+                        <textarea 
+                            v-model="tempNotes"
+                            rows="4"
+                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4"
+                            placeholder="e.g., No onions, extra spicy, well done..."
+                            @keydown.enter.meta="saveNotes"
+                            @keydown.enter.ctrl="saveNotes"
+                        ></textarea>
+                        <p class="mt-1 text-xs text-gray-500">Press Cmd/Ctrl + Enter to save quickly</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <Button type="button" variant="secondary" @click="closeNotesModal" class="flex-1">Cancel</Button>
+                    <Button type="button" @click="saveNotes" class="flex-1">Save Note</Button>
+                </div>
+            </div>
+        </Modal>
     </MainLayout>
 </template>
 
@@ -428,6 +476,7 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import Carousel from '@/Components/Carousel.vue';
+import Modal from '@/Components/Modal.vue';
 
 interface MenuItem {
     id: number;
@@ -455,6 +504,7 @@ interface CartItem {
     name: string;
     price: number;
     qty: number;
+    notes?: string;
     recipe?: { ingredient_id: string; quantity: number }[];
 }
 
@@ -521,6 +571,9 @@ const cart = ref<CartItem[]>([]);
 const selectedCustomer = ref<Customer | null>(null);
 const selectedReward = ref<Reward | null>(null);
 const phoneInput = ref('');
+const showNotesModal = ref(false);
+const editingCartItem = ref<CartItem | null>(null);
+const tempNotes = ref('');
 
 // Form
 const form = useForm({
@@ -530,7 +583,7 @@ const form = useForm({
     customer_id: null as number | null,
     type: 'dine_in',
     table_id: null as number | null,
-    items: [] as { menu_item_id: number; quantity: number; unit_price: number }[],
+    items: [] as { menu_item_id: number; quantity: number; unit_price: number; notes?: string }[],
     subtotal: 0,
     discount_amount: 0,
     tax: 0,
@@ -854,11 +907,32 @@ const tax = computed(() => afterDiscount.value * 0.05);
 
 const total = computed(() => afterDiscount.value + tax.value);
 
+// Notes Modal Functions
+const openNotesModal = (item: CartItem) => {
+    editingCartItem.value = item;
+    tempNotes.value = item.notes || '';
+    showNotesModal.value = true;
+};
+
+const closeNotesModal = () => {
+    showNotesModal.value = false;
+    editingCartItem.value = null;
+    tempNotes.value = '';
+};
+
+const saveNotes = () => {
+    if (editingCartItem.value) {
+        editingCartItem.value.notes = tempNotes.value.trim() || undefined;
+    }
+    closeNotesModal();
+};
+
 const createOrder = () => {
     form.items = cart.value.map(item => ({
         menu_item_id: item.id,
         quantity: item.qty,
-        unit_price: item.price
+        unit_price: item.price,
+        notes: item.notes
     }));
     form.subtotal = subtotal.value;
     form.discount_amount = discountAmount.value;

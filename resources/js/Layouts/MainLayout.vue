@@ -592,13 +592,29 @@
                     <div class="relative">
                         <button 
                             @click="languageMenuOpen = !languageMenuOpen"
-                            class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 border border-gray-200 dark:border-gray-600"
+                            class="flex items-center gap-2 px-3 sm:px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 border border-gray-200 dark:border-gray-600 hover:border-primary/50"
                         >
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                            </svg>
-                            <span class="text-xs sm:text-sm font-bold hidden xs:block">{{ currentLocale === 'ar' ? 'العربية' : 'EN' }}</span>
-                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Current Language Flag -->
+                            <div class="flex items-center gap-2">
+                                <div v-if="currentLocale === 'en'" class="w-5 h-5 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-blue-600">
+                                    <svg class="w-6 h-6" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+                                        <clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+                                        <clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+                                        <g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g>
+                                    </svg>
+                                </div>
+                                <div v-else class="w-5 h-5 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-green-600">
+                                    <svg class="w-6 h-6" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="900" height="600" fill="#165B33"/>
+                                        <g fill="#fff">
+                                            <path d="M450,150 L450,450 M300,300 L600,300" stroke="#fff" stroke-width="60"/>
+                                            <circle cx="450" cy="300" r="60" fill="none" stroke="#fff" stroke-width="20"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <span class="text-xs sm:text-sm font-semibold">{{ currentLocale === 'ar' ? 'العربية' : 'English' }}</span>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
@@ -618,25 +634,41 @@
                             >
                                 <button 
                                     @click="switchLanguage('en')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg"
                                     :class="currentLocale === 'en' ? 'text-primary font-semibold bg-primary/5' : 'text-gray-700 dark:text-gray-300'"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    <!-- UK Flag -->
+                                    <div class="w-6 h-6 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                                        <svg class="w-full h-full" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+                                            <clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+                                            <clipPath id="t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+                                            <g clip-path="url(#s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g>
+                                        </svg>
+                                    </div>
+                                    <span class="flex-1 text-left font-medium">English</span>
+                                    <svg v-if="currentLocale === 'en'" class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span class="flex-1 text-left">English</span>
-                                    <span v-if="currentLocale === 'en'" class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Active</span>
                                 </button>
                                 <button 
                                     @click="switchLanguage('ar')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    class="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-lg"
                                     :class="currentLocale === 'ar' ? 'text-primary font-semibold bg-primary/5' : 'text-gray-700 dark:text-gray-300'"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    <!-- Saudi Arabia Flag -->
+                                    <div class="w-6 h-6 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                                        <svg class="w-full h-full" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+                                            <rect width="900" height="600" fill="#165B33"/>
+                                            <g fill="#fff">
+                                                <text x="450" y="320" font-size="180" text-anchor="middle" font-family="Arial" font-weight="bold">العربية</text>
+                                                <path d="M350,400 L550,400 M450,350 L450,450" stroke="#fff" stroke-width="25"/>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                    <span class="flex-1 text-right font-medium" dir="rtl">العربية</span>
+                                    <svg v-if="currentLocale === 'ar'" class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span class="flex-1 text-right" dir="rtl">العربية</span>
-                                    <span v-if="currentLocale === 'ar'" class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">نشط</span>
                                 </button>
                             </div>
                         </Transition>

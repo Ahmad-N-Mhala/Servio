@@ -45,7 +45,19 @@
                             <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900">#{{ order.order_number }}</h3>
-                                    <p class="text-sm text-gray-500">{{ new Date(order.created_at).toLocaleTimeString() }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-sm text-gray-500">{{ new Date(order.created_at).toLocaleTimeString() }}</p>
+                                        <span 
+                                            :class="[
+                                                'text-xs font-bold px-2 py-0.5 rounded-full',
+                                                getOrderAge(order.created_at) > 30 ? 'bg-red-100 text-red-700 animate-pulse' :
+                                                getOrderAge(order.created_at) > 15 ? 'bg-orange-100 text-orange-700' :
+                                                'bg-green-100 text-green-700'
+                                            ]"
+                                        >
+                                            {{ getOrderAge(order.created_at) }} min
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="text-right">
                                     <div class="flex flex-col items-end">
@@ -65,12 +77,17 @@
                             </div>
 
                             <div class="space-y-2 mb-6">
-                                <div v-for="item in order.items" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                                    <div class="flex items-center gap-3">
-                                        <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                                            {{ item.quantity }}x
-                                        </span>
-                                        <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                <div v-for="item in order.items" :key="item.id" class="py-2 border-b border-gray-50 last:border-0">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                                                {{ item.quantity }}x
+                                            </span>
+                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                        </div>
+                                    </div>
+                                    <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
+                                        📝 {{ item.notes }}
                                     </div>
                                 </div>
                             </div>
@@ -143,12 +160,17 @@
                             </div>
 
                             <div class="space-y-2 mb-6">
-                                <div v-for="item in order.items" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                                    <div class="flex items-center gap-3">
-                                        <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                                            {{ item.quantity }}x
-                                        </span>
-                                        <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                <div v-for="item in order.items" :key="item.id" class="py-2 border-b border-gray-50 last:border-0">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                                                {{ item.quantity }}x
+                                            </span>
+                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                        </div>
+                                    </div>
+                                    <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
+                                        📝 {{ item.notes }}
                                     </div>
                                 </div>
                             </div>
@@ -207,12 +229,17 @@
                             </div>
 
                             <div class="space-y-2">
-                                <div v-for="item in order.items" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                                    <div class="flex items-center gap-3">
-                                        <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-                                            {{ item.quantity }}x
-                                        </span>
-                                        <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                <div v-for="item in order.items" :key="item.id" class="py-2 border-b border-gray-50 last:border-0">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                                                {{ item.quantity }}x
+                                            </span>
+                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                        </div>
+                                    </div>
+                                    <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
+                                        📝 {{ item.notes }}
                                     </div>
                                 </div>
                             </div>
@@ -280,6 +307,7 @@ const route = (window as any).route;
 const props = defineProps<{
     orders: any[];
     completedOrders: any[];
+    restaurant_id: string;
 }>();
 
 const processingId = ref<number | null>(null);
@@ -315,6 +343,13 @@ const closeCancelModal = () => {
     cancelForm.reset();
 };
 
+// Calculate order age in minutes
+const getOrderAge = (createdAt: string): number => {
+    const now = new Date().getTime();
+    const orderTime = new Date(createdAt).getTime();
+    return Math.floor((now - orderTime) / 1000 / 60);
+};
+
 const submitCancel = () => {
     if (!cancellingOrder.value) return;
 
@@ -336,19 +371,54 @@ const updateStatus = (order: any, status: string) => {
     });
 };
 
-// Auto-refresh every 30 seconds
+// Real-time updates with Laravel Echo + Fallback polling
 let refreshInterval: any;
+let echoChannel: any;
 
 onMounted(() => {
+    if (window.Echo && props.restaurant_id) {
+        // Subscribe to restaurant-specific order channel
+        echoChannel = window.Echo.channel(`restaurant.${props.restaurant_id}.orders`);
+        
+        // Listen for order created events
+        echoChannel.listen('.order.created', (e: any) => {
+            console.log('Order created:', e);
+            router.reload({ only: ['orders', 'completedOrders'] });
+        });
+        
+        // Listen for order status changed events
+        echoChannel.listen('.order.status_changed', (e: any) => {
+            console.log('Order status changed:', e);
+            router.reload({ only: ['orders', 'completedOrders'] });
+        });
+        
+        // Listen for order updated events
+        echoChannel.listen('.order.updated', (e: any) => {
+            console.log('Order updated:', e);
+            router.reload({ only: ['orders', 'completedOrders'] });
+        });
+        
+        console.log('✅ Real-time updates enabled via Laravel Echo');
+    } else {
+        console.warn('⚠️ Laravel Echo not available, using fallback polling');
+    }
+    
+    // Fallback: Polling every 30 seconds as backup
     refreshInterval = setInterval(() => {
         if (!cancellingOrder.value) { // Don't refresh if modal is open
              router.reload({ only: ['orders', 'completedOrders'] });
         }
-    }, 2000);
+    }, 30000); // 30 seconds fallback
 });
 
 onUnmounted(() => {
     if (refreshInterval) clearInterval(refreshInterval);
+    if (echoChannel) {
+        echoChannel.stopListening('.order.created');
+        echoChannel.stopListening('.order.status_changed');
+        echoChannel.stopListening('.order.updated');
+        window.Echo.leave(`restaurant.${props.restaurant_id}.orders`);
+    }
 });
 </script>
 

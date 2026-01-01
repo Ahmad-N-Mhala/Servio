@@ -54,6 +54,7 @@
                     v-for="category in categories"
                     :key="category.id"
                     class="glass-card rounded-2xl overflow-hidden card-hover animate-slide-up"
+                    :class="{'opacity-60 grayscale-[50%]': !category.is_active}"
                 >
                     <!-- Category Header -->
                     <div class="p-6 border-b border-gray-100/50 dark:border-gray-700/50">
@@ -65,8 +66,9 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                                    <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                         {{ getCategoryName(category.name) }}
+                                        <span v-if="!category.is_active" class="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600">Inactive</span>
                                     </h2>
                                     <p v-if="category.description" class="text-gray-500 dark:text-gray-400 mt-0.5">
                                         {{ category.description }}
@@ -111,6 +113,7 @@
                                 v-for="item in category.items"
                                 :key="item.id"
                                 class="group relative p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:border-primary/30 hover:shadow-md transition-all duration-200"
+                                :class="{'opacity-60 grayscale-[50%]': !item.is_available}"
                             >
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
@@ -145,13 +148,20 @@
                                     </span>
                                     
                                     <!-- Inventory Status -->
-                                    <div v-if="item.inventory_status?.sold_out" class="group/tooltip relative">
-                                        <span class="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded uppercase">
-                                            {{ $t('menu.sold_out') }}
-                                        </span>
-                                        <!-- Tooltip -->
-                                        <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-black/80 text-white text-xs rounded p-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity z-10">
-                                            {{ $t('menu.missing') }}: {{ item.inventory_status.missing_ingredients.join(', ') }}
+                                    <div class="flex gap-2">
+                                         <div v-if="!item.is_available" class="group/tooltip relative">
+                                            <span class="px-2 py-1 bg-gray-200 text-gray-700 text-xs font-bold rounded uppercase">
+                                                Unavailable
+                                            </span>
+                                        </div>
+                                        <div v-else-if="item.inventory_status?.sold_out" class="group/tooltip relative">
+                                            <span class="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded uppercase">
+                                                {{ $t('menu.sold_out') }}
+                                            </span>
+                                            <!-- Tooltip -->
+                                            <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-black/80 text-white text-xs rounded p-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity z-10">
+                                                {{ $t('menu.missing') }}: {{ item.inventory_status.missing_ingredients.join(', ') }}
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
@@ -216,6 +226,19 @@
                 rows="3"
                 placeholder="Optional description..."
             />
+
+            <!-- Active Status Toggle -->
+             <div class="flex items-center gap-2">
+                <input 
+                    type="checkbox" 
+                    id="category_active"
+                    v-model="categoryForm.is_active"
+                    class="rounded border-gray-300 text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary/20 focus:ring-opacity-50"
+                >
+                <label for="category_active" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Category Active (Visible in Menu)
+                </label>
+            </div>
 
             <div class="flex justify-between pt-4">
                 <Button 
@@ -342,8 +365,37 @@
                 placeholder="Ingredients, details..."
             />
 
+             <!-- Available Status Toggle -->
+             <div class="flex items-center gap-2">
+                <input 
+                    type="checkbox" 
+                    id="item_available"
+                    v-model="itemForm.is_available"
+                    class="rounded border-gray-300 text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary/20 focus:ring-opacity-50"
+                >
+                <label for="item_available" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Item Available
+                </label>
+            </div>
+
+
             <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h4 class="font-medium text-gray-900 dark:text-white mb-3">Recipe / Ingredients</h4>
+                
+                <!-- Cost Summary -->
+                 <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">Total Cost</p>
+                        <p class="text-lg font-bold text-blue-700 dark:text-blue-300">{{ totalIngredientCost.toFixed(2) }} <span class="text-xs font-normal">AED</span></p>
+                    </div>
+                    <div class="text-right">
+                         <p class="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">Estimated Profit</p>
+                         <p class="text-lg font-bold" :class="estimatedProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                             {{ estimatedProfit.toFixed(2) }} <span class="text-xs font-normal">AED</span>
+                         </p>
+                    </div>
+                </div>
+
                 <div class="space-y-3">
                     <div class="flex gap-2">
                         <Select
@@ -351,9 +403,19 @@
                             placeholder="Select Ingredient..."
                         >
                             <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
-                                {{ getCategoryName(ing.name) }} ({{ ing.unit }})
+                                {{ getCategoryName(ing.name) }} ({{ ing.unit }}) - {{ ing.cost }} / unit
                             </option>
                         </Select>
+                        <div class="w-24">
+                            <Select
+                                v-model="newIngredientUnit"
+                                placeholder="Unit"
+                            >
+                                <option v-for="unit in getAvailableUnits" :key="unit" :value="unit">
+                                    {{ unit }}
+                                </option>
+                            </Select>
+                        </div>
                         <div class="w-32">
                             <Input 
                                 v-model="newIngredientQty" 
@@ -363,18 +425,23 @@
                                 @keypress.enter.prevent="addIngredient"
                             />
                         </div>
-                        <Button type="button" @click="addIngredient" size="sm" :disabled="!newIngredientId">Add</Button>
+                        <Button type="button" @click="addIngredient" size="sm" :disabled="!newIngredientId || !newIngredientUnit">Add</Button>
                     </div>
 
                     <!-- List -->
                     <div v-if="itemForm.ingredients.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
                         <div v-for="(ing, index) in itemForm.ingredients" :key="index" class="flex justify-between items-center text-sm p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
-                            <span class="font-medium text-gray-700 dark:text-gray-300">
-                                {{ getCategoryName(getIngredient(ing.id)?.name) }}
-                            </span>
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-700 dark:text-gray-300">
+                                    {{ getCategoryName(getIngredient(ing.id)?.name) }}
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                     Stock Cost: {{ getIngredient(ing.id)?.cost }} x {{ Number(ing.quantity).toFixed(3) }} {{ getIngredient(ing.id)?.unit }} = {{ (getIngredient(ing.id)?.cost * ing.quantity).toFixed(2) }}
+                                </span>
+                            </div>
                             <div class="flex items-center gap-3">
                                 <span class="text-xs text-gray-500 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                                    {{ ing.quantity }} {{ getIngredient(ing.id)?.unit }}
+                                    {{ ing.usage_quantity || ing.quantity }} {{ ing.usage_unit || getIngredient(ing.id)?.unit }}
                                 </span>
                                 <button type="button" @click="removeIngredient(index)" class="text-red-500 hover:text-red-700 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -443,7 +510,8 @@ const editingCategory = ref<any>(null);
 const categoryForm = useForm({
     name: { en: '', ar: '' },
     description: '',
-    sort_order: 0
+    sort_order: 0,
+    is_active: true
 });
 
 // Item State
@@ -464,6 +532,7 @@ const itemForm = useForm({
     sort_order: 0,
     allergens: [],
     ingredients: [] as any[],
+    is_available: true,
     _method: 'POST'
 });
 
@@ -471,8 +540,99 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 
 const newIngredientId = ref<number | null>(null);
 const newIngredientQty = ref<number | string>('');
+const newIngredientUnit = ref<string>('');
 
 const getIngredient = (id: number) => props.ingredients.find((i: any) => i.id === id);
+
+// Unit Conversion Factors (to base units: g, ml, pcs)
+const unitFactors: Record<string, number> = {
+    // Mass (to g)
+    'kg': 1000,
+    'g': 1,
+    'mg': 0.001,
+    // Volume (to ml)
+    'l': 1000,
+    'ml': 1,
+    // Count
+    'pcs': 1,
+    'box': 1, // Assume 1 unless defined
+    'pack': 1,
+    'can': 1,
+    'bottle': 1,
+    'dozen': 12
+};
+
+const getAvailableUnits = computed(() => {
+    if (!newIngredientId.value) return [];
+    
+    const ingredient = getIngredient(newIngredientId.value);
+    if (!ingredient) return [];
+    
+    const stockUnit = ingredient.unit?.toLowerCase();
+    
+    // Determine type based on stock unit
+    const massUnits = ['kg', 'g', 'mg'];
+    const volUnits = ['l', 'ml'];
+    
+    if (massUnits.includes(stockUnit)) return massUnits;
+    if (volUnits.includes(stockUnit)) return volUnits;
+    
+    return [stockUnit]; // Default to just the stock unit if unknown type
+});
+
+const calculateNormalizedQuantity = (qty: number, fromUnit: string, toUnit: string) => {
+    const fromFactor = unitFactors[fromUnit.toLowerCase()] || 1;
+    const toFactor = unitFactors[toUnit.toLowerCase()] || 1;
+    
+    // If types match (both mass or both volume), convert. Else return raw (should be validated)
+    return qty * (fromFactor / toFactor);
+};
+
+const addIngredient = () => {
+    if (!newIngredientId.value || !newIngredientQty.value || !newIngredientUnit.value) return;
+    
+    const ingredient = getIngredient(newIngredientId.value);
+    const normalizedQty = calculateNormalizedQuantity(
+        Number(newIngredientQty.value), 
+        newIngredientUnit.value, 
+        ingredient?.unit || newIngredientUnit.value
+    );
+
+    // Check if already exists
+    const existing = itemForm.ingredients.find(i => i.id === newIngredientId.value);
+    if (existing) {
+        // If updating, we keep the FIRST unit selected or update it? 
+        // For simplicity, just add to the normalized quantity.
+        // But the UI shows usage_quantity. This is tricky for mixed units.
+        // We will just add a new row if units differ? No, duplicate IDs might be issue.
+        // Let's simplified: Update the quantity.
+        existing.quantity += normalizedQty;
+        // Optionally update usage display
+        // existing.usage_quantity = Number(existing.usage_quantity) + Number(newIngredientQty.value); 
+        // The above is wrong if units differ.
+    } else {
+        itemForm.ingredients.push({
+            id: newIngredientId.value,
+            quantity: normalizedQty,
+            usage_quantity: Number(newIngredientQty.value),
+            usage_unit: newIngredientUnit.value
+        });
+    }
+    
+    newIngredientQty.value = '';
+    // Keep unit or reset?
+};
+
+// Set default unit when ingredient changes
+import { watch } from 'vue';
+watch(newIngredientId, (newId) => {
+    if (newId) {
+        const ingredient = getIngredient(newId);
+        if (ingredient) {
+            newIngredientUnit.value = ingredient.unit;
+        }
+    }
+});
 
 const showUnsplashPicker = ref(false);
 
@@ -522,23 +682,19 @@ const removeKeptImage = (index: number) => {
     itemForm.kept_images.splice(index, 1);
 };
 
-const addIngredient = () => {
-    if (!newIngredientId.value || !newIngredientQty.value) return;
-    
-    // Check if already exists
-    const existing = itemForm.ingredients.find(i => i.id === newIngredientId.value);
-    if (existing) {
-        existing.quantity = Number(existing.quantity) + Number(newIngredientQty.value);
-    } else {
-        itemForm.ingredients.push({
-            id: newIngredientId.value,
-            quantity: Number(newIngredientQty.value)
-        });
-    }
-    
-    newIngredientId.value = null;
-    newIngredientQty.value = '';
-};
+// Cost Calculations
+const totalIngredientCost = computed(() => {
+    return itemForm.ingredients.reduce((total, ing) => {
+        const ingredient = getIngredient(ing.id);
+        const cost = ingredient ? Number(ingredient.cost || 0) : 0;
+        return total + (cost * Number(ing.quantity));
+    }, 0);
+});
+
+const estimatedProfit = computed(() => {
+    const price = Number(itemForm.price || 0);
+    return price - totalIngredientCost.value;
+});
 
 const removeIngredient = (index: number) => {
     itemForm.ingredients.splice(index, 1);
@@ -562,9 +718,11 @@ const openCategoryModal = (category: any = null) => {
         categoryForm.name.ar = category.name.ar || '';
         categoryForm.description = category.description;
         categoryForm.sort_order = category.sort_order;
+        categoryForm.is_active = category.is_active !== false; // Default true if undefined
     } else {
         editingCategory.value = null;
         categoryForm.reset();
+        categoryForm.is_active = true;
         categoryForm.clearErrors();
     }
     showCategoryModal.value = true;
@@ -632,6 +790,7 @@ const openItemModal = (category: any, item: any = null) => {
         itemForm.description = item.description;
         itemForm.price = item.price;
         itemForm.sort_order = item.sort_order;
+        itemForm.is_available = item.is_available !== false; // Default true
         
         // Populate kept_images
         // Priority: item.images (array), then item.image (string)
@@ -674,6 +833,7 @@ const openItemModal = (category: any, item: any = null) => {
         const catId = itemForm.menu_category_id;
         itemForm.reset();
         itemForm.menu_category_id = catId;
+        itemForm.is_available = true; // Default
         itemForm.clearErrors();
     }
     showItemModal.value = true;

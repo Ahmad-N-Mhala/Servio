@@ -70,6 +70,8 @@ class InventoryController extends Controller
             'cost' => 'required|numeric|min:0',
             'reorder_level' => 'nullable|numeric|min:0',
             'expiration_date' => 'nullable|date',
+            'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $validated['restaurant_id'] = $restaurant->id;
@@ -109,7 +111,18 @@ class InventoryController extends Controller
             'expiration_date' => $validated['expiration_date'] ?? null,
         ]);
 
+        // Handle Bill Upload
+        $billPath = null;
+        if ($request->hasFile('bill')) {
+            $billPath = $request->file('bill')->store('inventory-bills', 'public');
+        }
+
         // Log the creation of new ingredient with initial stock
+        $logNotes = "New ingredient created with initial stock: {$validated['current_stock']} {$validated['unit']} @ {$validated['cost']}";
+        if (!empty($validated['notes'])) {
+            $logNotes .= "\nUser Notes: " . $validated['notes'];
+        }
+
         \App\Models\InventoryLog::create([
             'restaurant_id' => $restaurant->id,
             'ingredient_id' => $ingredient->id,
@@ -117,7 +130,8 @@ class InventoryController extends Controller
             'action' => 'created',
             'quantity_change' => $validated['current_stock'],
             'new_stock_level' => $validated['current_stock'],
-            'notes' => "New ingredient created with initial stock: {$validated['current_stock']} {$validated['unit']} @ {$validated['cost']}",
+            'notes' => $logNotes,
+            'bill_path' => $billPath,
         ]);
 
         return redirect()->back()->with('message', 'Ingredient added successfully.');
@@ -159,6 +173,8 @@ class InventoryController extends Controller
             'add_stock' => 'nullable|numeric|min:0',
             'added_cost' => 'nullable|numeric|min:0', // New field for the price of the *new* stock
             'expiration_date' => 'nullable|date',
+            'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         if (is_string($request->name)) {
@@ -225,7 +241,18 @@ class InventoryController extends Controller
 
             $ingredient->save();
 
+            // Handle Bill Upload
+            $billPath = null;
+            if ($request->hasFile('bill')) {
+                $billPath = $request->file('bill')->store('inventory-bills', 'public');
+            }
+
             // Log the action
+            $logNotes = "Added {$addedQty} {$ingredient->unit} @ {$incomingCost} [{$nextBatchNumber}]";
+            if (!empty($validated['notes'])) {
+                $logNotes .= "\nUser Notes: " . $validated['notes'];
+            }
+
             \App\Models\InventoryLog::create([
                 'restaurant_id' => $ingredient->restaurant_id,
                 'ingredient_id' => $ingredient->id,
@@ -233,7 +260,8 @@ class InventoryController extends Controller
                 'action' => 'added',
                 'quantity_change' => $addedQty,
                 'new_stock_level' => $ingredient->fresh()->current_stock,
-                'notes' => "Added {$addedQty} {$ingredient->unit} @ {$incomingCost} [{$nextBatchNumber}]",
+                'notes' => $logNotes,
+                'bill_path' => $billPath,
             ]);
 
             // Unset fields 
@@ -262,6 +290,82 @@ class InventoryController extends Controller
             ->get();
 
         return response()->json($logs);
+    }
+
+    public function export(Request $request)
+    {
+        $restaurant = $request->user()->currentRestaurant();
+        if (!$restaurant && $request->user()->is_super_admin) {
+            if (session('active_restaurant_id')) {
+                $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+            }
+        }
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant context not found');
+        }
+
+        // Determine Timezone
+        $country = \App\Models\Country::where('name', $restaurant->country)->first();
+        $timezone = $country && $country->timezone ? $country->timezone : config('app.timezone');
+
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        // Parse dates in the restaurant's timezone using Carbon
+        $startDate = \Carbon\Carbon::parse($request->start_date, $timezone)->startOfDay();
+        $endDate = \Carbon\Carbon::parse($request->end_date, $timezone)->endOfDay();
+
+        $query = \App\Models\InventoryLog::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->with(['ingredient', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        $logs = $query->get();
+
+        // Current time in restaurant timezone for filename
+        $now = \Carbon\Carbon::now($timezone);
+        $filename = "inventory_report_" . $now->format('Y-m-d_H-i') . ".csv";
+
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=" . $filename,
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $columns = ['Date', 'Ingredient', 'Action', 'Quantity Change', 'New Stock Level', 'User', 'Notes'];
+
+        $callback = function () use ($logs, $columns, $timezone) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($logs as $log) {
+                $ingredientName = $log->ingredient ? ($log->ingredient->name['en'] ?? $log->ingredient->name['ar'] ?? (is_string($log->ingredient->name) ? $log->ingredient->name : 'Deleted Item')) : 'Deleted Item';
+
+                // Format log date in restaurant timezone
+                $logDate = $log->created_at->setTimezone($timezone)->format('Y-m-d H:i:s');
+
+                $row = [
+                    $logDate,
+                    $ingredientName,
+                    ucfirst(str_replace('_', ' ', $log->action)),
+                    $log->quantity_change > 0 ? '+' . $log->quantity_change : $log->quantity_change,
+                    $log->new_stock_level,
+                    $log->user ? $log->user->name : 'System',
+                    $log->notes,
+                ];
+
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function destroy($id)

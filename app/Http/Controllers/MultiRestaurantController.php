@@ -158,6 +158,7 @@ class MultiRestaurantController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:255'],
             'zip_code' => ['nullable', 'string', 'max:20'],
+            'logo' => ['nullable', 'image', 'max:2048'], // 2MB Max
         ]);
 
         $user = Auth::user();
@@ -200,6 +201,11 @@ class MultiRestaurantController extends Controller
             $countryObj = \App\Models\Country::where('name', $validated['country'])->first();
             $currency = $countryObj ? $countryObj->currency : 'AED';
 
+            $logoPath = null;
+            if ($request->hasFile('logo')) {
+                $logoPath = $request->file('logo')->store('restaurant-logos', 'public');
+            }
+
             $restaurant = Restaurant::create([
                 'name' => $validated['restaurant_name'],
                 'slug' => \Illuminate\Support\Str::slug($validated['restaurant_name']) . '-' . \Illuminate\Support\Str::random(6),
@@ -210,6 +216,7 @@ class MultiRestaurantController extends Controller
                 'city' => $validated['city'],
                 'address' => $validated['address'],
                 'zip_code' => $validated['zip_code'] ?? null,
+                'logo' => $logoPath,
             ]);
 
             // 2. Link User to Restaurant via Pivot
@@ -268,5 +275,72 @@ class MultiRestaurantController extends Controller
             \Log::error('Restaurant Creation failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Creation failed: ' . $e->getMessage()]);
         }
+    }
+
+    public function edit(Request $request, Restaurant $restaurant)
+    {
+        // 1. Permission Check
+        // If the user has global permission OR is an owner of this specific restaurant
+        $isOwner = \DB::table('restaurant_user')
+            ->where('restaurant_id', $restaurant->id)
+            ->where('email', $request->user()->email)
+            ->where('role', 'owner')
+            ->exists();
+
+        if (!$isOwner && !$request->user()->can('edit_restaurant')) {
+            abort(403);
+        }
+
+        // 2. Fetch Countries for Selection
+        $countries = \App\Models\Country::select('name', 'currency', 'states')->get();
+
+        return Inertia::render('MultiRestaurant/Edit', [
+            'restaurant' => $restaurant,
+            'countries' => $countries,
+        ]);
+    }
+
+    public function update(Request $request, Restaurant $restaurant)
+    {
+        // 1. Permission Check
+        $isOwner = \DB::table('restaurant_user')
+            ->where('restaurant_id', $restaurant->id)
+            ->where('email', $request->user()->email)
+            ->where('role', 'owner')
+            ->exists();
+
+        if (!$isOwner && !$request->user()->can('edit_restaurant')) {
+            abort(403);
+        }
+
+        // 2. Validation
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'country' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+            'address' => ['required', 'string', 'max:255'],
+            'zip_code' => ['nullable', 'string', 'max:20'],
+            'google_map_location' => ['nullable', 'string'],
+            'logo' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        // 3. Update Logic
+        // Determine currency if country changed
+        if ($restaurant->country !== $validated['country']) {
+            $countryObj = \App\Models\Country::where('name', $validated['country'])->first();
+            $validated['currency'] = $countryObj ? $countryObj->currency : 'AED';
+        }
+
+        // Handle File Upload
+        if ($request->hasFile('logo')) {
+            $validated['logo'] = $request->file('logo')->store('restaurant-logos', 'public');
+        }
+
+        $restaurant->update($validated);
+
+        return redirect()->route('restaurants.index')->with('success', 'Restaurant updated successfully.');
     }
 }

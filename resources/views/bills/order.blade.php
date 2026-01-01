@@ -181,7 +181,31 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="restaurant-name">{{ $order->restaurant->name ?? $tenant->name ?? 'RestaurFy' }}</div>
+            @if($order->restaurant->logo)
+                @php
+                    $logoPath = storage_path('app/public/' . $order->restaurant->logo);
+                    $logoData = null;
+
+                    if (file_exists($logoPath)) {
+                        $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                        $data = file_get_contents($logoPath);
+                        $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                    } elseif (file_exists(public_path('storage/' . $order->restaurant->logo))) {
+                        // Fallback to public path if symbolic link is used but storage_path mapping is different
+                        $logoPath = public_path('storage/' . $order->restaurant->logo);
+                        $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                        $data = file_get_contents($logoPath);
+                        $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                    }
+                @endphp
+
+                @if($logoData)
+                    <div style="margin-bottom: 15px;">
+                        <img src="{{ $logoData }}" alt="Logo" style="max-height: 100px; max-width: 150px; object-fit: contain;">
+                    </div>
+                @endif
+            @endif
+            <div class="restaurant-name">{{ $order->restaurant->name ?? $tenant->name ?? 'Servio' }}</div>
             <div class="restaurant-info">
                 @if($order->restaurant->address) {{ $order->restaurant->address }} @endif
                 @if($order->restaurant->city) , {{ $order->restaurant->city }} @endif
@@ -216,10 +240,6 @@
                 <div class="value">
                     Order #: <strong>{{ $order->order_number }}</strong><br>
                     Date: {{ $order->created_at->format('M d, Y h:i A') }}<br>
-                    Status: {{ ucfirst($order->status) }}
-                    @if(isset($order->waiter))
-                        <br>Waiter: {{ $order->waiter->name }}
-                    @endif
                 </div>
             </div>
         </div>
@@ -324,8 +344,8 @@
 
         <div class="footer">
             Thank you for dining with
-            <strong>{{ $order->restaurant->name ?? $tenant->name ?? 'RestaurFy' }}</strong>!<br>
-            <span style="opacity: 0.6; font-size: 10px;">Powered by RestaurFy</span>
+            <strong>{{ $order->restaurant->name ?? $tenant->name ?? 'Servio' }}</strong>!<br>
+            <span style="opacity: 0.6; font-size: 10px;">Powered by Servio</span>
         </div>
     </div>
 </body>

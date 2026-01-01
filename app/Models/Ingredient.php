@@ -47,6 +47,46 @@ class Ingredient extends Model
     }
 
     /**
+     * Boot method to add model event listeners
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Prevent negative stock
+        static::saving(function ($ingredient) {
+            if ($ingredient->current_stock < 0) {
+                throw new \Exception("Stock for ingredient '{$ingredient->name}' cannot be negative. Current: {$ingredient->current_stock}");
+            }
+        });
+    }
+
+    /**
+     * Atomically decrement stock (thread-safe for concurrent orders)
+     * 
+     * @param float $quantity Amount to deduct
+     * @return bool Success status
+     * @throws \Exception if insufficient stock
+     */
+    public function decrementStock(float $quantity): bool
+    {
+        // Use MongoDB's atomic decrement operation
+        $result = $this->decrement('current_stock', $quantity);
+
+        // Refresh to get updated value
+        $this->refresh();
+
+        // Check if stock went negative (race condition check)
+        if ($this->current_stock < 0) {
+            // Rollback by incrementing
+            $this->increment('current_stock', $quantity);
+            throw new \Exception("Insufficient stock for ingredient '{$this->name}'. Available: " . ($this->current_stock + $quantity) . ", Required: {$quantity}");
+        }
+
+        return $result;
+    }
+
+    /**
      * Update ingredient cost based on FIFO (First In, First Out)
      * The cost reflects the oldest batch with remaining stock
      */

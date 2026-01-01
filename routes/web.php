@@ -60,8 +60,13 @@ Route::group([
         // Restaurant Selection (No Context Check Required)
         Route::get('/select-restaurant', [\App\Http\Controllers\MultiRestaurantController::class, 'index'])->name('restaurants.index');
         Route::get('/select-restaurant/create', [\App\Http\Controllers\MultiRestaurantController::class, 'create'])->name('restaurants.create');
-        Route::post('/select-restaurant/create', [\App\Http\Controllers\MultiRestaurantController::class, 'store'])->name('restaurants.store');
-        Route::post('/switch-restaurant/{restaurant}', [\App\Http\Controllers\MultiRestaurantController::class, 'switch'])->name('restaurants.switch');
+        Route::post('restaurants', [\App\Http\Controllers\MultiRestaurantController::class, 'store'])->name('restaurants.store');
+
+        // Add Edit Routes
+        Route::get('restaurants/{restaurant}/edit', [\App\Http\Controllers\MultiRestaurantController::class, 'edit'])->name('restaurants.edit');
+        Route::put('restaurants/{restaurant}', [\App\Http\Controllers\MultiRestaurantController::class, 'update'])->name('restaurants.update');
+
+        Route::post('restaurants/{restaurant}/switch', [\App\Http\Controllers\MultiRestaurantController::class, 'switch'])->name('restaurants.switch');
 
         // Protected by Restaurant Context
         Route::middleware(['restaurant.context'])->group(function () {
@@ -238,6 +243,8 @@ Route::group([
                 ->only(['index', 'store', 'update', 'destroy'])
                 ->middleware('permission:view_waste'); // Store/Update/Destroy should ideally have record_waste
 
+            Route::get('inventory/export', [\App\Http\Controllers\Tenant\InventoryController::class, 'export'])->name('inventory.export')
+                ->middleware('permission:view_inventory');
             Route::get('inventory/{inventory}/history', [\App\Http\Controllers\Tenant\InventoryController::class, 'history'])->name('inventory.history')
                 ->middleware('permission:view_inventory');
             Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class)
@@ -255,6 +262,8 @@ Route::group([
 
             Route::prefix('reports')->name('reports.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\ReportController::class, 'index'])->name('sales')
+                    ->middleware('permission:view_sales_reports');
+                Route::get('/export', [\App\Http\Controllers\Tenant\ReportController::class, 'export'])->name('export')
                     ->middleware('permission:view_sales_reports');
             });
 

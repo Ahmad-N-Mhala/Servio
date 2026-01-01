@@ -18,6 +18,7 @@ class InventoryLog extends Model
         'quantity_change',
         'new_stock_level',
         'notes',
+        'bill_path',
     ];
 
     protected $casts = [

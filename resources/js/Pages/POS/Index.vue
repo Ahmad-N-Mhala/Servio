@@ -11,11 +11,11 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-500 font-medium">Cash Register Balance</p>
+                            <p class="text-xs text-gray-500 font-medium">{{ $t('pos.register_balance') }}</p>
                             <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(currentBalance) }}</p>
                         </div>
                         <div class="ml-4 pl-4 border-l border-gray-200">
-                            <p class="text-xs text-gray-500">Opened</p>
+                            <p class="text-xs text-gray-500">{{ $t('pos.opened') }}</p>
                             <p class="text-sm font-medium text-gray-700">{{ formatTime(currentRegister.opened_at) }}</p>
                         </div>
                     </div>
@@ -27,7 +27,7 @@
                             Deposit
                         </button>
                         <button @click="showCloseModal = true" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                            Close Register
+                            {{ $t('common.close') }} Register
                         </button>
                     </div>
                 </div>
@@ -41,20 +41,20 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                         <div>
-                            <p class="text-sm font-bold text-yellow-900">Cash Register Not Open</p>
-                            <p class="text-xs text-yellow-700">Open your cash register to process cash payments</p>
+                            <p class="text-sm font-bold text-yellow-900">{{ $t('pos.register_not_open') }}</p>
+                            <p class="text-xs text-yellow-700">{{ $t('pos.register_prompt') }}</p>
                         </div>
                     </div>
                     <button @click="showOpenModal = true" class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
-                        Open Register
+                        {{ $t('pos.open_register') }}
                     </button>
                 </div>
             </div>
 
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Point of Sale</h1>
-                    <p class="mt-1 text-sm text-gray-500">Settle bills and clear tables</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('pos.title') }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ $t('pos.subtitle') }}</p>
                 </div>
                 <Link 
                     v-if="hasPermission('view_cash_register_history')"
@@ -64,7 +64,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    View History
+                    {{ $t('pos.view_history') }}
                 </Link>
             </div>
 
@@ -73,7 +73,7 @@
                 <div class="w-1/2 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
                     <h2 class="text-lg font-bold text-gray-900 sticky top-0 bg-gray-50 pb-2 z-10 flex flex-col gap-2">
                         <div class="flex items-center justify-between">
-                            Active Orders
+                            {{ $t('pos.active_orders') }}
                             <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ filteredOrders.length }}</span>
                         </div>
                         <input 
@@ -85,7 +85,7 @@
                     </h2>
                     
                     <div v-if="filteredOrders.length === 0" class="glass-card p-8 text-center rounded-2xl border-2 border-dashed border-gray-200">
-                        <p class="text-gray-500">No unpaid orders found</p>
+                        <p class="text-gray-500">{{ $t('pos.no_active_orders') }}</p>
                     </div>
 
                     <div 
@@ -111,14 +111,17 @@
                             <div class="flex flex-col gap-1">
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm" :class="selectedOrder?.id === order.id ? 'text-white/90' : 'text-gray-600'">
-                                        {{ order.table ? order.table.name : 'Takeaway' }}
+                                        {{ order.table ? order.table.name : $t('pos.takeaway') }}
                                     </span>
                                     <span v-if="order.type === 'dine_in'" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20">
-                                        Dine In
+                                        {{ $t('pos.dine_in') }}
+                                    </span>
+                                    <span v-else class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20">
+                                        {{ $t('pos.takeaway') }}
                                     </span>
                                 </div>
                                 <span class="text-xs" :class="selectedOrder?.id === order.id ? 'text-white/80' : 'text-gray-400'">
-                                    {{ order.items.length }} Items • {{ order.customer_name || 'Guest' }}
+                                    {{ order.items.length }} {{ $t('common.items') }} • {{ order.customer_name || $t('common.guest') }}
                                 </span>
                             <span class="font-bold text-xl" :class="{ 'text-white': selectedOrder?.id === order.id }">
                                 {{ order.currency || currentCurrency }} {{ order.total }}
@@ -133,13 +136,19 @@
                     <div v-if="selectedOrder" class="glass-card flex flex-col h-full rounded-2xl overflow-hidden border border-gray-200 shadow-xl">
                         <!-- Bill Header -->
                         <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center shrink-0">
-                            <div>
-                                <h3 class="font-bold text-xl text-gray-900">Bill Details</h3>
-                                <p class="text-sm text-gray-500">Order #{{ selectedOrder.order_number }}</p>
+                            <div class="flex items-center gap-4">
+                                <!-- Restaurant Logo -->
+                                <div v-if="currentRestaurant?.logo" class="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                                    <img :src="`/storage/${currentRestaurant.logo}`" class="w-full h-full object-contain" alt="Restaurant Logo" />
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-bold">{{ currentRestaurant?.name || $t('pos.bill_details') }}</h2>
+                                    <p class="text-xs opacity-75">{{ new Date().toLocaleDateString() }}</p>
+                                </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-bold text-gray-900">{{ selectedOrder.table ? 'Table: ' + selectedOrder.table.name : 'Takeaway' }}</p>
-                                <p class="text-xs text-gray-500">{{ selectedOrder.customer_name || 'Guest' }}</p>
+                                <p class="text-sm font-bold text-gray-900">{{ selectedOrder.table ? $t('pos.table') + ': ' + selectedOrder.table.name : $t('pos.takeaway') }}</p>
+                                <p class="text-xs text-gray-500">{{ selectedOrder.customer_name || $t('common.guest') }}</p>
                             </div>
                         </div>
 
@@ -517,6 +526,7 @@ import { usePermissions } from '@/Composables/usePermissions';
 
 const page = usePage();
 const currentCurrency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+const currentRestaurant = computed(() => (page.props.current_restaurant as any));
 const { hasPermission } = usePermissions();
 
 const props = defineProps<{

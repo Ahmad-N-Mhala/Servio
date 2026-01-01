@@ -24,11 +24,9 @@ class MenuController extends Controller
             abort(404, 'Restaurant context not found');
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
             ->with([
                 'items' => function ($query) {
-                    $query->where('is_available', true)
-                        ->with('ingredients')
+                    $query->with('ingredients')
                         ->orderBy('sort_order');
                 }
             ])
@@ -58,6 +56,7 @@ class MenuController extends Controller
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer'],
+            'is_active' => ['boolean'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -83,7 +82,7 @@ class MenuController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'sort_order' => $validated['sort_order'] ?? 0,
-            'is_active' => true,
+            'is_active' => $validated['is_active'] ?? true,
         ]);
 
         return redirect()->back()->with('message', __('menu.category_created'));
@@ -167,6 +166,7 @@ class MenuController extends Controller
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'ingredients' => ['nullable', 'array'],
+            'is_available' => ['boolean'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -206,7 +206,7 @@ class MenuController extends Controller
             'image' => $imagePaths[0] ?? null, // Primary image fallback
             'sort_order' => $validated['sort_order'] ?? 0,
             'allergens' => $validated['allergens'] ?? null,
-            'is_available' => true,
+            'is_available' => $validated['is_available'] ?? true,
         ]);
 
         if ($request->has('ingredients')) {
@@ -219,7 +219,9 @@ class MenuController extends Controller
                     if (isset($ing['id']) && isset($ing['quantity'])) {
                         $recipe[] = [
                             'ingredient_id' => $ing['id'],
-                            'quantity' => (float) $ing['quantity']
+                            'quantity' => (float) $ing['quantity'],
+                            'usage_quantity' => isset($ing['usage_quantity']) ? (float) $ing['usage_quantity'] : (float) $ing['quantity'],
+                            'usage_unit' => $ing['usage_unit'] ?? null,
                         ];
 
                         // Sync Pivot
@@ -307,7 +309,9 @@ class MenuController extends Controller
                         // Build Recipe
                         $recipe[] = [
                             'ingredient_id' => $ing['id'],
-                            'quantity' => (float) $ing['quantity']
+                            'quantity' => (float) $ing['quantity'],
+                            'usage_quantity' => isset($ing['usage_quantity']) ? (float) $ing['usage_quantity'] : (float) $ing['quantity'],
+                            'usage_unit' => $ing['usage_unit'] ?? null,
                         ];
 
                         // Sync Pivot (Required for Eager Loading / Relationships)

@@ -10,9 +10,15 @@
                 :currency="currency"
             >
                 <template #header-actions>
-                    <Button @click="openCreateModal">
-                        {{ $t('inventory.add_item', 'Add Raw Item') }}
-                    </Button>
+                    <div class="flex gap-2">
+                        <Button variant="secondary" @click="openExportModal">
+                            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Export Log
+                        </Button>
+                        <Button @click="openCreateModal">
+                            {{ $t('inventory.add_item', 'Add Raw Item') }}
+                        </Button>
+                    </div>
                 </template>
 
                 <!-- Name Column -->
@@ -104,26 +110,75 @@
                             <p v-if="isEditing" class="text-xs text-gray-500 mt-1">Use 'Add Stock' to update inventory.</p>
                         </div>
                         <div>
-                            <Input id="unit" type="text" v-model="form.unit" label="Unit (e.g. kg, pcs)" required :error="form.errors.unit" />
+                            <Select
+                                id="unit"
+                                v-model="form.unit"
+                                label="Unit"
+                                required
+                                :error="form.errors.unit"
+                            >
+                                <option value="" disabled>Select Unit</option>
+                                <optgroup label="Mass (Weight)">
+                                    <option value="kg">Kilogram (kg)</option>
+                                    <option value="g">Gram (g)</option>
+                                    <option value="mg">Milligram (mg)</option>
+                                </optgroup>
+                                <optgroup label="Volume (Liquid)">
+                                    <option value="l">Liter (l)</option>
+                                    <option value="ml">Milliliter (ml)</option>
+                                </optgroup>
+                                <optgroup label="Count">
+                                    <option value="pcs">Pieces (pcs)</option>
+                                    <option value="box">Box</option>
+                                    <option value="pack">Pack</option>
+                                    <option value="can">Can</option>
+                                    <option value="bottle">Bottle</option>
+                                    <option value="dozen">Dozen</option>
+                                </optgroup>
+                            </Select>
                         </div>
                     </div>
                     <div class="mb-4 grid grid-cols-2 gap-4">
                          <div>
-                            <Input id="cost" type="number" step="0.01" v-model="form.cost" label="Cost per Unit" required :error="form.errors.cost" />
+                            <Input id="cost" type="number" step="0.01" v-model="form.cost" :label="$t('inventory.cost_unit')" required :error="form.errors.cost" />
                         </div>
                         <div>
                             <Input id="reorder" type="number" step="0.0001" v-model="form.reorder_level" label="Low Stock Threshold" placeholder="e.g. 5" />
                         </div>
                     </div>
                     <div class="mb-4">
-                        <Input id="expiry" type="date" v-model="form.expiration_date" label="Expiry Date (Optional)" />
+                        <Input id="expiry" type="date" v-model="form.expiration_date" :label="$t('inventory.expiry_date') + ' (Optional)'" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('inventory.notes_optional') }}</label>
+                        <textarea
+                            v-model="form.notes"
+                            rows="2"
+                            class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all hover:border-slate-300 dark:hover:border-slate-600 disabled:bg-slate-100 disabled:text-slate-500"
+                        ></textarea>
+                    </div>
+                    <div class="mb-4">
+                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('inventory.bill_invoice') }}</label>
+                         <input 
+                            type="file" 
+                            @change="(e) => form.bill = (e.target as HTMLInputElement).files?.[0] || null"
+                            class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-primary/10 file:text-primary
+                                hover:file:bg-primary/20
+                            "
+                            accept=".pdf,.jpg,.jpeg,.png"
+                        />
+                        <p v-if="form.errors.bill" class="text-xs text-red-600 mt-1">{{ form.errors.bill }}</p>
                     </div>
                     <div class="flex justify-end mt-6">
-                        <Button type="submit" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                            Save
+                         <Button type="submit" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                            {{ $t('common.save') }}
                         </Button>
                         <Button type="button" variant="secondary" @click="closeCreateModal" class="ml-2">
-                            Cancel
+                            {{ $t('common.cancel') }}
                         </Button>
                     </div>
                 </form>
@@ -146,7 +201,7 @@
                             type="number" 
                             step="0.01" 
                             v-model="stockForm.added_cost" 
-                            label="Incoming / Batch Unit Cost" 
+                            :label="$t('inventory.incoming_cost')" 
                             :error="stockForm.errors.added_cost" 
                         />
                         <p class="text-xs text-gray-500 mt-1">
@@ -154,7 +209,31 @@
                         </p>
                     </div>
                     <div class="mb-4">
-                        <Input id="stock_expiry" type="date" v-model="stockForm.expiration_date" label="Batch Expiry Date (Optional)" />
+                        <Input id="stock_expiry" type="date" v-model="stockForm.expiration_date" :label="$t('inventory.batch_expiry')" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('inventory.notes_optional') }}</label>
+                        <textarea
+                            v-model="stockForm.notes"
+                            rows="2"
+                            class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all hover:border-slate-300 dark:hover:border-slate-600 disabled:bg-slate-100 disabled:text-slate-500"
+                        ></textarea>
+                    </div>
+                    <div class="mb-4">
+                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('inventory.bill_invoice') }}</label>
+                         <input 
+                            type="file" 
+                            @change="(e) => stockForm.bill = (e.target as HTMLInputElement).files?.[0] || null"
+                            class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-primary/10 file:text-primary
+                                hover:file:bg-primary/20
+                            "
+                            accept=".pdf,.jpg,.jpeg,.png"
+                        />
+                        <p v-if="stockForm.errors.bill" class="text-xs text-red-600 mt-1">{{ stockForm.errors.bill }}</p>
                     </div>
                     <div class="flex justify-end mt-6">
                         <Button type="submit" class="ml-3" :class="{ 'opacity-25': stockForm.processing }" :disabled="stockForm.processing">
@@ -172,17 +251,18 @@
         <Modal :show="showHistoryModal" @close="closeHistoryModal" maxWidth="7xl">
             <div class="p-6">
                  <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                   History: {{ getLocaleName(selectedItem?.name) }}
+                   {{ $t('inventory.history') }}: {{ getLocaleName(selectedItem?.name) }}
                 </h3>
                 <div class="overflow-x-auto max-h-[70vh]">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Level</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User/Notes</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.date') || 'Date' }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.action') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.change') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.new_level') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.user_notes') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.docs') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -197,16 +277,27 @@
                                     {{ log.user ? log.user.name : 'System' }}
                                     <span v-if="log.notes" class="block text-xs text-gray-400">{{ log.notes }}</span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <a 
+                                        v-if="log.bill_path" 
+                                        :href="`/storage/${log.bill_path}`" 
+                                        target="_blank"
+                                        class="text-primary hover:text-primary-hover underline text-xs flex items-center gap-1"
+                                    >
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        {{ $t('inventory.download') }}
+                                    </a>
+                                </td>
                             </tr>
                             <tr v-if="historyLogs.length === 0">
-                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No history found.</td>
+                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">{{ $t('inventory.no_history') }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="flex justify-end mt-6">
                     <Button type="button" variant="secondary" @click="closeHistoryModal">
-                        Close
+                        {{ $t('common.close') }}
                     </Button>
                 </div>
             </div>
@@ -220,10 +311,10 @@
                         <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        Stock Batches: {{ getLocaleName(selectedItem?.name) }}
+                        {{ $t('inventory.stock_batches') }}: {{ getLocaleName(selectedItem?.name) }}
                     </h3>
                     <div class="text-sm px-3 py-1 bg-primary/10 text-primary rounded-full font-semibold">
-                        Total Stock: {{ selectedItem?.current_stock }} {{ selectedItem?.unit }}
+                        {{ $t('inventory.total_stock') }}: {{ selectedItem?.current_stock }} {{ selectedItem?.unit }}
                     </div>
                 </div>
 
@@ -232,12 +323,12 @@
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider">Batch #</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Initial Qty</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Remaining</th>
-                                    <th class="px-6 py-3 text-right font-semibold text-gray-500 uppercase tracking-wider">Cost/Unit</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Received At</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">Expiry</th>
+                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.batch_number') }}</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.initial_qty') }}</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.remaining') }}</th>
+                                    <th class="px-6 py-3 text-right font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.cost_unit') }}</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.received_at') }}</th>
+                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.expiry_date') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -268,7 +359,7 @@
                                 </tr>
                                 <tr v-if="selectedIngredientBatches.length === 0">
                                     <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">
-                                        No batches found for this ingredient.
+                                        {{ $t('inventory.no_batches') }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -277,8 +368,33 @@
                 </div>
 
                 <div class="mt-8 flex justify-end">
-                    <Button variant="secondary" @click="closeBatchesModal" class="px-6">Close</Button>
+                    <Button variant="secondary" @click="closeBatchesModal" class="px-6">{{ $t('common.close') }}</Button>
                 </div>
+            </div>
+        </Modal>
+
+        <!-- Export Modal -->
+        <Modal :show="showExportModal" @close="closeExportModal">
+            <div class="p-6">
+                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ $t('inventory.export_report') }}</h3>
+                 <form @submit.prevent="submitExport">
+                     <p class="text-sm text-gray-500 mb-4">{{ $t('inventory.select_duration') }}</p>
+                     <div class="mb-4 grid grid-cols-2 gap-4">
+                         <div>
+                             <Input id="start_date" type="date" v-model="exportForm.start_date" label="Start Date" required />
+                         </div>
+                         <div>
+                             <Input id="end_date" type="date" v-model="exportForm.end_date" label="End Date" required />
+                         </div>
+                     </div>
+                     <div class="flex justify-end mt-6">
+                         <Button type="submit" class="ml-3">
+                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                             {{ $t('inventory.download_excel') }}
+                         </Button>
+                         <Button type="button" variant="secondary" @click="closeExportModal" class="ml-2">{{ $t('common.cancel') }}</Button>
+                     </div>
+                 </form>
             </div>
         </Modal>
 
@@ -291,6 +407,7 @@ import { useForm, router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
 import Button from '@/Components/Button.vue';
 import Table from '@/Components/Table.vue';
 import { useI18n } from 'vue-i18n';
@@ -321,6 +438,7 @@ const showCreateModal = ref(false);
 const showStockModal = ref(false);
 const showHistoryModal = ref(false);
 const showBatchesModal = ref(false);
+const showExportModal = ref(false);
 const isEditing = ref(false);
 const selectedItem = ref<any>(null);
 const historyLogs = ref<any[]>([]);
@@ -334,6 +452,8 @@ const form = useForm<any>({
     cost: 0,
     reorder_level: null,
     expiration_date: null,
+    bill: null,
+    notes: '',
 });
 
 const stockForm = useForm<any>({
@@ -341,6 +461,13 @@ const stockForm = useForm<any>({
     add_stock: 0,
     added_cost: 0,
     expiration_date: null,
+    bill: null,
+    notes: '',
+});
+
+const exportForm = ref({
+    start_date: new Date().toISOString().substr(0, 10),
+    end_date: new Date().toISOString().substr(0, 10)
 });
 
 const getLocaleName = (name: any) => {
@@ -381,12 +508,31 @@ const openCreateModal = () => {
     isEditing.value = false;
     form.reset();
     form.clearErrors();
+    form.bill = null;
+    form.notes = '';
     showCreateModal.value = true;
 };
 
 const closeCreateModal = () => {
     showCreateModal.value = false;
     form.reset();
+};
+
+const openExportModal = () => {
+    showExportModal.value = true;
+};
+
+const closeExportModal = () => {
+    showExportModal.value = false;
+};
+
+const submitExport = () => {
+    const url = route('inventory.export', {
+        start_date: exportForm.value.start_date,
+        end_date: exportForm.value.end_date
+    });
+    window.location.href = url;
+    closeExportModal();
 };
 
 const openEditModal = (item: any) => {
@@ -399,12 +545,17 @@ const openEditModal = (item: any) => {
     form.unit = item.unit;
     form.cost = item.cost;
     form.reorder_level = item.reorder_level;
+    form.bill = null;
+    form.notes = '';
     showCreateModal.value = true;
 };
 
 const submitCreate = () => {
     if (isEditing.value) {
-        form.put(route('inventory.update', form.id), {
+        form.transform((data) => ({
+            ...data,
+            _method: 'PUT',
+        })).post(route('inventory.update', form.id), {
             preserveScroll: true,
             onSuccess: () => closeCreateModal(),
         });
@@ -429,7 +580,9 @@ const openAddStockModal = (item: any) => {
     stockForm.reset();
     stockForm.clearErrors();
     stockForm.id = item.id;
-    stockForm.added_cost = item.cost; 
+    stockForm.added_cost = item.cost;
+    stockForm.bill = null; 
+    stockForm.notes = '';
     showStockModal.value = true;
 };
 
@@ -439,8 +592,11 @@ const closeStockModal = () => {
 };
 
 const submitAddStock = () => {
-    // Using update route to add stock as per controller logic
-    stockForm.put(route('inventory.update', stockForm.id), {
+    // IMPORTANT: File uploads with PUT require POST + _method: 'PUT' in Laravel/Inertia
+    stockForm.transform((data) => ({
+        ...data,
+        _method: 'PUT',
+    })).post(route('inventory.update', stockForm.id), {
         preserveScroll: true,
         onSuccess: () => closeStockModal(),
     });

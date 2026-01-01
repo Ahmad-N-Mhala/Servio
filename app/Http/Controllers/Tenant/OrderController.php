@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\LoyaltyService;
+use App\Events\OrderUpdated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -344,6 +345,7 @@ class OrderController extends Controller
             'items.*.menu_item_id' => ['required', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.notes' => ['nullable', 'string', 'max:500'],
             'subtotal' => ['required', 'numeric', 'min:0'],
             'tax' => ['nullable', 'numeric', 'min:0'],
             'discount_amount' => ['nullable', 'numeric', 'min:0'],
@@ -452,6 +454,7 @@ class OrderController extends Controller
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['unit_price'],
                 'total_price' => $item['quantity'] * $item['unit_price'],
+                'notes' => $item['notes'] ?? null,
             ]);
         }
 
@@ -470,6 +473,9 @@ class OrderController extends Controller
                 $redemption->markAsUsed($order->id);
             }
         }
+
+        // Broadcast order created event for real-time updates
+        broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.order_created'));
     }
@@ -632,6 +638,9 @@ class OrderController extends Controller
             }
         }
         // ====== END INVENTORY DEDUCTION ======
+
+        // Broadcast order status changed event for real-time updates
+        broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'status_changed'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.status_updated'));
     }

@@ -82,10 +82,10 @@
                 <div 
                     v-for="restaurant in restaurants" 
                     :key="restaurant.id"
-                    class="bg-white overflow-hidden shadow-sm hover:shadow-md rounded-xl border border-gray-100 cursor-pointer hover:border-primary/20 transition-all"
+                    class="bg-white overflow-hidden shadow-sm hover:shadow-md rounded-xl border border-gray-100 cursor-pointer hover:border-primary/20 transition-all flex flex-col"
                     @click="switchRestaurant(restaurant)"
                 >
-                    <div class="p-5 sm:p-6">
+                    <div class="p-5 sm:p-6 flex-1">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
                                 <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg sm:text-xl">
@@ -112,18 +112,33 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="bg-gray-50/50 px-5 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-t border-gray-100">
-                        <div class="text-xs sm:text-sm">
-                            <span class="text-gray-500">Plan: </span>
-                            <span class="font-bold text-gray-900 capitalize">{{ restaurant.plan }}</span>
-                        </div>
-                        <div v-if="restaurant.is_active" class="flex items-center text-emerald-600 text-xs sm:text-sm font-bold">
-                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
-                            Active
-                        </div>
-                        <div v-else class="flex items-center text-red-600 text-xs sm:text-sm font-bold">
-                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full mr-1.5"></span>
-                            Inactive
+                         <div class="flex items-center gap-3">
+                             <div class="text-xs sm:text-sm">
+                                <span class="text-gray-500">Plan: </span>
+                                <span class="font-bold text-gray-900 capitalize">{{ restaurant.plan }}</span>
+                            </div>
+                         </div>
+
+                        <div class="flex items-center gap-3">
+                             <button
+                                v-if="restaurant.role === 'owner' || props.canEditAny" 
+                                @click.stop="editRestaurant(restaurant)"
+                                class="text-gray-400 hover:text-primary transition-colors p-1"
+                                title="Edit Restaurant Details"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00-2 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+
+                             <div v-if="restaurant.is_active" class="flex items-center text-emerald-600 text-xs sm:text-sm font-bold">
+                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
+                                Active
+                            </div>
+                            <div v-else class="flex items-center text-red-600 text-xs sm:text-sm font-bold">
+                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full mr-1.5"></span>
+                                Inactive
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,6 +171,7 @@ const props = defineProps<{
     restaurants: Restaurant[];
     canAddRestaurant: boolean;
     currentPlan: CurrentPlan | null;
+    canEditAny?: boolean; // Passed from controller based on permission
 }>();
 
 const switchRestaurant = (restaurant: Restaurant) => {
@@ -164,5 +180,9 @@ const switchRestaurant = (restaurant: Restaurant) => {
 
 const handleAddRestaurant = () => {
     router.get(route('restaurants.create'));
+};
+
+const editRestaurant = (restaurant: Restaurant) => {
+    router.get(route('restaurants.edit', restaurant.id));
 };
 </script>
