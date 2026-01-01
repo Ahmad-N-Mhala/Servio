@@ -1,0 +1,25 @@
+[
+    {
+        "status": "active",
+        "billing_cycle": "monthly",
+        "starts_at": "2025-12-27T19:59:10.115000Z",
+        "ends_at": "2026-01-27T19:59:10.115000Z",
+        "updated_at": "2025-12-27T19:59:10.115000Z",
+        "created_at": "2025-12-27T19:59:10.115000Z",
+        "id": {
+            "$oid": "69503a8eeaf319e8830776f2"
+        }
+    },
+    {
+        "status": "active",
+        "billing_cycle": "monthly",
+        "starts_at": "2025-12-27T20:15:12.780000Z",
+        "ends_at": "2026-01-27T20:15:12.780000Z",
+        "stripe_subscription_id": "sub_free_QmK0DHf868u0HMET",
+        "updated_at": "2025-12-27T20:15:12.780000Z",
+        "created_at": "2025-12-27T20:15:12.780000Z",
+        "id": {
+            "$oid": "69503e50eaf319e883077718"
+        }
+    }
+]

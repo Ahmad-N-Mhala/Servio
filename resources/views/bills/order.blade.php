@@ -238,7 +238,7 @@
             <div class="col-right">
                 <div class="label">Order Details</div>
                 <div class="value">
-                    Order #: <strong>{{ $order->order_number }}</strong><br>
+                    Transaction #: <strong>{{ $order->order_number }}</strong><br>
                     Date: {{ $order->created_at->format('M d, Y h:i A') }}<br>
                 </div>
             </div>

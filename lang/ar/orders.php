@@ -8,5 +8,13 @@ return [
     'processing' => 'قيد المعالجة',
     'completed' => 'مكتمل',
     'cancelled' => 'ملغي',
+    'actions' => 'إجراءات',
+    'view_bill' => 'عرض الفاتورة',
+    'view_receipt' => 'عرض الإيصال',
+    'order_number' => 'رقم المعاملة',
+    'customer' => 'العميل',
+    'total' => 'المجموع',
+    'payment' => 'الدفع',
+    'duration' => 'المدة',
 ];
 

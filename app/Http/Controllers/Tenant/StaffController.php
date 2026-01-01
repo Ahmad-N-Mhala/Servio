@@ -113,6 +113,7 @@ class StaffController extends Controller
                     'id' => $staff->id,
                     'name' => $staff->user->name ?? 'Unknown',
                     'email' => $staff->user->email ?? 'Unknown',
+                    'phone' => $staff->user->phone ?? 'N/A', // Added phone
                     'role' => $staff->role,
                     'is_active' => $staff->is_active,
                     'joined_at' => $staff->joined_at?->format('Y-m-d'),
@@ -133,10 +134,39 @@ class StaffController extends Controller
             'by_role' => $allStaff->groupBy('role')->map->count(),
         ];
 
+
+        // Fetch Roles dynamically
+        $dbRoles = \App\Models\Role::all();
+        $configNames = config('roles.display_names', []);
+        $locale = app()->getLocale();
+
+        $rolesList = [];
+        foreach ($dbRoles as $role) {
+            $label = null;
+            // 1. DB Display Name
+            if (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name))) {
+                $display = (array) $role->display_name;
+                $label = $display[$locale] ?? $display['en'] ?? null;
+            }
+            // 2. Config
+            if (!$label) {
+                $label = $configNames[$role->name] ?? null;
+            }
+            // 3. Fallback
+            if (!$label) {
+                $label = ucwords(str_replace('_', ' ', $role->name));
+            }
+
+            $rolesList[] = [
+                'value' => $role->name,
+                'label' => $label
+            ];
+        }
+
         return Inertia::render('Staff/Manage', [
             'staff' => $staff,
             'stats' => $stats,
-            'roles' => array_keys(config('roles.display_names')),
+            'roles' => $rolesList,
             'filters' => $request->only(['search', 'sort_field', 'sort_direction']),
         ]);
     }
@@ -146,7 +176,16 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'role' => ['required', config('roles.validation_rule')],
+            'phone' => ['required', 'string', 'max:20'], // Ask for phone
+            'role' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!\App\Models\Role::where('name', $value)->exists()) {
+                        $fail('The selected role is invalid.');
+                    }
+                }
+            ],
         ]);
 
         $restaurant = Restaurant::find(session('active_restaurant_id'));
@@ -159,6 +198,7 @@ class StaffController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'],
             'password' => Hash::make($password),
             'email_verified_at' => now(),
         ]);
@@ -205,7 +245,16 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'unique:users,email,' . $staff->user_id],
-            'role' => ['sometimes', config('roles.validation_rule')],
+            'phone' => ['sometimes', 'string', 'max:20'],
+            'role' => [
+                'sometimes',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!\App\Models\Role::where('name', $value)->exists()) {
+                        $fail('The selected role is invalid.');
+                    }
+                }
+            ],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
@@ -218,6 +267,8 @@ class StaffController extends Controller
             $userUpdateData['name'] = $validated['name'];
         if (isset($validated['email']))
             $userUpdateData['email'] = $validated['email'];
+        if (isset($validated['phone']))
+            $userUpdateData['phone'] = $validated['phone'];
 
         if (!empty($userUpdateData)) {
             $user->update($userUpdateData);

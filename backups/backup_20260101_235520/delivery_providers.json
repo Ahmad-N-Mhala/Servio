@@ -1,0 +1,48 @@
+[
+    {
+        "name": "noon",
+        "slug": "noon",
+        "description": null,
+        "api_documentation_url": null,
+        "requires_api_key": "1",
+        "requires_api_secret": "1",
+        "requires_store_id": "1",
+        "requires_webhook_secret": "1",
+        "is_active": "1",
+        "sort_order": 1,
+        "updated_at": "2025-12-26T18:29:25.655000Z",
+        "created_at": "2025-12-26T18:07:53.686000Z",
+        "logo_url": null,
+        "requires_client_id": "1",
+        "requires_client_secret": "1",
+        "requires_password": "1",
+        "requires_username": "1",
+        "webhook_url_template": null,
+        "id": {
+            "$oid": "694ecef94c7837e511064ba2"
+        }
+    },
+    {
+        "name": "sad",
+        "slug": "sad",
+        "description": null,
+        "api_documentation_url": null,
+        "requires_api_key": "0",
+        "requires_api_secret": "0",
+        "requires_store_id": "1",
+        "requires_webhook_secret": "1",
+        "is_active": "1",
+        "sort_order": "0",
+        "updated_at": "2025-12-26T18:26:55.768000Z",
+        "created_at": "2025-12-26T18:22:43.004000Z",
+        "logo_url": null,
+        "requires_client_id": "0",
+        "requires_client_secret": "0",
+        "requires_password": "0",
+        "requires_username": "0",
+        "webhook_url_template": null,
+        "id": {
+            "$oid": "694ed2734c7837e511064ba3"
+        }
+    }
+]

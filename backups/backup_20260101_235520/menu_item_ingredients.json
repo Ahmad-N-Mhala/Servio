@@ -1,0 +1,114 @@
+[
+    {
+        "menu_item_id": {
+            "$oid": "694abb045adaff86060a6d1f"
+        },
+        "ingredient_id": {
+            "$oid": "694ab4a05adaff86060a6d15"
+        },
+        "quantity": 3,
+        "updated_at": "2025-12-23T15:53:40.391000Z",
+        "created_at": "2025-12-23T15:53:40.391000Z",
+        "id": {
+            "$oid": "694abb045adaff86060a6d20"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "694abc795adaff86060a6d24"
+        },
+        "ingredient_id": {
+            "$oid": "694abc5e5adaff86060a6d21"
+        },
+        "quantity": 2,
+        "updated_at": "2025-12-23T15:59:53.324000Z",
+        "created_at": "2025-12-23T15:59:53.324000Z",
+        "id": {
+            "$oid": "694abc795adaff86060a6d25"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "6954254eed481145dc0e0e02"
+        },
+        "ingredient_id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        },
+        "quantity": 1,
+        "updated_at": "2026-01-01T09:16:46.287000Z",
+        "created_at": "2026-01-01T09:16:46.287000Z",
+        "id": {
+            "$oid": "69563b7eaeff1b1ae101c525"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "69563bc8aeff1b1ae101c526"
+        },
+        "ingredient_id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        },
+        "quantity": 0.05,
+        "updated_at": "2026-01-01T09:18:00.191000Z",
+        "created_at": "2026-01-01T09:18:00.191000Z",
+        "id": {
+            "$oid": "69563bc8aeff1b1ae101c527"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "69563bc8aeff1b1ae101c526"
+        },
+        "ingredient_id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        },
+        "quantity": 0.05,
+        "updated_at": "2026-01-01T09:19:25.548000Z",
+        "created_at": "2026-01-01T09:19:25.548000Z",
+        "id": {
+            "$oid": "69563c1daeff1b1ae101c52a"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "69563bc8aeff1b1ae101c526"
+        },
+        "ingredient_id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        },
+        "quantity": 0.05,
+        "updated_at": "2026-01-01T10:49:13.224000Z",
+        "created_at": "2026-01-01T10:49:13.224000Z",
+        "id": {
+            "$oid": "69565129aeff1b1ae101c53c"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "69563bc8aeff1b1ae101c526"
+        },
+        "ingredient_id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        },
+        "quantity": 0.05,
+        "updated_at": "2026-01-01T10:49:21.101000Z",
+        "created_at": "2026-01-01T10:49:21.101000Z",
+        "id": {
+            "$oid": "69565131aeff1b1ae101c53d"
+        }
+    },
+    {
+        "menu_item_id": {
+            "$oid": "69563bc8aeff1b1ae101c526"
+        },
+        "ingredient_id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        },
+        "quantity": 0.05,
+        "updated_at": "2026-01-01T16:34:56.666000Z",
+        "created_at": "2026-01-01T16:34:56.666000Z",
+        "id": {
+            "$oid": "6956a23001134f518209abf6"
+        }
+    }
+]

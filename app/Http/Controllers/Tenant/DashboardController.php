@@ -299,6 +299,21 @@ class DashboardController extends Controller
                 ];
             })->values()->sortBy('hour')->values();
 
+        // -- Payment Method Distribution --
+        $paymentDistribution = (clone $baseOrderQuery)
+            ->where('status', 'completed')
+            ->get()
+            ->groupBy(function ($order) {
+                return $order->payment_method ?? 'unknown';
+            })
+            ->map(function ($group, $method) {
+                return [
+                    'method' => ucwords(str_replace('_', ' ', $method)),
+                    'count' => $group->count(),
+                    'total' => (float) (string) $group->sum('total'),
+                ];
+            })->values();
+
         // -- Top Menu Items --
         // Simplified top items logic
         $allItems = [];
@@ -367,7 +382,8 @@ class DashboardController extends Controller
             'status_distribution' => $statusDistribution,
             'peak_hours' => $peakHours,
             'top_menu_items' => $topMenuItems,
-            'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
+            'payment_distribution' => $paymentDistribution,
+            // 'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
             'date_range' => [
                 'start_date' => $startDate->format('Y-m-d'),
                 'end_date' => $endDate->format('Y-m-d'),

@@ -152,15 +152,24 @@
                             </div>
                         </div>
 
-                        <!-- Bill Items (Editable) -->
+                        <!-- Bill Items (Read-Only with Update Button) -->
                         <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-white">
-                            <div v-for="(item, index) in editableItems" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0 group">
+                            <!-- Update Order Button -->
+                            <button 
+                                @click="showUpdateOrderModal = true"
+                                class="w-full py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 mb-4"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Update Order
+                            </button>
+                            
+                            <div v-for="item in editableItems" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0 group">
                                 <div class="flex items-center gap-3 flex-1">
-                                    <!-- Quantity Controls -->
-                                    <div class="flex items-center bg-gray-50 rounded-lg border border-gray-200">
-                                        <button @click="updateQuantity(index, -1)" class="px-2 py-1 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-l-lg transition-colors font-bold">-</button>
-                                        <span class="w-6 text-center text-sm font-bold text-gray-900">{{ item.quantity }}</span>
-                                        <button @click="updateQuantity(index, 1)" class="px-2 py-1 text-gray-600 hover:text-green-500 hover:bg-green-50 rounded-r-lg transition-colors font-bold">+</button>
+                                    <!-- Quantity Display (Read-Only) -->
+                                    <div class="flex items-center bg-gray-100 rounded-lg border border-gray-200 px-3 py-1">
+                                        <span class="text-sm font-bold text-gray-900">{{ item.quantity }}x</span>
                                     </div>
                                     
                                     <div>
@@ -270,6 +279,38 @@
                                 <button @click="updateOrder" :disabled="processing" class="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-lg shadow-sm">
                                     Changes Detected - Update Bill
                                 </button>
+                            </div>
+                            
+                            <!-- Print Receipt Button (Manual) -->
+                            <button 
+                                @click="printCurrentReceipt"
+                                :disabled="hasUnsavedChanges"
+                                :class="['w-full py-2.5 border-2 rounded-xl flex items-center justify-center gap-2 transition-all mb-3 text-sm font-bold',
+                                    hasUnsavedChanges 
+                                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' 
+                                        : 'bg-white border-gray-200 hover:border-primary/50 text-gray-700 hover:bg-gray-50'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2v4h10z" />
+                                </svg>
+                                {{ hasUnsavedChanges ? 'Save Changes to Print' : 'Print Receipt' }}
+                            </button>
+
+                            <!-- Print Bill Checkbox -->
+                            <div class="flex items-center gap-2 p-3 bg-white rounded-xl border border-gray-200">
+                                <input 
+                                    id="printBill" 
+                                    v-model="printBill" 
+                                    type="checkbox" 
+                                    class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                                >
+                                <label for="printBill" class="text-sm font-medium text-gray-700 cursor-pointer select-none flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    Print Bill (POS Printer)
+                                </label>
                             </div>
 
                             <!-- Payment Section -->
@@ -515,11 +556,231 @@
                 </form>
             </div>
         </div>
+        
+        <!-- Update Order Modal -->
+        <div v-if="showUpdateOrderModal && selectedOrder" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white rounded-2xl shadow-xl max-w-6xl w-full my-8">
+                <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-blue-50">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Update Order #{{ selectedOrder.order_number }}</h3>
+                            <p class="text-sm text-gray-600 mt-1">Modify customer details, order type, table, and items</p>
+                        </div>
+                        <button @click="closeUpdateOrderModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar space-y-6">
+                    <!-- Customer Details Section -->
+                    <div class="glass-card rounded-xl p-5 border border-gray-200">
+                        <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <div class="p-1.5 bg-primary/10 rounded-lg">
+                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            Customer Details
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Customer Name</label>
+                                <input 
+                                    v-model="updateForm.customer_name"
+                                    type="text"
+                                    placeholder="Optional"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Phone Number</label>
+                                <input 
+                                    v-model="updateForm.customer_phone"
+                                    type="tel"
+                                    placeholder="Optional"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Type & Table Section -->
+                    <div class="glass-card rounded-xl p-5 border border-gray-200">
+                        <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <div class="p-1.5 bg-blue-100 rounded-lg">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            Order Type & Table
+                        </h4>
+                        <div class="flex gap-3 mb-4">
+                            <label class="flex-1 cursor-pointer group">
+                                <input type="radio" v-model="updateForm.type" value="dine_in" class="peer sr-only">
+                                <div class="p-3 rounded-lg border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5 text-gray-400 peer-checked:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    </svg>
+                                    <span class="font-semibold text-sm text-gray-700 peer-checked:text-primary">Dine In</span>
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer group">
+                                <input type="radio" v-model="updateForm.type" value="takeaway" class="peer sr-only">
+                                <div class="p-3 rounded-lg border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5 text-gray-400 peer-checked:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                    <span class="font-semibold text-sm text-gray-700 peer-checked:text-primary">Takeaway</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div v-if="updateForm.type === 'dine_in'" class="animate-fade-in-up">
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Select Table</label>
+                            <select 
+                                v-model="updateForm.table_id" 
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            >
+                                <option :value="null">No table assigned</option>
+                                <option v-for="table in tables" :key="table.id" :value="table.id" :disabled="!table.is_available && table.id !== selectedOrder.table_id">
+                                    {{ table.name }} ({{ table.capacity }} seats){{ table.location ? ' - ' + table.location : '' }}{{ !table.is_available && table.id !== selectedOrder.table_id ? ' [OCCUPIED]' : '' }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Current Order Items -->
+                    <div class="glass-card rounded-xl p-5 border border-gray-200">
+                        <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <div class="p-1.5 bg-green-100 rounded-lg">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </div>
+                            Current Order Items
+                            <span class="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-semibold">{{ editableItems.length }} items</span>
+                        </h4>
+                        <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                            <div v-for="(item, index) in editableItems" :key="item.id" class="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-primary/30 transition-all">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || item.menu_item?.name || 'Item' }}</span>
+                                    <span v-if="item.notes" class="text-xs text-gray-500 italic bg-amber-50 px-2 py-0.5 rounded">📝 {{ item.notes }}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm">
+                                        <button @click="updateItemQuantity(index, -1)" class="px-3 py-1.5 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-l-lg transition-colors font-bold">−</button>
+                                        <span class="w-10 text-center text-sm font-bold text-gray-900">{{ item.quantity }}</span>
+                                        <button @click="updateItemQuantity(index, 1)" class="px-3 py-1.5 text-gray-600 hover:text-green-500 hover:bg-green-50 rounded-r-lg transition-colors font-bold">+</button>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-900 min-w-[5rem] text-right">
+                                        {{ selectedOrder.currency || currentCurrency }} {{ (item.quantity * item.unit_price).toFixed(2) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div v-if="editableItems.length === 0" class="text-center text-gray-400 text-sm py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                </svg>
+                                No items in order. Add items below.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add Menu Items - Organized by Category -->
+                    <div class="glass-card rounded-xl p-5 border border-gray-200">
+                        <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <div class="p-1.5 bg-purple-100 rounded-lg">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            Add Menu Items
+                        </h4>
+                        
+                        <!-- Category Tabs -->
+                        <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                            <button 
+                                v-for="category in menuCategories" 
+                                :key="category.id"
+                                @click="selectedCategory = category.id"
+                                :class="[
+                                    'px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all',
+                                    selectedCategory === category.id 
+                                        ? 'bg-primary text-white shadow-md' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ]"
+                            >
+                                {{ category.name?.en || category.name }}
+                                <span class="ml-1.5 text-xs opacity-75">({{ category.items?.length || 0 }})</span>
+                            </button>
+                        </div>
+
+                        <!-- Menu Items Grid -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto custom-scrollbar">
+                            <button 
+                                v-for="menuItem in filteredMenuItems" 
+                                :key="menuItem.id"
+                                @click="addItemToOrder(menuItem)"
+                                class="p-3 text-left bg-white border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-lg transition-all group relative overflow-hidden"
+                            >
+                                <!-- Item Image (if available) -->
+                                <div v-if="menuItem.image" class="w-full h-20 mb-2 rounded-lg overflow-hidden bg-gray-100">
+                                    <img 
+                                        :src="menuItem.image.startsWith('http') ? menuItem.image : '/storage/' + menuItem.image" 
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                        :alt="menuItem.name?.en || menuItem.name"
+                                    />
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <p class="text-sm font-semibold text-gray-900 group-hover:text-primary line-clamp-2 leading-tight">
+                                        {{ menuItem.name?.en || menuItem.name }}
+                                    </p>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <span class="text-xs font-bold text-primary">{{ currentCurrency }} {{ menuItem.price }}</span>
+                                        <svg class="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Updated Total:</span>
+                            <span class="text-xs text-gray-500 ml-2">(Subtotal + 5% Tax)</span>
+                        </div>
+                        <span class="text-2xl font-bold text-primary">{{ selectedOrder.currency || currentCurrency }} {{ calculateModalTotal().toFixed(2) }}</span>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="closeUpdateOrderModal" class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all">
+                            Cancel
+                        </button>
+                        <button 
+                            @click="saveOrderUpdates" 
+                            :disabled="processing"
+                            class="px-8 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-hover rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                        >
+                            <svg v-if="processing" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ processing ? 'Saving Changes...' : 'Save All Changes' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { usePermissions } from '@/Composables/usePermissions';
@@ -532,6 +793,7 @@ const { hasPermission } = usePermissions();
 const props = defineProps<{
     orders: any[];
     tables: any[];
+    menuItems: any[];
     currentRegister: any;
     currentBalance: number;
 }>();
@@ -546,6 +808,8 @@ const searchQuery = ref('');
 const selectedOrder = ref<any>(null);
 const paymentMethod = ref<string>('cash');
 const processing = ref(false);
+const printBill = ref(true); // Default to yes
+const showUpdateOrderModal = ref(false);
 
 // Formatting state
 const discountType = ref('fixed');
@@ -559,6 +823,52 @@ const adjustmentMode = ref<'none' | 'discount' | 'extra'>('none');
 // Temporary state for the active adjustment input
 const activeType = ref('fixed');
 const activeValue = ref(0);
+
+// Update Form State
+const updateForm = ref({
+    customer_name: '',
+    customer_phone: '',
+    type: 'dine_in',
+    table_id: null as number | null
+});
+
+// Menu Category Selection
+const selectedCategory = ref<number | null>(null);
+
+// Organize menu items by category
+const menuCategories = computed(() => {
+    const categories: any[] = [];
+    const categoryMap = new Map();
+    
+    props.menuItems.forEach((item: any) => {
+        const categoryId = item.category_id || item.category?.id || 0;
+        const categoryName = item.category?.name || { en: 'Uncategorized', ar: 'غير مصنف' };
+        
+        if (!categoryMap.has(categoryId)) {
+            categoryMap.set(categoryId, {
+                id: categoryId,
+                name: categoryName,
+                items: []
+            });
+            categories.push(categoryMap.get(categoryId));
+        }
+        
+        categoryMap.get(categoryId).items.push(item);
+    });
+    
+    return categories;
+});
+
+// Filtered menu items based on selected category
+const filteredMenuItems = computed(() => {
+    if (!selectedCategory.value) {
+        // If no category selected, show first category or all items
+        return menuCategories.value[0]?.items || props.menuItems;
+    }
+    
+    const category = menuCategories.value.find(c => c.id === selectedCategory.value);
+    return category?.items || [];
+});
 
 watch(selectedOrder, (newOrder) => {
     if (newOrder) {
@@ -581,6 +891,19 @@ watch(selectedOrder, (newOrder) => {
 
         paymentMethod.value = newOrder.payment_method || 'cash';
         adjustmentMode.value = 'none'; // reset mode
+        
+        // Populate update form with order details
+        updateForm.value = {
+            customer_name: newOrder.customer_name || '',
+            customer_phone: newOrder.customer_phone || '',
+            type: newOrder.type || 'dine_in',
+            table_id: newOrder.table_id || null
+        };
+        
+        // Initialize selected category to first category
+        if (menuCategories.value.length > 0) {
+            selectedCategory.value = menuCategories.value[0].id;
+        }
     } else {
         discountValue.value = 0;
         additionalChargeValue.value = 0;
@@ -649,15 +972,112 @@ const selectOrder = (order: any) => {
     selectedOrder.value = order;
 };
 
-const updateQuantity = (index: number, delta: number) => {
+const closeUpdateOrderModal = () => {
+    showUpdateOrderModal.value = false;
+};
+
+// Modal functions for updating order items
+const updateItemQuantity = (index: number, delta: number) => {
     const item = editableItems.value[index];
     if (item) {
         item.quantity = Math.max(0, item.quantity + delta);
+        // Remove item if quantity is 0
+        if (item.quantity === 0) {
+            editableItems.value.splice(index, 1);
+        }
     }
-    // Auto-update order on quantity change? 
-    // User requested "price updated based on updated".
-    // I will trigger updateOrder debounced? Or just show the "Update Bill" button strongly.
-    // I'll show the "Changes Detected" button.
+};
+
+const addItemToOrder = (menuItem: any) => {
+    // Check if item already exists in order
+    const existingItem = editableItems.value.find(item => item.menu_item_id === menuItem.id);
+    
+    if (existingItem) {
+        // Increment quantity if already exists
+        existingItem.quantity += 1;
+        existingItem.total_price = existingItem.quantity * existingItem.unit_price;
+    } else {
+        // Add new item to order
+        editableItems.value.push({
+            id: `new_${Date.now()}`, // Temporary ID for new items
+            menu_item_id: menuItem.id,
+            menu_item: menuItem,
+            quantity: 1,
+            unit_price: menuItem.price,
+            total_price: menuItem.price,
+            notes: ''
+        });
+    }
+};
+
+const calculateModalTotal = () => {
+    const subtotal = editableItems.value.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const tax = subtotal * 0.05;
+    
+    let discountAmount = 0;
+    if (discountType.value === 'percent') {
+        discountAmount = subtotal * (discountValue.value / 100);
+    } else {
+        discountAmount = discountValue.value;
+    }
+
+    let additionalChargeAmount = 0;
+    if (additionalChargeType.value === 'percent') {
+        additionalChargeAmount = subtotal * (additionalChargeValue.value / 100);
+    } else {
+        additionalChargeAmount = additionalChargeValue.value;
+    }
+
+    return Math.max(0, subtotal + tax + additionalChargeAmount - discountAmount);
+};
+
+const saveOrderUpdates = () => {
+    if (!selectedOrder.value) return;
+    
+    processing.value = true;
+    
+    // Prepare items data - separate existing and new items
+    const itemsData = editableItems.value.map(item => {
+        if (item.id.toString().startsWith('new_')) {
+            // New item
+            return {
+                menu_item_id: item.menu_item_id,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                notes: item.notes || ''
+            };
+        } else {
+            // Existing item
+            return {
+                id: item._id || item.id,
+                quantity: item.quantity
+            };
+        }
+    });
+    
+    router.put(`/pos/${selectedOrder.value.id}`, {
+        // Order items
+        items: itemsData,
+        // Adjustments
+        discount_type: discountType.value,
+        discount_value: discountValue.value,
+        additional_charge_type: additionalChargeType.value,
+        additional_charge_value: additionalChargeValue.value,
+        // Customer details
+        customer_name: updateForm.value.customer_name,
+        customer_phone: updateForm.value.customer_phone,
+        // Order type and table
+        type: updateForm.value.type,
+        table_id: updateForm.value.table_id
+    }, {
+        onSuccess: () => {
+            processing.value = false;
+            closeUpdateOrderModal();
+        },
+        onError: () => {
+            processing.value = false;
+        }
+    });
 };
 
 // When user clicks 'Apply' in adjustment box
@@ -724,6 +1144,10 @@ const settleBill = () => {
         payment_method: paymentMethod.value,
     }, {
         onSuccess: () => {
+            // Print receipt if checkbox is checked
+            if (printBill.value) {
+                printReceipt(selectedOrder.value);
+            }
             selectedOrder.value = null; // Clear selection
             processing.value = false;
         },
@@ -731,6 +1155,400 @@ const settleBill = () => {
             processing.value = false;
         }
     });
+};
+
+// Enhanced Thermal Printer Receipt Function
+// Supports multiple printer types: 80mm, 58mm thermal printers, and standard A4 printers
+const printReceipt = (order: any) => {
+    try {
+        // Create a hidden iframe for printing
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'absolute';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = 'none';
+        printFrame.style.left = '-9999px';
+        printFrame.setAttribute('id', 'receipt-print-frame');
+        document.body.appendChild(printFrame);
+
+        const doc = printFrame.contentWindow?.document;
+        if (!doc) {
+            console.error('Failed to access iframe document');
+            alert('Print failed: Unable to create print document. Please try again.');
+            document.body.removeChild(printFrame);
+            return;
+        }
+
+        // Escape HTML to prevent XSS
+        const escapeHtml = (text: string) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        // Generate receipt HTML with multi-printer support
+        // This format works with:
+        // - 80mm thermal printers (Epson TM-T88, Star TSP100, etc.)
+        // - 58mm thermal printers (smaller POS printers)
+        // - ESC/POS compatible printers
+        // - Standard A4 printers (as fallback)
+        const receiptHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Receipt #${escapeHtml(order.order_number)}</title>
+                <style>
+                    /* Print-specific styles for thermal printers */
+                    @media print {
+                        /* Support for 80mm thermal printers (most common) */
+                        @page {
+                            size: 80mm auto;
+                            margin: 0;
+                        }
+                        
+                        /* Alternative: 58mm thermal printers */
+                        @page :first {
+                            size: 58mm auto;
+                            margin: 0;
+                        }
+                        
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        
+                        /* Hide browser print headers/footers */
+                        @page {
+                            margin: 0;
+                        }
+                        
+                        /* Prevent page breaks within items */
+                        .item-row, .row, tr {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                        }
+                    }
+                    
+                    /* Base styles - works for all printer types */
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: 'Courier New', Courier, 'Lucida Console', monospace;
+                        font-size: 12px;
+                        line-height: 1.5;
+                        color: #000;
+                        background: #fff;
+                        max-width: 80mm;
+                        margin: 0 auto;
+                        padding: 3mm 5mm;
+                    }
+                    
+                    /* Responsive for different paper widths */
+                    @media (max-width: 58mm) {
+                        body {
+                            max-width: 58mm;
+                            font-size: 11px;
+                            padding: 2mm 3mm;
+                        }
+                        .logo {
+                            max-width: 45mm !important;
+                            max-height: 20mm !important;
+                        }
+                    }
+                    
+                    .center {
+                        text-align: center;
+                        display: block;
+                        width: 100%;
+                    }
+                    
+                    .bold {
+                        font-weight: bold;
+                    }
+                    
+                    .large {
+                        font-size: 14px;
+                        line-height: 1.3;
+                    }
+                    
+                    .xlarge {
+                        font-size: 16px;
+                    }
+                    
+                    /* Dividers - works well on thermal printers */
+                    .divider {
+                        border-top: 1px dashed #000;
+                        margin: 3px 0;
+                        width: 100%;
+                    }
+                    
+                    .double-divider {
+                        border-top: 2px solid #000;
+                        margin: 4px 0;
+                        width: 100%;
+                    }
+                    
+                    .row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin: 2px 0;
+                        width: 100%;
+                    }
+                    
+                    .row span {
+                        display: inline-block;
+                    }
+                    
+                    .row .left {
+                        text-align: left;
+                        flex: 1;
+                    }
+                    
+                    .row .right {
+                        text-align: right;
+                        white-space: nowrap;
+                    }
+                    
+                    .right {
+                        text-align: right;
+                    }
+                    
+                    /* Logo handling - prevents breaking on thermal printers */
+                    .logo {
+                        max-width: 60mm;
+                        max-height: 25mm;
+                        height: auto;
+                        width: auto;
+                        margin: 0 auto 3mm;
+                        display: block;
+                        object-fit: contain;
+                    }
+                    
+                    /* Table styles optimized for thermal printing */
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 2px 0;
+                    }
+                    
+                    td {
+                        padding: 2px 1px;
+                        vertical-align: top;
+                    }
+                    
+                    thead td {
+                        border-bottom: 1px solid #000;
+                        padding-bottom: 2px;
+                    }
+                    
+                    .item-name {
+                        max-width: 35mm;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    
+                    .item-note {
+                        font-size: 10px;
+                        font-style: italic;
+                        padding-left: 5px;
+                        color: #333;
+                    }
+                    
+                    /* Spacing */
+                    .spacer {
+                        height: 3mm;
+                    }
+                    
+                    .spacer-large {
+                        height: 10mm;
+                    }
+                    
+                    /* Footer spacing for paper cut */
+                    .cut-line {
+                        margin-top: 10mm;
+                        text-align: center;
+                        font-size: 10px;
+                        color: #666;
+                    }
+                </style>
+            </head>
+            <body>
+                ${currentRestaurant.value?.logo ? `<img src="${currentRestaurant.value.logo}" class="logo" alt="Logo" onerror="this.style.display='none'">` : ''}
+                
+                <div class="center bold large">${escapeHtml(currentRestaurant.value?.name || 'Restaurant')}</div>
+                ${currentRestaurant.value?.address ? `<div class="center">${escapeHtml(currentRestaurant.value.address)}</div>` : ''}
+                ${currentRestaurant.value?.phone ? `<div class="center">Tel: ${escapeHtml(currentRestaurant.value.phone)}</div>` : ''}
+                ${currentRestaurant.value?.email ? `<div class="center">${escapeHtml(currentRestaurant.value.email)}</div>` : ''}
+                
+                <div class="double-divider"></div>
+                
+                <div class="center bold">RECEIPT</div>
+                <div class="spacer"></div>
+                
+                <div class="row">
+                    <span class="left">Order #:</span>
+                    <span class="right bold">${escapeHtml(order.order_number)}</span>
+                </div>
+                <div class="row">
+                    <span class="left">Date:</span>
+                    <span class="right">${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                </div>
+                ${order.table ? `<div class="row"><span class="left">Table:</span><span class="right">${escapeHtml(order.table.name)}</span></div>` : ''}
+                ${order.customer_name ? `<div class="row"><span class="left">Customer:</span><span class="right">${escapeHtml(order.customer_name)}</span></div>` : ''}
+                <div class="row">
+                    <span class="left">Type:</span>
+                    <span class="right">${order.type === 'dine_in' ? 'Dine In' : 'Takeaway'}</span>
+                </div>
+                <div class="row">
+                    <span class="left">Payment:</span>
+                    <span class="right bold">${paymentMethod.value.toUpperCase()}</span>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <td class="bold">Item</td>
+                            <td class="bold center" style="width: 15mm;">Qty</td>
+                            <td class="bold right" style="width: 15mm;">Price</td>
+                            <td class="bold right" style="width: 18mm;">Total</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${editableItems.value.map(item => `
+                            <tr>
+                                <td class="item-name">${escapeHtml(item.menu_item?.name?.en || item.menu_item?.name || 'Item')}</td>
+                                <td class="center">${item.quantity}</td>
+                                <td class="right">${(item.unit_price).toFixed(2)}</td>
+                                <td class="right">${(item.quantity * item.unit_price).toFixed(2)}</td>
+                            </tr>
+                            ${item.notes ? `<tr><td colspan="4" class="item-note">Note: ${escapeHtml(item.notes)}</td></tr>` : ''}
+                        `).join('')}
+                    </tbody>
+                </table>
+                
+                <div class="divider"></div>
+                <div class="spacer"></div>
+                
+                <div class="row">
+                    <span class="left">Subtotal:</span>
+                    <span class="right">${order.currency || currentCurrency.value} ${totals.value.subtotal.toFixed(2)}</span>
+                </div>
+                <div class="row">
+                    <span class="left">Tax (5%):</span>
+                    <span class="right">${order.currency || currentCurrency.value} ${totals.value.tax.toFixed(2)}</span>
+                </div>
+                ${totals.value.discountAmount > 0 ? `
+                    <div class="row">
+                        <span class="left">Discount ${discountType.value === 'percent' ? `(${discountValue.value}%)` : ''}:</span>
+                        <span class="right">-${order.currency || currentCurrency.value} ${totals.value.discountAmount.toFixed(2)}</span>
+                    </div>
+                ` : ''}
+                ${totals.value.additionalChargeAmount > 0 ? `
+                    <div class="row">
+                        <span class="left">Extra Charge ${additionalChargeType.value === 'percent' ? `(${additionalChargeValue.value}%)` : ''}:</span>
+                        <span class="right">+${order.currency || currentCurrency.value} ${totals.value.additionalChargeAmount.toFixed(2)}</span>
+                    </div>
+                ` : ''}
+                
+                <div class="double-divider"></div>
+                
+                <div class="row bold xlarge">
+                    <span class="left">TOTAL:</span>
+                    <span class="right">${order.currency || currentCurrency.value} ${totals.value.total.toFixed(2)}</span>
+                </div>
+                
+                <div class="double-divider"></div>
+                <div class="spacer"></div>
+                
+                <div class="center bold">Thank You!</div>
+                <div class="center">Please Come Again</div>
+                
+                <div class="spacer-large"></div>
+                <div class="cut-line">- - - - - - - - - - - - - - - -</div>
+            </body>
+            </html>
+        `;
+
+        // Write content to iframe
+        doc.open();
+        doc.write(receiptHTML);
+        doc.close();
+
+        // Enhanced print handling with error recovery
+        const executePrint = () => {
+            try {
+                const printWindow = printFrame.contentWindow;
+                if (!printWindow) {
+                    throw new Error('Print window not available');
+                }
+
+                // Focus the print frame
+                printWindow.focus();
+
+                // Trigger print
+                printWindow.print();
+
+                console.log('Print command sent successfully');
+
+                // Cleanup after print dialog is handled
+                // Extended timeout to ensure print job is queued
+                setTimeout(() => {
+                    try {
+                        if (document.body.contains(printFrame)) {
+                            document.body.removeChild(printFrame);
+                        }
+                    } catch (cleanupError) {
+                        console.warn('Cleanup error:', cleanupError);
+                    }
+                }, 2000);
+
+            } catch (printError) {
+                console.error('Print execution error:', printError);
+                alert('Print dialog may have been blocked. Please check your browser settings and try again.');
+                
+                // Cleanup on error
+                if (document.body.contains(printFrame)) {
+                    document.body.removeChild(printFrame);
+                }
+            }
+        };
+
+        // Wait for content and images to load before printing
+        if (printFrame.contentWindow) {
+            printFrame.contentWindow.addEventListener('load', () => {
+                // Additional delay to ensure images are loaded
+                setTimeout(executePrint, 500);
+            });
+
+            // Fallback: if load event doesn't fire
+            setTimeout(() => {
+                if (printFrame.contentWindow && document.body.contains(printFrame)) {
+                    executePrint();
+                }
+            }, 1500);
+        }
+
+    } catch (error) {
+        console.error('Receipt print error:', error);
+        alert('Failed to print receipt. Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+};
+
+const printCurrentReceipt = () => {
+    if (!selectedOrder.value || hasUnsavedChanges.value) return;
+    const url = route('orders.receipt', selectedOrder.value.id);
+    window.open(url, 'receipt', 'left=100,top=100,width=400,height=600,toolbar=0,scrollbars=1,status=0');
 };
 
 // Helper functions for cash register
@@ -864,4 +1682,27 @@ const calculateDifference = () => {
 
 // Add route helper
 const route = (window as any).route;
+
+// Auto-refresh every 2 seconds to sync with kitchen
+let refreshInterval: any;
+
+onMounted(() => {
+    // Refresh POS data every 2 seconds
+    refreshInterval = setInterval(() => {
+        // Don't refresh if any modal is open to avoid disrupting user
+        if (!showUpdateOrderModal.value && !showOpenModal.value && !showCloseModal.value && 
+            !showWithdrawModal.value && !showDepositModal.value) {
+            router.reload({ only: ['orders', 'currentRegister', 'currentBalance'] });
+        }
+    }, 2000); // 2 seconds
+    
+    console.log('✅ POS auto-refresh enabled (2 seconds)');
+});
+
+onUnmounted(() => {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        console.log('🛑 POS auto-refresh stopped');
+    }
+});
 </script>

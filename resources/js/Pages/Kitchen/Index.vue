@@ -403,12 +403,12 @@ onMounted(() => {
         console.warn('⚠️ Laravel Echo not available, using fallback polling');
     }
     
-    // Fallback: Polling every 30 seconds as backup
+    // Fallback: Polling every 2 seconds as backup
     refreshInterval = setInterval(() => {
         if (!cancellingOrder.value) { // Don't refresh if modal is open
              router.reload({ only: ['orders', 'completedOrders'] });
         }
-    }, 30000); // 30 seconds fallback
+    }, 2000); // 2 seconds for real-time sync with POS
 });
 
 onUnmounted(() => {

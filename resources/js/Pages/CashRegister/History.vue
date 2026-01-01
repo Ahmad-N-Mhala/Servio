@@ -9,7 +9,7 @@
 
             <!-- Filters -->
             <div class="glass-card rounded-2xl p-6 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
                         <input
@@ -26,18 +26,7 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                         />
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cashier</label>
-                        <select
-                            v-model="filters.cashier_id"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        >
-                            <option value="">All Cashiers</option>
-                            <option v-for="cashier in cashiers" :key="cashier.id" :value="cashier.id">
-                                {{ cashier.name }}
-                            </option>
-                        </select>
-                    </div>
+
                     <div class="flex items-end">
                         <button
                             @click="applyFilters"
@@ -177,7 +166,12 @@
                                             {{ formatCurrency(transaction.balance_after) }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500">
-                                            {{ transaction.notes || '-' }}
+                                            <div v-if="transaction.order">
+                                                <span class="font-medium text-gray-900 dark:text-gray-100">Order #{{ transaction.order.order_number }}</span>
+                                            </div>
+                                            <div v-else>
+                                                {{ transaction.notes || '-' }}
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -234,18 +228,15 @@ const route = (window as any).route;
 
 const props = defineProps<{
     registers: any;
-    cashiers: any[];
     filters: {
         start_date: string | null;
         end_date: string | null;
-        cashier_id: string | null;
     };
 }>();
 
 const filters = ref({
     start_date: props.filters.start_date || '',
     end_date: props.filters.end_date || '',
-    cashier_id: props.filters.cashier_id || '',
 });
 
 const expandedRegisters = ref<string[]>([]);

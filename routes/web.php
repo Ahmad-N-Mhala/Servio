@@ -110,6 +110,8 @@ Route::group([
                     ->middleware('permission:edit_order');
                 Route::get('/{order}/bill', [\App\Http\Controllers\Tenant\OrderController::class, 'generateBill'])->name('bill')
                     ->middleware('permission:print_bill');
+                Route::get('/{order}/receipt', [\App\Http\Controllers\Tenant\OrderController::class, 'receipt'])->name('receipt')
+                    ->middleware('permission:print_bill');
             });
 
             // Customers
@@ -274,6 +276,14 @@ Route::group([
                 Route::post('/{plan}/subscribe', [\App\Http\Controllers\PlanController::class, 'subscribe'])->name('subscribe')
                     ->middleware('permission:manage_billing');
             });
+
+            // Receipt Template Settings
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'index'])->name('receipt-template.index')
+                    ->middleware('permission:customize_receipt_template');
+                Route::post('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'store'])->name('receipt-template.store')
+                    ->middleware('permission:customize_receipt_template');
+            });
         });
 
         // Admin Portal Routes
@@ -304,6 +314,7 @@ Route::group([
             Route::get('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('permissions.index');
             Route::post('permissions', [\App\Http\Controllers\Admin\PermissionController::class, 'update'])->name('permissions.update');
             Route::post('roles', [\App\Http\Controllers\Admin\PermissionController::class, 'storeRole'])->name('roles.store');
+            Route::put('roles/{role}', [\App\Http\Controllers\Admin\PermissionController::class, 'updateRole'])->name('roles.update');
             Route::delete('roles/{role}', [\App\Http\Controllers\Admin\PermissionController::class, 'destroyRole'])->name('roles.destroy');
 
             // Profile Routes

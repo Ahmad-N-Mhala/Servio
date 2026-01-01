@@ -18,27 +18,42 @@ class PermissionController extends Controller
         $locale = app()->getLocale();
 
         foreach ($dbRoles as $role) {
-            $label = $configNames[$role->name] ?? null;
+            $label = null;
 
+            // 1. Check DB display_name (User Override)
+            if (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name))) {
+                $display = (array) $role->display_name;
+                $label = $display[$locale] ?? $display['en'] ?? null;
+            }
+
+            // 2. Fallback to Config
             if (!$label) {
-                // Check DB display_name
-                if (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name))) {
-                    // Cast to array ensuring access
-                    $display = (array) $role->display_name;
-                    $label = $display[$locale] ?? $display['en'] ?? ucwords(str_replace('_', ' ', $role->name));
-                } else {
-                    $label = ucwords(str_replace('_', ' ', $role->name));
-                }
+                $label = $configNames[$role->name] ?? null;
+            }
+
+            // 3. Fallback to Name
+            if (!$label) {
+                $label = ucwords(str_replace('_', ' ', $role->name));
             }
 
             $roles[$role->name] = $label;
             $rolePermissions[$role->name] = $role->permissions->pluck('name')->toArray();
         }
 
+        $rolesList = [];
+        foreach ($dbRoles as $role) {
+            $rolesList[] = [
+                'name' => $role->name,
+                'display_name' => (array) ($role->display_name ?? []),
+                'label' => $roles[$role->name] ?? $role->name,
+            ];
+        }
+
         $permissions = config('permissions');
 
         return inertia('Admin/Permissions/Index', [
-            'roles' => $roles,
+            'roles' => $roles, // Keep for backward compatibility/quick lookup
+            'rolesList' => $rolesList, // For Roles Tab management
             'permissions' => $permissions,
             'rolePermissions' => $rolePermissions,
         ]);
@@ -68,6 +83,24 @@ class PermissionController extends Controller
         ]);
 
         return back()->with('success', 'Role created successfully.');
+    }
+
+    public function updateRole(Request $request, $roleName)
+    {
+        $role = \App\Models\Role::where('name', $roleName)->firstOrFail();
+
+        $validated = $request->validate([
+            'name_en' => 'required|string|max:255',
+            'name_ar' => 'required|string|max:255',
+        ]);
+
+        $role->display_name = [
+            'en' => $validated['name_en'],
+            'ar' => $validated['name_ar']
+        ];
+        $role->save();
+
+        return back()->with('success', 'Role updated successfully.');
     }
 
     public function destroyRole($roleName)

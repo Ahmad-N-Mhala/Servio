@@ -59,7 +59,7 @@ return [
     ],
     'settings' => [
         'label' => 'System Settings',
-        'permissions' => ['view_settings', 'manage_billing', 'edit_restaurant']
+        'permissions' => ['view_settings', 'manage_billing', 'edit_restaurant', 'customize_receipt_template']
     ],
     'service' => [
         'label' => 'Waiter Service',

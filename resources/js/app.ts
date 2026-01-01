@@ -128,3 +128,18 @@ router.on('finish', () => {
     refreshCSRFToken();
 });
 
+// Global error handler for 419 CSRF token mismatch errors
+router.on('error', (event: any) => {
+    // Check if it's a 419 error (CSRF token mismatch)
+    // The error event from Inertia doesn't have response directly, but we can check the errors object
+    // If errors is empty and the request failed, it's likely a 419
+    if (event.detail && event.detail.errors && Object.keys(event.detail.errors).length === 0) {
+        console.error('Possible CSRF token mismatch detected (419 error)');
+
+        // Show user-friendly message
+        alert('Your session has expired. The page will reload to refresh your session. Please try your action again.');
+
+        // Reload the page to get a fresh CSRF token
+        window.location.reload();
+    }
+});

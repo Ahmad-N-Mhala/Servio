@@ -86,9 +86,9 @@
                     <canvas ref="statusChartCanvas"></canvas>
                 </ChartCard>
 
-                <!-- Peak Hours -->
-                <ChartCard title="Peak Hours" height="300px">
-                    <canvas ref="peakHoursChartCanvas"></canvas>
+                <!-- Payment Methods -->
+                <ChartCard title="Payment Methods" height="300px">
+                    <canvas ref="paymentChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Top Menu Items -->
@@ -96,9 +96,9 @@
                     <canvas ref="topItemsChartCanvas"></canvas>
                 </ChartCard>
 
-                <!-- Avg Completion Time -->
-                <ChartCard title="Avg Completion Time (Minutes)" height="300px">
-                    <canvas ref="completionTimeChartCanvas"></canvas>
+                <!-- Peak Hours -->
+                <ChartCard title="Peak Hours" height="300px">
+                    <canvas ref="peakHoursChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Waste Trend -->
@@ -180,7 +180,7 @@ const revenueChart = computed(() => page.props.revenue_chart as any[]);
 const statusDistribution = computed(() => page.props.status_distribution as any[]);
 const peakHours = computed(() => page.props.peak_hours as any[]);
 const topMenuItems = computed(() => page.props.top_menu_items as any[]);
-const avgCompletionTime = computed(() => page.props.avg_completion_time as any[]);
+const paymentDistribution = computed(() => page.props.payment_distribution as any[]);
 const wasteChart = computed(() => page.props.waste_chart as any[]);
 const dateRange = computed(() => page.props.date_range as any);
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
@@ -221,14 +221,14 @@ const revenueChartCanvas = ref<HTMLCanvasElement | null>(null);
 const statusChartCanvas = ref<HTMLCanvasElement | null>(null);
 const peakHoursChartCanvas = ref<HTMLCanvasElement | null>(null);
 const topItemsChartCanvas = ref<HTMLCanvasElement | null>(null);
-const completionTimeChartCanvas = ref<HTMLCanvasElement | null>(null);
+const paymentChartCanvas = ref<HTMLCanvasElement | null>(null);
 const wasteChartCanvas = ref<HTMLCanvasElement | null>(null);
 
 let revenueChartInstance: Chart | null = null;
 let statusChartInstance: Chart | null = null;
 let peakHoursChartInstance: Chart | null = null;
 let topItemsChartInstance: Chart | null = null;
-let completionTimeChartInstance: Chart | null = null;
+let paymentChartInstance: Chart | null = null;
 let wasteChartInstance: Chart | null = null;
 
 const formatCurrency = (amount: number) => {
@@ -241,6 +241,8 @@ const formatCurrency = (amount: number) => {
 const getStatusClass = (status: string) => {
     const classes: Record<string, string> = {
         pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+        processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+        ready: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
         completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
         cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
     };
@@ -296,7 +298,7 @@ const initRevenueChart = () => {
                     },
                 },
             },
-            onClick: (e: any, activeElements: any[]) => {
+            onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements && activeElements.length > 0) {
                     const firstElement = activeElements[0];
                     if (firstElement && typeof firstElement.index !== 'undefined') {
@@ -321,9 +323,11 @@ const initStatusChart = () => {
     if (!ctx) return;
 
     const colors = {
-        pending: 'rgb(234, 179, 8)',
-        completed: 'rgb(34, 197, 94)',
-        cancelled: 'rgb(239, 68, 68)',
+        pending: 'rgb(234, 179, 8)', // Yellow
+        processing: 'rgb(59, 130, 246)', // Blue
+        ready: 'rgb(168, 85, 247)', // Purple
+        completed: 'rgb(34, 197, 94)', // Green
+        cancelled: 'rgb(239, 68, 68)', // Red
     };
 
     statusChartInstance = new Chart(ctx, {
@@ -343,7 +347,7 @@ const initStatusChart = () => {
                     position: 'bottom',
                 },
             },
-            onClick: (e: any, activeElements: any[]) => {
+            onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements && activeElements.length > 0) {
                     const firstElement = activeElements[0];
                     if (firstElement && typeof firstElement.index !== 'undefined') {
@@ -441,27 +445,30 @@ const initTopItemsChart = () => {
     });
 };
 
-const initCompletionTimeChart = () => {
-    if (!completionTimeChartCanvas.value) return;
+const initPaymentChart = () => {
+    if (!paymentChartCanvas.value) return;
     
-    if (completionTimeChartInstance) {
-        completionTimeChartInstance.destroy();
+    if (paymentChartInstance) {
+        paymentChartInstance.destroy();
     }
 
-    const ctx = completionTimeChartCanvas.value.getContext('2d');
+    const ctx = paymentChartCanvas.value.getContext('2d');
     if (!ctx) return;
 
-    completionTimeChartInstance = new Chart(ctx, {
-        type: 'line',
+    const colors = [
+        'rgb(34, 197, 94)', // Green (Cash)
+        'rgb(59, 130, 246)', // Blue (Card)
+        'rgb(168, 85, 247)', // Purple (Online)
+        'rgb(234, 179, 8)', // Yellow
+    ];
+
+    paymentChartInstance = new Chart(ctx, {
+        type: 'pie',
         data: {
-            labels: avgCompletionTime.value.map((item: any) => item.date),
+            labels: paymentDistribution.value.map((item: any) => item.method),
             datasets: [{
-                label: 'Avg Minutes',
-                data: avgCompletionTime.value.map((item: any) => item.minutes),
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true,
+                data: paymentDistribution.value.map((item: any) => item.total), // Show Amount by default? Or Count? User probably cares about Revenue source.
+                backgroundColor: colors,
             }],
         },
         options: {
@@ -469,13 +476,17 @@ const initCompletionTimeChart = () => {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false,
+                    position: 'bottom',
                 },
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${formatCurrency(value)}`;
+                        }
+                    }
+                }
             },
         },
     });
@@ -526,16 +537,16 @@ onMounted(() => {
     initStatusChart();
     initPeakHoursChart();
     initTopItemsChart();
-    initCompletionTimeChart();
+    initPaymentChart();
     initWasteChart();
 });
 
-watch([revenueChart, statusDistribution, peakHours, topMenuItems, avgCompletionTime], () => {
+watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistribution], () => {
     initRevenueChart();
     initStatusChart();
     initPeakHoursChart();
     initTopItemsChart();
-    initCompletionTimeChart();
+    initPaymentChart();
     initWasteChart();
 });
 </script>

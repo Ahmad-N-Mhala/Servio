@@ -8,6 +8,7 @@ use App\Models\CashTransaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Carbon\Carbon;
 
 class CashRegisterController extends Controller
 {
@@ -291,29 +292,31 @@ class CashRegisterController extends Controller
         // Get filters
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $cashierId = $request->input('cashier_id');
+        // $cashierId = $request->input('cashier_id'); // Removing cashier filter as requested
 
         // Build query
         $query = CashRegister::where('restaurant_id', $restaurant->id)
             ->with([
                 'user',
                 'transactions' => function ($q) {
-                    $q->orderBy('created_at', 'asc');
+                    $q->orderBy('created_at', 'asc')->with('order');
                 }
             ]);
 
         // Apply filters
         if ($startDate) {
-            $query->where('opened_at', '>=', $startDate);
+            $query->where('opened_at', '>=', Carbon::parse($startDate)->startOfDay());
         }
 
         if ($endDate) {
-            $query->where('opened_at', '<=', $endDate . ' 23:59:59');
+            $query->where('opened_at', '<=', Carbon::parse($endDate)->endOfDay());
         }
 
+        /* Removing cashier filter
         if ($cashierId) {
             $query->where('user_id', $cashierId);
         }
+        */
 
         // Get registers with pagination
         $registers = $query->latest('opened_at')
@@ -331,7 +334,7 @@ class CashRegisterController extends Controller
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
-                'cashier_id' => $cashierId,
+                // 'cashier_id' => $cashierId,
             ],
         ]);
     }

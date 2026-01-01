@@ -37,6 +37,13 @@ class POSController extends Controller
 
         $tables = Table::where('restaurant_id', $restaurant->id)->get();
 
+        // Get menu items for order updates
+        $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
+            ->where('is_available', true)
+            ->with('category')
+            ->orderBy('name->en')
+            ->get();
+
         // Get current open cash register for this user
         $currentRegister = \App\Models\CashRegister::where('restaurant_id', $restaurant->id)
             ->where('user_id', auth()->id())
@@ -51,6 +58,7 @@ class POSController extends Controller
         return Inertia::render('POS/Index', [
             'orders' => $orders,
             'tables' => $tables,
+            'menuItems' => $menuItems,
             'currentRegister' => $currentRegister,
             'currentBalance' => $currentRegister ? $currentRegister->getCurrentBalance() : 0,
         ]);
@@ -126,38 +134,59 @@ class POSController extends Controller
     {
         $validated = $request->validate([
             'items' => ['sometimes', 'array'],
-            'items.*.id' => ['required', 'string'],
+            'items.*.id' => ['sometimes', 'string'],
+            'items.*.menu_item_id' => ['sometimes', 'string'],
             'items.*.quantity' => ['required', 'integer', 'min:0'],
+            'items.*.unit_price' => ['sometimes', 'numeric', 'min:0'],
+            'items.*.notes' => ['sometimes', 'string', 'nullable'],
             'discount_type' => ['required', 'string', 'in:fixed,percent'],
             'discount_value' => ['required', 'numeric', 'min:0'],
             'additional_charge_type' => ['required', 'string', 'in:fixed,percent'],
             'additional_charge_value' => ['required', 'numeric', 'min:0'],
+            // Customer details
+            'customer_name' => ['sometimes', 'string', 'nullable'],
+            'customer_phone' => ['sometimes', 'string', 'nullable'],
+            // Order type and table
+            'type' => ['sometimes', 'string', 'in:dine_in,takeaway'],
+            'table_id' => ['sometimes', 'string', 'nullable'],
         ]);
 
         // 1. Update Items
         if ($request->has('items')) {
             foreach ($validated['items'] as $itemData) {
-                // Find via relation to ensure it belongs to order
-                $orderItem = $order->items()->where('_id', $itemData['id'])->first();
-                if ($orderItem) {
-                    if ($itemData['quantity'] <= 0) {
-                        $orderItem->delete();
-                    } else {
-                        // Use unit_price from item (or fallback to menu item price if item has 0 but we want to be safe, ideally item has it)
-                        // If item unit_price is 0 (old bug), we try to get from menu item relation if loaded? 
-                        // But relation might not be loaded on $orderItem here. Best to rely on stored unit_price or fetch fresh?
-                        // Let's rely on stored. If stored is 0, total_price is 0.
-                        $price = $orderItem->unit_price;
-                        if ($price <= 0 && $orderItem->menuItem) {
-                            $price = $orderItem->menuItem->price;
-                            $orderItem->unit_price = $price; // fix it
-                        }
-
-                        $orderItem->update([
+                // Check if this is a new item (has menu_item_id) or existing item (has id)
+                if (isset($itemData['menu_item_id'])) {
+                    // New item - create it
+                    $menuItem = \App\Models\MenuItem::find($itemData['menu_item_id']);
+                    if ($menuItem) {
+                        \App\Models\OrderItem::create([
+                            'order_id' => $order->id,
+                            'menu_item_id' => $menuItem->id,
                             'quantity' => $itemData['quantity'],
-                            'total_price' => $itemData['quantity'] * $price,
-                            'unit_price' => $price
+                            'unit_price' => $itemData['unit_price'] ?? $menuItem->price,
+                            'total_price' => $itemData['quantity'] * ($itemData['unit_price'] ?? $menuItem->price),
+                            'notes' => $itemData['notes'] ?? '',
                         ]);
+                    }
+                } elseif (isset($itemData['id'])) {
+                    // Existing item - update it
+                    $orderItem = $order->items()->where('_id', $itemData['id'])->first();
+                    if ($orderItem) {
+                        if ($itemData['quantity'] <= 0) {
+                            $orderItem->delete();
+                        } else {
+                            $price = $orderItem->unit_price;
+                            if ($price <= 0 && $orderItem->menuItem) {
+                                $price = $orderItem->menuItem->price;
+                                $orderItem->unit_price = $price;
+                            }
+
+                            $orderItem->update([
+                                'quantity' => $itemData['quantity'],
+                                'total_price' => $itemData['quantity'] * $price,
+                                'unit_price' => $price
+                            ]);
+                        }
                     }
                 }
             }
@@ -188,7 +217,8 @@ class POSController extends Controller
         // 6. Final Total
         $total = $subtotal + $tax + $extraChargeAmount - $discountAmount;
 
-        $order->update([
+        // 7. Prepare update data
+        $updateData = [
             'subtotal' => $subtotal,
             'tax' => $tax,
             'discount_amount' => $discountAmount,
@@ -198,7 +228,46 @@ class POSController extends Controller
             'additional_charge_type' => $validated['additional_charge_type'],
             'additional_charge_value' => $validated['additional_charge_value'],
             'total' => max(0, $total),
-        ]);
+        ];
+
+        // 8. Update customer details if provided
+        if ($request->has('customer_name')) {
+            $updateData['customer_name'] = $validated['customer_name'];
+        }
+        if ($request->has('customer_phone')) {
+            $updateData['customer_phone'] = $validated['customer_phone'];
+        }
+
+        // 9. Update order type if provided
+        if ($request->has('type')) {
+            $updateData['type'] = $validated['type'];
+        }
+
+        // 10. Handle table changes
+        if ($request->has('table_id')) {
+            $oldTableId = $order->table_id;
+            $newTableId = $validated['table_id'];
+
+            // Free up old table if it exists and is different
+            if ($oldTableId && $oldTableId !== $newTableId) {
+                $oldTable = Table::find($oldTableId);
+                if ($oldTable) {
+                    $oldTable->update(['status' => 'available']);
+                }
+            }
+
+            // Occupy new table if it exists
+            if ($newTableId) {
+                $newTable = Table::find($newTableId);
+                if ($newTable) {
+                    $newTable->update(['status' => 'occupied']);
+                }
+            }
+
+            $updateData['table_id'] = $newTableId;
+        }
+
+        $order->update($updateData);
 
         return redirect()->back()->with('message', 'Order updated successfully.');
     }

@@ -1,0 +1,85 @@
+[
+    {
+        "email": "superadmin@restofy.com",
+        "name": "Super Admin",
+        "password": "$2y$12$WsgS9m9vyqSxQeRipm6bJOZv1227\/d\/FiFQDtbe0cqO0GAO8d0MtC",
+        "is_super_admin": true,
+        "updated_at": "2025-12-19T16:11:29.712000Z",
+        "created_at": "2025-12-19T16:11:29.712000Z",
+        "id": {
+            "$oid": "6945793119aaa592e0054aa5"
+        }
+    },
+    {
+        "email": "admin@demo.com",
+        "name": "Admin User",
+        "password": "$2y$12$AZsRitaUzl6VV1K.O9Huzefq1.8x7Lrrpg.Buxn\/sipuOeTzFCHTG",
+        "email_verified_at": "2025-12-19T16:14:31.993000Z",
+        "updated_at": "2026-01-01T19:44:47.837000Z",
+        "created_at": "2025-12-19T16:14:31.999000Z",
+        "role_id": [
+            {
+                "$oid": "694576bd5de34597d4076ddf"
+            },
+            "694576bd5de34597d4076de0",
+            "694576bd5de34597d4076ddf"
+        ],
+        "phone": "3424234",
+        "restaurant_id": [
+            "694579e833231912b007b6c3"
+        ],
+        "permission_id": [
+            "69457dbe2d33b6a8db028a45"
+        ],
+        "remember_token": "xXqmPk0qa34tB7S6FBH1tnu1JtrJk4n1oghi89POP0anzok68vfvpn7bHTZj",
+        "id": {
+            "$oid": "694579e733231912b007b6c2"
+        }
+    },
+    {
+        "name": "Ahmad Mhala",
+        "email": "ahmad.n.mhala@gmail.com",
+        "phone": "+974 565616097",
+        "password": "$2y$12$tKC3p5bKSJYw2FQA.JgRNOH6z6yxwN89lS\/9SfPCoVVJFPrVSzwPi",
+        "password_set_at": "2025-12-27T20:11:52.574000Z",
+        "updated_at": "2025-12-27T20:11:52.574000Z",
+        "created_at": "2025-12-27T20:11:52.574000Z",
+        "role_id": [
+            "694576bd5de34597d4076ddf"
+        ],
+        "id": {
+            "$oid": "69503d88eaf319e883077707"
+        }
+    },
+    {
+        "name": "Ahmad Mhala",
+        "email": "ahmad.n.mhala2@gmail.com",
+        "phone": "+974",
+        "password": "$2y$12$KUQ\/93b2YQOAOwYwoflWPujap9sKF31Y29TKgK1NvhV8t0HbuFewy",
+        "password_set_at": "2025-12-27T20:12:56.060000Z",
+        "updated_at": "2025-12-27T20:12:56.061000Z",
+        "created_at": "2025-12-27T20:12:56.061000Z",
+        "role_id": [
+            "694576bd5de34597d4076ddf"
+        ],
+        "id": {
+            "$oid": "69503dc8eaf319e88307770d"
+        }
+    },
+    {
+        "name": "Waiter",
+        "email": "waiter@gmail.com",
+        "password": "$2y$12$iFREhT9ByVV0\/0JiV2c\/Qezl2\/kPiZQbfNyC2861CznEcQi7qXIbS",
+        "updated_at": "2025-12-31T04:53:38.887000Z",
+        "created_at": "2025-12-28T17:42:29.968000Z",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role_id": [
+            "694576bd5de34597d4076de3",
+            "694576bd5de34597d4076de0"
+        ],
+        "deleted_at": "2025-12-31T04:53:38.887000Z",
+        "id": {
+            "$oid": "69516c052f954f9a240de5b8"
+        }
+    }
+]

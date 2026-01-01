@@ -33,10 +33,12 @@ class Restaurant extends Model
         'google_map_location',
         'status',
         'logo',
+        'receipt_template',
+        'next_order_number',
     ];
 
     protected $casts = [
-        'settings' => 'array',
+        'next_order_number' => 'integer',
     ];
 
     protected $appends = ['phone_code', 'currency_rate'];
@@ -61,6 +63,22 @@ class Restaurant extends Model
             return $country ? $country->currency : $value;
         }
         return $value;
+    }
+
+    public function getLogoAttribute($value)
+    {
+        // If logo is empty or null, return null
+        if (empty($value)) {
+            return null;
+        }
+
+        // If it's already a full URL (starts with http:// or https://), return as is
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        // Otherwise, prepend the storage path
+        return asset('storage/' . $value);
     }
 
     public function staff(): HasMany

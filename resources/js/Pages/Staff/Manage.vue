@@ -157,6 +157,17 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                    <Input 
+                        v-model="form.phone" 
+                        type="tel" 
+                        placeholder="+971 50 123 4567"
+                        required
+                    />
+                    <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
                     <select 
                         v-model="form.role"
@@ -164,8 +175,8 @@
                         required
                     >
                         <option value="" disabled>Select a role</option>
-                        <option v-for="role in roles" :key="role" :value="role">
-                            {{ formatRole(role) }}
+                        <option v-for="role in roles" :key="role.value" :value="role.value">
+                            {{ role.label }}
                         </option>
                     </select>
                     <p v-if="form.errors.role" class="mt-1 text-sm text-red-600">{{ form.errors.role }}</p>
@@ -204,6 +215,7 @@ interface StaffMember {
     id: number;
     name: string;
     email: string;
+    phone: string; // Added phone
     role: string;
     is_active: boolean;
     joined_at: string | null;
@@ -234,7 +246,7 @@ const props = withDefaults(defineProps<{
         active: number;
         by_role: Record<string, number>;
     };
-    roles?: string[];
+    roles?: Array<{ value: string; label: string }>;
     filters?: {
         search?: string;
         sort_field?: string;
@@ -243,7 +255,7 @@ const props = withDefaults(defineProps<{
 }>(), {
     staff: () => ({ data: [] }),
     stats: () => ({ total: 0, active: 0, by_role: {} }),
-    roles: () => ['owner', 'manager', 'head_chef', 'kitchen_staff', 'waiter', 'cashier', 'delivery_driver'],
+    roles: () => [],
     filters: () => ({})
 });
 
@@ -254,6 +266,7 @@ const route = (window as any).route;
 const columns = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
+    { key: 'phone', label: 'Phone' },
     { key: 'role', label: 'Role', sortable: true },
     { key: 'is_active', label: 'Status', sortable: true },
     { key: 'joined_at', label: 'Joined', sortable: true },
@@ -281,6 +294,7 @@ watch(
 const form = useForm({
     name: '',
     email: '',
+    phone: '',
     role: ''
 });
 
@@ -306,6 +320,7 @@ const openEditModal = (staff: StaffMember) => {
     editingId.value = staff.id;
     form.name = staff.name;
     form.email = staff.email;
+    form.phone = staff.phone || '';
     form.role = staff.role;
     form.clearErrors();
     showAddModal.value = true;
@@ -339,6 +354,12 @@ const submitForm = () => {
         }
     }
 
+    // Validate Phone
+    if (!form.phone) {
+        form.errors.phone = 'Phone number is required.';
+        hasErrors = true;
+    }
+
     // Validate Role
     if (!form.role) {
         form.errors.role = 'Role is required.';
@@ -370,6 +391,10 @@ const getInitials = (name: string): string => {
     };
 
 const formatRole = (role: string): string => {
+    if (props.roles && props.roles.length > 0) {
+        const found = props.roles.find(r => r.value === role);
+        if (found) return found.label;
+    }
     return role.split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');

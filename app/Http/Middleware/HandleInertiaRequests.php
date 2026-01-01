@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
                     ->where('email', $request->user()->email)
                     ->pluck('restaurant_id')
                     ->toArray();
-                return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name'])->get();
+                return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name', 'logo'])->get();
             })() : [],
             'active_restaurant_id' => $request->session()->get('active_restaurant_id'),
 

@@ -44,6 +44,7 @@ class Order extends Model
         'discount_value',
         'additional_charge_type',
         'additional_charge_value',
+        'transaction_number',
     ];
 
     protected $casts = [
@@ -57,6 +58,7 @@ class Order extends Model
         'points_earned' => 'integer',
         'points_redeemed' => 'integer',
         'completed_at' => 'datetime',
+        'transaction_number' => 'integer',
     ];
 
     protected static function boot()

@@ -1,6 +1,6 @@
 <template>
     <MainLayout>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="w-full px-2 sm:px-4 lg:px-6 py-8">
             <div class="flex items-center justify-between mb-8">
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('orders.title') }}</h1>
                 <div class="flex gap-4">
@@ -61,13 +61,13 @@
                 </div>
                 
                 <!-- Table -->
-                <div v-else>
+                <div v-else class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th 
                                     scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                     @click="sort('order_number')"
                                 >
                                     <div class="flex items-center gap-1">
@@ -79,7 +79,7 @@
                                 </th>
                                 <th 
                                     scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     @click="sort('customer_name')"
                                 >
                                     <div class="flex items-center gap-1">
@@ -94,6 +94,12 @@
                                     class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                                 >
                                     Waiter
+                                </th>
+                                <th 
+                                    scope="col" 
+                                    class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                                >
+                                    {{ $t('orders.payment') }}
                                 </th>
                                 <th 
                                     scope="col" 
@@ -137,7 +143,7 @@
                                 >
                                     {{ $t('orders.duration') }}
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                     {{ $t('orders.actions') }}
                                 </th>
                             </tr>
@@ -146,9 +152,9 @@
                             <tr 
                                 v-for="order in ordersList" 
                                 :key="order.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-bold text-gray-900 dark:text-white">{{ order.order_number || 'N/A' }}</span>
                                         <span v-if="order.delivery_provider" 
@@ -165,14 +171,25 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ order.customer_name || $t('orders.guest') }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ order.customer_phone || '-' }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="text-sm text-gray-900 dark:text-white">{{ order.waiter?.name || '-' }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                                        {{ order.payment_method?.replace('_', ' ') || '-' }}
+                                    </div>
+                                    <span v-if="order.payment_status" 
+                                          class="text-xs font-medium uppercase"
+                                          :class="order.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'"
+                                    >
+                                        {{ order.payment_status }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <div class="flex items-center gap-1">
                                         <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(order.status)]">
                                             {{ getStatusLabel(order.status) }}
@@ -187,16 +204,16 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="text-sm font-bold text-primary">{{ currencyCode }} {{ formatMoney(order.total) }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ formatDate(order.created_at) }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ calculateDuration(order.created_at, order.completed_at) }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="relative inline-block text-left">
                                         <button 
                                             @click.stop="toggleDropdown(order.id)"
@@ -238,10 +255,25 @@
                                                     </svg>
                                                     {{ $t('orders.mark_as_completed') }}
                                                 </button>
+
+                                                <!-- View Receipt Action (Thermal) -->
+                                                <a 
+                                                    v-if="order.status !== 'cancelled' && order.status !== 'deleted' && hasPermission('print_bill')"
+                                                    :href="route('orders.receipt', order.id)"
+                                                    target="_blank"
+                                                    onclick="window.open(this.href, 'receipt', 'left=100,top=100,width=400,height=600,toolbar=0,scrollbars=1,status=0'); return false;"
+                                                    @click="closeDropdown"
+                                                    class="w-full text-left px-4 py-2.5 text-sm text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-3 transition-colors"
+                                                >
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                    </svg>
+                                                    {{ $t('orders.view_receipt') }}
+                                                </a>
                                                 
                                                 <!-- View Bill Action -->
                                                 <a 
-                                                    v-if="order.status === 'completed' && hasPermission('print_bill')"
+                                                    v-if="order.status !== 'cancelled' && order.status !== 'deleted' && hasPermission('print_bill')"
                                                     :href="route('orders.bill', order.id)"
                                                     target="_blank"
                                                     @click="closeDropdown"
@@ -325,6 +357,8 @@ interface Order {
     delivery_provider?: string;
     waiter?: { name: string };
     notes?: string;
+    payment_method?: string;
+    payment_status?: string;
 }
 
 interface PaginatedOrders {
@@ -391,7 +425,7 @@ onMounted(() => {
         // Only refresh if not interacting with a specific modal? 
         // We use partial reload to be efficient. reload() preserves scroll/state by default.
         router.reload({ only: ['orders'] });
-    }, 10000);
+    }, 3000);
 });
 
 onUnmounted(() => {

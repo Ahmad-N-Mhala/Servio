@@ -108,6 +108,11 @@ class MultiRestaurantController extends Controller
         // Set the active restaurant in the session
         session(['active_restaurant_id' => $restaurant->id]);
 
+        // Allows redirecting to a specific page after switching context
+        if ($request->has('redirect_to') && $request->filled('redirect_to')) {
+            return redirect($request->input('redirect_to'));
+        }
+
         return redirect($request->user()->getLandingRoute());
     }
     public function create()

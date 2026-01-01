@@ -428,11 +428,32 @@ class OrderController extends Controller
         }
         // ====== END STOCK VALIDATION ======
 
+        // Generate Transaction Number (Sequential)
+        $transactionNumber = $restaurant->next_order_number ?? 1;
+
+        try {
+            $restaurant->increment('next_order_number');
+        } catch (\Exception $e) {
+            // Handle case where next_order_number is stored as string in MongoDB (Cannot apply $inc)
+            // We fix the type by saving it as integer and retry. This self-heals any bad data.
+            if (str_contains($e->getMessage(), 'non-numeric type') || str_contains($e->getMessage(), 'Apply $inc to a value of non-numeric type')) {
+                $restaurant->next_order_number = (int) ($restaurant->next_order_number ?? 1);
+                $restaurant->save();
+                $restaurant->increment('next_order_number');
+            } else {
+                throw $e;
+            }
+        }
+
+        // Generate Order Number (Unique String)
+        $orderNumber = 'ORD-' . strtoupper(Str::random(8));
+
         // Create order
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
             'customer_id' => $customer ? $customer->id : null,
-            'order_number' => 'ORD-' . strtoupper(Str::random(8)),
+            'order_number' => $orderNumber,
+            'transaction_number' => $transactionNumber,
             'status' => 'pending',
             'type' => $validated['type'],
             'table_id' => $validated['table_id'] ?? null,
@@ -643,6 +664,28 @@ class OrderController extends Controller
         broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'status_changed'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.status_updated'));
+    }
+
+    public function receipt(Order $order)
+    {
+        $order->load(['customer', 'table', 'items.menuItem', 'restaurant', 'waiter']);
+
+        $restaurant = $order->restaurant; // Use the relationship
+
+        // Prepare template settings - Handle Mongo BSON
+        $settings = $restaurant->receipt_template;
+        if (is_object($settings) && method_exists($settings, 'getArrayCopy')) {
+            $settings = $settings->getArrayCopy();
+        } elseif (!is_array($settings)) {
+            $settings = [];
+        }
+
+        return Inertia::render('Orders/Receipt', [
+            'order' => $order,
+            'template' => $settings,
+            'logo' => $restaurant->logo,
+            'restaurantName' => $restaurant->name,
+        ]);
     }
 
     public function generateBill(Order $order)

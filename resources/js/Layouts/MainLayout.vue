@@ -297,6 +297,17 @@
                                     </svg>
                                     {{ $t('nav.tables') }}
                                 </Link>
+                                <Link 
+                                    v-if="hasPermission('customize_receipt_template')"
+                                    :href="route('settings.receipt-template')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/settings/receipt-template')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Receipt Template
+                                </Link>
                             </div>
                         </div>
 
@@ -555,8 +566,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    <!-- Mobile Logo -->
-                    <Logo class="lg:hidden scale-90 origin-left" />
+                    <!-- Restaurant Logo or Default Logo -->
+                    <div class="flex items-center gap-3">
+                        <img 
+                            v-if="currentRestaurantLogo" 
+                            :src="currentRestaurantLogo" 
+                            :alt="currentRestaurantName"
+                            class="h-10 w-auto object-contain rounded-lg"
+                        />
+                        <Logo v-else class="lg:hidden scale-90 origin-left" />
+                        <div v-if="currentRestaurantLogo && userRestaurants.length === 1" class="hidden sm:block">
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ currentRestaurantName }}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-3" :class="currentLocale === 'ar' ? 'space-x-reverse' : ''">
@@ -566,7 +588,13 @@
                             @click="isRestaurantMenuOpen = !isRestaurantMenuOpen"
                             class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                         >
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <img 
+                                v-if="currentRestaurantLogo" 
+                                :src="currentRestaurantLogo" 
+                                :alt="currentRestaurantName"
+                                class="w-5 h-5 object-contain rounded"
+                            />
+                            <svg v-else class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                             <span class="max-w-[80px] sm:max-w-[150px] truncate">{{ currentRestaurantName }}</span>
                             <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
@@ -580,10 +608,24 @@
                                 v-for="restaurant in userRestaurants"
                                 :key="restaurant.id"
                                 @click="switchRestaurant(restaurant)"
-                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors flex items-center justify-between group"
+                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors flex items-center gap-3 group"
                             >
-                                <span>{{ restaurant.name }}</span>
-                                <svg v-if="currentRestaurantId === restaurant.id" class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <img 
+                                    v-if="restaurant.logo" 
+                                    :src="restaurant.logo" 
+                                    :alt="restaurant.name"
+                                    class="w-8 h-8 object-contain rounded flex-shrink-0"
+                                />
+                                <div 
+                                    v-else 
+                                    class="w-8 h-8 bg-primary/10 rounded flex items-center justify-center flex-shrink-0"
+                                >
+                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                </div>
+                                <span class="flex-1">{{ restaurant.name }}</span>
+                                <svg v-if="currentRestaurantId === restaurant.id" class="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
                         </div>
                     </div>
@@ -889,6 +931,11 @@ const currentRestaurantId = computed(() => (page.props as any).active_restaurant
 const currentRestaurantName = computed(() => {
     const restaurant = userRestaurants.value.find((r: any) => r.id === currentRestaurantId.value);
     return restaurant?.name || 'Select Restaurant';
+});
+
+const currentRestaurantLogo = computed(() => {
+    const restaurant = userRestaurants.value.find((r: any) => r.id === currentRestaurantId.value);
+    return restaurant?.logo || null;
 });
 
 const switchRestaurant = (restaurant: any) => {
