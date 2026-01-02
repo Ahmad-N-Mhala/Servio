@@ -1,24 +1,10 @@
 <template>
     <MainLayout>
         <div class="w-full px-2 sm:px-4 lg:px-6 py-8">
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('orders.title') }}</h1>
-                <div class="flex gap-4">
-                    <div class="relative">
-                        <input 
-                            v-model="params.search"
-                            type="text" 
-                            :placeholder="$t('orders.search_orders')" 
-                            class="w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"
-                        >
-                        <div class="absolute left-3 top-2.5 text-gray-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                    
-                    <a v-if="hasPermission('export_reports')" :href="exportUrl" target="_blank" class="inline-flex">
+                <div class="flex flex-wrap gap-4">
+                     <a v-if="hasPermission('export_reports')" :href="exportUrl" target="_blank" class="inline-flex">
                         <Button class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -45,286 +31,201 @@
                 class="mb-6"
             />
             
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <!-- Empty State -->
-                <div v-if="ordersCount === 0" class="text-center py-16 px-6">
-                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                        <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+            <Table
+                :columns="columns"
+                :data="ordersList"
+                :pagination="paginationMeta"
+                v-model:search="params.search"
+                :title="$t('orders.title')"
+                :empty-message="$t('orders.no_orders')"
+                @sort="handleSort"
+            >
+                <!-- Order Number & Delivery Provider -->
+                <template #cell-order_number="{ row }">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ row.order_number || 'N/A' }}</span>
+                        <span v-if="row.delivery_provider" 
+                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium w-fit mt-1"
+                            :class="{
+                                'bg-yellow-100 text-yellow-800': row.delivery_provider === 'noon',
+                                'bg-orange-100 text-orange-800': row.delivery_provider === 'talabat',
+                                'bg-cyan-100 text-cyan-800': row.delivery_provider === 'deliveroo',
+                                'bg-green-100 text-green-800': row.delivery_provider === 'careem',
+                                'bg-gray-100 text-gray-800': !['noon', 'talabat', 'deliveroo', 'careem'].includes(row.delivery_provider)
+                            }"
+                        >
+                            {{ row.delivery_provider }}
+                        </span>
                     </div>
-                    <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $t('orders.no_orders') }}</h4>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('orders.create_first_order') }}</p>
-                    <Link v-if="hasPermission('create_order')" :href="route('orders.create')">
-                        <Button>{{ $t('orders.create_first_order') }}</Button>
-                    </Link>
-                </div>
-                
-                <!-- Table -->
-                <div v-else class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th 
-                                    scope="col" 
-                                    class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    @click="sort('order_number')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.order_number') }}
-                                        <span v-if="params.sort_field === 'order_number'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('customer_name')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.customer') }}
-                                        <span v-if="params.sort_field === 'customer_name'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                                >
-                                    Waiter
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                                >
-                                    {{ $t('orders.payment') }}
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('status')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.status') }}
-                                        <span v-if="params.sort_field === 'status'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('total')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.total') }}
-                                        <span v-if="params.sort_field === 'total'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('created_at')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.date') }}
-                                        <span v-if="params.sort_field === 'created_at'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    scope="col" 
-                                    class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                                >
-                                    {{ $t('orders.duration') }}
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    {{ $t('orders.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr 
-                                v-for="order in ordersList" 
-                                :key="order.id"
-                                class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                            >
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ order.order_number || 'N/A' }}</span>
-                                        <span v-if="order.delivery_provider" 
-                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium w-fit mt-1"
-                                            :class="{
-                                                'bg-yellow-100 text-yellow-800': order.delivery_provider === 'noon',
-                                                'bg-orange-100 text-orange-800': order.delivery_provider === 'talabat',
-                                                'bg-cyan-100 text-cyan-800': order.delivery_provider === 'deliveroo',
-                                                'bg-green-100 text-green-800': order.delivery_provider === 'careem',
-                                                'bg-gray-100 text-gray-800': !['noon', 'talabat', 'deliveroo', 'careem'].includes(order.delivery_provider)
-                                            }"
-                                        >
-                                            {{ order.delivery_provider }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ order.customer_name || $t('orders.guest') }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ order.customer_phone || '-' }}</div>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <span class="text-sm text-gray-900 dark:text-white">{{ order.waiter?.name || '-' }}</span>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white capitalize">
-                                        {{ order.payment_method?.replace('_', ' ') || '-' }}
-                                    </div>
-                                    <span v-if="order.payment_status" 
-                                          class="text-xs font-medium uppercase"
-                                          :class="order.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'"
-                                    >
-                                        {{ order.payment_status }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="flex items-center gap-1">
-                                        <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(order.status)]">
-                                            {{ getStatusLabel(order.status) }}
-                                        </span>
-                                        <div v-if="order.status === 'cancelled' && order.notes" class="group relative">
-                                            <svg class="w-4 h-4 text-red-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center">
-                                                {{ order.notes }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <span class="text-sm font-bold text-primary">{{ currencyCode }} {{ formatMoney(order.total) }}</span>
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ formatDate(order.created_at) }}
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ calculateDuration(order.created_at, order.completed_at) }}
-                                </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="relative inline-block text-left">
-                                        <button 
-                                            @click.stop="toggleDropdown(order.id)"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium shadow-sm"
-                                        >
-                                            {{ $t('orders.actions') }}
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-                                        
-                                        <!-- Dropdown Menu -->
-                                        <div 
-                                            v-if="openDropdown === order.id"
-                                            @click.stop
-                                            class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 z-10 overflow-hidden"
-                                        >
-                                            <div class="py-1">
-                                                <!-- Process Action -->
-                                                <button 
-                                                    v-if="order.status === 'pending' && hasPermission('edit_order')"
-                                                    @click="handleAction(order.id, 'processing')"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 transition-colors"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                                    </svg>
-                                                    {{ $t('orders.mark_as_processing') }}
-                                                </button>
-                                                
-                                                <!-- Complete Action -->
-                                                <button 
-                                                    v-if="order.status === 'processing' && hasPermission('edit_order')"
-                                                    @click="handleAction(order.id, 'completed')"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-3 transition-colors"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    {{ $t('orders.mark_as_completed') }}
-                                                </button>
+                </template>
 
-                                                <!-- View Receipt Action (Thermal) -->
-                                                <a 
-                                                    v-if="order.status !== 'cancelled' && order.status !== 'deleted' && hasPermission('print_bill')"
-                                                    :href="route('orders.receipt', order.id)"
-                                                    target="_blank"
-                                                    onclick="window.open(this.href, 'receipt', 'left=100,top=100,width=400,height=600,toolbar=0,scrollbars=1,status=0'); return false;"
-                                                    @click="closeDropdown"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-3 transition-colors"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                                    </svg>
-                                                    {{ $t('orders.view_receipt') }}
-                                                </a>
-                                                
-                                                <!-- View Bill Action -->
-                                                <a 
-                                                    v-if="order.status !== 'cancelled' && order.status !== 'deleted' && hasPermission('print_bill')"
-                                                    :href="route('orders.bill', order.id)"
-                                                    target="_blank"
-                                                    @click="closeDropdown"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-3 transition-colors"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                    </svg>
-                                                    {{ $t('orders.view_bill') }}
-                                                </a>
-                                                
-                                                <!-- Cancel Action -->
-                                                <button 
-                                                    v-if="(order.status === 'pending' || order.status === 'processing') && hasPermission('cancel_order')"
-                                                    @click="handleAction(order.id, 'cancelled', $t('orders.confirm_cancel'))"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-3 transition-colors"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                    {{ $t('orders.cancel_order') }}
-                                                </button>
-                                                
-                                                <!-- Divider before delete -->
-                                                <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-                                                
-                                                <!-- Delete Action -->
-                                                <button 
-                                                    v-if="hasPermission('delete_order')"
-                                                    @click="handleAction(order.id, 'deleted', $t('orders.confirm_delete'))"
-                                                    class="w-full text-left px-4 py-2.5 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
-                                                >
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    {{ $t('orders.delete_order') }}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <!-- Pagination -->
-                    <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                        <Pagination :meta="paginationMeta" />
+                <!-- Customer Column -->
+                <template #cell-customer_name="{ row }">
+                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ row.customer_name || $t('orders.guest') }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ row.customer_phone || '-' }}</div>
+                </template>
+
+                <!-- Waiter -->
+                 <template #cell-waiter="{ row }">
+                    <span class="text-sm text-gray-900 dark:text-white">{{ row.waiter?.name || '-' }}</span>
+                </template>
+
+                 <!-- Payment -->
+                <template #cell-payment_method="{ row }">
+                    <div class="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                        {{ row.payment_method?.replace('_', ' ') || '-' }}
                     </div>
-                </div>
-            </div>
+                    <span v-if="row.payment_status" 
+                          class="text-xs font-medium uppercase"
+                          :class="row.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'"
+                    >
+                        {{ row.payment_status }}
+                    </span>
+                </template>
+
+                 <!-- Status -->
+                <template #cell-status="{ row }">
+                     <div class="flex items-center gap-1">
+                        <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(row.status)]">
+                            {{ getStatusLabel(row.status) }}
+                        </span>
+                        <div v-if="row.status === 'cancelled' && row.notes" class="group relative">
+                            <svg class="w-4 h-4 text-red-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center">
+                                {{ row.notes }}
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Total -->
+                <template #cell-total="{ row }">
+                     <span class="text-sm font-bold text-primary">{{ currencyCode }} {{ formatMoney(row.total) }}</span>
+                </template>
+
+                 <!-- Duration -->
+                <template #cell-duration="{ row }">
+                    {{ calculateDuration(row.created_at, row.completed_at) }}
+                </template>
+
+                <!-- Actions -->
+                <template #actions="{ row }">
+                    <div class="relative inline-block text-left">
+                        <button 
+                            @click.stop="toggleDropdown(row.id)"
+                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 font-medium shadow-sm text-sm"
+                        >
+                            {{ $t('orders.actions') }}
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div 
+                            v-if="openDropdown === row.id"
+                            @click.stop
+                            class="absolute right-0 mt-2 w-48 rounded-xl shadow-xl bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-10 z-50 overflow-hidden transform origin-top-right transition-all"
+                        >
+                            <div class="py-1">
+                                <!-- Approve (Delivery/Online) Action -->
+                                <button 
+                                    v-if="row.status === 'pending_approval' && hasPermission('edit_order')"
+                                    @click="handleAction(row.id, 'pending')"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    {{ $t('orders.approve_order') }}
+                                </button>
+
+                                <!-- Process Action -->
+                                <button 
+                                    v-if="row.status === 'pending' && hasPermission('edit_order')"
+                                    @click="handleAction(row.id, 'processing')"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    {{ $t('orders.mark_as_processing') }}
+                                </button>
+                                
+                                <!-- Complete Action -->
+                                <button 
+                                    v-if="row.status === 'processing' && hasPermission('edit_order')"
+                                    @click="handleAction(row.id, 'completed')"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ $t('orders.mark_as_completed') }}
+                                </button>
+
+                                <!-- View Receipt Action (Thermal) -->
+                                <a 
+                                    v-if="row.status !== 'cancelled' && row.status !== 'deleted' && hasPermission('print_bill')"
+                                    :href="route('orders.receipt', row.id)"
+                                    target="_blank"
+                                    onclick="window.open(this.href, 'receipt', 'left=100,top=100,width=400,height=600,toolbar=0,scrollbars=1,status=0'); return false;"
+                                    @click="closeDropdown"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    {{ $t('orders.view_receipt') }}
+                                </a>
+                                
+                                <!-- View Bill Action -->
+                                <a 
+                                    v-if="row.status !== 'cancelled' && row.status !== 'deleted' && hasPermission('print_bill')"
+                                    :href="route('orders.bill', row.id)"
+                                    target="_blank"
+                                    @click="closeDropdown"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    {{ $t('orders.view_bill') }}
+                                </a>
+                                
+                                <!-- Cancel Action -->
+                                <button 
+                                    v-if="(row.status === 'pending' || row.status === 'processing') && hasPermission('cancel_order')"
+                                    @click="handleAction(row.id, 'cancelled', $t('orders.confirm_cancel'))"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    {{ $t('orders.cancel_order') }}
+                                </button>
+                                
+                                <!-- Divider before delete -->
+                                <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                                
+                                <!-- Delete Action -->
+                                <button 
+                                    v-if="hasPermission('delete_order')"
+                                    @click="handleAction(row.id, 'deleted', $t('orders.confirm_delete'))"
+                                    class="w-full text-left px-4 py-2.5 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    {{ $t('orders.delete_order') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </Table>
         </div>
     </MainLayout>
 </template>
@@ -337,50 +238,16 @@ import { useI18n } from 'vue-i18n';
 import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
-import Pagination from '@/Components/Pagination.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
+import Table from '@/Components/Table.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 
 const { hasPermission } = usePermissions();
 const { t } = useI18n();
 const page = usePage();
 
-interface Order {
-    id: number;
-    order_number: string;
-    customer_name: string;
-    customer_phone: string;
-    status: string;
-    total: number;
-    created_at: string;
-    completed_at?: string;
-    delivery_provider?: string;
-    waiter?: { name: string };
-    notes?: string;
-    payment_method?: string;
-    payment_status?: string;
-}
-
-interface PaginatedOrders {
-    data: Order[];
-    meta?: {
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-        from: number;
-        to: number;
-    };
-    current_page?: number;
-    last_page?: number;
-    per_page?: number;
-    total?: number;
-    from?: number;
-    to?: number;
-}
-
 const props = withDefaults(defineProps<{
-    orders?: PaginatedOrders;
+    orders?: any;
     currency?: string;
     filters?: {
         search?: string;
@@ -403,29 +270,34 @@ const params = ref({
     end_date: props.filters?.end_date || ''
 });
 
+const columns = computed(() => [
+    { key: 'order_number', label: t('orders.order_number'), sortable: true },
+    { key: 'customer_name', label: t('orders.customer'), sortable: true },
+    { key: 'waiter', label: 'Waiter' },
+    { key: 'payment_method', label: t('orders.payment') },
+    { key: 'status', label: t('orders.status'), sortable: true },
+    { key: 'total', label: t('orders.total'), sortable: true, align: 'right' as const },
+    { key: 'created_at', label: t('orders.date'), sortable: true, format: 'datetime' as const },
+    { key: 'duration', label: t('orders.duration') },
+]);
+
 const openDropdown = ref<number | null>(null);
 
 const toggleDropdown = (orderId: number) => {
     openDropdown.value = openDropdown.value === orderId ? null : orderId;
 };
 
-// Close dropdown when clicking outside
 const closeDropdown = () => {
     openDropdown.value = null;
 };
 
-// Add and remove click listener using Vue lifecycle hooks
 let refreshInterval: any = null;
 
 onMounted(() => {
     document.addEventListener('click', closeDropdown);
-    
-    // Auto-refresh every 10 seconds to keep orders live
     refreshInterval = setInterval(() => {
-        // Only refresh if not interacting with a specific modal? 
-        // We use partial reload to be efficient. reload() preserves scroll/state by default.
         router.reload({ only: ['orders'] });
-    }, 3000);
+    }, 3000); // 3s auto refresh
 });
 
 onUnmounted(() => {
@@ -449,8 +321,17 @@ watch(
     { deep: true }
 );
 
+const handleSort = (key: string, direction: 'asc' | 'desc') => {
+    params.value.sort_field = key;
+    params.value.sort_direction = direction;
+    
+    router.get(route('orders.index'), params.value, {
+        preserveState: true,
+        replace: true
+    });
+};
+
 const exportUrl = computed(() => {
-    // We'll use a try-catch because route() might be undefined initially or during SSR
     try {
         const baseUrl = route('orders.export');
         const url = new URL(baseUrl, window.location.origin);
@@ -465,16 +346,6 @@ const exportUrl = computed(() => {
     }
 });
 
-const sort = (field: string) => {
-    params.value.sort_field = field;
-    params.value.sort_direction = params.value.sort_direction === 'asc' ? 'desc' : 'asc';
-    
-    router.get(route('orders.index'), params.value, {
-        preserveState: true,
-        replace: true
-    });
-};
-
 const route = (window as any).route;
 
 const ordersList = computed(() => {
@@ -485,14 +356,11 @@ const ordersList = computed(() => {
     }
 });
 
-const ordersCount = computed(() => ordersList.value.length);
+// Helper functions for formatting (currency, date, duration, labels)
 const currencyCode = computed(() => (page.props.current_restaurant as any)?.currency || props.currency || 'AED');
 
 const paginationMeta = computed(() => {
-    if (props.orders?.meta) {
-        return props.orders.meta;
-    }
-    // Handle Laravel's default paginate format
+    if (props.orders?.meta) return props.orders.meta;
     return {
         current_page: props.orders?.current_page || 1,
         last_page: props.orders?.last_page || 1,
@@ -508,41 +376,22 @@ const formatMoney = (amount: number | null | undefined): string => {
     return Number(amount).toFixed(2);
 };
 
-const formatDate = (dateStr: string | null | undefined): string => {
-    if (!dateStr) return '-';
-    try {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch {
-        return '-';
-    }
-};
-
 const calculateDuration = (created: string, completed?: string): string => {
     if (!completed) return t('orders.in_progress');
-    
     const start = new Date(created).getTime();
     const end = new Date(completed).getTime();
     const diff = end - start;
-    
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 0) {
-        return `${hours}h ${minutes}m`;
-    }
+    if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
 };
 
 const getStatusLabel = (status: string | null | undefined): string => {
     const statusMap: Record<string, string> = {
+        pending_approval: t('orders.pending_approval') || 'Pending Approval',
         pending: t('orders.pending'),
-      processing: t('orders.processing'),
+        processing: t('orders.processing'),
         completed: t('orders.completed'),
         cancelled: t('orders.cancelled'),
         deleted: t('orders.deleted')
@@ -552,6 +401,7 @@ const getStatusLabel = (status: string | null | undefined): string => {
 
 const getStatusClass = (status: string | null | undefined): string => {
     const classes: Record<string, string> = {
+        pending_approval: 'bg-purple-100 text-purple-800',
         pending: 'bg-yellow-100 text-yellow-800',
         processing: 'bg-blue-100 text-blue-800',
         completed: 'bg-green-100 text-green-800',
@@ -566,17 +416,12 @@ const updateStatus = (orderId: number, status: string) => {
 };
 
 const handleAction = (orderId: number, status: string, confirmMessage?: string) => {
-    // Close the dropdown
     openDropdown.value = null;
-    
-    // If there's a confirmation message, show it
     if (confirmMessage) {
-        if (confirm(confirmMessage)) {
-            updateStatus(orderId, status);
-        }
+        if (confirm(confirmMessage)) updateStatus(orderId, status);
     } else {
-        // No confirmation needed, just update
         updateStatus(orderId, status);
     }
 };
 </script>
+

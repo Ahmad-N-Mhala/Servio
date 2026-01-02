@@ -30,5 +30,7 @@ return [
     'confirm_delete' => 'Are you sure you want to delete this order?',
     'order_created' => 'Order created successfully',
     'status_updated' => 'Order status updated successfully',
+    'pending_approval' => 'Pending Approval',
+    'approve_order' => 'Approve Order',
 ];
 

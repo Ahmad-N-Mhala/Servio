@@ -35,6 +35,7 @@ class Restaurant extends Model
         'logo',
         'receipt_template',
         'next_order_number',
+        'service_type',
     ];
 
     protected $casts = [

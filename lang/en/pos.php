@@ -26,4 +26,5 @@ return [
     'extra_charges' => 'Extra Charges',
     'fixed' => 'Fixed',
     'percent' => 'Percent',
+    'table' => 'Table',
 ];

@@ -26,4 +26,5 @@ return [
     'extra_charges' => 'رسوم إضافية',
     'fixed' => 'ثابت',
     'percent' => 'نسبة',
+    'table' => 'طاولة',
 ];

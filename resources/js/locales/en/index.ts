@@ -106,6 +106,7 @@ export default {
         cancel_order: 'Cancel Order',
         delete_order: 'Delete Order',
         view_bill: 'View Bill (PDF)',
+        view_receipt: 'View Receipt (Thermal)',
         no_orders: 'No orders yet',
         create_first_order: 'Create First Order',
         search_orders: 'Search orders...',

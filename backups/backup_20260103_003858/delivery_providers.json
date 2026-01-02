@@ -1,0 +1,84 @@
+[
+    {
+        "name": "Noon Food",
+        "slug": "noon",
+        "description": "Noon's food delivery service offering fast delivery across UAE and Saudi Arabia with a wide selection of restaurants.",
+        "api_documentation_url": "https:\/\/developers.noon.com",
+        "requires_api_key": "1",
+        "requires_api_secret": "1",
+        "requires_store_id": "1",
+        "requires_webhook_secret": false,
+        "is_active": true,
+        "sort_order": 2,
+        "updated_at": "2026-01-02T09:04:12.885000Z",
+        "created_at": "2025-12-26T18:07:53.686000Z",
+        "logo_url": "https:\/\/z.nooncdn.com\/s\/app\/com\/noon\/images\/logos\/noon-logo-en.svg",
+        "requires_client_id": "1",
+        "requires_client_secret": "1",
+        "requires_password": "1",
+        "requires_username": "1",
+        "webhook_url_template": null,
+        "id": {
+            "$oid": "694ecef94c7837e511064ba2"
+        }
+    },
+    {
+        "slug": "talabat",
+        "name": "Talabat",
+        "description": "Leading food delivery platform in the Middle East, operating across UAE, Saudi Arabia, Kuwait, Bahrain, Oman, Qatar, Jordan, and Egypt.",
+        "logo_url": "https:\/\/upload.wikimedia.org\/wikipedia\/commons\/thumb\/8\/8a\/Talabat_logo.svg\/1200px-Talabat_logo.svg.png",
+        "api_documentation_url": "https:\/\/developers.talabat.com",
+        "requires_api_key": true,
+        "requires_api_secret": true,
+        "requires_store_id": true,
+        "requires_webhook_secret": true,
+        "is_active": true,
+        "sort_order": 1,
+        "updated_at": "2026-01-02T08:02:44.291000Z",
+        "created_at": "2026-01-02T08:02:44.291000Z",
+        "id": {
+            "$oid": "69577ba470068b15c40ac162"
+        }
+    },
+    {
+        "slug": "deliveroo",
+        "name": "Deliveroo",
+        "description": "International food delivery company operating in UAE, Kuwait, and Qatar, known for premium restaurant partnerships.",
+        "logo_url": "delivery-providers\/u5hw5ra86UryxlXOTaKq0nEYIyukTQyRohU8ior4.png",
+        "api_documentation_url": "https:\/\/developers.deliveroo.com",
+        "requires_api_key": true,
+        "requires_api_secret": true,
+        "requires_store_id": true,
+        "requires_webhook_secret": true,
+        "is_active": true,
+        "sort_order": 4,
+        "updated_at": "2026-01-02T09:04:28.524000Z",
+        "created_at": "2026-01-02T08:02:44.301000Z",
+        "requires_client_id": "0",
+        "requires_client_secret": "0",
+        "requires_password": "0",
+        "requires_username": "0",
+        "webhook_url_template": null,
+        "id": {
+            "$oid": "69577ba470068b15c40ac164"
+        }
+    },
+    {
+        "slug": "keeta",
+        "name": "Keeta",
+        "description": "Fast-growing food delivery app in the Middle East, backed by Meituan.",
+        "logo_url": "https:\/\/play-lh.googleusercontent.com\/9lQOa9J8E7-f_bCgT1yK6X0dB7aL1g7x5c3V9n8oM2kP4qR5sT6uU8vW3xY0zA",
+        "api_documentation_url": "https:\/\/www.keeta.com",
+        "requires_api_key": true,
+        "requires_api_secret": true,
+        "requires_store_id": true,
+        "requires_webhook_secret": true,
+        "is_active": true,
+        "sort_order": 9,
+        "updated_at": "2026-01-02T08:02:44.303000Z",
+        "created_at": "2026-01-02T08:02:44.303000Z",
+        "id": {
+            "$oid": "69577ba470068b15c40ac169"
+        }
+    }
+]

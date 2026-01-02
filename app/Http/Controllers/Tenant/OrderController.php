@@ -49,11 +49,12 @@ class OrderController extends Controller
         }
 
         // Date Range
+        // Date Range
         if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->input('start_date'));
+            $query->where('created_at', '>=', \Carbon\Carbon::parse($request->input('start_date'))->startOfDay());
         }
         if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->input('end_date'));
+            $query->where('created_at', '<=', \Carbon\Carbon::parse($request->input('end_date'))->endOfDay());
         }
 
         // Sort
@@ -71,9 +72,11 @@ class OrderController extends Controller
         $orders = $query->paginate(10)
             ->withQueryString();
 
+
+
         return Inertia::render('Orders/Live', [
             'orders' => $orders,
-            'currency' => $restaurant->currency ?? 'AED',
+            'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
             'filters' => $request->only(['search', 'sort_field', 'sort_direction', 'start_date', 'end_date']),
         ]);
     }
@@ -106,10 +109,10 @@ class OrderController extends Controller
 
         // Date Range
         if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->input('start_date'));
+            $query->where('created_at', '>=', \Carbon\Carbon::parse($request->input('start_date'))->startOfDay());
         }
         if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->input('end_date'));
+            $query->where('created_at', '<=', \Carbon\Carbon::parse($request->input('end_date'))->endOfDay());
         }
 
         // Sort
@@ -325,7 +328,7 @@ class OrderController extends Controller
             'customers' => $customers,
             'rewards' => $rewards,
             'tables' => $tables,
-            'currency' => $restaurant->currency ?? 'AED',
+            'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
             'stockAvailability' => $menuItemStockInfo,
             'ingredientStocks' => $ingredientStocks,
         ]);
@@ -445,8 +448,9 @@ class OrderController extends Controller
             }
         }
 
-        // Generate Order Number (Unique String)
-        $orderNumber = 'ORD-' . strtoupper(Str::random(8));
+        // Generate Order Number
+        // We use the sequential transaction number (per-restaurant) as the order number
+        $orderNumber = (string) $transactionNumber;
 
         // Create order
         $order = Order::create([
@@ -461,7 +465,7 @@ class OrderController extends Controller
             'tax' => $validated['tax'] ?? 0,
             'discount_amount' => $validated['discount_amount'] ?? 0,
             'total' => $validated['total'],
-            'currency' => $restaurant->currency ?? 'AED',
+            'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
             'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
             'customer_phone' => $validated['customer_phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
@@ -658,6 +662,21 @@ class OrderController extends Controller
                 }
             }
         }
+
+        // Handle Delivery Order Approval
+        // If it's a delivery order and being "approved" (moved to processing), mark as paid online
+        if (
+            $order->delivery_provider &&
+            in_array($validated['status'], ['processing', 'preparing']) &&
+            in_array($oldStatus, ['pending', 'pending_approval'])
+        ) {
+
+            $order->update([
+                'payment_status' => 'paid',
+                'payment_method' => 'online', // Or $order->delivery_provider
+            ]);
+        }
+
         // ====== END INVENTORY DEDUCTION ======
 
         // Broadcast order status changed event for real-time updates

@@ -10,12 +10,13 @@
                 <a 
                     :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date })"
                     target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
                 >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export Report
+                    <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Report
+                    </Button>
                 </a>
             </div>
 
@@ -105,6 +106,21 @@
                 <ChartCard title="Waste Trend (Money)" height="300px">
                     <canvas ref="wasteChartCanvas"></canvas>
                 </ChartCard>
+            <!-- Recent Orders -->
+            <div class="mb-8">
+                <Table
+                    title="Recent Orders"
+                    :columns="recentOrdersColumns"
+                    :data="recentOrders"
+                    :pagination="null"
+                >
+                    <template #cell-status="{ row }">
+                        <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(row.status)]">
+                            {{ row.status }}
+                        </span>
+                    </template>
+                </Table>
+            </div>
             </div>     <!-- Waste Trend -->
         </div>
 
@@ -167,6 +183,8 @@ import DateRangePicker from '@/Components/DateRangePicker.vue';
 import StatsCard from '@/Components/StatsCard.vue';
 import ChartCard from '@/Components/ChartCard.vue';
 import Modal from '@/Components/Modal.vue';
+import Table from '@/Components/Table.vue';
+import Button from '@/Components/Button.vue';
 import axios from 'axios';
 
 Chart.register(...registerables);
@@ -184,6 +202,15 @@ const paymentDistribution = computed(() => page.props.payment_distribution as an
 const wasteChart = computed(() => page.props.waste_chart as any[]);
 const dateRange = computed(() => page.props.date_range as any);
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+const recentOrders = computed(() => page.props.recent_orders as any[]);
+
+const recentOrdersColumns = [
+    { key: 'order_number', label: 'Order #' },
+    { key: 'customer_name', label: 'Customer' },
+    { key: 'total', label: 'Total', format: 'currency' as const, align: 'right' as const },
+    { key: 'status', label: 'Status', format: 'badge' as const },
+    { key: 'created_at', label: 'Time' },
+];
 
 const showDetailsModal = ref(false);
 const loadingDetails = ref(false);

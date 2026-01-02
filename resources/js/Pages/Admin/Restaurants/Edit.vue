@@ -58,6 +58,18 @@
                                     </select>
                                     <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</div>
                                 </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Service Type</label>
+                                    <select v-model="form.service_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                        <option value="both">Both (Table Service & Self Service)</option>
+                                        <option value="self_service">Self Service Only (Counter/Kiosk)</option>
+                                        <option value="table_service">Table Service Only (Waiter)</option>
+                                    </select>
+                                    <div v-if="form.errors.service_type" class="text-red-500 text-xs mt-1">{{ form.errors.service_type }}</div>
+                                    <p class="text-xs text-gray-500 mt-1" v-if="form.service_type === 'self_service'">Hides waiter UI, enables pickup screen.</p>
+                                    <p class="text-xs text-gray-500 mt-1" v-if="form.service_type === 'table_service'">Hides public status screen.</p>
+                                </div>
                             </div>
                             
                             <div class="border-t pt-4 mt-2">
@@ -371,6 +383,7 @@ const props = defineProps<{
         owner_email?: string;
         phone: string | null;
         currency: string;
+        service_type?: string;
         status: string;
         address: string | null;
         city: string | null;
@@ -402,6 +415,7 @@ const form = useForm({
     email: props.restaurant.email,
     phone: props.restaurant.phone,
     currency: props.restaurant.currency,
+    service_type: props.restaurant.service_type || 'both',
     status: props.restaurant.status || 'active',
     address: props.restaurant.address,
     city: props.restaurant.city,

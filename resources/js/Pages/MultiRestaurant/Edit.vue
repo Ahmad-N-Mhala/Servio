@@ -46,7 +46,7 @@
                         
                         <!-- Logo Upload -->
                         <div class="flex flex-col items-center justify-center p-6 bg-gray-50 border border-gray-100 rounded-2xl">
-                             <div class="relative group cursor-pointer mb-4" @click="$refs.logoInput.click()">
+                             <div class="relative group cursor-pointer mb-4" @click="logoInput?.click()">
                                 <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white flex items-center justify-center relative">
                                     <img v-if="logoPreview || currentLogo" :src="logoPreview || currentLogo" class="w-full h-full object-cover" />
                                     <div v-else class="text-gray-300">
@@ -93,6 +93,38 @@
                                     type="text"
                                     :error="form.errors.phone"
                                 />
+                            </div>
+                        </div>
+
+                        <!-- Service Type Configuration -->
+                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
+                            <h3 class="text-lg font-bold text-gray-900">Service Configuration</h3>
+                            <label class="block text-sm font-medium text-gray-700">Service Type</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div 
+                                    @click="form.service_type = 'both'"
+                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                    :class="form.service_type === 'both' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                >
+                                    <div class="font-bold text-gray-900 text-center">Both</div>
+                                    <div class="text-xs text-gray-500 text-center mt-1">Table & Self Service</div>
+                                </div>
+                                <div 
+                                    @click="form.service_type = 'table_service'"
+                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                    :class="form.service_type === 'table_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                >
+                                    <div class="font-bold text-gray-900 text-center">Table Service</div>
+                                    <div class="text-xs text-gray-500 text-center mt-1">Waiter Only</div>
+                                </div>
+                                <div 
+                                    @click="form.service_type = 'self_service'"
+                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                    :class="form.service_type === 'self_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                >
+                                    <div class="font-bold text-gray-900 text-center">Self Service</div>
+                                    <div class="text-xs text-gray-500 text-center mt-1">Pickup/Kiosk</div>
+                                </div>
                             </div>
                         </div>
 
@@ -178,8 +210,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import Logo from '@/Components/Logo.vue';
 import Input from '@/Components/Input.vue';
 import Select from '@/Components/Select.vue';
@@ -203,10 +235,12 @@ const form = useForm({
     zip_code: props.restaurant.zip_code,
     google_map_location: props.restaurant.google_map_location,
     logo: null as File | null,
+    service_type: props.restaurant.service_type || 'both',
 });
 
 const currentLogo = ref(props.restaurant.logo ? `/storage/${props.restaurant.logo}` : null);
 const logoPreview = ref<string | null>(null);
+const logoInput = ref<HTMLInputElement | null>(null);
 
 const handleLogoChange = (event: Event) => {
     const target = event.target as HTMLInputElement;

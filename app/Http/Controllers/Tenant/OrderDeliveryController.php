@@ -18,6 +18,11 @@ class OrderDeliveryController extends Controller
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
+        // If self-service only, hide waiter delivery screen
+        if ($restaurant->service_type === 'self_service') {
+            abort(404);
+        }
+
         $readyOrders = Order::with(['items.menuItem', 'table'])
             ->where('restaurant_id', $restaurant->id)
             ->where('status', 'ready')
@@ -76,6 +81,10 @@ class OrderDeliveryController extends Controller
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
         if (!$restaurant) {
+            return response()->json(['ids' => []]);
+        }
+
+        if ($restaurant->service_type === 'self_service') {
             return response()->json(['ids' => []]);
         }
 

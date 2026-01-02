@@ -19,8 +19,6 @@ class MultiRestaurantController extends Controller
 
         // Fetch restaurants where the user's email is associated
         // We use the central 'restaurants' table now
-        // Fetch restaurants where the user's email is associated
-        // We use the central 'restaurants' table now
         $allowedIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
             ->where('email', $user->email)
             ->pluck('restaurant_id')
@@ -118,8 +116,11 @@ class MultiRestaurantController extends Controller
     public function create()
     {
         $defaultCountry = $this->getCountryFromIp(request()->ip());
+        $countries = \App\Models\Country::all();
+
         return Inertia::render('MultiRestaurant/Create', [
-            'defaultCountry' => $defaultCountry
+            'defaultCountry' => $defaultCountry,
+            'countries' => $countries,
         ]);
     }
 
@@ -164,6 +165,11 @@ class MultiRestaurantController extends Controller
             'address' => ['required', 'string', 'max:255'],
             'zip_code' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'max:2048'], // 2MB Max
+            // New Fields for Alignment
+            'email' => ['required', 'email'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'service_type' => ['required', 'in:self_service,table_service,both'],
+            'google_map_location' => ['nullable', 'url'],
         ]);
 
         $user = Auth::user();
@@ -222,6 +228,10 @@ class MultiRestaurantController extends Controller
                 'address' => $validated['address'],
                 'zip_code' => $validated['zip_code'] ?? null,
                 'logo' => $logoPath,
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'service_type' => $validated['service_type'],
+                'google_map_location' => $validated['google_map_location'] ?? null,
             ]);
 
             // 2. Link User to Restaurant via Pivot
@@ -330,6 +340,7 @@ class MultiRestaurantController extends Controller
             'zip_code' => ['nullable', 'string', 'max:20'],
             'google_map_location' => ['nullable', 'string'],
             'logo' => ['nullable', 'image', 'max:2048'],
+            'service_type' => ['required', 'in:self_service,table_service,both'],
         ]);
 
         // 3. Update Logic

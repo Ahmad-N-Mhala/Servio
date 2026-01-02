@@ -291,6 +291,40 @@
                                 />
                             </div>
 
+                            </div>
+
+                            <!-- Service Type Configuration -->
+                            <div class="pt-6 border-t border-gray-100">
+                                <h3 class="text-lg font-bold text-gray-900 mb-4">Service Configuration</h3>
+                                <label class="block text-sm font-medium text-gray-700">Service Model</label>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                                    <div 
+                                        @click="form.service_type = 'both'"
+                                        class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                        :class="form.service_type === 'both' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                    >
+                                        <div class="font-bold text-gray-900 text-center">Both</div>
+                                        <div class="text-xs text-gray-500 text-center mt-1">Table & Self Service</div>
+                                    </div>
+                                    <div 
+                                        @click="form.service_type = 'table_service'"
+                                        class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                        :class="form.service_type === 'table_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                    >
+                                        <div class="font-bold text-gray-900 text-center">Table Service</div>
+                                        <div class="text-xs text-gray-500 text-center mt-1">Waiter Only</div>
+                                    </div>
+                                    <div 
+                                        @click="form.service_type = 'self_service'"
+                                        class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                        :class="form.service_type === 'self_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                    >
+                                        <div class="font-bold text-gray-900 text-center">Self Service</div>
+                                        <div class="text-xs text-gray-500 text-center mt-1">Pickup/Kiosk</div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Loyalty Setup -->
                             <div class="pt-6 border-t border-gray-100">
                                 <h3 class="text-lg font-bold text-gray-900 mb-4">Loyalty Program Setup</h3>
@@ -408,6 +442,7 @@ const form = useForm({
     password_confirmation: '',
     earning_method_type: 'order_total',
     earning_points: 1,
+    service_type: 'both',
 });
 
 // Computed properties for dynamic localization

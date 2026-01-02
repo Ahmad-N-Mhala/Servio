@@ -24,7 +24,7 @@ class POSController extends Controller
 
         $orders = Order::with(['items.menuItem', 'customer', 'table'])
             ->where('restaurant_id', $restaurant->id)
-            ->whereIn('status', ['pending', 'completed', 'processing', 'ready', 'served'])
+            ->whereIn('status', ['pending', 'pending_approval', 'completed', 'processing', 'ready', 'served'])
             ->where(function ($query) {
                 $query->where('payment_status', 'unpaid')
                     ->orWhereNull('payment_status');  // Include orders without payment_status field

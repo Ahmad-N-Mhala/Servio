@@ -43,6 +43,29 @@
                                         <input v-model="form.currency" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="AED" required>
                                         <div v-if="form.errors.currency" class="text-red-500 text-xs mt-1">{{ form.errors.currency }}</div>
                                     </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Logo</label>
+                                        <input @change="handleLogoChange" type="file" ref="logoInput" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*">
+                                        <div v-if="form.errors.logo" class="text-red-500 text-xs mt-1">{{ form.errors.logo }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Service Type -->
+                            <div class="pt-2">
+                                <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Service Configuration</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Service Type</label>
+                                        <select v-model="form.service_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                            <option value="both">Both (Table Service & Self Service)</option>
+                                            <option value="self_service">Self Service Only</option>
+                                            <option value="table_service">Table Service Only</option>
+                                        </select>
+                                        <div v-if="form.errors.service_type" class="text-red-500 text-xs mt-1">{{ form.errors.service_type }}</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -247,7 +270,20 @@ const form = useForm({
     // Loyalty
     earning_method_type: 'order_total',
     earning_points: 1,
+
+    // New Fields
+    logo: null as File | null,
+    service_type: 'both',
 });
+
+const handleLogoChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        form.logo = target.files[0];
+    } else {
+        form.logo = null;
+    }
+};
 
 const route = (window as any).route;
 

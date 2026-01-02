@@ -156,4 +156,40 @@ class DeliveryIntegrationController extends Controller
 
         return back()->with('error', 'Integration not found.');
     }
+    public function pushMenu(Request $request, $provider)
+    {
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
+
+        $integration = DeliveryIntegration::where('restaurant_id', $restaurant->id)
+            ->where('provider', $provider)
+            ->first();
+
+        if (!$integration || !$integration->is_enabled) {
+            return back()->with('error', 'Integration is not active.');
+        }
+
+        // Simulate Menu Push
+        // In reality, this would Dispatch a Job: PushMenuToProvider::dispatch($restaurant, $integration);
+        // And we would verify keys, etc.
+
+        // Simulated Delay and Random Success/Fail (mostly success)
+        sleep(1); // Simulate network call
+
+        $simulatedSuccess = true;
+        // if (rand(0, 10) > 8) $simulatedSuccess = false; // Optional random failure for testing user handling
+
+        if ($simulatedSuccess) {
+            // Store the "Last Pushed" time in settings
+            $settings = $integration->settings ?? [];
+            $settings['last_menu_push'] = now()->toIso8601String();
+            $integration->settings = $settings;
+            $integration->save();
+
+            return back()->with('success', "Menu successfully pushed to {$provider}!");
+        } else {
+            return back()->with('error', "Failed to push menu to {$provider}. Please check credentials and try again.");
+        }
+    }
 }

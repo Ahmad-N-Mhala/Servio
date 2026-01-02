@@ -109,27 +109,41 @@
                         
                         <div class="flex justify-between items-end">
                             <div class="flex flex-col gap-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm" :class="selectedOrder?.id === order.id ? 'text-white/90' : 'text-gray-600'">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <!-- Delivery Provider Badge -->
+                                    <span v-if="order.delivery_provider" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                        {{ order.delivery_provider }}
+                                    </span>
+                                    
+                                    <!-- Table / Type Info -->
+                                    <span v-if="!order.delivery_provider" class="text-sm" :class="selectedOrder?.id === order.id ? 'text-white/90' : 'text-gray-600'">
                                         {{ order.table ? order.table.name : $t('pos.takeaway') }}
                                     </span>
-                                    <span v-if="order.type === 'dine_in'" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20">
+
+                                    <!-- Order Type Badge -->
+                                    <span v-if="order.type === 'dine_in' && !order.delivery_provider" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20">
                                         {{ $t('pos.dine_in') }}
                                     </span>
-                                    <span v-else class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20">
+                                    <span v-else-if="order.type === 'takeaway' && !order.delivery_provider" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/20">
                                         {{ $t('pos.takeaway') }}
+                                    </span>
+
+                                    <!-- Status Badge (for delivery/special statuses) -->
+                                    <span v-if="order.status === 'pending_approval'" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
+                                        Pending Approval
                                     </span>
                                 </div>
                                 <span class="text-xs" :class="selectedOrder?.id === order.id ? 'text-white/80' : 'text-gray-400'">
                                     {{ order.items.length }} {{ $t('common.items') }} • {{ order.customer_name || $t('common.guest') }}
                                 </span>
+                            </div>
                             <span class="font-bold text-xl" :class="{ 'text-white': selectedOrder?.id === order.id }">
                                 {{ order.currency || currentCurrency }} {{ order.total }}
                             </span>
                         </div>
                     </div>
                 </div>
-                </div>
+
 
                 <!-- Right Column: Bill Details & Payment -->
                 <div class="w-1/2 flex flex-col">
@@ -138,9 +152,7 @@
                         <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center shrink-0">
                             <div class="flex items-center gap-4">
                                 <!-- Restaurant Logo -->
-                                <div v-if="currentRestaurant?.logo" class="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 bg-white">
-                                    <img :src="`/storage/${currentRestaurant.logo}`" class="w-full h-full object-contain" alt="Restaurant Logo" />
-                                </div>
+
                                 <div>
                                     <h2 class="text-xl font-bold">{{ currentRestaurant?.name || $t('pos.bill_details') }}</h2>
                                     <p class="text-xs opacity-75">{{ new Date().toLocaleDateString() }}</p>
@@ -608,7 +620,7 @@
                     </div>
 
                     <!-- Order Type & Table Section -->
-                    <div class="glass-card rounded-xl p-5 border border-gray-200">
+                    <div v-if="currentRestaurant?.service_type !== 'self_service'" class="glass-card rounded-xl p-5 border border-gray-200">
                         <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <div class="p-1.5 bg-blue-100 rounded-lg">
                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -828,7 +840,7 @@ const activeValue = ref(0);
 const updateForm = ref({
     customer_name: '',
     customer_phone: '',
-    type: 'dine_in',
+    type: currentRestaurant.value?.service_type === 'self_service' ? 'takeaway' : 'dine_in',
     table_id: null as number | null
 });
 
@@ -872,7 +884,12 @@ const filteredMenuItems = computed(() => {
 
 watch(selectedOrder, (newOrder) => {
     if (newOrder) {
-        editableItems.value = JSON.parse(JSON.stringify(newOrder.items));
+        editableItems.value = JSON.parse(JSON.stringify(newOrder.items)).map((item: any) => ({
+            ...item,
+            quantity: Number(item.quantity),
+            unit_price: Number(item.unit_price),
+            total_price: Number(item.total_price)
+        }));
         
         discountType.value = newOrder.discount_type || 'fixed';
         discountValue.value = parseFloat(newOrder.discount_value) || 0;
@@ -939,7 +956,7 @@ const filteredOrders = computed(() => {
 const totals = computed(() => {
     if (!selectedOrder.value) return { subtotal: 0, tax: 0, discountAmount: 0, additionalChargeAmount: 0, total: 0 };
 
-    const subtotal = editableItems.value.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const subtotal = editableItems.value.reduce((sum, item) => sum + (item.quantity * Number(item.unit_price)), 0);
     const tax = subtotal * 0.05; // Assuming 5%
     
     let discountAmount = 0;
@@ -995,7 +1012,7 @@ const addItemToOrder = (menuItem: any) => {
     if (existingItem) {
         // Increment quantity if already exists
         existingItem.quantity += 1;
-        existingItem.total_price = existingItem.quantity * existingItem.unit_price;
+        existingItem.total_price = existingItem.quantity * Number(existingItem.unit_price);
     } else {
         // Add new item to order
         editableItems.value.push({
@@ -1003,8 +1020,8 @@ const addItemToOrder = (menuItem: any) => {
             menu_item_id: menuItem.id,
             menu_item: menuItem,
             quantity: 1,
-            unit_price: menuItem.price,
-            total_price: menuItem.price,
+            unit_price: Number(menuItem.price),
+            total_price: Number(menuItem.price),
             notes: ''
         });
     }
@@ -1108,8 +1125,26 @@ watch(adjustmentMode, (mode) => {
 const updateOrder = () => {
     if (!selectedOrder.value) return;
     processing.value = true;
+    const itemsData = editableItems.value.map(item => {
+        if (item.id.toString().startsWith('new_')) {
+            // New item
+            return {
+                menu_item_id: item.menu_item_id,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                notes: item.notes || ''
+            };
+        } else {
+            // Existing item
+            return {
+                id: item._id || item.id,
+                quantity: item.quantity
+            };
+        }
+    });
+
     router.put(`/pos/${selectedOrder.value.id}`, {
-        items: editableItems.value.map(item => ({ id: item._id || item.id, quantity: item.quantity })),
+        items: itemsData,
         discount_type: discountType.value,
         discount_value: discountValue.value,
         additional_charge_type: additionalChargeType.value,
@@ -1139,23 +1174,32 @@ const settleBill = () => {
         return;
     }
 
+
+
     processing.value = true;
     router.post(`/pos/${selectedOrder.value.id}/settle`, {
         payment_method: paymentMethod.value,
     }, {
         onSuccess: () => {
-            // Print receipt if checkbox is checked
-            if (printBill.value) {
-                printReceipt(selectedOrder.value);
+            try {
+                // Print receipt if checkbox is checked
+                if (printBill.value) {
+                    printReceipt(selectedOrder.value);
+                }
+            } catch (e) {
+                console.error('Print error in onSuccess:', e);
+            } finally {
+                selectedOrder.value = null; // Clear selection
+                processing.value = false;
             }
-            selectedOrder.value = null; // Clear selection
-            processing.value = false;
         },
         onError: () => {
             processing.value = false;
         }
     });
 };
+
+
 
 // Enhanced Thermal Printer Receipt Function
 // Supports multiple printer types: 80mm, 58mm thermal printers, and standard A4 printers
@@ -1429,8 +1473,8 @@ const printReceipt = (order: any) => {
                             <tr>
                                 <td class="item-name">${escapeHtml(item.menu_item?.name?.en || item.menu_item?.name || 'Item')}</td>
                                 <td class="center">${item.quantity}</td>
-                                <td class="right">${(item.unit_price).toFixed(2)}</td>
-                                <td class="right">${(item.quantity * item.unit_price).toFixed(2)}</td>
+                                <td class="right">${Number(item.unit_price).toFixed(2)}</td>
+                                <td class="right">${(item.quantity * Number(item.unit_price)).toFixed(2)}</td>
                             </tr>
                             ${item.notes ? `<tr><td colspan="4" class="item-note">Note: ${escapeHtml(item.notes)}</td></tr>` : ''}
                         `).join('')}
@@ -1689,10 +1733,18 @@ let refreshInterval: any;
 onMounted(() => {
     // Refresh POS data every 2 seconds
     refreshInterval = setInterval(() => {
-        // Don't refresh if any modal is open to avoid disrupting user
+        // Don't refresh if any confirmed modal is open to avoid disrupting user
         if (!showUpdateOrderModal.value && !showOpenModal.value && !showCloseModal.value && 
-            !showWithdrawModal.value && !showDepositModal.value) {
-            router.reload({ only: ['orders', 'currentRegister', 'currentBalance'] });
+            !showWithdrawModal.value && !showDepositModal.value && adjustmentMode.value === 'none') {
+            
+            // Also block refresh if user is typing in any input field (including inline edits)
+            const activeTag = document.activeElement?.tagName;
+            if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') {
+                return;
+            }
+
+            // Include 'flash' to ensure we clear any stale success messages from session
+            router.reload({ only: ['orders', 'currentRegister', 'currentBalance', 'flash'] });
         }
     }, 2000); // 2 seconds
     

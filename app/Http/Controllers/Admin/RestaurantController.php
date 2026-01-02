@@ -101,10 +101,22 @@ class RestaurantController extends Controller
             // Subscription
             'plan_id' => 'required|exists:plans,id',
             'billing_cycle' => 'required|in:monthly,yearly',
+
+            // Service Type
+            'service_type' => 'required|string|in:self_service,table_service,both',
+
+            // Logo
+            'logo' => 'nullable|image|max:2048',
         ]);
 
         try {
             // \DB::beginTransaction();
+
+            // Handle Logo
+            $logoPath = null;
+            if ($request->hasFile('logo')) {
+                $logoPath = $request->file('logo')->store('restaurants/logos', 'public');
+            }
 
             // 1. Create Restaurant
             $restaurantData = $request->only([
@@ -118,8 +130,13 @@ class RestaurantController extends Controller
                 'state',
                 'zip_code',
                 'country',
-                'google_map_location'
+                'google_map_location',
+                'service_type'
             ]);
+
+            if ($logoPath) {
+                $restaurantData['logo'] = $logoPath;
+            }
 
             $restaurant = \App\Models\Restaurant::create($restaurantData);
 
@@ -232,6 +249,7 @@ class RestaurantController extends Controller
                 'zip_code' => 'nullable|string',
                 'country' => 'nullable|string',
                 'google_map_location' => 'nullable|url',
+                'service_type' => 'required|string|in:self_service,table_service,both',
 
                 // Loyalty
                 'earning_method_type' => 'nullable|string|in:order_total,visit',

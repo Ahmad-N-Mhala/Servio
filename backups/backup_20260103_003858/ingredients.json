@@ -1,0 +1,59 @@
+[
+    {
+        "name": "{\"en\":\"dsa\",\"ar\":\"dsa\"}",
+        "unit": "f",
+        "current_stock": {
+            "$numberDecimal": "3.0000"
+        },
+        "cost": {
+            "$numberDecimal": "30.00"
+        },
+        "reorder_level": {
+            "$numberDecimal": "0.0000"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "updated_at": "2025-12-27T21:12:16.466000Z",
+        "created_at": "2025-12-27T21:12:16.466000Z",
+        "id": {
+            "$oid": "69504bb0eaf319e883077724"
+        }
+    },
+    {
+        "name": "{\"en\":\"tomato\",\"ar\":\"tomato\"}",
+        "unit": "e",
+        "current_stock": {
+            "$numberDecimal": "2.0000"
+        },
+        "cost": {
+            "$numberDecimal": "3.00"
+        },
+        "reorder_level": {
+            "$numberDecimal": "0.0000"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "updated_at": "2025-12-28T08:24:05.379000Z",
+        "created_at": "2025-12-27T21:18:04.342000Z",
+        "id": {
+            "$oid": "69504d0ceaf319e883077727"
+        }
+    },
+    {
+        "name": "{\"en\":\"Tomato\",\"ar\":\"Tomato\"}",
+        "unit": "kg",
+        "current_stock": {
+            "$numberDecimal": "10.9000"
+        },
+        "cost": {
+            "$numberDecimal": "4.00"
+        },
+        "reorder_level": {
+            "$numberDecimal": "0.0000"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "updated_at": "2026-01-02T20:09:33.979000Z",
+        "created_at": "2026-01-01T09:13:50.440000Z",
+        "id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        }
+    }
+]

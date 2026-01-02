@@ -406,7 +406,8 @@ onMounted(() => {
     // Fallback: Polling every 2 seconds as backup
     refreshInterval = setInterval(() => {
         if (!cancellingOrder.value) { // Don't refresh if modal is open
-             router.reload({ only: ['orders', 'completedOrders'] });
+             // Include 'flash' to ensure we clear any stale success messages from the session
+             router.reload({ only: ['orders', 'completedOrders', 'flash'] });
         }
     }, 2000); // 2 seconds for real-time sync with POS
 });

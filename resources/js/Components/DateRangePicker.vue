@@ -63,7 +63,11 @@ const presets = [
 ];
 
 const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0];
+    // Use local time instead of UTC to avoid timezone issues (e.g. UTC picking previous day)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 const selectPreset = (preset: typeof presets[0]) => {
@@ -79,12 +83,12 @@ const selectPreset = (preset: typeof presets[0]) => {
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         startDate.value = formatDate(firstDay);
         endDate.value = formatDate(today);
-    } else if (preset.days === 0) {
+    } else if (preset.days !== undefined && preset.days === 0) {
         startDate.value = formatDate(today);
         endDate.value = formatDate(today);
     } else {
         const pastDate = new Date(today);
-        pastDate.setDate(pastDate.getDate() - preset.days);
+        pastDate.setDate(pastDate.getDate() - (preset.days || 0));
         startDate.value = formatDate(pastDate);
         endDate.value = formatDate(today);
     }

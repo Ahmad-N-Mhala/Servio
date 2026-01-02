@@ -11,7 +11,7 @@ return [
     ],
     'orders' => [
         'label' => 'Order Management',
-        'permissions' => ['view_orders', 'create_order', 'edit_order', 'cancel_order', 'delete_order', 'print_bill']
+        'permissions' => ['view_orders', 'create_order', 'edit_order', 'cancel_order', 'delete_order', 'print_bill', 'view_order_status_screen', 'manage_order_status_screen']
     ],
     'kitchen' => [
         'label' => 'Kitchen Display',

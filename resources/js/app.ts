@@ -19,10 +19,10 @@ import zh from './locales/zh/index';
 
 // Configure Axios to send CSRF token with every request
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-const token = document.head.querySelector('meta[name="csrf-token"]');
-if (token) {
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = (token as HTMLMetaElement).content;
-}
+
+// We rely on the XSRF-TOKEN cookie which Laravel maintains automatically.
+// Do NOT manually set X-CSRF-TOKEN from the meta tag here, as it becomes stale
+// and causes 419 errors on long-lived pages (like KDS/Status screens) or after login.
 
 // Configure Laravel Echo for real-time broadcasting (only if credentials are available)
 declare global {
@@ -101,32 +101,8 @@ createInertiaApp({
 // Comprehensive CSRF token management to prevent 419 errors
 import { router } from '@inertiajs/vue3';
 
-// Function to refresh CSRF token
-function refreshCSRFToken() {
-    const token = document.head.querySelector('meta[name="csrf-token"]');
-    if (token) {
-        const csrfToken = (token as HTMLMetaElement).content;
-        axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 
-        // Also set it for fetch requests
-        if (typeof window !== 'undefined') {
-            (window as any).csrfToken = csrfToken;
-        }
-    }
-}
-
-// Refresh on page load
-refreshCSRFToken();
-
-// Refresh before every Inertia request
-router.on('before', () => {
-    refreshCSRFToken();
-});
-
-// Refresh after every page visit
-router.on('finish', () => {
-    refreshCSRFToken();
-});
+// Global error handler for 419 CSRF token mismatch errors
 
 // Global error handler for 419 CSRF token mismatch errors
 router.on('error', (event: any) => {

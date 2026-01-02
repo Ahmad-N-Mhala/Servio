@@ -44,14 +44,16 @@
                 <div class="p-6 sm:p-10">
                     <div class="mb-6 sm:mb-8">
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Restaurant Details</h2>
-                        <p class="text-sm sm:text-base text-gray-500 mt-1">This restaurant will be added to your existing subscription plan.</p>
+                        <p class="text-sm sm:text-base text-gray-500 mt-1">Configure your new restaurant location.</p>
                     </div>
 
                     <form @submit.prevent="submit" class="space-y-6 sm:space-y-8">
                         
+                        <!-- Plan Selection Removed as per User Request -->
+                        
                          <!-- Logo Upload -->
                         <div class="flex flex-col items-center justify-center p-6 bg-gray-50 border border-gray-100 rounded-2xl">
-                             <div class="relative group cursor-pointer mb-4" @click="$refs.logoInput.click()">
+                             <div class="relative group cursor-pointer mb-4" @click="logoInput?.click()">
                                 <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white flex items-center justify-center relative">
                                     <img v-if="logoPreview" :src="logoPreview" class="w-full h-full object-cover" />
                                     <div v-else class="text-gray-300">
@@ -73,14 +75,69 @@
                         </div>
 
                         <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
-                            <Input
+                             <Input
                                 v-model="form.restaurant_name"
                                 label="Restaurant Name"
                                 type="text"
-                                placeholder="e.g. My Great Bistro - Downtown"
+                                placeholder="e.g. Tasty Bites - Downtown"
                                 required
                                 :error="form.errors.restaurant_name"
                             />
+                        </div>
+
+                        <!-- Contact Details -->
+                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
+                            <h3 class="text-lg font-bold text-gray-900">Contact Details</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Input
+                                    v-model="form.email"
+                                    label="Public Email"
+                                    type="email"
+                                    placeholder="contact@restaurant.com"
+                                    required
+                                    :error="form.errors.email"
+                                />
+                                <Input
+                                    v-model="form.phone"
+                                    label="Phone Number"
+                                    type="tel"
+                                    placeholder="+971 50 123 4567"
+                                    required
+                                    :error="form.errors.phone"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Service Type Configuration -->
+                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
+                            <h3 class="text-lg font-bold text-gray-900">Service Configuration</h3>
+                            <label class="block text-sm font-medium text-gray-700">Service Type</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div 
+                                    @click="form.service_type = 'both'"
+                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                    :class="form.service_type === 'both' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                >
+                                    <div class="font-bold text-gray-900 text-center">Both</div>
+                                    <div class="text-xs text-gray-500 text-center mt-1">Table & Self Service</div>
+                                </div>
+                                <div 
+                                    @click="form.service_type = 'table_service'"
+                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                    :class="form.service_type === 'table_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                >
+                                    <div class="font-bold text-gray-900 text-center">Table Service</div>
+                                    <div class="text-xs text-gray-500 text-center mt-1">Waiter Only</div>
+                                </div>
+                                <div 
+                                    @click="form.service_type = 'self_service'"
+                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
+                                    :class="form.service_type === 'self_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+                                >
+                                    <div class="font-bold text-gray-900 text-center">Self Service</div>
+                                    <div class="text-xs text-gray-500 text-center mt-1">Pickup/Kiosk</div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
@@ -122,14 +179,26 @@
                                 />
                             </div>
 
-                            <Input
-                                v-model="form.address"
-                                label="Street Name / Address"
-                                type="text"
-                                placeholder="e.g. Sheikh Zayed Road, Building 5"
-                                required
-                                :error="form.errors.address"
-                            />
+                            <div class="mt-4">
+                                <Input
+                                    v-model="form.address"
+                                    label="Street Address"
+                                    type="text"
+                                    placeholder="e.g. 123 Main St"
+                                    required
+                                    :error="form.errors.address"
+                                />
+                            </div>
+
+                             <div class="mt-4">
+                                <Input
+                                    v-model="form.google_map_location"
+                                    label="Google Map Embed URL (Optional)"
+                                    type="text"
+                                    placeholder="<iframe>...</iframe> or URL"
+                                    :error="form.errors.google_map_location"
+                                />
+                            </div>
                         </div>
 
                         <!-- Loyalty Setup -->
@@ -235,8 +304,15 @@ const form = useForm({
 
     earning_method_type: 'order_total',
     earning_points: 1,
+
+    // New Fields
+    email: '',
+    phone: '',
+    google_map_location: '',
+    service_type: 'both',
 });
 
+const logoInput = ref<HTMLInputElement | null>(null);
 const logoPreview = ref<string | null>(null);
 
 const handleLogoChange = (event: Event) => {

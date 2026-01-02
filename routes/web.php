@@ -112,6 +112,19 @@ Route::group([
                     ->middleware('permission:print_bill');
                 Route::get('/{order}/receipt', [\App\Http\Controllers\Tenant\OrderController::class, 'receipt'])->name('receipt')
                     ->middleware('permission:print_bill');
+
+                // Status Screen
+                // Status Screen (Public View)
+                Route::get('/status/screen', [\App\Http\Controllers\Tenant\OrderStatusScreenController::class, 'index'])->name('status-screen')
+                    ->middleware('permission:view_order_status_screen');
+                Route::get('/status/screen/poll', [\App\Http\Controllers\Tenant\OrderStatusScreenController::class, 'poll'])->name('status-screen.poll')
+                    ->middleware('permission:view_order_status_screen');
+
+                // Status Manager (Editable View for Kitchen/Counter)
+                Route::get('/status/manage', [\App\Http\Controllers\Tenant\OrderStatusScreenController::class, 'manage'])->name('status-screen.manage')
+                    ->middleware('permission:manage_order_status_screen');
+                Route::post('/status/update-state', [\App\Http\Controllers\Tenant\OrderStatusScreenController::class, 'updateState'])->name('status-screen.update-state')
+                    ->middleware('permission:update_item_status');
             });
 
             // Customers
@@ -233,6 +246,8 @@ Route::group([
                 Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index')
                     ->middleware('permission:view_delivery_settings');
                 Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update')
+                    ->middleware('permission:toggle_providers');
+                Route::post('/delivery/{provider}/push-menu', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'pushMenu'])->name('delivery.push-menu')
                     ->middleware('permission:toggle_providers');
                 Route::delete('/delivery/{provider}', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'destroy'])->name('delivery.destroy')
                     ->middleware('permission:toggle_providers');

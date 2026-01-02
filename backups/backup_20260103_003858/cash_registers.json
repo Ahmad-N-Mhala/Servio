@@ -1,0 +1,95 @@
+[
+    {
+        "restaurant_id": "69503e50eaf319e883077714",
+        "user_id": "69503e50eaf319e883077713",
+        "opening_balance": {
+            "$numberDecimal": "2.00"
+        },
+        "opened_at": "2025-12-28T08:54:52.557000Z",
+        "status": "closed",
+        "opening_notes": null,
+        "updated_at": "2025-12-28T08:55:33.099000Z",
+        "created_at": "2025-12-28T08:54:52.557000Z",
+        "closed_at": "2025-12-28T08:55:33.099000Z",
+        "closing_balance": {
+            "$numberDecimal": "3.00"
+        },
+        "closing_notes": null,
+        "difference": {
+            "$numberDecimal": "1.00"
+        },
+        "expected_balance": {
+            "$numberDecimal": "2.00"
+        },
+        "id": {
+            "$oid": "6950f05cb7507517d40c4914"
+        }
+    },
+    {
+        "restaurant_id": "69503e50eaf319e883077714",
+        "user_id": "69503e50eaf319e883077713",
+        "opening_balance": {
+            "$numberDecimal": "2.00"
+        },
+        "opened_at": "2025-12-28T09:05:29.610000Z",
+        "status": "closed",
+        "opening_notes": null,
+        "updated_at": "2025-12-28T09:06:29.508000Z",
+        "created_at": "2025-12-28T09:05:29.610000Z",
+        "closed_at": "2025-12-28T09:06:29.508000Z",
+        "closing_balance": {
+            "$numberDecimal": "5.00"
+        },
+        "closing_notes": null,
+        "difference": {
+            "$numberDecimal": "-1.30"
+        },
+        "expected_balance": {
+            "$numberDecimal": "6.30"
+        },
+        "id": {
+            "$oid": "6950f2d9b7507517d40c4917"
+        }
+    },
+    {
+        "restaurant_id": "69503e50eaf319e883077714",
+        "user_id": "69503e50eaf319e883077713",
+        "opening_balance": {
+            "$numberDecimal": "20.00"
+        },
+        "opened_at": "2025-12-28T09:47:36.617000Z",
+        "status": "open",
+        "opening_notes": null,
+        "updated_at": "2025-12-28T09:47:36.617000Z",
+        "created_at": "2025-12-28T09:47:36.617000Z",
+        "id": {
+            "$oid": "6950fcb8b7507517d40c4925"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "opening_balance": {
+            "$numberDecimal": "3.00"
+        },
+        "opened_at": "2026-01-01T10:20:07.592000Z",
+        "status": "closed",
+        "opening_notes": null,
+        "updated_at": "2026-01-01T19:32:34.627000Z",
+        "created_at": "2026-01-01T10:20:07.592000Z",
+        "closed_at": "2026-01-01T19:32:34.627000Z",
+        "closing_balance": {
+            "$numberDecimal": "500.00"
+        },
+        "closing_notes": null,
+        "difference": {
+            "$numberDecimal": "-28.00"
+        },
+        "expected_balance": {
+            "$numberDecimal": "528.00"
+        },
+        "id": {
+            "$oid": "69564a57aeff1b1ae101c539"
+        }
+    }
+]

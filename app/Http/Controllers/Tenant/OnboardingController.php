@@ -89,6 +89,7 @@ class OnboardingController extends Controller
             'address' => ['required', 'string', 'max:255'], // Street Name
             'zip_code' => ['nullable', 'string', 'max:20'],
             'google_map_location' => ['nullable', 'url', 'max:500'],
+            'service_type' => ['required', 'in:self_service,table_service,both'],
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
@@ -141,6 +142,9 @@ class OnboardingController extends Controller
                 'address' => $validated['address'],
                 'zip_code' => $validated['zip_code'] ?? null,
                 'google_map_location' => $validated['google_map_location'] ?? null,
+                'email' => $validated['email'], // Reuse owner email for restaurant
+                'phone' => $validated['phone'], // Reuse owner phone for restaurant
+                'service_type' => $validated['service_type'],
             ]);
 
             // 3. Link User to Restaurant via Pivot

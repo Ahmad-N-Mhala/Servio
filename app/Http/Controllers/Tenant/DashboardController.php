@@ -62,7 +62,9 @@ class DashboardController extends Controller
                         $name = $item->name;
                         if (is_string($name) && str_starts_with($name, '{')) {
                             $decoded = json_decode($name, true);
-                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                            $locale = app()->getLocale();
+                            $fallback = config('app.fallback_locale', 'en');
+                            $name = $decoded[$locale] ?? $decoded[$fallback] ?? $decoded['en'] ?? 'Unknown';
                         }
                         $allItems[$id] = ['name' => $name, 'quantity' => 0];
                     }
@@ -328,7 +330,9 @@ class DashboardController extends Controller
                         // Attempt JSON decode for name
                         if (is_string($name) && str_starts_with($name, '{')) {
                             $decoded = json_decode($name, true);
-                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                            $locale = app()->getLocale();
+                            $fallback = config('app.fallback_locale', 'en');
+                            $name = $decoded[$locale] ?? $decoded[$fallback] ?? $decoded['en'] ?? 'Unknown';
                         }
                         $allItems[$id] = ['name' => $name, 'quantity' => 0];
                     }
