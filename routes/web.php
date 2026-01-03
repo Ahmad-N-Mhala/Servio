@@ -30,6 +30,10 @@ Route::group([
         return redirect()->route('login');
     });
 
+    // Public Feedback Routes (Localized)
+    Route::get('/feedback/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'create'])->name('public.feedback.create');
+    Route::post('/feedback/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'store'])->name('public.feedback.store');
+
     Route::get('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'show'])->name('login');
     Route::post('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'store'])->name('login.store');
     Route::post('/logout', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'destroy'])->name('logout');
@@ -298,7 +302,15 @@ Route::group([
                     ->middleware('permission:customize_receipt_template');
                 Route::post('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'store'])->name('receipt-template.store')
                     ->middleware('permission:customize_receipt_template');
+                Route::post('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'store'])->name('receipt-template.store')
+                    ->middleware('permission:customize_receipt_template');
             });
+
+            // Feedback (Admin)
+            Route::get('/feedback', [\App\Http\Controllers\Tenant\FeedbackController::class, 'index'])->name('feedback.index')
+                ->middleware('permission:view_feedback');
+            Route::post('/feedback/settings', [\App\Http\Controllers\Tenant\FeedbackController::class, 'updateSettings'])->name('feedback.settings.update')
+                ->middleware('permission:view_feedback'); // Re-using permission
         });
 
         // Admin Portal Routes

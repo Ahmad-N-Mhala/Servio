@@ -7,17 +7,30 @@
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('dashboard.welcome') }}</h1>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">{{ $t('dashboard.subtitle') }}</p>
                 </div>
-                <a 
-                    :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date })"
-                    target="_blank"
-                >
-                    <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export Report
-                    </Button>
-                </a>
+                <div class="flex space-x-2">
+                    <a 
+                        :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'excel' })"
+                        target="_blank"
+                    >
+                         <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Export Excel
+                        </Button>
+                    </a>
+                    <a 
+                        :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf' })"
+                        target="_blank"
+                    >
+                        <Button variant="primary" class="bg-primary-600 text-white hover:bg-primary-700">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Export PDF
+                        </Button>
+                    </a>
+                </div>
             </div>
 
             <!-- Date Range Picker -->
@@ -106,22 +119,44 @@
                 <ChartCard title="Waste Trend (Money)" height="300px">
                     <canvas ref="wasteChartCanvas"></canvas>
                 </ChartCard>
-            <!-- Recent Orders -->
-            <div class="mb-8">
-                <Table
-                    title="Recent Orders"
-                    :columns="recentOrdersColumns"
-                    :data="recentOrders"
-                    :pagination="null"
-                >
-                    <template #cell-status="{ row }">
-                        <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(row.status)]">
-                            {{ row.status }}
-                        </span>
-                    </template>
-                </Table>
+
+                <!-- Top Categories -->
+                <ChartCard title="Top Categories (Sales)" height="300px">
+                    <canvas ref="topCategoriesChartCanvas"></canvas>
+                </ChartCard>
+
+                <!-- Top Customers -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Customers</h3>
+                     <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Orders</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tr v-for="(customer, idx) in topCustomers" :key="idx">
+                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ customer.name }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 text-right">{{ customer.count }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white text-right">{{ formatCurrency(customer.total) }}</td>
+                                </tr>
+                                <tr v-if="topCustomers.length === 0">
+                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">No data available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                     </div>
+                </div>
+             <!-- Customer Retention -->
+             <div class="col-span-1 lg:col-span-2 mb-8">
+                <ChartCard title="Customer Retention (Visit Funnel)" height="300px">
+                    <canvas ref="retentionChartCanvas"></canvas>
+                </ChartCard>
+             </div>
             </div>
-            </div>     <!-- Waste Trend -->
         </div>
 
         <!-- Details Modal -->
@@ -183,7 +218,6 @@ import DateRangePicker from '@/Components/DateRangePicker.vue';
 import StatsCard from '@/Components/StatsCard.vue';
 import ChartCard from '@/Components/ChartCard.vue';
 import Modal from '@/Components/Modal.vue';
-import Table from '@/Components/Table.vue';
 import Button from '@/Components/Button.vue';
 import axios from 'axios';
 
@@ -200,17 +234,11 @@ const peakHours = computed(() => page.props.peak_hours as any[]);
 const topMenuItems = computed(() => page.props.top_menu_items as any[]);
 const paymentDistribution = computed(() => page.props.payment_distribution as any[]);
 const wasteChart = computed(() => page.props.waste_chart as any[]);
+const topCategories = computed(() => page.props.top_categories as any[] || []);
+const topCustomers = computed(() => page.props.top_customers as any[] || []);
 const dateRange = computed(() => page.props.date_range as any);
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
-const recentOrders = computed(() => page.props.recent_orders as any[]);
-
-const recentOrdersColumns = [
-    { key: 'order_number', label: 'Order #' },
-    { key: 'customer_name', label: 'Customer' },
-    { key: 'total', label: 'Total', format: 'currency' as const, align: 'right' as const },
-    { key: 'status', label: 'Status', format: 'badge' as const },
-    { key: 'created_at', label: 'Time' },
-];
+const retentionStats = computed(() => page.props.retention_stats as any[] || []);
 
 const showDetailsModal = ref(false);
 const loadingDetails = ref(false);
@@ -250,6 +278,8 @@ const peakHoursChartCanvas = ref<HTMLCanvasElement | null>(null);
 const topItemsChartCanvas = ref<HTMLCanvasElement | null>(null);
 const paymentChartCanvas = ref<HTMLCanvasElement | null>(null);
 const wasteChartCanvas = ref<HTMLCanvasElement | null>(null);
+const topCategoriesChartCanvas = ref<HTMLCanvasElement | null>(null);
+const retentionChartCanvas = ref<HTMLCanvasElement | null>(null);
 
 let revenueChartInstance: Chart | null = null;
 let statusChartInstance: Chart | null = null;
@@ -257,6 +287,8 @@ let peakHoursChartInstance: Chart | null = null;
 let topItemsChartInstance: Chart | null = null;
 let paymentChartInstance: Chart | null = null;
 let wasteChartInstance: Chart | null = null;
+let topCategoriesChartInstance: Chart | null = null;
+let retentionChartInstance: Chart | null = null;
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AE', {
@@ -559,6 +591,108 @@ const initWasteChart = () => {
     });
 };
 
+const initTopCategoriesChart = () => {
+    if (!topCategoriesChartCanvas.value) return;
+    
+    if (topCategoriesChartInstance) {
+        topCategoriesChartInstance.destroy();
+    }
+
+    const ctx = topCategoriesChartCanvas.value.getContext('2d');
+    if (!ctx) return;
+
+    // Generate random colors or a fixed palette
+    const colors = [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+    ];
+
+    topCategoriesChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: topCategories.value.map((item: any) => item.name),
+            datasets: [{
+                label: 'Sales',
+                data: topCategories.value.map((item: any) => item.value),
+                backgroundColor: colors.slice(0, topCategories.value.length),
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+             plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                     callbacks: {
+                        label: (context) => {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${formatCurrency(value)}`;
+                        }
+                    }
+                }
+            },
+        },
+    });
+};
+
+const initRetentionChart = () => {
+    if (!retentionChartCanvas.value) return;
+    
+    if (retentionChartInstance) {
+        retentionChartInstance.destroy();
+    }
+
+    const ctx = retentionChartCanvas.value.getContext('2d');
+    if (!ctx) return;
+
+    retentionChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: retentionStats.value.map((item: any) => item.label),
+            datasets: [{
+                label: 'Retention %',
+                data: retentionStats.value.map((item: any) => item.percentage),
+                backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 1
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const index = context.dataIndex;
+                            const item = retentionStats.value[index];
+                            return `Retention: ${item.percentage}% (${item.count} customers)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: (value) => value + '%'
+                    }
+                },
+            },
+        },
+    });
+};
+
 onMounted(() => {
     initRevenueChart();
     initStatusChart();
@@ -566,14 +700,18 @@ onMounted(() => {
     initTopItemsChart();
     initPaymentChart();
     initWasteChart();
+    initTopCategoriesChart();
+    initRetentionChart();
 });
 
-watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistribution], () => {
+watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistribution, wasteChart, topCategories, retentionStats], () => {
     initRevenueChart();
     initStatusChart();
     initPeakHoursChart();
     initTopItemsChart();
     initPaymentChart();
     initWasteChart();
+    initTopCategoriesChart();
+    initRetentionChart();
 });
 </script>

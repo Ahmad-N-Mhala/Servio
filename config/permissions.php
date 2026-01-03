@@ -65,4 +65,8 @@ return [
         'label' => 'Waiter Service',
         'permissions' => ['deliver_orders']
     ],
+    'feedback' => [
+        'label' => 'Feedback Management',
+        'permissions' => ['view_feedback', 'reply_feedback']
+    ],
 ];

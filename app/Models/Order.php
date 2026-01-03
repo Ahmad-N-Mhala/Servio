@@ -45,6 +45,7 @@ class Order extends Model
         'additional_charge_type',
         'additional_charge_value',
         'transaction_number',
+        'feedback_token',
     ];
 
     protected $casts = [

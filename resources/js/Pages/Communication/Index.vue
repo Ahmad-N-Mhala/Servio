@@ -75,48 +75,193 @@
                     Communication Logs
                 </button>
                 <button 
-                    @click="activeTab = 'bundles'"
+                    @click="activeTab = 'feedback'"
                     :class="[
                         'px-4 py-2 text-sm font-medium rounded-lg transition-all',
-                        activeTab === 'bundles' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                        activeTab === 'feedback' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
                     ]"
                 >
-                    Buy Credits
+                    Feedback Automation
                 </button>
             </div>
 
-                <!-- Active Filter Indicator -->
-                <div v-if="params.template_id" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 animate-fade-in">
-                     <span class="text-sm font-medium">Filtering by rule logs</span>
-                     <button @click="clearTemplateFilter" class="hover:text-blue-900">
-                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                         </svg>
-                     </button>
+            <!-- Active Filter Indicator -->
+            <div v-if="params.template_id" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 animate-fade-in">
+                 <span class="text-sm font-medium">Filtering by rule logs</span>
+                 <button @click="clearTemplateFilter" class="hover:text-blue-900">
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                     </svg>
+                 </button>
+            </div>
+        </div>
+
+        <!-- NEW: Feedback Settings Tab -->
+        <div v-if="activeTab === 'feedback'" class="max-w-4xl mx-auto animate-fade-in">
+             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363 1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                        Automated Feedback Requests
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Automatically send a feedback request via SMS when an order is completed.
+                    </p>
+                    <div class="mt-2 text-right lg:text-left">
+                        <Link :href="route('feedback.index')" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
+                            View Received Feedback
+                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </Link>
+                    </div>
                 </div>
+                
+                <form @submit.prevent="saveFeedbackSettings" class="p-6 space-y-8">
+                     <!-- Activation Toggle -->
+                     <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" v-model="feedbackForm.is_active" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Feedback Requests</span>
+                        </label>
+                     </div>
+
+                     <!-- Message Editor -->
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
+                        <div class="relative">
+                            <textarea 
+                                v-model="feedbackForm.message_body" 
+                                rows="4"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-sans"
+                                placeholder="Hi {{customer_name}}, Thanks for your order! Rate us: {{feedback_link}}"
+                            ></textarea>
+                            
+                            <!-- Validation / Help Text -->
+                            <div class="mt-2 flex justify-between items-start text-xs text-gray-500">
+                                <p>
+                                    Variables <span class="font-mono bg-gray-100 px-1 rounded">{{ '{' + '{' }} customer_name {{ '}' + '}' }}</span> and 
+                                    <span class="font-mono bg-gray-100 px-1 rounded">{{ '{' + '{' }} feedback_link {{ '}' + '}' }}</span> are required.
+                                </p>
+                                <span :class="feedbackForm.message_body.length > 160 ? 'text-red-600 font-bold' : ''">
+                                    {{ feedbackForm.message_body.length }}/160
+                                </span>
+                            </div>
+                        </div>
+                     </div>
+
+                     <!-- Timing and Delay -->
+                     <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-6 transition-all duration-300">
+                        <label class="block text-sm font-medium text-blue-900 mb-3">When should the message be sent?</label>
+                        <div class="space-y-4">
+                            <!-- Option 1: Immediately -->
+                            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-colors" :class="{'bg-white shadow-sm ring-1 ring-blue-200': feedbackForm.timing_mode === 'immediately'}">
+                                <input type="radio" v-model="feedbackForm.timing_mode" value="immediately" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                <span class="text-gray-900 font-medium">Immediately after payment</span>
+                            </label>
+
+                            <!-- Option 2: Custom Delay -->
+                            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-colors" :class="{'bg-white shadow-sm ring-1 ring-blue-200': feedbackForm.timing_mode === 'delay'}">
+                                <input type="radio" v-model="feedbackForm.timing_mode" value="delay" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 mt-3">
+                                <div class="flex-1">
+                                    <span class="block text-gray-900 font-medium mb-2 mt-2">Delay Sending</span>
+                                    
+                                    <div class="flex flex-wrap items-center gap-2" :class="{'opacity-50 pointer-events-none': feedbackForm.timing_mode !== 'delay'}">
+                                        <span class="text-sm text-gray-600">Wait for</span>
+                                        <div class="w-24">
+                                            <input 
+                                                v-model="feedbackForm.timing_val" 
+                                                type="number" 
+                                                min="1"
+                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                            >
+                                        </div>
+                                        <div class="w-32">
+                                            <select 
+                                                v-model="feedbackForm.timing_unit"
+                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                            >
+                                                <option value="minutes">Minutes</option>
+                                                <option value="hours">Hours</option>
+                                                <option value="days">Days</option>
+                                            </select>
+                                        </div>
+                                        <span class="text-sm text-gray-600">after payment</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                     </div>
+
+                     <!-- Timing and Delay -->
+                     <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-6 transition-all duration-300">
+                        <!-- ... (Timing Code from before) ... -->
+                     </div>
+
+                     <!-- Rewards Section -->
+                     <div class="mb-6 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                        <label class="block text-sm font-medium text-yellow-900 mb-2">Loyalty Reward</label>
+                        <p class="text-xs text-yellow-700 mb-3">Reward customers who provide feedback with loyalty points.</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-32">
+                                <Input 
+                                    v-model="feedbackForm.feedback_points"
+                                    type="number"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
+                            <span class="text-sm font-medium text-yellow-800">Points</span>
+                        </div>
+                     </div>
+
+                     <!-- Conditions -->
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <Input 
+                            v-model="feedbackForm.min_order_amount"
+                            label="Minimum Order Amount"
+                            type="number"
+                            placeholder="0"
+                            hint="Only send for orders above this amount"
+                         />
+                         <Input 
+                            v-model="feedbackForm.min_orders_count"
+                            label="Minimum Past Orders"
+                            type="number"
+                            placeholder="0"
+                            hint="Only send to repeat customers (e.g., 2+ orders)"
+                         />
+                     </div>
+
+                    <!-- Submit -->
+                    <div class="flex justify-end pt-4 border-t border-gray-100">
+                        <Button :loading="feedbackForm.processing" class="px-8">
+                            Save Changes
+                        </Button>
+                    </div>
+                </form>
+             </div>
+        </div>
+
+        <!-- Templates / Automation Rules Section -->
+        <div v-if="activeTab === 'templates'" class="grid grid-cols-1 gap-6 animate-fade-in">
+        <!-- ... existing template list ... -->
+        <!-- FILTER OUT FEEDBACK TEMPLATE FROM LIST TO AVOID DUPES -->
+            <div v-if="templates.filter(t => t.trigger_event !== 'order_completed_feedback').length === 0" class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <!-- ... empty state ... -->
+                <h3 class="text-lg font-medium text-gray-900">No custom automation rules defined</h3>
+                <!-- ... -->
             </div>
 
-            <!-- Templates / Automation Rules Section -->
-            <div v-if="activeTab === 'templates'" class="grid grid-cols-1 gap-6 animate-fade-in">
-                <div v-if="templates.length === 0" class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900">No automation rules defined</h3>
-                    <p class="text-gray-500 mt-1 mb-4">Create rules to automatically send messages based on events.</p>
-                    <Button @click="openTemplateModal()">Create New Rule</Button>
-                </div>
-
-                <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div 
-                        v-for="template in templates" 
-                        :key="template.id" 
-                        class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
-                    >
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center gap-3">
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Filter the list -->
+                <div 
+                    v-for="template in templates.filter(t => t.trigger_event !== 'order_completed_feedback')" 
+                    class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                >
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
                                 <div class="flex gap-1" v-if="template.channels && template.channels.length">
                                     <div v-if="template.channels.includes('sms')" class="p-2 rounded-lg bg-blue-100" title="SMS Enabled">
                                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,7 +328,11 @@
                         <option value="sent">Sent</option>
                         <option value="failed">Failed</option>
                     </select>
-                    <DateRangePicker @update="onDateRangeUpdate" />
+                    <DateRangePicker 
+                        :initial-start-date="params.date_from"
+                        :initial-end-date="params.date_to"
+                        @update="onDateRangeUpdate" 
+                    />
                 </div>
 
                 <div class="overflow-x-auto">
@@ -285,6 +434,7 @@
                                 <option value="order_cancelled">❌ Order Cancelled</option>
                                 <option value="birthday">🎂 Customer Birthday</option>
                                 <option value="churn_risk">⚠️ Churn Risk (Inactive)</option>
+                                <option value="feedback_received">⭐ Feedback Received</option>
                             </select>
                             <p class="mt-1 text-xs text-gray-500">When should this message be sent?</p>
                         </div>
@@ -473,28 +623,50 @@
                     <p class="text-xs text-gray-600 mb-4">Only send if these conditions are met</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                         <Input 
-                            v-model="templateForm.conditions.min_order_amount"
-                            label="Min Order Amount"
-                            type="number"
-                            placeholder="0"
-                            hint="Minimum order value required"
-                         />
-                         <Input 
-                            v-model="templateForm.conditions.min_orders_count"
-                            label="Min Orders Count"
-                            type="number"
-                            placeholder="0"
-                            hint="Minimum past orders required"
-                         />
-                         <Input 
-                            v-if="templateForm.trigger_event === 'churn_risk'"
-                            v-model="templateForm.conditions.days_since_last_order"
-                            label="Days Since Last Order"
-                            type="number"
-                            placeholder="30"
-                            hint="Days of inactivity"
-                         />
+                         <template v-if="templateForm.trigger_event === 'feedback_received'">
+                            <Input 
+                                v-model="templateForm.conditions.min_rating"
+                                label="Min Rating"
+                                type="number"
+                                min="1"
+                                max="5"
+                                placeholder="1"
+                                hint="Send if rating >= this"
+                            />
+                            <Input 
+                                v-model="templateForm.conditions.max_rating"
+                                label="Max Rating"
+                                type="number"
+                                min="1"
+                                max="5"
+                                placeholder="5"
+                                hint="Send if rating <= this"
+                            />
+                         </template>
+                         <template v-else>
+                             <Input 
+                                v-model="templateForm.conditions.min_order_amount"
+                                label="Min Order Amount"
+                                type="number"
+                                placeholder="0"
+                                hint="Minimum order value required"
+                             />
+                             <Input 
+                                v-model="templateForm.conditions.min_orders_count"
+                                label="Min Orders Count"
+                                type="number"
+                                placeholder="0"
+                                hint="Minimum past orders required"
+                             />
+                             <Input 
+                                v-if="templateForm.trigger_event === 'churn_risk'"
+                                v-model="templateForm.conditions.days_since_last_order"
+                                label="Days Since Last Order"
+                                type="number"
+                                placeholder="30"
+                                hint="Days of inactivity"
+                             />
+                        </template>
                     </div>
                 </div>
 
@@ -531,7 +703,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, Link } from '@inertiajs/vue3';
 // @ts-ignore
 import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
@@ -629,6 +801,8 @@ const templateForm = useForm({
         min_order_amount: null as number | null,
         min_orders_count: null as number | null,
         days_since_last_order: null as number | null,
+        min_rating: null as number | null,
+        max_rating: null as number | null,
         loyalty_tier: ''
     },
     is_active: true,
@@ -636,6 +810,102 @@ const templateForm = useForm({
     timing_days: 0,
     timing_time: '12:00'
 });
+
+// --- Feedback Settings ---
+const feedbackTemplateId = ref<string|null>(null);
+const feedbackForm = useForm({
+    is_active: false,
+    message_body: '',
+    min_order_amount: null as number | null,
+    min_orders_count: null as number | null,
+    timing_mode: 'immediately', 
+    timing_val: 1,
+    timing_unit: 'hours',
+    feedback_points: null as number | null
+});
+
+// Initialize form from existing template
+watch(() => props.templates, (newTemplates) => {
+    // ...
+    const existing = newTemplates.find((t: any) => t.trigger_event === 'order_completed_feedback');
+    if (existing) {
+        feedbackTemplateId.value = existing.id;
+        feedbackForm.is_active = !!existing.is_active;
+        feedbackForm.message_body = existing.sms_content || 'Hi {{customer_name}}, Thanks for your order! Rate us: {{feedback_link}}';
+        
+        feedbackForm.min_order_amount = existing.conditions?.min_order_amount || null;
+        feedbackForm.min_orders_count = existing.conditions?.min_orders_count || null;
+        feedbackForm.feedback_points = existing.conditions?.feedback_points || null;
+
+        // Load Timing
+        if (existing.timing_type === 'custom_delay' && existing.conditions?.delay_unit) {
+            feedbackForm.timing_mode = 'delay';
+            feedbackForm.timing_val = existing.conditions.delay_val || 1;
+            feedbackForm.timing_unit = existing.conditions.delay_unit;
+        } else if (existing.timing_type === 'delay_1_hour') {
+            feedbackForm.timing_mode = 'delay';
+            feedbackForm.timing_val = 1;
+            feedbackForm.timing_unit = 'hours';
+        } else if (existing.timing_type === 'delay_24_hours') {
+            feedbackForm.timing_mode = 'delay';
+            feedbackForm.timing_val = 24;
+            feedbackForm.timing_unit = 'hours';
+        } else {
+            feedbackForm.timing_mode = 'immediately';
+            feedbackForm.timing_val = 1;
+            feedbackForm.timing_unit = 'hours';
+        }
+
+    } else {
+        feedbackForm.message_body = 'Hi {{customer_name}}, Thanks for your order! Rate us: {{feedback_link}}';
+        feedbackForm.timing_mode = 'immediately';
+        feedbackForm.feedback_points = null;
+    }
+}, { immediate: true });
+
+const saveFeedbackSettings = () => {
+    if (!feedbackForm.message_body.includes('{{customer_name}}') || !feedbackForm.message_body.includes('{{feedback_link}}')) {
+        alert('Message must contain {{customer_name}} and {{feedback_link}} variables.');
+        return;
+    }
+
+    const payload = {
+        name: 'Automated Feedback Request',
+        trigger_event: 'order_completed_feedback',
+        channels: ['sms'],
+        sms_content: feedbackForm.message_body,
+        content: feedbackForm.message_body,
+        is_active: feedbackForm.is_active,
+        timing_type: feedbackForm.timing_mode === 'delay' ? 'custom_delay' : 'immediately',
+        timing_days: 0,
+        timing_time: '12:00',
+        conditions: {
+            min_order_amount: feedbackForm.min_order_amount,
+            min_orders_count: feedbackForm.min_orders_count,
+            feedback_points: feedbackForm.feedback_points,
+            delay_val: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_val : null,
+            delay_unit: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_unit : null
+        }
+    };
+
+    if (feedbackTemplateId.value) {
+        // @ts-ignore
+        feedbackForm.transform(() => payload).put(route('communication.templates.update', feedbackTemplateId.value), {
+            preserveScroll: true,
+            onSuccess: () => {
+                // success
+            }
+        });
+    } else {
+        // @ts-ignore
+        feedbackForm.transform(() => payload).post(route('communication.templates.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                // success
+            }
+        });
+    }
+};
 
 const openTemplateModal = (template: any = null) => {
     if (template) {
@@ -655,6 +925,8 @@ const openTemplateModal = (template: any = null) => {
             min_order_amount: template.conditions?.min_order_amount || null,
             min_orders_count: template.conditions?.min_orders_count || null,
             days_since_last_order: template.conditions?.days_since_last_order || null,
+            min_rating: template.conditions?.min_rating || null,
+            max_rating: template.conditions?.max_rating || null,
             loyalty_tier: template.conditions?.loyalty_tier || ''
         };
        templateForm.is_active = !!template.is_active;

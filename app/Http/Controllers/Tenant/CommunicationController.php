@@ -147,6 +147,7 @@ class CommunicationController extends Controller
             'timing_type' => 'required|in:immediately,before,after',
             'timing_days' => 'required_if:timing_type,before,after|integer|min:0',
             'timing_time' => 'required|date_format:H:i',
+            // Optional: You can validate that content contains {{feedback_link}} if trigger is feedback_received
         ]);
 
         $template->update(array_merge($validated, [

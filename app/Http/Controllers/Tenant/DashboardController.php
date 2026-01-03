@@ -26,6 +26,7 @@ class DashboardController extends Controller
         $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
+        $format = $request->input('format', 'pdf');
 
         if (is_string($startDate))
             $startDate = Carbon::parse($startDate)->startOfDay();
@@ -46,18 +47,23 @@ class DashboardController extends Controller
         $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)->whereBetween('created_at', [$startDate, $endDate])->sum('amount');
         $netProfit = (float) (string) $revenue - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
 
-        $revenueOrders = (clone $baseOrderQuery)->where('status', 'completed')->get();
+        $revenueOrders = (clone $baseOrderQuery)->where('status', 'completed')->with('items')->get();
         $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
             return $order->completed_at->diffInMinutes($order->created_at);
         }) ?? 0;
 
-        // Top Menu Items
+        // Top Menu Items & Categories
         $allItems = [];
-        $ordersWithItems = (clone $baseOrderQuery)->with('items')->get();
-        foreach ($ordersWithItems as $order) {
+        $categorySales = [];
+        $menuItemIds = [];
+
+        foreach ($revenueOrders as $order) {
             if ($order->items) {
                 foreach ($order->items as $item) {
                     $id = $item->menu_item_id;
+                    $menuItemIds[] = $id;
+
+                    // Top Items
                     if (!isset($allItems[$id])) {
                         $name = $item->name;
                         if (is_string($name) && str_starts_with($name, '{')) {
@@ -75,21 +81,94 @@ class DashboardController extends Controller
         usort($allItems, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
         $topMenuItems = array_slice($allItems, 0, 5);
 
-        // Recent Orders
-        $recentOrders = (clone $baseOrderQuery)
-            ->with(['customer'])
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
+        // Fetch Categories
+        $menuItemsWithCategories = \App\Models\MenuItem::whereIn('id', array_unique($menuItemIds))
+            ->with('category')
             ->get()
-            ->map(function ($order) {
+            ->keyBy('id');
+
+        foreach ($revenueOrders as $order) {
+            if ($order->items) {
+                foreach ($order->items as $item) {
+                    $mItem = $menuItemsWithCategories[$item->menu_item_id] ?? null;
+                    $catName = $mItem && $mItem->category ? $mItem->category->name : 'Uncategorized';
+
+                    // Translate Category
+                    if (is_string($catName) && str_starts_with($catName, '{')) {
+                        $decoded = json_decode($catName, true);
+                        $locale = app()->getLocale();
+                        $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
+                    }
+
+                    if (!isset($categorySales[$catName])) {
+                        $categorySales[$catName] = 0;
+                    }
+                    // Assuming item total is not stored directly on item level in this specific snippet, 
+                    // we might approximate or if OrderItem has 'price' * 'quantity'. 
+                    // Using simple quantity or price if available. 
+                    // Ideally OrderItem has 'total' or 'price'. fallback to 0.
+                    $itemTotal = (float) ($item->price ?? 0) * (float) ($item->quantity ?? 1);
+                    $categorySales[$catName] += $itemTotal;
+                }
+            }
+        }
+
+        $topCategories = collect($categorySales)
+            ->map(function ($total, $name) {
+                return ['name' => $name, 'value' => $total];
+            })
+            ->sortByDesc('value')
+            ->values()
+            ->take(5)
+            ->toArray();
+
+
+        // Recent Orders
+        // -- Customer Retention (Visits Funnel) --
+        $customerVisits = (clone $baseOrderQuery)
+            ->where('status', 'completed')
+            ->whereNotNull('customer_name')
+            ->where('customer_name', '!=', 'Guest')
+            ->get()
+            ->groupBy('customer_name')
+            ->map(fn($o) => $o->count());
+
+        $totalCustomers = $customerVisits->count();
+        $retentionStats = [];
+
+        for ($i = 1; $i <= 5; $i++) {
+            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i . match ($i) { 2 => 'nd', 3 => 'rd', default => 'th'} . ' Visit');
+
+            if ($totalCustomers === 0) {
+                $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
+                continue;
+            }
+
+            $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            $percentage = ($countAtLeast / $totalCustomers) * 100;
+
+            $retentionStats[] = [
+                'label' => $label,
+                'percentage' => round($percentage, 1),
+                'count' => $countAtLeast
+            ];
+        }
+
+        // Top Customers
+        $topCustomers = (clone $baseOrderQuery)
+            ->where('status', 'completed')
+            ->get()
+            ->groupBy('customer_name') // Group by name for now
+            ->map(function ($orders, $name) {
                 return [
-                    'order_number' => $order->order_number,
-                    'customer_name' => $order->customer_name,
-                    'total' => $order->total,
-                    'status' => $order->status,
-                    'created_at' => $order->created_at->format('M d, Y H:i'),
+                    'name' => $name ?: 'Guest',
+                    'count' => $orders->count(),
+                    'total' => (float) (string) $orders->sum('total'),
                 ];
-            });
+            })
+            ->sortByDesc('total')
+            ->values()
+            ->take(5);
 
         // -- Status Distribution --
         $statusDistribution = (clone $baseOrderQuery)
@@ -174,13 +253,71 @@ class DashboardController extends Controller
                 'monthly_expenses' => (float) (string) $monthlyExpenses
             ],
             'topMenuItems' => $topMenuItems,
-            'recentOrders' => $recentOrders,
+            'topCategories' => $topCategories,
+            'topCustomers' => $topCustomers,
+            'retentionStats' => $retentionStats,
             'revenueChart' => $revenueChart,
             'statusDistribution' => $statusDistribution,
             'peakHours' => $peakHours,
             'wasteChart' => $wasteChart,
             'avgCompletionTime' => $avgCompletionTimeChart,
         ];
+
+        if ($format === 'excel') {
+            $headers = [
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=dashboard_report.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            ];
+
+            $callback = function () use ($data) {
+                $file = fopen('php://output', 'w');
+                // Header
+                fputcsv($file, ['Dashboard Report']);
+                fputcsv($file, ['Restaurant', $data['restaurant']->name]);
+                fputcsv($file, ['Date Range', $data['startDate']->format('Y-m-d') . ' to ' . $data['endDate']->format('Y-m-d')]);
+                fputcsv($file, []);
+
+                // Stats
+                fputcsv($file, ['Key Metrics']);
+                fputcsv($file, ['Total Orders', $data['stats']['total_orders']]);
+                fputcsv($file, ['Revenue', $data['stats']['revenue']]);
+                fputcsv($file, ['Net Profit', $data['stats']['net_profit']]);
+                fputcsv($file, ['Total Waste', $data['stats']['total_waste']]);
+                fputcsv($file, ['Inventory Value', $data['stats']['inventory_value']]);
+                fputcsv($file, []);
+
+                // Top Items
+                fputcsv($file, ['Top Menu Items']);
+                fputcsv($file, ['Item Name', 'Quantity Sold']);
+                foreach ($data['topMenuItems'] as $item) {
+                    fputcsv($file, [$item['name'], $item['quantity']]);
+                }
+                fputcsv($file, []);
+
+                // Top Categories
+                fputcsv($file, ['Top Categories']);
+                fputcsv($file, ['Category', 'Sales Value']);
+                foreach ($data['topCategories'] as $cat) {
+                    fputcsv($file, [$cat['name'], $cat['value']]);
+                }
+                fputcsv($file, []);
+
+                // Customer Retention
+                fputcsv($file, ['Customer Retention (Visit Funnel)']);
+                fputcsv($file, ['Milestone', 'Count', 'Percentage']);
+                foreach ($data['retentionStats'] as $stat) {
+                    fputcsv($file, [$stat['label'], $stat['count'], $stat['percentage'] . '%']);
+                }
+                fputcsv($file, []);
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
 
         $pdf = Pdf::loadView('exports.dashboard', $data);
         return $pdf->stream('dashboard-report-' . now()->format('Y-m-d') . '.pdf');
@@ -243,21 +380,35 @@ class DashboardController extends Controller
             });
 
         // -- Recent Orders --
-        $recentOrders = (clone $baseOrderQuery)
-            ->with(['items', 'customer']) // customer relation must exist on Order
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
+        // -- Customer Retention --
+        $customerVisits = (clone $baseOrderQuery)
+            ->where('status', 'completed')
+            ->whereNotNull('customer_name')
+            ->where('customer_name', '!=', 'Guest')
             ->get()
-            ->map(function ($order) {
-                return [
-                    'id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'customer_name' => $order->customer_name,
-                    'total' => $order->total,
-                    'status' => $order->status,
-                    'created_at' => $order->created_at->format('M d, Y H:i'),
-                ];
-            });
+            ->groupBy('customer_name')
+            ->map(fn($o) => $o->count());
+
+        $totalCustomers = $customerVisits->count();
+        $retentionStats = [];
+
+        for ($i = 1; $i <= 5; $i++) {
+            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i . match ($i) { 2 => 'nd', 3 => 'rd', default => 'th'} . ' Visit');
+
+            if ($totalCustomers === 0) {
+                $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
+                continue;
+            }
+
+            $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            $percentage = ($countAtLeast / $totalCustomers) * 100;
+
+            $retentionStats[] = [
+                'label' => $label,
+                'percentage' => round($percentage, 1),
+                'count' => $countAtLeast
+            ];
+        }
 
         // -- Revenue Chart --
         $revenueOrders = (clone $baseOrderQuery)
@@ -342,8 +493,71 @@ class DashboardController extends Controller
         }
 
         // Sort and slice
+        // Sort and slice
         usort($allItems, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
         $topMenuItems = array_slice($allItems, 0, 5);
+
+        // -- Top Categories Logic --
+        $categorySales = [];
+        $allIds = [];
+        foreach ($ordersWithItems as $order) {
+            if ($order->items) {
+                foreach ($order->items as $item)
+                    $allIds[] = $item->menu_item_id;
+            }
+        }
+        $menuItemsWithCategories = \App\Models\MenuItem::whereIn('id', array_unique($allIds))
+            ->with('category')
+            ->get()
+            ->keyBy('id');
+
+        foreach ($ordersWithItems as $order) {
+            if ($order->items) {
+                foreach ($order->items as $item) {
+                    $mItem = $menuItemsWithCategories[$item->menu_item_id] ?? null;
+                    $catName = $mItem && $mItem->category ? $mItem->category->name : 'Uncategorized';
+
+                    if (is_string($catName) && str_starts_with($catName, '{')) {
+                        $decoded = json_decode($catName, true);
+                        $locale = app()->getLocale();
+                        $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
+                    }
+
+                    if (!isset($categorySales[$catName])) {
+                        $categorySales[$catName] = 0;
+                    }
+                    $itemTotal = (float) ($item->price ?? 0) * (float) ($item->quantity ?? 1);
+                    $categorySales[$catName] += $itemTotal;
+                }
+            }
+        }
+
+        $topCategories = collect($categorySales)
+            ->map(function ($val, $key) {
+                return ['name' => $key, 'value' => $val];
+            })
+            ->sortByDesc('value')
+            ->values()
+            ->take(5)
+            ->toArray();
+
+        // -- Top Customers --
+        $topCustomers = (clone $baseOrderQuery)
+            ->where('status', 'completed')
+            ->get()
+            ->groupBy('customer_name')
+            ->map(function ($orders, $name) {
+                return [
+                    'name' => $name ?: 'Guest',
+                    'count' => $orders->count(),
+                    'total' => (float) (string) $orders->sum('total'),
+                ];
+            })
+            ->sortByDesc('total')
+            ->values()
+            ->take(5)
+            ->values()
+            ->toArray();
 
         // -- Waste Chart --
         $wasteChart = WasteLog::where('restaurant_id', $restaurant->id)
@@ -380,12 +594,14 @@ class DashboardController extends Controller
                 'net_profit' => $netProfit,
                 'avg_dining_time' => round((float) $avgDiningTime, 0),
             ],
-            'recent_orders' => $recentOrders,
+            'retention_stats' => $retentionStats,
             'revenue_chart' => $revenueChart,
             'waste_chart' => $wasteChart,
             'status_distribution' => $statusDistribution,
             'peak_hours' => $peakHours,
             'top_menu_items' => $topMenuItems,
+            'top_categories' => $topCategories,
+            'top_customers' => $topCustomers,
             'payment_distribution' => $paymentDistribution,
             // 'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
             'date_range' => [

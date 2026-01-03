@@ -133,10 +133,12 @@ class PermissionController extends Controller
 
         try {
             $role = \App\Models\Role::findByName($roleName, 'web');
-            \Log::info("Role found: " . $role->id);
+            \Log::info("Role found: " . $role->id . " Name: " . $role->name);
 
             // Force clear permissions to handle MongoDB mix of embedded/pivot
-            $role->unset('permission_id');
+            // For older spatie versions on Mongo, sometimes permissions are embedded in 'permission_ids' or similar
+            $role->unset('permission_ids');
+            $role->unset('permissions');
             $role->save();
 
             DB::connection('mongodb')->table('role_has_permissions')->where('role_id', $role->id)->delete();

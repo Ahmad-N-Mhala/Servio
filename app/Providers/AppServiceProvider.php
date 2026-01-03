@@ -179,6 +179,9 @@ class AppServiceProvider extends ServiceProvider
             // Fallback during migrations or if table doesn't exist yet
             \Log::error('AppServiceProvider Gate Error: ' . $e->getMessage());
         }
+
+        \App\Models\Order::observe(\App\Observers\OrderObserver::class);
+        \App\Models\Feedback::observe(\App\Observers\FeedbackObserver::class);
     }
 }
 

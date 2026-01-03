@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 const emit = defineEmits<{
     (e: 'update', value: { startDate: string; endDate: string }): void;
@@ -52,7 +52,7 @@ const props = defineProps<{
 
 const startDate = ref('');
 const endDate = ref('');
-const selectedPreset = ref('Last 7 Days');
+const selectedPreset = ref(''); // Default to empty (custom)
 
 const presets = [
     { label: 'Today', days: 0 },
@@ -63,40 +63,52 @@ const presets = [
 ];
 
 const formatDate = (date: Date): string => {
-    // Use local time instead of UTC to avoid timezone issues (e.g. UTC picking previous day)
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 };
 
-const selectPreset = (preset: typeof presets[0]) => {
-    selectedPreset.value = preset.label;
+const getPresetDates = (preset: typeof presets[0]) => {
     const today = new Date();
+    let start = '';
+    let end = '';
     
     if (preset.isYesterday) {
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-        startDate.value = formatDate(yesterday);
-        endDate.value = formatDate(yesterday);
+        start = formatDate(yesterday);
+        end = formatDate(yesterday);
     } else if (preset.isMonth) {
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        startDate.value = formatDate(firstDay);
-        endDate.value = formatDate(today);
+        start = formatDate(firstDay);
+        end = formatDate(today);
     } else if (preset.days !== undefined && preset.days === 0) {
-        startDate.value = formatDate(today);
-        endDate.value = formatDate(today);
+        start = formatDate(today);
+        end = formatDate(today);
     } else {
         const pastDate = new Date(today);
         pastDate.setDate(pastDate.getDate() - (preset.days || 0));
-        startDate.value = formatDate(pastDate);
-        endDate.value = formatDate(today);
+        start = formatDate(pastDate);
+        end = formatDate(today);
     }
-    
-    onDateChange();
+    return { start, end };
+};
+
+const selectPreset = (preset: typeof presets[0]) => {
+    selectedPreset.value = preset.label;
+    const { start, end } = getPresetDates(preset);
+    startDate.value = start;
+    endDate.value = end;
+    emitUpdate(); // Directly emit
 };
 
 const onDateChange = () => {
+    selectedPreset.value = ''; // Clear preset on manual change
+    emitUpdate();
+};
+
+const emitUpdate = () => {
     if (startDate.value && endDate.value) {
         emit('update', {
             startDate: startDate.value,
@@ -105,13 +117,34 @@ const onDateChange = () => {
     }
 };
 
-onMounted(() => {
+const syncWithProps = () => {
     if (props.initialStartDate && props.initialEndDate) {
         startDate.value = props.initialStartDate;
         endDate.value = props.initialEndDate;
+        
+        // Try to match specific preset
+        const match = presets.find(p => {
+             const { start, end } = getPresetDates(p);
+             return start === props.initialStartDate && end === props.initialEndDate;
+        });
+        
+        if (match) {
+            selectedPreset.value = match.label;
+        } else {
+             selectedPreset.value = '';
+        }
     } else {
-        // Default to Last 7 Days
-        selectPreset(presets[2]);
+        // Default to Last 7 Days if no props provided (initial load only preferably)
+         const defaultPreset = presets[2];
+         selectPreset(defaultPreset);
     }
+};
+
+onMounted(() => {
+    syncWithProps();
+});
+
+watch(() => [props.initialStartDate, props.initialEndDate], () => {
+    syncWithProps();
 });
 </script>

@@ -441,38 +441,98 @@
         </div>
     </div>
 
-    <!-- Recent Orders -->
+    <!-- Charts Row 4 -->
+    <div class="chart-section">
+        <!-- Top Categories -->
+        <div class="chart-col">
+            <div class="section-title">Top Categories (Sales)</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th style="text-align:right;">Sales</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($topCategories as $cat)
+                        <tr>
+                            <td>{{ $cat['name'] }}</td>
+                            <td style="text-align:right;">
+                                {{ $currency }} {{ number_format($cat['value'], 2) }}
+                                @php
+                                    $maxCat = collect($topCategories)->max('value') ?: 1;
+                                    $width = ($cat['value'] / $maxCat) * 100;
+                                @endphp
+                                <div class="bar-container">
+                                    <div class="bar-fill color-purple" style="width: {{ $width }}%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="2" style="text-align:center;color:#999;">No data</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Top Customers -->
+        <div class="chart-col" style="padding-left: 2%; padding-right:0;">
+            <div class="section-title">Top Customers</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Orders</th>
+                        <th style="text-align:right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($topCustomers as $customer)
+                        <tr>
+                            <td>{{ $customer['name'] }}</td>
+                            <td>{{ $customer['count'] }}</td>
+                            <td style="text-align:right;">
+                                {{ $currency }} {{ number_format($customer['total'], 2) }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" style="text-align:center;color:#999;">No data</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Customer Retention -->
     <div class="section">
-        <div class="section-title">Recent Orders</div>
+        <div class="section-title">Customer Retention (Visit Funnel)</div>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Order #</th>
-                    <th>Customer</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th style="text-align:right;">Total</th>
+                    <th>Milestone</th>
+                    <th style="text-align:right;">Count</th>
+                    <th style="text-align:right;">Percentage</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($recentOrders as $order)
+                @forelse($retentionStats as $stat)
                     <tr>
-                        <td>{{ $order['order_number'] }}</td>
-                        <td>{{ $order['customer_name'] }}</td>
-                        <td>
-                            <span
-                                style="font-size:10px; padding:2px 6px; border-radius:4px; 
-                                        background: {{ match ($order['status']) { 'completed' => '#dcfce7', 'cancelled' => '#fee2e2', default => '#fef9c3'} }};
-                                        color: {{ match ($order['status']) { 'completed' => '#166534', 'cancelled' => '#991b1b', default => '#854d0e'} }};">
-                                {{ ucfirst($order['status']) }}
-                            </span>
+                        <td>{{ $stat['label'] }}</td>
+                        <td style="text-align:right;">{{ $stat['count'] }} customers</td>
+                        <td style="text-align:right;">
+                            {{ $stat['percentage'] }}%
+                            <div class="bar-container">
+                                <div class="bar-fill color-green" style="width: {{ $stat['percentage'] }}%"></div>
+                            </div>
                         </td>
-                        <td>{{ $order['created_at'] }}</td>
-                        <td style="text-align:right;">{{ $currency }} {{ number_format($order['total'], 2) }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="text-align:center; color:#999;">No recent orders</td>
+                        <td colspan="3" style="text-align:center;color:#999;">No data</td>
                     </tr>
                 @endforelse
             </tbody>
