@@ -204,6 +204,13 @@ class OnboardingController extends Controller
             // Auto-login the user
             \Illuminate\Support\Facades\Auth::login($user);
 
+            // Trigger Registration Notification
+            $commService = app(\App\Services\CommunicationService::class);
+            $commService->sendNotification('user_registered', $user, [
+                'restaurant_name' => $restaurant->name,
+                'link' => route('login'),
+            ]);
+
             // Set active restaurant session
             session(['active_restaurant_id' => $restaurant->id]);
 

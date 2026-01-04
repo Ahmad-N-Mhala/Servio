@@ -1,0 +1,198 @@
+[
+    {
+        "customer_id": "694587c52d33b6a8db028a9a",
+        "order_id": "694587c52d33b6a8db028a9b",
+        "type": "earned",
+        "points": 35,
+        "description": "Points earned from order #ORD-YZYHRR3P",
+        "balance_after": 35,
+        "expires_at": "2026-12-19T17:13:58.089000Z",
+        "updated_at": "2025-12-19T17:13:58.092000Z",
+        "created_at": "2025-12-19T17:13:58.092000Z",
+        "id": {
+            "$oid": "694587d62d33b6a8db028a9e"
+        }
+    },
+    {
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_id": "694963aff8c92b5bc1060075",
+        "type": "earned",
+        "points": 34,
+        "description": "Points earned from order #ORD-RKHDBQ1Q",
+        "balance_after": 34,
+        "expires_at": "2026-12-22T15:33:16.523000Z",
+        "updated_at": "2025-12-22T15:33:16.524000Z",
+        "created_at": "2025-12-22T15:33:16.524000Z",
+        "id": {
+            "$oid": "694964bcf8c92b5bc106007b"
+        }
+    },
+    {
+        "customer_id": "694964c5f8c92b5bc106007c",
+        "order_id": "694964c5f8c92b5bc106007d",
+        "type": "earned",
+        "points": 34,
+        "description": "Points earned from order #ORD-OZHSYFJH",
+        "balance_after": 34,
+        "expires_at": "2026-12-22T15:35:29.109000Z",
+        "updated_at": "2025-12-22T15:35:29.111000Z",
+        "created_at": "2025-12-22T15:35:29.111000Z",
+        "id": {
+            "$oid": "69496541f8c92b5bc1060083"
+        }
+    },
+    {
+        "customer_id": "694587c52d33b6a8db028a9a",
+        "order_id": "69496689f8c92b5bc1060086",
+        "type": "earned",
+        "points": 16,
+        "description": "Points earned from order #ORD-ZLHTHQPC",
+        "balance_after": 51,
+        "expires_at": "2026-12-22T15:41:25.587000Z",
+        "updated_at": "2025-12-22T15:41:25.588000Z",
+        "created_at": "2025-12-22T15:41:25.588000Z",
+        "id": {
+            "$oid": "694966a5f8c92b5bc1060088"
+        }
+    },
+    {
+        "customer_id": "6949690ef8c92b5bc106008f",
+        "order_id": "6949690ef8c92b5bc1060090",
+        "type": "earned",
+        "points": 21,
+        "description": "Points earned from order #ORD-9HPTCHN5",
+        "balance_after": 21,
+        "expires_at": "2026-12-22T15:53:07.908000Z",
+        "updated_at": "2025-12-22T15:53:07.909000Z",
+        "created_at": "2025-12-22T15:53:07.909000Z",
+        "id": {
+            "$oid": "69496963f8c92b5bc1060093"
+        }
+    },
+    {
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_id": "695166662f954f9a240de5b2",
+        "type": "earned",
+        "points": 487,
+        "description": "Points earned from order #ORD-TI6NDJ5Q",
+        "balance_after": 521,
+        "expires_at": "2027-01-01T09:42:59.332000Z",
+        "updated_at": "2026-01-01T09:42:59.336000Z",
+        "created_at": "2026-01-01T09:42:59.336000Z",
+        "id": {
+            "$oid": "695641a3aeff1b1ae101c52f"
+        }
+    },
+    {
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_id": "695166732f954f9a240de5b5",
+        "type": "earned",
+        "points": 254,
+        "description": "Points earned from order #ORD-QGWPKFOQ",
+        "balance_after": 775,
+        "expires_at": "2027-01-01T09:43:00.602000Z",
+        "updated_at": "2026-01-01T09:43:00.603000Z",
+        "created_at": "2026-01-01T09:43:00.603000Z",
+        "id": {
+            "$oid": "695641a4aeff1b1ae101c530"
+        }
+    },
+    {
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_id": "6956440baeff1b1ae101c531",
+        "type": "earned",
+        "points": 63,
+        "description": "Points earned from order #ORD-G9MFJ32Q",
+        "balance_after": 838,
+        "expires_at": "2027-01-01T09:54:38.324000Z",
+        "updated_at": "2026-01-01T09:54:38.325000Z",
+        "created_at": "2026-01-01T09:54:38.325000Z",
+        "id": {
+            "$oid": "6956445eaeff1b1ae101c534"
+        }
+    },
+    {
+        "customer_id": "694964c5f8c92b5bc106007c",
+        "order_id": "695792873aaf0cdc0b05ce32",
+        "type": "earned",
+        "points": 189,
+        "description": "Points earned from order #ORD-260102-0036",
+        "balance_after": 223,
+        "expires_at": "2027-01-02T09:55:18.640000Z",
+        "updated_at": "2026-01-02T09:55:18.645000Z",
+        "created_at": "2026-01-02T09:55:18.645000Z",
+        "id": {
+            "$oid": "695796063aaf0cdc0b05ce3b"
+        }
+    },
+    {
+        "customer_id": "694964c5f8c92b5bc106007c",
+        "order_id": "6956c93101134f518209ac08",
+        "type": "earned",
+        "points": 63,
+        "description": "Points earned from order #ORD-QHW3FITY",
+        "balance_after": 286,
+        "expires_at": "2027-01-02T10:18:57.397000Z",
+        "updated_at": "2026-01-02T10:18:57.399000Z",
+        "created_at": "2026-01-02T10:18:57.399000Z",
+        "id": {
+            "$oid": "69579b913aaf0cdc0b05ce3c"
+        }
+    },
+    {
+        "customer_id": "694587c52d33b6a8db028a9a",
+        "order_id": "695794ee3aaf0cdc0b05ce37",
+        "type": "earned",
+        "points": 462,
+        "description": "Points earned from order #38",
+        "balance_after": 513,
+        "expires_at": "2027-01-02T19:48:21.974000Z",
+        "updated_at": "2026-01-02T19:48:21.977000Z",
+        "created_at": "2026-01-02T19:48:21.977000Z",
+        "id": {
+            "$oid": "69582105263432b44a0246e2"
+        }
+    },
+    {
+        "customer_id": "6958217c263432b44a0246e3",
+        "order_id": "6958217c263432b44a0246e4",
+        "type": "earned",
+        "points": 126,
+        "description": "Points earned from order #39",
+        "balance_after": 126,
+        "expires_at": "2027-01-02T20:04:25.396000Z",
+        "updated_at": "2026-01-02T20:04:25.396000Z",
+        "created_at": "2026-01-02T20:04:25.396000Z",
+        "id": {
+            "$oid": "695824c9263432b44a0246e8"
+        }
+    },
+    {
+        "customer_id": "6958255b263432b44a0246e9",
+        "order_id": "6958255b263432b44a0246ea",
+        "type": "earned",
+        "points": 84,
+        "description": "Points earned from order #40",
+        "balance_after": 84,
+        "expires_at": "2027-01-02T20:07:56.428000Z",
+        "updated_at": "2026-01-02T20:07:56.429000Z",
+        "created_at": "2026-01-02T20:07:56.429000Z",
+        "id": {
+            "$oid": "6958259c263432b44a0246ee"
+        }
+    },
+    {
+        "customer_id": "695825f8263432b44a0246ef",
+        "order_id": "695825f8263432b44a0246f0",
+        "type": "earned",
+        "points": 84,
+        "description": "Points earned from order #41",
+        "balance_after": 84,
+        "expires_at": "2027-01-02T20:09:55.678000Z",
+        "updated_at": "2026-01-02T20:09:55.678000Z",
+        "created_at": "2026-01-02T20:09:55.678000Z",
+        "id": {
+            "$oid": "69582613263432b44a0246f5"
+        }
+    }
+]

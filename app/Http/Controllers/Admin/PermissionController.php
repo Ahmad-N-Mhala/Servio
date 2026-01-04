@@ -147,6 +147,11 @@ class PermissionController extends Controller
             } catch (\Exception $e) {
             }
 
+            // Ensure all permissions exist in DB first
+            foreach ($permissions as $permissionName) {
+                \App\Models\Permission::findOrCreate($permissionName, 'web');
+            }
+
             // Sync permissions directly
             $role->syncPermissions($permissions);
             \Log::info("syncPermissions called for role: {$roleName}");

@@ -43,7 +43,7 @@ return [
     ],
     'loyalty' => [
         'label' => 'Loyalty Program',
-        'permissions' => ['view_loyalty', 'manage_rewards', 'manage_earning_rules', 'adjust_points']
+        'permissions' => ['view_loyalty', 'manage_rewards', 'manage_earning_rules', 'adjust_points', 'view_sms_logs']
     ],
     'delivery' => [
         'label' => 'Delivery Integrations',
@@ -59,7 +59,7 @@ return [
     ],
     'settings' => [
         'label' => 'System Settings',
-        'permissions' => ['view_settings', 'manage_billing', 'edit_restaurant', 'customize_receipt_template']
+        'permissions' => ['view_settings', 'view_plans', 'manage_billing', 'edit_restaurant', 'customize_receipt_template']
     ],
     'service' => [
         'label' => 'Waiter Service',

@@ -8,9 +8,9 @@
                     Customer Feedback
                 </h2>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3" v-if="restaurant?.slug">
                     <a 
-                        :href="route('public.feedback.create', $page.props.auth.restaurant.slug)" 
+                        :href="route('public.feedback.create', restaurant.slug)" 
                         target="_blank"
                         class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
                     >
@@ -45,14 +45,49 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div v-if="currentTab === 'list'" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <Table 
-                        :columns="columns" 
-                        :data="feedback.data"
-                        :pagination="feedback"
-                        title="Recent Feedback"
-                        empty-message="No feedback received yet."
-                    >
+                <div v-if="currentTab === 'list'">
+                    <!-- Filters -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <Input 
+                                    v-model="filters.search" 
+                                    placeholder="Search by customer name, comment, or order number..." 
+                                    type="search"
+                                />
+                            </div>
+                            <div class="w-full sm:w-auto">
+                                <select 
+                                    v-model="filters.rating" 
+                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
+                                >
+                                    <option value="">All Ratings</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4 stars)</option>
+                                    <option value="3">⭐⭐⭐ (3 stars)</option>
+                                    <option value="2">⭐⭐ (2 stars)</option>
+                                    <option value="1">⭐ (1 star)</option>
+                                </select>
+                            </div>
+                            <div class="w-full sm:w-auto">
+                                <DateRangePicker 
+                                    :initial-start-date="filters.date_from"
+                                    :initial-end-date="filters.date_to"
+                                    @update="onDateRangeUpdate"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <Table 
+                            :columns="columns" 
+                            :data="feedback.data"
+                            :pagination="feedback"
+                            title="Recent Feedback"
+                            empty-message="No feedback received yet."
+                        >
                          <!-- Custom Cell Rendering -->
                          <template #cell-rating="{ row }">
                             <div class="flex text-yellow-400">
@@ -92,10 +127,11 @@
                         </template>
                     </Table>
                 </div>
+            </div>
 
-                <div v-else-if="currentTab === 'design'">
-                    <Design :settings="settings" />
-                </div>
+            <div v-else-if="currentTab === 'design'">
+                <Design :settings="settings" :restaurant="restaurant" />
+            </div>
             </div>
         </div>
     </MainLayout>
@@ -105,15 +141,61 @@
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Table from '@/Components/Table.vue';
 import Design from './Design.vue';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import Input from '@/Components/Input.vue';
+import DateRangePicker from '@/Components/DateRangePicker.vue';
+import { Head, router } from '@inertiajs/vue3';
+import { ref, reactive, watch } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     feedback: Object;
     settings?: Record<string, any>;
+    restaurant?: { id: string; name: string; slug: string; logo?: string } | null;
+    filters?: {
+        search: string;
+        rating: string;
+        date_from: string;
+        date_to: string;
+    };
 }>();
 
 const currentTab = ref('list');
+
+const filters = reactive({
+    search: props.filters?.search || '',
+    rating: props.filters?.rating || '',
+    date_from: props.filters?.date_from || '',
+    date_to: props.filters?.date_to || '',
+});
+
+// Debounce timer
+let searchTimeout: ReturnType<typeof setTimeout>;
+
+// Watch filters and trigger search
+watch(filters, () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        applyFilters();
+    }, 500); // 500ms debounce
+});
+
+const onDateRangeUpdate = ({ startDate, endDate }: { startDate: string; endDate: string }) => {
+    filters.date_from = startDate;
+    filters.date_to = endDate;
+};
+
+const applyFilters = () => {
+    const params: Record<string, any> = {};
+    
+    if (filters.search) params.search = filters.search;
+    if (filters.rating) params.rating = filters.rating;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
+    
+    router.get(route('feedback.index'), params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
 
 const columns = [
     { key: 'created_at', label: 'Received' },

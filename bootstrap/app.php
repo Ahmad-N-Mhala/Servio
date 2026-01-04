@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'feature.access' => \App\Http\Middleware\CheckFeatureAccess::class,
         ]);
 
         // Remove the tenant middleware injection
@@ -66,4 +67,8 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->route('login')
                 ->with('error', 'You must be logged in to access this page.');
         });
-    })->create();
+    })
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+        $schedule->command('subscriptions:notify-expiring')->hourly();
+    })
+    ->create();

@@ -25,24 +25,7 @@ class QrOrderController extends Controller
         $table = Table::where('qr_code_token', $token)->firstOrFail();
         $restaurant = $table->restaurant;
 
-        // Feature Gate: QR Ordering
-        $subscription = \App\Models\RestaurantSubscription::where('restaurant_id', $restaurant->id)
-            ->where('status', 'active')
-            ->with('plan')
-            ->latest()
-            ->first();
-
-        $hasFeature = false;
-        if ($subscription && $subscription->plan) {
-            $features = $subscription->plan->features;
-            if (is_string($features))
-                $features = json_decode($features, true) ?? [];
-            if (in_array('qr_ordering', $features)) {
-                $hasFeature = true;
-            }
-        }
-
-        if (!$hasFeature) {
+        if (!$restaurant->hasFeature('qr_ordering')) {
             abort(403, 'QR Ordering is not enabled for this restaurant.');
         }
 

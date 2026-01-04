@@ -142,7 +142,7 @@
                                     New Order
                                 </Link>
                                  <Link 
-                                    v-if="hasPermission('view_kitchen')"
+                                    v-if="hasPermission('view_kitchen') && hasFeature('kds')"
                                     :href="route('kitchen.index')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
                                     :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/kitchen')}"
@@ -154,7 +154,7 @@
                                 </Link>
                             </div>
                                 <Link 
-                                    v-if="hasPermission('view_inventory')"
+                                    v-if="hasPermission('view_inventory') && hasFeature('inventory')"
                                     :href="route('inventory.index')"
                                     :class="[
                                         'flex items-center rounded-lg transition-all duration-200',
@@ -169,7 +169,7 @@
                                     <span v-if="!isSidebarCollapsed">Inventory</span>
                                 </Link>
                                 <Link 
-                                    v-if="hasPermission('view_waste')"
+                                    v-if="hasPermission('view_waste') && hasFeature('inventory')"
                                     :href="route('waste.index')"
                                     :class="[
                                         'flex items-center rounded-lg transition-all duration-200',
@@ -187,7 +187,7 @@
 
                         <!-- POS -->
                         <Link 
-                            v-if="hasPermission('view_pos')"
+                            v-if="hasPermission('view_pos') && hasFeature('pos')"
                             :href="route('pos.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -225,7 +225,7 @@
 
                         <!-- Customer Status Screen -->
                         <Link 
-                            v-if="hasPermission('view_order_status_screen')"
+                            v-if="hasPermission('view_order_status_screen') && hasFeature('kds')"
                             :href="route('orders.status-screen')" 
                             :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -306,7 +306,7 @@
                                     {{ $t('nav.menu') }}
                                 </Link>
                                 <Link 
-                                    v-if="hasPermission('view_tables')"
+                                    v-if="hasPermission('view_tables') && hasFeature('qr_ordering')"
                                     :href="route('tables.index')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
                                     :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/tables')}"
@@ -392,7 +392,7 @@
                         </Link>
                         
                          <!-- Sub-Group: Loyalty -->
-                        <div class="space-y-0.5" v-if="hasPermission('view_loyalty')">
+                        <div class="space-y-0.5" v-if="hasPermission('view_loyalty') && hasFeature('loyalty')">
                              <button 
                                 @click="toggleMenu('growth.loyalty')"
                                 :class="[
@@ -442,12 +442,23 @@
                                     </svg>
                                     {{ $t('nav.earning_methods') }}
                                 </Link>
+                                <Link 
+                                    v-if="hasPermission('view_sms_logs')"
+                                    :href="route('loyalty.sms-logs')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/sms-logs')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                    </svg>
+                                    SMS Logs (OTP)
+                                </Link>
                             </div>
                         </div>
 
                         <!-- Delivery Integrations -->
                         <Link 
-                            v-if="hasPermission('view_delivery_settings')"
+                            v-if="hasPermission('view_delivery_settings') && hasFeature('delivery')"
                             :href="route('integrations.delivery.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -466,7 +477,7 @@
 
                         <!-- Feedback -->
                         <Link 
-                            v-if="hasPermission('view_feedback')"
+                            v-if="hasPermission('view_feedback') && hasFeature('feedback')"
                             :href="route('feedback.index')" 
                             :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -485,7 +496,7 @@
 
                         <!-- Communication -->
                         <Link 
-                            v-if="hasPermission('view_communication')"
+                            v-if="hasPermission('view_communication') && hasFeature('marketing')"
                             :href="route('communication.index')" 
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
@@ -503,7 +514,7 @@
                         </Link>
 
                         <!-- Financial (Sub-Group) -->
-                        <div class="space-y-0.5" v-if="hasAnyPermission(['view_sales_reports', 'view_expense_reports'])">
+                        <div class="space-y-0.5" v-if="hasAnyPermission(['view_sales_reports', 'view_expense_reports']) && hasFeature('analytics')">
                             <button 
                                 @click="toggleMenu('growth.financial')"
                                 :class="[
@@ -909,8 +920,10 @@ import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
 import Toast from '@/Components/Toast.vue';
 import { usePermissions } from '@/Composables/usePermissions';
+import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasPermission, hasAnyPermission } = usePermissions();
+const { hasFeature } = useFeatures();
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);

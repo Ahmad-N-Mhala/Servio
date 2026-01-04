@@ -110,7 +110,7 @@ class User extends Authenticatable
         $role = \App\Models\Role::findByName($pivot->role, 'web');
         $rolePermissions = $role ? $role->permissions->pluck('name') : collect([]);
 
-        // 2. Get Active Plan Features
+        // 2. Get Active Plan Technical Features
         $subscription = \App\Models\RestaurantSubscription::where('restaurant_id', $restaurant->id)
             ->where('status', 'active')
             ->with('plan')
@@ -119,50 +119,50 @@ class User extends Authenticatable
 
         $planFeatures = [];
         if ($subscription && $subscription->plan) {
-            $planFeatures = $subscription->plan->features;
-            if (is_string($planFeatures)) {
-                $planFeatures = json_decode($planFeatures, true) ?? [];
+            $rawFeatures = $subscription->plan->enabled_features;
+            if (is_array($rawFeatures)) {
+                $planFeatures = $rawFeatures;
+            } elseif (is_string($rawFeatures)) {
+                $planFeatures = json_decode($rawFeatures, true) ?? [];
             }
         }
 
-        // 3. Define Map: Feature Key => Permission Config Group (or explicit array)
+        // 3. Define Map & Core
+        // Essential features that are included in ANY plan
+        $coreGroups = ['dashboard', 'orders', 'menu', 'tables', 'customers', 'staff', 'settings', 'service'];
+
+        // Premium features mapped to permission groups
         $featureMap = [
-            'menu_management' => config('permissions.menu.permissions'),
-            'pos_system' => config('permissions.pos.permissions'), // e.g. view_pos
-            'order_management' => array_merge(
-                config('permissions.orders.permissions'),
-                config('permissions.service.permissions') // Waiter service linked to orders
-            ),
-            'kds' => config('permissions.kitchen.permissions'),
-            'table_management' => config('permissions.tables.permissions'),
-            'customer_management' => config('permissions.customers.permissions'),
-            'staff_management' => config('permissions.staff.permissions'),
-            'inventory_management' => config('permissions.inventory.permissions'),
-            'waste_management' => config('permissions.waste.permissions'),
-            'customer_loyalty' => config('permissions.loyalty.permissions'),
-            'delivery_integration' => config('permissions.delivery.permissions'),
-            'communication' => config('permissions.communication.permissions'),
-            'financial_management' => config('permissions.finance.permissions'),
-            // 'reports_analytics' handled specifically below
+            'pos' => ['pos'],
+            'inventory' => ['inventory', 'waste'],
+            'loyalty' => ['loyalty'],
+            'delivery' => ['delivery'],
+            'marketing' => ['communication'],
+            'feedback' => ['feedback'],
+            'analytics' => ['finance', 'dashboard'], // Dashboard group has reports, finance has sales
+            'kds' => ['kitchen'],
+            'qr_ordering' => ['tables'],
         ];
 
-        // 4. Build List of ALL Permitted Actions based on Plan
-        $allowedActions = collect(['view_dashboard', 'view_settings', 'manage_billing', 'profile.edit']); // Core permissions
+        // 4. Build List of ALL Permitted Actions based on Plan + Core
+        $allowedActions = collect(['profile.edit']); // Base non-grouped stuff
 
-        // If 'reports_analytics' feature enabled, add analytics permissions
-        if (in_array('reports_analytics', $planFeatures)) {
-            $allowedActions->push('view_analytics', 'export_reports', 'view_sales_reports');
+        // Add Core permissions
+        foreach ($coreGroups as $group) {
+            $allowedActions = $allowedActions->merge(config("permissions.{$group}.permissions", []));
         }
 
+        // Add Plan-enabled permissions
         foreach ($planFeatures as $featureKey) {
-            if (isset($featureMap[$featureKey]) && is_array($featureMap[$featureKey])) {
-                $allowedActions = $allowedActions->merge($featureMap[$featureKey]);
+            if (isset($featureMap[$featureKey])) {
+                foreach ($featureMap[$featureKey] as $permissionGroup) {
+                    $allowedActions = $allowedActions->merge(config("permissions.{$permissionGroup}.permissions", []));
+                }
             }
         }
 
         // 5. Intersect: User can only do what BOTH their Role AND their Plan allow
-        // Note: We use values() to reset keys after filter
-        return $rolePermissions->intersect($allowedActions)->values();
+        return $rolePermissions->intersect($allowedActions->unique())->values();
     }
 
     public function getRestaurantRole()
@@ -265,16 +265,9 @@ class User extends Authenticatable
 
         // Try System Template First
         $commService = app(\App\Services\CommunicationService::class);
-        $sent = $commService->sendNotification('password_reset', $this, [
+        $commService->sendNotification('password_reset', $this, [
             'link' => $resetUrl
         ]);
-
-        if ($sent)
-            return;
-
-        // Fallback to default
-        \Illuminate\Support\Facades\Mail::to($this->email)
-            ->send(new \App\Mail\PasswordResetEmail($resetUrl, $this));
     }
 }
 

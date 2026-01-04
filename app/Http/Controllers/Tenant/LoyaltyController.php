@@ -88,6 +88,10 @@ class LoyaltyController extends Controller
     public function showCustomer(Customer $customer): Response
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
+
+        if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+            abort(403, 'This customer belongs to another restaurant.');
+        }
         $customer->load([
             'loyaltyPoints',
             'pointTransactions' => function ($query) {
@@ -99,8 +103,13 @@ class LoyaltyController extends Controller
             }
         ]);
 
+        $rewards = \App\Models\Reward::where('restaurant_id', $customer->restaurant_id)
+            ->where('is_active', true)
+            ->get();
+
         return Inertia::render('Loyalty/Customer', [
             'customer' => $customer,
+            'rewards' => $rewards,
         ]);
     }
 
@@ -329,5 +338,98 @@ class LoyaltyController extends Controller
         $reward->save();
 
         return redirect()->back()->with('success', 'Reward design updated successfully.');
+    }
+
+    public function requestRedemptionOtp(Request $request, Customer $customer)
+    {
+        \Illuminate\Support\Facades\Log::info("LoyaltyController: Requesting OTP for Customer ID: " . $customer->id);
+
+        try {
+            \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
+
+            if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+                \Illuminate\Support\Facades\Log::warning("LoyaltyController: Unauthorized access attempt.");
+                return response()->json(['message' => 'Unauthorized customer access'], 403);
+            }
+
+            \Illuminate\Support\Facades\Log::info("LoyaltyController: Calling sendRedemptionOtp");
+            $sent = $this->loyaltyService->sendRedemptionOtp($customer);
+
+            if ($sent) {
+                \Illuminate\Support\Facades\Log::info("LoyaltyController: OTP sent successfully.");
+                return response()->json(['message' => 'OTP sent successfully']);
+            }
+
+            \Illuminate\Support\Facades\Log::error("LoyaltyController: Service returned false.");
+            return response()->json(['message' => 'Failed to send OTP. SMS service may be unavailable.'], 503);
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("LoyaltyController Exception: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
+            return response()->json(['message' => 'Server Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function verifyAndRedeem(Request $request, Customer $customer)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
+
+        if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+            return response()->json(['message' => 'Unauthorized customer access'], 403);
+        }
+
+        $validated = $request->validate([
+            'reward_id' => 'required|exists:rewards,id',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+            return response()->json(['message' => 'Invalid or expired OTP'], 422);
+        }
+
+        try {
+            $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
+            return response()->json([
+                'message' => 'Reward redeemed successfully',
+                'redemption' => $redemption
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function verifyOtpOnly(Request $request, Customer $customer)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
+
+        if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+            return response()->json(['message' => 'Unauthorized customer access'], 403);
+        }
+
+        $validated = $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+            return response()->json(['message' => 'OTP Verified']);
+        }
+
+        return response()->json(['message' => 'Invalid or expired OTP'], 422);
+    }
+
+    public function smsLogs(Request $request)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('view_sms_logs');
+
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+
+        $logs = \App\Models\CommunicationLog::where('restaurant_id', $restaurant->id)
+            ->where('type', 'sms')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return Inertia::render('Loyalty/SmsLogs', [
+            'logs' => $logs
+        ]);
     }
 }

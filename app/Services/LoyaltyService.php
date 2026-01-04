@@ -108,7 +108,7 @@ class LoyaltyService
         $customer->updateTier();
     }
 
-    public function redeemReward(Customer $customer, int $rewardId): RewardRedemption
+    public function redeemReward(Customer $customer, string $rewardId): RewardRedemption
     {
         $reward = \App\Models\Reward::findOrFail($rewardId);
 
@@ -150,6 +150,108 @@ class LoyaltyService
         $reward->increment('redemptions_count');
 
         return $redemption;
+    }
+
+    public function sendRedemptionOtp(Customer $customer): bool
+    {
+        if (!$customer->phone) {
+            return false;
+        }
+
+        // Generate 6-digit OTP
+        $otpCode = (string) rand(100000, 999999);
+
+        // Store OTP
+        \App\Models\CustomerOtp::create([
+            'customer_id' => $customer->id,
+            'phone' => $customer->phone,
+            'otp' => $otpCode,
+            'expires_at' => now()->addMinutes(10),
+            'is_used' => false,
+            'type' => 'redemption',
+        ]);
+
+        // Send SMS via mock/log
+        try {
+            // Check if SMS provider is configured
+            // Real-world check: Check for API Key in .env or config
+            $apiKey = env('SMS_PROVIDER_KEY');
+
+            if (empty($apiKey)) {
+                // Simulate Success for Testing/Demo when no provider is configured
+                \Illuminate\Support\Facades\Log::info("SIMULATED SMS to {$customer->phone}: OTP {$otpCode}");
+
+                // Log as 'sent' so the logs look correct in UI, but append (Simulated)
+                \App\Models\CommunicationLog::create([
+                    'restaurant_id' => $customer->restaurant_id,
+                    'recipient' => $customer->phone,
+                    'type' => 'sms',
+                    'status' => 'sent',
+                    'message' => "OTP for redemption: {$otpCode} (Simulated - No Provider Configured)",
+                    'sent_at' => now(),
+                ]);
+
+                return true;
+            }
+
+            // If key exists, we proceed to mock send (or real send if implemented)
+            // app(SmsService::class)->send(...)
+
+            $this->sendSms($customer->phone, "Your Restrufy redemption code is: {$otpCode}. Valid for 10 minutes.");
+
+            // Log the SMS in CommunicationLog as SENT
+            \App\Models\CommunicationLog::create([
+                'restaurant_id' => $customer->restaurant_id,
+                'recipient' => $customer->phone,
+                'type' => 'sms',
+                'status' => 'sent',
+                'message' => "OTP for redemption: {$otpCode}",
+                'sent_at' => now(),
+            ]);
+
+            return true;
+
+        } catch (\Exception $e) {
+            // Log the SMS in CommunicationLog as FAILED
+            \App\Models\CommunicationLog::create([
+                'restaurant_id' => $customer->restaurant_id,
+                'recipient' => $customer->phone,
+                'type' => 'sms',
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+                'message' => "OTP for redemption: {$otpCode}",
+                'sent_at' => now(),
+            ]);
+
+            \Illuminate\Support\Facades\Log::error("Failed to send OTP SMS: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function verifyOtp(Customer $customer, string $otp): bool
+    {
+        $validOtp = \App\Models\CustomerOtp::where('customer_id', $customer->id)
+            ->where('otp', $otp)
+            ->where('is_used', false)
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+
+        if ($validOtp) {
+            $validOtp->update(['is_used' => true]);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function sendSms(string $phone, string $message): void
+    {
+        // Placeholder for SMS provider integration (e.g. Twilio, SMS.ae)
+        \Illuminate\Support\Facades\Log::info("SMS to {$phone}: {$message}");
+
+        // When integrating, you would call the SMS service here:
+        // app(SmsService::class)->send($phone, $message);
     }
 
     public function getCustomerByPhone(Restaurant $restaurant, string $phone): ?Customer

@@ -1,2 +1,1 @@
-$country- . : No timezone set
-
+Customer:  . $customer- . PHP_EOL

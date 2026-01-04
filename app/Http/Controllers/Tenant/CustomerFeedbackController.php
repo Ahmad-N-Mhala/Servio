@@ -83,13 +83,70 @@ class CustomerFeedbackController extends Controller
 
 
 
+
         // Logic check for Google Redirect
         $shouldRedirect = false;
         $redirectUrl = null;
 
-        if ($validated['rating'] >= 4 && !empty($restaurant->google_map_location)) {
+        // Get google_review_link from the feedback template
+        $feedbackTemplate = \App\Models\CommunicationTemplate::where('restaurant_id', $restaurant->id)
+            ->where('trigger_event', 'order_completed_feedback')
+            ->first();
+
+        $googleReviewLink = null;
+        if ($feedbackTemplate && isset($feedbackTemplate->conditions['google_review_link'])) {
+            $googleReviewLink = $feedbackTemplate->conditions['google_review_link'];
+        }
+
+        if ($validated['rating'] >= 4 && !empty($googleReviewLink)) {
             $shouldRedirect = true;
-            $redirectUrl = $restaurant->google_map_location;
+
+            // Parse Google Maps URL to extract Place ID and generate review URL
+            $googleUrl = $googleReviewLink;
+            $placeId = null;
+            $cid = null;
+
+            // If it's a short URL (goo.gl), follow the redirect to get the full URL
+            if (strpos($googleUrl, 'goo.gl') !== false || strpos($googleUrl, 'maps.app.goo.gl') !== false) {
+                try {
+                    $context = stream_context_create([
+                        'http' => [
+                            'follow_location' => true,
+                            'max_redirects' => 5,
+                            'timeout' => 5,
+                        ]
+                    ]);
+                    $headers = get_headers($googleUrl, 1, $context);
+                    if (isset($headers['Location'])) {
+                        $googleUrl = is_array($headers['Location']) ? end($headers['Location']) : $headers['Location'];
+                    }
+                } catch (\Exception $e) {
+                    // If redirect fails, continue with original URL
+                }
+            }
+
+            // Try to extract Place ID (starts with ChIJ)
+            if (preg_match('/!1s(ChIJ[A-Za-z0-9_-]+)/', $googleUrl, $matches)) {
+                $placeId = $matches[1];
+            } elseif (preg_match('/query_place_id=(ChIJ[A-Za-z0-9_-]+)/', $googleUrl, $matches)) {
+                $placeId = $matches[1];
+            } elseif (preg_match('/place_id=(ChIJ[A-Za-z0-9_-]+)/', $googleUrl, $matches)) {
+                $placeId = $matches[1];
+            }
+
+            // Try to extract CID (hex format like 0x...:0x...)
+            if (!$placeId && preg_match('/!1s0x[a-fA-F0-9]+:0x([a-fA-F0-9]+)/', $googleUrl, $matches)) {
+                $cid = $matches[1];
+            }
+
+            // Generate the review URL
+            if ($placeId) {
+                // Preferred: Use Place ID for review URL
+                $redirectUrl = "https://search.google.com/local/writereview?placeid=" . $placeId;
+            } else {
+                // Fallback: Clean the URL and open the place page
+                $redirectUrl = preg_replace('/[?&]entry=.*$/', '', $googleUrl);
+            }
 
             // Mark as redirected
             $feedback->update(['redirected_to_google' => true]);

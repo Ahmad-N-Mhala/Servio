@@ -1,0 +1,115 @@
+[
+    {
+        "restaurant_id": "69503a8eeaf319e8830776ee",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-27T19:59:10.113000Z",
+        "created_at": "2025-12-27T19:59:10.113000Z",
+        "id": {
+            "$oid": "69503a8eeaf319e8830776f1"
+        }
+    },
+    {
+        "restaurant_id": "69503b2deaf319e8830776f6",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-27T20:01:49.389000Z",
+        "created_at": "2025-12-27T20:01:49.389000Z",
+        "id": {
+            "$oid": "69503b2deaf319e8830776f9"
+        }
+    },
+    {
+        "restaurant_id": "69503b69eaf319e8830776fc",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-27T20:02:49.367000Z",
+        "created_at": "2025-12-27T20:02:49.367000Z",
+        "id": {
+            "$oid": "69503b69eaf319e8830776ff"
+        }
+    },
+    {
+        "restaurant_id": "69503b7feaf319e883077702",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-27T20:03:11.272000Z",
+        "created_at": "2025-12-27T20:03:11.272000Z",
+        "id": {
+            "$oid": "69503b7feaf319e883077705"
+        }
+    },
+    {
+        "restaurant_id": "69503d88eaf319e883077708",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-27T20:11:52.578000Z",
+        "created_at": "2025-12-27T20:11:52.578000Z",
+        "id": {
+            "$oid": "69503d88eaf319e88307770b"
+        }
+    },
+    {
+        "restaurant_id": "69503dc8eaf319e88307770e",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-27T20:12:56.065000Z",
+        "created_at": "2025-12-27T20:12:56.065000Z",
+        "id": {
+            "$oid": "69503dc8eaf319e883077711"
+        }
+    },
+    {
+        "restaurant_id": "69503e50eaf319e883077714",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": "2025-12-28T17:11:44.220000Z",
+        "created_at": "2025-12-27T20:15:12.780000Z",
+        "max_points": null,
+        "min_spent": null,
+        "id": {
+            "$oid": "69503e50eaf319e883077717"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "name": "{\"en\":\"Points per Spend\"}",
+        "type": "order_total",
+        "points": "1",
+        "is_active": true,
+        "currency_amount": "1",
+        "updated_at": "2025-12-28T18:27:00.857000Z",
+        "created_at": "2025-12-28T18:27:00.857000Z",
+        "id": {
+            "$oid": "695176742f954f9a240de5bd"
+        }
+    }
+]

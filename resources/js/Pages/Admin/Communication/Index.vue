@@ -90,7 +90,8 @@
                         <option value="user_registered">User Registered (Standard Welcome)</option>
                         <option value="password_reset">Password Reset Request</option>
                         <option value="subscription_created">Subscription Created</option>
-                        <option value="subscription_expired">Subscription Expired</option>
+                        <option value="subscription_warning">Subscription Expiry Warning (Days Before)</option>
+                        <option value="subscription_expired">Subscription Expired (Immediately)</option>
                         <option value="restaurant_created">Restaurant Created</option>
                         <option value="custom">Custom (Type manually below)</option>
                     </Select>
@@ -219,7 +220,7 @@ const form = useForm({
 });
 
 // Sync custom trigger
-watch(customTrigger, (val) => {
+watch(customTrigger, () => {
     if (form.trigger_event === 'custom') {
          // This logic handled on submit really, but we need to pass strict validation
     }

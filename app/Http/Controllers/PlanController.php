@@ -57,6 +57,11 @@ class PlanController extends Controller
             'status' => 'active',
         ]);
 
+        // Sync features to restaurant settings
+        $settings = is_array($restaurant->settings) ? $restaurant->settings : [];
+        $settings['enabled_features'] = $plan->enabled_features ?? [];
+        $restaurant->update(['settings' => $settings]);
+
         return redirect()->route('plans.index')
             ->with('message', "Successfully subscribed to {$plan->name} plan!");
     }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
@@ -10,9 +10,11 @@ import UnsplashPicker from '@/Components/UnsplashPicker.vue';
 
 const props = defineProps<{
     settings?: Record<string, any>;
+    restaurant?: { id: string; name: string; slug: string; logo?: string } | null;
 }>();
 
 const design = props.settings?.feedback_design || {};
+const route = (window as any).route;
 
 const form = useForm({
     page_title: design.page_title || 'We Value Your Feedback',
@@ -21,9 +23,12 @@ const form = useForm({
     text_color: design.text_color || '#ffffff',
     header_logo: null as File | null,
     background_image: null as File | null,
+    reset_logo: false, // Flag to signal logo reset
 });
 
-const logoPreview = ref(design.header_logo || '/images/logo-placeholder.png');
+// Use custom logo if set, otherwise fall back to restaurant logo, then placeholder
+const defaultLogo = design.header_logo || props.restaurant?.logo || '/images/logo-placeholder.png';
+const logoPreview = ref(defaultLogo);
 const bgPreview = ref(design.background_image || null);
 
 const showCropper = ref(false);
@@ -89,11 +94,33 @@ const handleUnsplashSelect = async (image: any) => {
     }
 };
 
+const resetToDefaultLogo = () => {
+    if (props.restaurant?.logo) {
+        logoPreview.value = props.restaurant.logo;
+        form.header_logo = null;
+        form.reset_logo = true; // Signal backend to clear custom logo
+    }
+};
+
 const submit = () => {
-    form.post(window.route('feedback.settings.update'), {
+    // Get current locale from URL
+    const locale = window.location.pathname.split('/')[1] || 'en';
+    const url = `/${locale}/feedback/settings`;
+    
+    console.log('Submitting to URL:', url);
+    console.log('Current pathname:', window.location.pathname);
+    console.log('Extracted locale:', locale);
+    
+    form.post(url, {
         preserveScroll: true,
         forceFormData: true,
-        onSuccess: () => alert('Design saved!')
+        onSuccess: () => {
+            alert('Design saved successfully!');
+        },
+        onError: (errors) => {
+            console.error('Save failed:', errors);
+            alert('Failed to save design. Please try again.');
+        }
     });
 };
 </script>
@@ -137,7 +164,20 @@ const submit = () => {
 
                         <div class="border-t pt-4 space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-medium text-gray-700">Logo</label>
+                                    <button 
+                                        v-if="design.header_logo && restaurant?.logo" 
+                                        type="button" 
+                                        @click="resetToDefaultLogo"
+                                        class="text-xs text-primary font-medium hover:underline"
+                                    >
+                                        Reset to Restaurant Logo
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-2">
+                                    {{ design.header_logo ? 'Using custom logo' : (restaurant?.logo ? 'Using restaurant logo (default)' : 'No logo set') }}
+                                </p>
                                 <input type="file" accept="image/*" @change="handleLogoUpload" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
                             </div>
                             
@@ -167,22 +207,33 @@ const submit = () => {
                 <!-- Phone Frame -->
                 <div class="w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden border-8 border-gray-900 relative aspect-[9/18]">
                     
-                    <!-- Dynamic Header -->
+                    <!-- Dynamic Header with Background Image -->
                     <div 
-                        class="p-6 text-center relative overflow-hidden"
-                        :style="{ backgroundColor: form.theme_color, color: form.text_color }"
+                        class="p-6 text-center relative overflow-hidden transition-colors duration-500"
+                        :style="{ 
+                            backgroundColor: form.theme_color, 
+                            color: form.text_color,
+                            backgroundImage: bgPreview ? `url(${bgPreview})` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        }"
                     >
-                         <!-- BG Image -->
-                        <div v-if="bgPreview" class="absolute inset-0 opacity-20">
-                            <img :src="bgPreview" class="w-full h-full object-cover" />
+                        <!-- Overlay for better text readability when background image is present -->
+                        <div v-if="bgPreview" class="absolute inset-0 bg-black/40"></div>
+                        
+                        <!-- Background Decoration (if no custom BG image) -->
+                        <div v-if="!bgPreview" class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <path d="M0 100 C 20 0 50 0 100 100 Z" fill="currentColor" />
+                            </svg>
                         </div>
                          
                         <div class="relative z-10">
-                            <div class="w-20 h-20 mx-auto bg-white rounded-full p-1 shadow-lg mb-3">
-                                <img :src="logoPreview" class="w-full h-full object-cover rounded-full" />
+                            <div class="w-20 h-20 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center mb-3 overflow-hidden border-4 border-white/40">
+                                <img :src="logoPreview" class="w-full h-full object-cover" />
                             </div>
-                            <h2 class="text-xl font-bold">{{ form.page_title }}</h2>
-                            <p class="text-sm opacity-90 mt-1">{{ form.welcome_message }}</p>
+                            <h2 class="text-xl font-bold tracking-tight mb-1 drop-shadow-md">{{ form.page_title }}</h2>
+                            <p class="text-xs font-medium tracking-wide uppercase opacity-90">{{ form.welcome_message }}</p>
                         </div>
                     </div>
 
@@ -191,12 +242,19 @@ const submit = () => {
                         <div class="text-center mb-6">
                              <h3 class="text-lg font-bold text-gray-800 mb-4">How was your experience?</h3>
                              <div class="flex justify-center gap-2 mb-6">
-                                <span v-for="i in 5" :key="i" class="text-gray-300 text-3xl">★</span>
+                                <span v-for="i in 5" :key="i" class="text-yellow-400 text-3xl">★</span>
                              </div>
                              
-                             <div class="bg-gray-100 rounded-xl h-24 w-full mb-4"></div>
+                             <!-- Comment textarea mock -->
+                             <div class="bg-gray-100 rounded-xl h-24 w-full mb-4 border border-gray-200"></div>
                              
-                             <div class="h-12 bg-primary w-full rounded-xl"></div>
+                             <!-- Submit button with theme color -->
+                             <div 
+                                class="h-12 w-full rounded-xl flex items-center justify-center text-white font-semibold shadow-lg"
+                                :style="{ backgroundColor: form.theme_color }"
+                             >
+                                Submit Feedback
+                             </div>
                         </div>
                     </div>
 

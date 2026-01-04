@@ -20,8 +20,8 @@ class RestaurantSubscription extends Model
     ];
 
     protected $casts = [
-        'starts_at' => 'date',
-        'ends_at' => 'date',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
     ];
 
     public function restaurant(): BelongsTo

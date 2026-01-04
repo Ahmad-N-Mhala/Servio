@@ -355,6 +355,7 @@ class OrderController extends Controller
             'total' => ['required', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'reward_id' => ['nullable', 'exists:rewards,id'],
+            'otp' => ['nullable', 'string', 'size:6'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -494,7 +495,20 @@ class OrderController extends Controller
             }
 
             if ($reward) {
-                $redemption = $this->loyaltyService->redeemReward($customer, (int) $validated['reward_id']);
+                // Verify OTP
+                if (empty($validated['otp'])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'otp' => ['OTP is required for reward redemption.']
+                    ]);
+                }
+
+                if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'otp' => ['Invalid or expired OTP.']
+                    ]);
+                }
+
+                $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
                 $redemption->markAsUsed($order->id);
             }
         }

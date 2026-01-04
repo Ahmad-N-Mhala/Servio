@@ -64,14 +64,15 @@
                             </div>
 
                             <div class="border-t border-gray-200 pt-6">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Plan Features</h3>
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Technical Features (For System)</h3>
+                                <p class="text-sm text-gray-500 mb-4">Select which technical features are enabled for this plan.</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <label v-for="(label, key) in availableFeatures" :key="key" class="relative flex items-start">
                                         <div class="flex items-center h-5">
                                             <input 
                                                 type="checkbox" 
                                                 :value="key" 
-                                                v-model="form.features"
+                                                v-model="form.enabled_features"
                                                 class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
                                             >
                                         </div>
@@ -80,6 +81,19 @@
                                         </div>
                                     </label>
                                 </div>
+                            </div>
+
+                            <div class="border-t border-gray-200 pt-6">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Display Features (For Public)</h3>
+                                <p class="text-sm text-gray-500 mb-2">Comma separated list of features to display on the pricing page.</p>
+                                <textarea 
+                                    :value="form.features.join('\n')" 
+                                    @input="form.features = ($event.target as HTMLTextAreaElement).value.split('\n').filter(s => s.trim())"
+                                    rows="5" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    placeholder="Examples:&#10;1 Restaurant&#10;Unlimited Staff&#10;Email Support"
+                                ></textarea>
+                                <div v-if="form.errors.features" class="text-red-500 text-xs mt-1">{{ form.errors.features }}</div>
                             </div>
                             
                             <div>
@@ -125,7 +139,8 @@ const form = useForm({
     max_users: null,
     max_orders_per_month: null,
     is_active: true,
-    features: [],
+    features: [] as string[],
+    enabled_features: [] as string[],
 });
 
 const route = (window as any).route;

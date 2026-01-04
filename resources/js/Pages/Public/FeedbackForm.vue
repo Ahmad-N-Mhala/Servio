@@ -1,21 +1,25 @@
 <template>
     <div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 selection:bg-primary-100 selection:text-primary-700">
         
-        <!-- Background Image Support -->
-        <div v-if="design.background_image" class="fixed inset-0 z-0 opacity-10">
-            <img :src="design.background_image" class="w-full h-full object-cover">
-        </div>
-
         <!-- Main Card -->
         <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden ring-1 ring-black/5 transform transition-all duration-300 hover:shadow-3xl relative z-10">
             
-            <!-- Header with Customizable Theme -->
+            <!-- Header with Customizable Theme and Background Image -->
             <div 
                 class="p-8 text-center relative overflow-hidden transition-colors duration-500"
-                :style="{ backgroundColor: design.theme_color || '#1e3a8a', color: design.text_color || '#ffffff' }"
+                :style="{ 
+                    backgroundColor: design.theme_color || '#1e3a8a', 
+                    color: design.text_color || '#ffffff',
+                    backgroundImage: design.background_image ? `url(${design.background_image})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                }"
             >
-                <!-- Background Decoration (if no custom BG for header) -->
-                <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <!-- Overlay for better text readability when background image is present -->
+                <div v-if="design.background_image" class="absolute inset-0 bg-black/40"></div>
+                
+                <!-- Background Decoration (if no custom BG image) -->
+                <div v-if="!design.background_image" class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
                      <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <path d="M0 100 C 20 0 50 0 100 100 Z" fill="currentColor" />
                     </svg>

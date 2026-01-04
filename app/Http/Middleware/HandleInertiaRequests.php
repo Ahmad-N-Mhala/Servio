@@ -58,7 +58,16 @@ class HandleInertiaRequests extends Middleware
                 : [],
             'current_restaurant' => function () use ($request) {
                 if ($request->user()) {
-                    return $request->user()->currentRestaurant();
+                    $restaurant = $request->user()->currentRestaurant();
+                    if ($restaurant) {
+                        return [
+                            'id' => $restaurant->id,
+                            'name' => $restaurant->name,
+                            'slug' => $restaurant->slug,
+                            'logo' => $restaurant->logo,
+                            'settings' => $restaurant->settings,
+                        ];
+                    }
                 }
                 return null;
             },

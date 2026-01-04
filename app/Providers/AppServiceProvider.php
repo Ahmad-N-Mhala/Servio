@@ -57,42 +57,43 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // 2. Role HAS permission. Now Check Plan Features.
-                // Define Permission -> Feature Map
-                // This map helps us know which Feature is required for a given Permission
                 static $permToFeatureMap = null;
                 if ($permToFeatureMap === null) {
-                    $mapConfig = [
-                        'menu' => 'menu_management',
-                        'pos' => 'pos_system',
-                        'orders' => 'order_management',
+                    $coreGroups = ['dashboard', 'orders', 'menu', 'tables', 'customers', 'staff', 'settings', 'service'];
+
+                    // Map Permission Groups to Feature Keys where they differ
+                    $groupMapping = [
                         'kitchen' => 'kds',
-                        'tables' => 'table_management',
-                        'customers' => 'customer_management',
-                        'staff' => 'staff_management',
-                        'inventory' => 'inventory_management',
-                        'waste' => 'waste_management',
-                        'loyalty' => 'customer_loyalty',
-                        'delivery' => 'delivery_integration',
-                        'communication' => 'communication',
-                        'finance' => 'financial_management',
+                        'waste' => 'inventory', // Waste is part of Inventory feature
+                        'communication' => 'marketing',
+                        'finance' => 'analytics',
+                        'qr_ordering' => 'qr_ordering',
                     ];
+
                     $permToFeatureMap = [];
                     foreach (config('permissions') as $group => $data) {
-                        if (isset($mapConfig[$group]) && isset($data['permissions'])) {
+                        // Skip Core Groups - they don't need a feature check
+                        if (in_array($group, $coreGroups)) {
+                            continue;
+                        }
+
+                        // Determine Feature Key
+                        $featureKey = $groupMapping[$group] ?? $group;
+
+                        if (isset($data['permissions'])) {
                             foreach ($data['permissions'] as $perm) {
-                                $permToFeatureMap[$perm] = $mapConfig[$group];
+                                $permToFeatureMap[$perm] = $featureKey;
                             }
                         }
                     }
-                    // Extras
-                    foreach (config('permissions.service.permissions', []) as $p)
-                        $permToFeatureMap[$p] = 'order_management';
-                    $permToFeatureMap['view_analytics'] = 'reports_analytics';
-                    $permToFeatureMap['export_reports'] = 'reports_analytics';
-                    $permToFeatureMap['view_sales_reports'] = 'financial_management'; // Ensure consistency
+
+                    // Explicit Overrides (if needed)
+                    $permToFeatureMap['view_analytics'] = 'analytics';
+                    $permToFeatureMap['export_reports'] = 'analytics';
+                    $permToFeatureMap['view_sales_reports'] = 'analytics';
                 }
 
-                // If this permission is NOT linked to any feature, it's a Core permission. Allow it.
+                // If this permission is NOT in the map, it's either Core or unmapped. Allow it.
                 if (!isset($permToFeatureMap[$ability])) {
                     return true;
                 }
@@ -108,10 +109,15 @@ class AppServiceProvider extends ServiceProvider
                         ->latest()
                         ->first();
 
-                    $feats = [];
                     if ($subscription && $subscription->plan) {
-                        $f = $subscription->plan->features;
-                        $feats = is_string($f) ? (json_decode($f, true) ?? []) : $f;
+                        $f = $subscription->plan->enabled_features;
+                        if (is_string($f)) {
+                            $feats = json_decode($f, true) ?? [];
+                        } elseif (is_array($f)) {
+                            $feats = $f;
+                        } else {
+                            $feats = [];
+                        }
                     }
                     $subscriptionCache[$targetId] = $feats ?? [];
                 }
@@ -159,9 +165,11 @@ class AppServiceProvider extends ServiceProvider
 
                         // Cache the FEATURES array directly, or empty array if no active sub/plan
                         if ($subscription && $subscription->plan) {
-                            $planFeatures = $subscription->plan->features;
+                            $planFeatures = $subscription->plan->enabled_features;
                             if (is_string($planFeatures)) {
                                 $planFeatures = json_decode($planFeatures, true) ?? [];
+                            } elseif (!is_array($planFeatures)) {
+                                $planFeatures = [];
                             }
                             $subscriptionCache[$restaurant->id] = is_array($planFeatures) ? $planFeatures : [];
                         } else {

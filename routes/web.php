@@ -30,9 +30,9 @@ Route::group([
         return redirect()->route('login');
     });
 
-    // Public Feedback Routes (Localized)
-    Route::get('/feedback/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'create'])->name('public.feedback.create');
-    Route::post('/feedback/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'store'])->name('public.feedback.store');
+    // Public Feedback Routes (Localized) - using /f/ to avoid conflict with admin /feedback/ routes
+    Route::get('/f/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'create'])->name('public.feedback.create');
+    Route::post('/f/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'store'])->name('public.feedback.store');
 
     Route::get('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'show'])->name('login');
     Route::post('/login', [\App\Http\Controllers\Tenant\Auth\LoginController::class, 'store'])->name('login.store');
@@ -137,15 +137,18 @@ Route::group([
                 ->middleware('permission:view_customers');
 
             // Tables
-            Route::resource('tables', \App\Http\Controllers\Tenant\TableController::class)
-                ->middleware('permission:view_tables'); // Basic view, controller should handle create/edit checks or we add here
-            Route::get('tables/{table}/qr-code', [\App\Http\Controllers\Tenant\TableController::class, 'downloadQrCode'])->name('tables.qr-code')
-                ->middleware('permission:view_tables');
-            Route::post('tables/{table}/regenerate-qr', [\App\Http\Controllers\Tenant\TableController::class, 'regenerateQrCode'])->name('tables.regenerate-qr')
-                ->middleware('permission:edit_table');
+            Route::prefix('tables')->name('tables.')->middleware('feature.access:qr_ordering')->group(function () {
+                Route::resource('/', \App\Http\Controllers\Tenant\TableController::class)
+                    ->parameters(['' => 'table'])
+                    ->middleware('permission:view_tables');
+                Route::get('/{table}/qr-code', [\App\Http\Controllers\Tenant\TableController::class, 'downloadQrCode'])->name('qr-code')
+                    ->middleware('permission:view_tables');
+                Route::post('/{table}/regenerate-qr', [\App\Http\Controllers\Tenant\TableController::class, 'regenerateQrCode'])->name('regenerate-qr')
+                    ->middleware('permission:edit_table');
+            });
 
             // Loyalty
-            Route::prefix('loyalty')->name('loyalty.')->group(function () {
+            Route::prefix('loyalty')->name('loyalty.')->middleware('feature.access:loyalty')->group(function () {
                 Route::resource('loyalty', \App\Http\Controllers\Tenant\LoyaltyController::class)
                     ->middleware('permission:view_loyalty');
                 Route::get('/', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'index'])->name('index')
@@ -164,6 +167,14 @@ Route::group([
                     ->middleware('permission:manage_rewards');
                 Route::post('/rewards/{reward}/design', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateRewardDesign'])->name('rewards.update-design')
                     ->middleware('permission:manage_rewards');
+                Route::get('/sms-logs', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'smsLogs'])->name('sms-logs')
+                    ->middleware('permission:view_sms_logs');
+                Route::post('/customers/{customer}/request-otp', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'requestRedemptionOtp'])->name('customers.request-otp')
+                    ->middleware('permission:view_loyalty');
+                Route::post('/customers/{customer}/verify-otp-only', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'verifyOtpOnly'])->name('customers.verify-otp-only')
+                    ->middleware('permission:view_loyalty');
+                Route::post('/customers/{customer}/verify-redeem', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'verifyAndRedeem'])->name('customers.verify-redeem')
+                    ->middleware('permission:view_loyalty');
 
                 Route::resource('earning-methods', \App\Http\Controllers\Tenant\EarningMethodController::class)
                     ->except(['create', 'edit', 'show'])
@@ -183,7 +194,7 @@ Route::group([
             });
 
             // Kitchen
-            Route::prefix('kitchen')->name('kitchen.')->group(function () {
+            Route::prefix('kitchen')->name('kitchen.')->middleware('feature.access:kds')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\KitchenController::class, 'index'])->name('index')
                     ->middleware('permission:view_kitchen');
                 Route::put('/{order}/status', [\App\Http\Controllers\Tenant\KitchenController::class, 'updateStatus'])->name('status.update')
@@ -191,7 +202,7 @@ Route::group([
             });
 
             // POS
-            Route::prefix('pos')->name('pos.')->group(function () {
+            Route::prefix('pos')->name('pos.')->middleware('feature.access:pos')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\POSController::class, 'index'])->name('index')
                     ->middleware('permission:view_pos');
                 Route::post('/{order}/settle', [\App\Http\Controllers\Tenant\POSController::class, 'settle'])->name('settle')
@@ -231,7 +242,7 @@ Route::group([
             });
 
             // Communication
-            Route::prefix('communication')->name('communication.')->group(function () {
+            Route::prefix('communication')->name('communication.')->middleware('feature.access:marketing')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\CommunicationController::class, 'index'])->name('index')
                     ->middleware('permission:view_communication');
                 Route::post('/bundles/{bundle}/purchase', [\App\Http\Controllers\Tenant\CommunicationController::class, 'purchaseBundle'])->name('bundles.purchase')
@@ -246,7 +257,7 @@ Route::group([
             });
 
             // Integrations
-            Route::prefix('integrations')->name('integrations.')->group(function () {
+            Route::prefix('integrations')->name('integrations.')->middleware('feature.access:delivery')->group(function () {
                 Route::get('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'index'])->name('delivery.index')
                     ->middleware('permission:view_delivery_settings');
                 Route::post('/delivery', [\App\Http\Controllers\Tenant\DeliveryIntegrationController::class, 'update'])->name('delivery.update')
@@ -258,19 +269,21 @@ Route::group([
             });
 
             // Waste & Inventory
-            Route::post('waste/{waste}/restore', [\App\Http\Controllers\Tenant\WasteController::class, 'restore'])->name('waste.restore')
-                ->middleware('permission:record_waste');
-            Route::resource('waste', \App\Http\Controllers\Tenant\WasteController::class)
-                ->only(['index', 'store', 'update', 'destroy'])
-                ->middleware('permission:view_waste'); // Store/Update/Destroy should ideally have record_waste
+            Route::middleware('feature.access:inventory')->group(function () {
+                Route::post('waste/{waste}/restore', [\App\Http\Controllers\Tenant\WasteController::class, 'restore'])->name('waste.restore')
+                    ->middleware('permission:record_waste');
+                Route::resource('waste', \App\Http\Controllers\Tenant\WasteController::class)
+                    ->only(['index', 'store', 'update', 'destroy'])
+                    ->middleware('permission:view_waste');
 
-            Route::get('inventory/export', [\App\Http\Controllers\Tenant\InventoryController::class, 'export'])->name('inventory.export')
-                ->middleware('permission:view_inventory');
-            Route::get('inventory/{inventory}/history', [\App\Http\Controllers\Tenant\InventoryController::class, 'history'])->name('inventory.history')
-                ->middleware('permission:view_inventory');
-            Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class)
-                ->except(['show'])
-                ->middleware('permission:view_inventory'); // Add/Deduct stock handled in controller or specific routes?
+                Route::get('inventory/export', [\App\Http\Controllers\Tenant\InventoryController::class, 'export'])->name('inventory.export')
+                    ->middleware('permission:view_inventory');
+                Route::get('inventory/{inventory}/history', [\App\Http\Controllers\Tenant\InventoryController::class, 'history'])->name('inventory.history')
+                    ->middleware('permission:view_inventory');
+                Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class)
+                    ->except(['show'])
+                    ->middleware('permission:view_inventory');
+            });
 
             // Monthly Expenses
             Route::resource('monthly-expenses', \App\Http\Controllers\Tenant\MonthlyExpenseController::class)
@@ -281,7 +294,7 @@ Route::group([
             Route::get('financial', [\App\Http\Controllers\Tenant\FinancialController::class, 'index'])->name('financial.index')
                 ->middleware('permission:view_sales_reports');
 
-            Route::prefix('reports')->name('reports.')->group(function () {
+            Route::prefix('reports')->name('reports.')->middleware('feature.access:analytics')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Tenant\ReportController::class, 'index'])->name('sales')
                     ->middleware('permission:view_sales_reports');
                 Route::get('/export', [\App\Http\Controllers\Tenant\ReportController::class, 'export'])->name('export')
@@ -291,26 +304,26 @@ Route::group([
             // Plans & Subscription (Manage Billing)
             Route::prefix('plans')->name('plans.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\PlanController::class, 'index'])->name('index')
-                    ->middleware('permission:manage_billing');
+                    ->middleware('permission:view_plans');
                 Route::post('/{plan}/subscribe', [\App\Http\Controllers\PlanController::class, 'subscribe'])->name('subscribe')
                     ->middleware('permission:manage_billing');
             });
 
             // Receipt Template Settings
             Route::prefix('settings')->name('settings.')->group(function () {
-                Route::get('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'index'])->name('receipt-template.index')
-                    ->middleware('permission:customize_receipt_template');
-                Route::post('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'store'])->name('receipt-template.store')
+                Route::get('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'index'])->name('receipt-template')
                     ->middleware('permission:customize_receipt_template');
                 Route::post('/receipt-template', [\App\Http\Controllers\Tenant\ReceiptTemplateController::class, 'store'])->name('receipt-template.store')
                     ->middleware('permission:customize_receipt_template');
             });
 
             // Feedback (Admin)
-            Route::get('/feedback', [\App\Http\Controllers\Tenant\FeedbackController::class, 'index'])->name('feedback.index')
-                ->middleware('permission:view_feedback');
-            Route::post('/feedback/settings', [\App\Http\Controllers\Tenant\FeedbackController::class, 'updateSettings'])->name('feedback.settings.update')
-                ->middleware('permission:view_feedback'); // Re-using permission
+            Route::prefix('feedback')->name('feedback.')->middleware('feature.access:feedback')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\FeedbackController::class, 'index'])->name('index')
+                    ->middleware('permission:view_feedback');
+                Route::post('/settings', [\App\Http\Controllers\Tenant\FeedbackController::class, 'updateSettings'])->name('settings.update')
+                    ->middleware('permission:view_feedback');
+            });
         });
 
         // Admin Portal Routes

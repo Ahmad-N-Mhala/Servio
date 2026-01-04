@@ -20,6 +20,7 @@ class Plan extends Model
         'price_yearly',
         'currency',
         'features',
+        'enabled_features',
         'max_restaurants',
         'max_users',
         'max_orders_per_month',

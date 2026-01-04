@@ -19,6 +19,8 @@ class CommunicationLog extends Model
         'cost',
         'error_message',
         'communication_template_id',
+        'restaurant_id',
+        'sent_at'
     ];
 
     protected $casts = [

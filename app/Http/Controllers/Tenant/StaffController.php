@@ -15,7 +15,6 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
-use App\Mail\WelcomeEmail;
 
 class StaffController extends Controller
 {
@@ -230,12 +229,11 @@ class StaffController extends Controller
         $token = Password::createToken($user);
         $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
-        try {
-            Mail::to($user->email)->send(new WelcomeEmail($user, $restaurant->name, $resetUrl));
-        } catch (\Exception $e) {
-            // Log error but don't fail the request completely
-            \Log::error('Failed to send welcome email: ' . $e->getMessage());
-        }
+        $commService = app(\App\Services\CommunicationService::class);
+        $commService->sendNotification('user_registered', $user, [
+            'restaurant_name' => $restaurant->name,
+            'link' => $resetUrl
+        ]);
 
         return back()->with('success', 'Staff member added successfully. An invitation email has been sent.');
     }

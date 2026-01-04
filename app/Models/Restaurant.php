@@ -123,9 +123,47 @@ class Restaurant extends Model
         return $this->hasOne(RestaurantSubscription::class)->latest();
     }
 
+
     public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->users()->wherePivot('role', 'owner');
+    }
+
+    /**
+     * Check if a specific feature is enabled for this restaurant
+     */
+    public function hasFeature(string $feature): bool
+    {
+        // 1. Check Plan Features
+        $subscription = $this->subscription;
+        if ($subscription && $subscription->plan) {
+            $rawFeatures = $subscription->plan->enabled_features;
+            $planFeatures = [];
+
+            if (is_array($rawFeatures)) {
+                $planFeatures = $rawFeatures;
+            } elseif (is_string($rawFeatures)) {
+                $planFeatures = json_decode($rawFeatures, true) ?? [];
+            }
+
+            if (in_array($feature, $planFeatures)) {
+                return true;
+            }
+        }
+
+        // 2. Check Restaurant Settings Overrides
+        $settings = is_array($this->settings) ? $this->settings : [];
+        $enabledFeatures = $settings['enabled_features'] ?? [];
+
+        return in_array($feature, $enabledFeatures);
+    }
+
+    /**
+     * Check if feedback feature is enabled
+     */
+    public function hasFeedbackFeature(): bool
+    {
+        return $this->hasFeature('feedback');
     }
 
 }

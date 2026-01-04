@@ -97,8 +97,32 @@
         </div>
 
         <!-- NEW: Feedback Settings Tab -->
-        <div v-if="activeTab === 'feedback'" class="max-w-4xl mx-auto animate-fade-in">
-             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div v-if="activeTab === 'feedback'" class="max-w-4xl mx-auto animate-fade-in" :class="!hasFeature('feedback') ? 'opacity-85 pointer-events-none' : ''">
+             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
+                <!-- Lock Overlay Banner -->
+                <div v-if="!hasFeature('feedback')" class="absolute inset-0 z-50 flex items-center justify-center p-6 bg-gray-50/10 backdrop-blur-[1px] pointer-events-auto">
+                    <div class="bg-white p-8 rounded-2xl shadow-2xl border border-amber-100 text-center max-w-md animate-bounce-in">
+                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Feedback Feature Locked</h3>
+                        <p class="text-gray-600 mb-6 text-sm">
+                            This feature is not included in your current subscription plan. Upgrade to unlock automated feedback requests and Google review redirection.
+                        </p>
+                        <button 
+                            @click="$inertia.visit(route('dashboard'))"
+                            class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-600 text-white font-semibold rounded-xl hover:bg-amber-700 transition-colors shadow-lg shadow-amber-200"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Upgrade Plan
+                        </button>
+                    </div>
+                </div>
+
                 <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
                     <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +145,7 @@
                      <!-- Activation Toggle -->
                      <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="feedbackForm.is_active" class="sr-only peer">
+                            <input type="checkbox" v-model="feedbackForm.is_active" class="sr-only peer" :disabled="!hasFeature('feedback')">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                             <span class="ml-3 text-sm font-medium text-gray-900">Enable Feedback Requests</span>
                         </label>
@@ -149,6 +173,48 @@
                                 </span>
                             </div>
                         </div>
+                     </div>
+
+                     <!-- Google Maps Review Link -->
+                     <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Google Maps Review Link</label>
+                            <div class="relative group">
+                                <svg class="w-4 h-4 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                
+                                <!-- Tooltip -->
+                                <div class="absolute left-0 bottom-full mb-2 w-80 p-4 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                    <div class="font-semibold mb-2">How to get your Google Maps review link:</div>
+                                    <ol class="list-decimal list-inside space-y-1.5">
+                                        <li>Open Google Maps and search for your restaurant</li>
+                                        <li>Click on your restaurant name</li>
+                                        <li>Click the "Share" button</li>
+                                        <li>Copy the link and paste it here</li>
+                                    </ol>
+                                    <div class="mt-3 pt-3 border-t border-gray-700">
+                                        <p class="font-semibold mb-1">Supported formats:</p>
+                                        <ul class="space-y-1 text-gray-300">
+                                            <li>• Short URL: maps.app.goo.gl/...</li>
+                                            <li>• Full URL: google.com/maps/place/...</li>
+                                            <li>• Place ID: ChIJ...</li>
+                                        </ul>
+                                    </div>
+                                    <!-- Arrow -->
+                                    <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <input 
+                            v-model="feedbackForm.google_review_link" 
+                            type="url"
+                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="https://maps.app.goo.gl/... or https://www.google.com/maps/place/..."
+                        >
+                        <p class="mt-2 text-xs text-gray-500">
+                            Customers with 4-5 star ratings will be redirected to leave a Google review
+                        </p>
                      </div>
 
                      <!-- Timing and Delay -->
@@ -192,11 +258,6 @@
                                 </div>
                             </label>
                         </div>
-                     </div>
-
-                     <!-- Timing and Delay -->
-                     <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-6 transition-all duration-300">
-                        <!-- ... (Timing Code from before) ... -->
                      </div>
 
                      <!-- Rewards Section -->
@@ -712,6 +773,9 @@ import DateRangePicker from '@/Components/DateRangePicker.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
+import { useFeatures } from '@/Composables/useFeatures';
+
+const { hasFeature } = useFeatures();
 
 const props = defineProps({
     balances: {
@@ -821,7 +885,8 @@ const feedbackForm = useForm({
     timing_mode: 'immediately', 
     timing_val: 1,
     timing_unit: 'hours',
-    feedback_points: null as number | null
+    feedback_points: null as number | null,
+    google_review_link: ''
 });
 
 // Initialize form from existing template
@@ -836,6 +901,7 @@ watch(() => props.templates, (newTemplates) => {
         feedbackForm.min_order_amount = existing.conditions?.min_order_amount || null;
         feedbackForm.min_orders_count = existing.conditions?.min_orders_count || null;
         feedbackForm.feedback_points = existing.conditions?.feedback_points || null;
+        feedbackForm.google_review_link = existing.conditions?.google_review_link || '';
 
         // Load Timing
         if (existing.timing_type === 'custom_delay' && existing.conditions?.delay_unit) {
@@ -884,7 +950,8 @@ const saveFeedbackSettings = () => {
             min_orders_count: feedbackForm.min_orders_count,
             feedback_points: feedbackForm.feedback_points,
             delay_val: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_val : null,
-            delay_unit: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_unit : null
+            delay_unit: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_unit : null,
+            google_review_link: feedbackForm.google_review_link
         }
     };
 

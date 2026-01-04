@@ -1,0 +1,83 @@
+[
+    {
+        "slug": "basic",
+        "name": "Basic",
+        "price_monthly": {
+            "$numberDecimal": "99.00"
+        },
+        "price_yearly": {
+            "$numberDecimal": "990.00"
+        },
+        "currency": "AED",
+        "features": "[\"1 restaurant\",\"Up to 5 staff members\",\"Basic menu management\",\"Order tracking\",\"Kitchen Display System (KDS)\",\"Email support\"]",
+        "is_active": true,
+        "updated_at": "2026-01-04T19:40:39.574000Z",
+        "created_at": "2025-12-19T16:11:29.520000Z",
+        "enabled_features": [
+            "pos",
+            "kds"
+        ],
+        "id": {
+            "$oid": "6945793119aaa592e0054aa2"
+        }
+    },
+    {
+        "slug": "pro",
+        "name": "Pro",
+        "price_monthly": {
+            "$numberDecimal": "299.00"
+        },
+        "price_yearly": {
+            "$numberDecimal": "2990.00"
+        },
+        "currency": "AED",
+        "features": "[\"3 restaurants\",\"Unlimited staff members\",\"Advanced menu management\",\"Real-time order tracking\",\"Kitchen Display System (KDS)\",\"QR Code Ordering\",\"Analytics & reports\",\"Priority support\"]",
+        "is_active": true,
+        "updated_at": "2026-01-04T19:40:39.576000Z",
+        "created_at": "2025-12-19T16:11:29.522000Z",
+        "enabled_features": [
+            "pos",
+            "inventory",
+            "loyalty",
+            "analytics",
+            "kds",
+            "qr_ordering"
+        ],
+        "id": {
+            "$oid": "6945793119aaa592e0054aa3"
+        }
+    },
+    {
+        "slug": "enterprise",
+        "name": "Enterprise",
+        "price_monthly": {
+            "$numberDecimal": "799.00"
+        },
+        "price_yearly": {
+            "$numberDecimal": "7990.00"
+        },
+        "currency": "AED",
+        "features": "[\"Unlimited restaurants\",\"Unlimited staff members\",\"Advanced menu management\",\"Real-time order tracking\",\"Kitchen Display System (KDS)\",\"QR Code Ordering\",\"Advanced analytics & reports\",\"API access\",\"Custom integrations\",\"Dedicated support\"]",
+        "is_active": true,
+        "updated_at": "2026-01-04T19:40:39.577000Z",
+        "created_at": "2025-12-19T16:11:29.522000Z",
+        "description": null,
+        "max_orders_per_month": 2,
+        "max_restaurants": 2,
+        "max_users": 2,
+        "enabled_features": [
+            "pos",
+            "inventory",
+            "loyalty",
+            "analytics",
+            "marketing",
+            "feedback",
+            "delivery",
+            "kds",
+            "qr_ordering"
+        ],
+        "id": {
+            "$oid": "6945793119aaa592e0054aa4"
+        }
+    }
+]

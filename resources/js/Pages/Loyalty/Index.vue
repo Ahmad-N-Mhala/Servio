@@ -239,7 +239,7 @@
                                     {{ currency }} {{ customer.total_spent || '0.00' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button class="text-primary hover:text-primary-hover">View Details</button>
+                                    <Link :href="route('loyalty.customers.show', customer.id)" class="text-primary hover:text-primary-hover font-bold">View Details</Link>
                                 </td>
                             </tr>
                         </tbody>

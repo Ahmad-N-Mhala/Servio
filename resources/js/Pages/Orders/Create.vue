@@ -112,7 +112,7 @@
                     </h3>
                     <div class="flex gap-4 mb-6">
                         <label class="flex-1 cursor-pointer group">
-                            <input type="radio" v-model="form.type" value="dine_in" class="peer sr-only">
+                            <input type="radio" v-model="form.type" value="dine_in" class="peer sr-only" />
                             <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
                                 <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.704 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
@@ -121,7 +121,7 @@
                             </div>
                         </label>
                         <label class="flex-1 cursor-pointer group">
-                            <input type="radio" v-model="form.type" value="takeaway" class="peer sr-only">
+                            <input type="radio" v-model="form.type" value="takeaway" class="peer sr-only" />
                             <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
                                 <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -394,12 +394,73 @@
                             <span>{{ currencyCode }} {{ total.toFixed(2) }}</span>
                         </div>
                         
-                        <!-- Points to be used -->
-                        <div v-if="selectedReward" class="mt-3 p-3 bg-purple-50 rounded-xl">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-purple-700">Points to redeem:</span>
-                                <span class="font-bold text-purple-700">{{ selectedReward.points_required }} points</span>
+
+
+                        <!-- OTP Verification Section (Inline) -->
+                        <div v-if="selectedReward && !otpVerified" class="mt-4 p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
+                            <div class="flex flex-col gap-3">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-bold text-gray-700">Verify Redemption</label>
+                                    <span class="text-xs text-gray-500">Code sent to {{ selectedCustomer?.phone }}</span>
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <input 
+                                        v-model="otpInput"
+                                        type="text" 
+                                        maxlength="6"
+                                        placeholder="Enter 6-digit OTP"
+                                        class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-center font-mono tracking-widest uppercase transition-colors"
+                                        :class="{'border-red-500 bg-red-50': otpError}"
+                                        @input="otpError = ''"
+                                    />
+                                    <Button 
+                                        type="button" 
+                                        v-if="(!otpSent && otpTimer === 0) && otpInput.length < 6"
+                                        size="sm"
+                                        @click="requestOtp"
+                                    >
+                                        Send Code
+                                    </Button>
+                                    <Button 
+                                        type="button" 
+                                        v-else
+                                        size="sm" 
+                                        @click="verifyOtp"
+                                        :disabled="otpInput.length !== 6"
+                                    >
+                                        Verify
+                                    </Button>
+                                </div>
+
+                                <div v-if="otpError" class="text-xs text-red-600 font-bold flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    {{ otpError }}
+                                </div>
+
+                                <div v-if="otpSent || otpTimer > 0" class="flex justify-between items-center text-xs">
+                                    <span v-if="otpSent" class="text-green-600">OTP Sent!</span>
+                                    <button 
+                                        type="button" 
+                                        @click="requestOtp" 
+                                        :disabled="otpTimer > 0"
+                                        class="text-purple-600 font-medium hover:underline disabled:text-gray-400 disabled:no-underline"
+                                    >
+                                        {{ otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend Code' }}
+                                    </button>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- OTP Success State -->
+                        <div v-if="selectedReward && otpVerified" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-sm font-bold text-green-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                Reward Verified
+                            </span>
+                            <button @click="otpVerified = false; form.otp = ''; otpInput = ''" class="text-xs text-gray-500 underline hover:text-red-500">
+                                Change
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -465,6 +526,8 @@
                 </div>
             </div>
         </Modal>
+
+
     </MainLayout>
 </template>
 
@@ -589,7 +652,8 @@ const form = useForm({
     tax: 0,
     total: 0,
     notes: '',
-    reward_id: null as number | null
+    reward_id: null as number | null,
+    otp: ''
 });
 
 // Handle phone input
@@ -608,6 +672,62 @@ const handlePhoneInput = (e: Event) => {
         form.customer_phone = '';
     }
 };
+
+// OTP State
+const otpInput = ref('');
+const otpSent = ref(false);
+const otpTimer = ref(0);
+let timerInterval: any = null;
+
+const otpVerified = ref(false);
+const otpError = ref('');
+
+const requestOtp = async () => {
+    if (!selectedCustomer.value) return;
+    
+    try {
+        otpError.value = '';
+        await (window as any).axios.post(route('loyalty.customers.request-otp', selectedCustomer.value.id));
+        otpSent.value = true;
+        startOtpTimer();
+    } catch (error: any) {
+        console.error('Failed to send OTP', error);
+        const msg = error.response?.data?.message || 'Failed to send OTP. Please try again.';
+        otpError.value = msg;
+        otpSent.value = false;
+    }
+};
+
+const verifyOtp = async () => {
+    if (!selectedCustomer.value || otpInput.value.length !== 6) return;
+    
+    try {
+        otpError.value = '';
+        await (window as any).axios.post(route('loyalty.customers.verify-otp-only', selectedCustomer.value.id), {
+            otp: otpInput.value
+        });
+        otpVerified.value = true;
+        form.otp = otpInput.value;
+    } catch (error: any) {
+        console.error('OTP Verification Failed', error);
+        otpVerified.value = false;
+        otpError.value = error.response?.data?.message || 'Invalid OTP';
+    }
+};
+
+const startOtpTimer = () => {
+    otpTimer.value = 60; 
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        otpTimer.value--;
+        if (otpTimer.value <= 0) {
+            clearInterval(timerInterval);
+        }
+    }, 1000);
+};
+
+
 
 // Customer lookup
 const lookupCustomer = () => {
@@ -801,6 +921,15 @@ const toggleReward = (reward: Reward) => {
         selectedReward.value = null;
     } else {
         selectedReward.value = reward;
+        otpVerified.value = false;
+        otpSent.value = false;
+        otpInput.value = '';
+        otpError.value = '';
+        
+        // Auto-request OTP when reward is selected (optional, or wait for use to click send)
+        // Ensure user is ready
+        // Removed auto-request to allow user to click Send Code manually
+
 
         // Auto-add free item if not in cart
         if (reward.reward_type === 'free_item') {
@@ -928,6 +1057,19 @@ const saveNotes = () => {
 };
 
 const createOrder = () => {
+    // Check for Reward OTP requirement
+    if (selectedReward.value) {
+        if (!otpVerified.value) {
+            alert('Please verify the Loyalty Reward OTP before satisfying the order.');
+            // Scroll to OTP section?
+            return;
+        }
+    }
+
+    submitOrder();
+};
+
+const submitOrder = () => {
     form.items = cart.value.map(item => ({
         menu_item_id: item.id,
         quantity: item.qty,
@@ -949,6 +1091,10 @@ const createOrder = () => {
             selectedReward.value = null;
             selectedCustomer.value = null;
             phoneInput.value = '';
+            otpInput.value = '';
+            otpSent.value = false;
+            otpVerified.value = false;
+            otpError.value = '';
             form.reset();
         }
     });
