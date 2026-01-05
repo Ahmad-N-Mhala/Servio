@@ -494,7 +494,7 @@ const handleUnsplashSelect = async (image: any) => {
                     />
                 </div>
                 <div class="flex justify-end gap-3">
-                    <Button variant="secondary" @click="showCropper = false">Cancel</Button>
+                    <Button variant="secondary" @click="showCropper = false">{{ $t('common.cancel') }}</Button>
                     <Button @click="saveCrop">Confirm & Use</Button>
                 </div>
             </div>

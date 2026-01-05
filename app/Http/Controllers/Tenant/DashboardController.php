@@ -972,6 +972,127 @@ class DashboardController extends Controller
                     ];
                 })->values();
                 break;
+
+            case 'payment_method_slice':
+                $method = $request->input('method');
+                // Reverse map the display method back to key if needed, or send key from frontend
+                // Assuming frontend sends the key (e.g. 'cash', 'card', 'online')
+                // But wait, the chart uses the grouped names.
+                // Let's assume we pass the raw db value from frontend if possible, or fuzzy match.
+                // Actually the chart `initPaymentChart` uses `paymentDistribution` values which have `method` property which is `ucwords(...)`.
+                // Better to make sure we query somewhat loosely or update frontend to send raw key.
+                // For now, let's try to match case-insensitive or expect mapped value.
+                // Ideally, we'd store raw key in chart data and use it.
+                // Let's assume frontend sends something we can query.
+
+                // If the frontend sends "Cash", we search for "cash" etc.
+                $searchMethod = strtolower(str_replace(' ', '_', $method));
+
+                $title = "Orders Paid via " . ucfirst($method);
+                $columns = [
+                    ['key' => 'order_number', 'label' => 'Order #'],
+                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
+                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
+                ];
+
+                $data = Order::where('restaurant_id', $restaurant->id)
+                    ->where('status', 'completed')
+                    ->where('payment_method', $searchMethod)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->orderByDesc('created_at')
+                    ->limit(50)
+                    ->get()
+                    ->map(function ($order) {
+                        return [
+                            'order_number' => $order->order_number,
+                            'total' => $order->total,
+                            'created_at' => $order->created_at->toIso8601String(),
+                        ];
+                    });
+                break;
+
+            case 'peak_hour_slice':
+                $hour = (int) $request->input('hour');
+                $title = "Orders at " . sprintf('%02d:00', $hour);
+                $columns = [
+                    ['key' => 'order_number', 'label' => 'Order #'],
+                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
+                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
+                ];
+
+                // Filter by hour. MongoDB aggregation or simple collection filter?
+                // Order::whereRaw check? MongoDB extraction in where is tricky in Eloquent without raw.
+                // Let's fetch ranges or use whereTime if supported (whereTime usually for time component).
+                // Or filter in memory since we have date range.
+                // Ideally:
+                // $query->where(function($q) use ($hour) { ... })
+                // actually whereTime works for specific time comparisons, not "hour part of any day".
+
+                // For MongoDB, we can use whereRaw with Mongo query syntax if needed, or just iterate.
+                // Given pagination limits, iterating might be slow if tons of orders.
+                // But for now, let's try a collection filter on the fetched range (which is limited by date).
+
+                $data = Order::where('restaurant_id', $restaurant->id)
+                    ->where('status', '!=', 'deleted')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get() // Pull into memory (careful with memory)
+                    ->filter(function ($order) use ($hour) {
+                        return $order->created_at->hour === $hour;
+                    })
+                    ->sortByDesc('created_at')
+                    ->take(50)
+                    ->map(function ($order) {
+                        return [
+                            'order_number' => $order->order_number,
+                            'total' => $order->total,
+                            'created_at' => $order->created_at->toIso8601String(),
+                        ];
+                    })
+                    ->values(); // reset keys
+                break;
+
+            case 'waste_chart_point':
+                $date = $request->input('date');
+                $title = "Waste for " . $date;
+                $columns = [
+                    ['key' => 'item_name', 'label' => 'Item'], // Ingredient or Menu Item
+                    ['key' => 'quantity', 'label' => 'Qty'],
+                    ['key' => 'loss', 'label' => 'Loss', 'format' => 'currency'],
+                    ['key' => 'reason', 'label' => 'Reason'],
+                    ['key' => 'time', 'label' => 'Time', 'format' => 'datetime']
+                ];
+
+                $start = Carbon::parse($date)->startOfDay();
+                $end = Carbon::parse($date)->endOfDay();
+
+                $data = WasteLog::where('restaurant_id', $restaurant->id)
+                    ->whereBetween('log_date', [$start, $end])
+                    ->get()
+                    ->map(function ($log) {
+                        // Resolve name
+                        $name = 'Unknown';
+                        if ($log->wasteable_type === 'App\Models\Ingredient') {
+                            $ing = Ingredient::find($log->wasteable_id);
+                            $name = $ing ? $ing->name : 'Deleted Ingredient';
+                        } elseif ($log->wasteable_type === 'App\Models\MenuItem') {
+                            $item = \App\Models\MenuItem::find($log->wasteable_id);
+                            $name = $item ? $item->name : 'Deleted Item';
+                        }
+
+                        if (is_string($name) && str_starts_with($name, '{')) {
+                            $decoded = json_decode($name, true);
+                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                        }
+
+                        return [
+                            'item_name' => $name,
+                            'quantity' => $log->quantity . ' ' . $log->unit,
+                            'loss' => $log->total_loss,
+                            'reason' => $log->reason,
+                            'time' => $log->created_at->toIso8601String()
+                        ];
+                    });
+                break;
         }
 
         return response()->json([

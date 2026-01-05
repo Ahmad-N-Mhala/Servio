@@ -24,7 +24,8 @@ Route::group([
         Route::post('/history', [\App\Http\Controllers\Tenant\PublicLoyaltyController::class, 'getHistory'])->name('history');
     });
 
-    // Delivery Webhooks
-    Route::post('/webhook/delivery/{provider}', [\App\Http\Controllers\DeliveryWebhookController::class, 'handle'])->name('api.webhook.delivery');
 });
+
+// Delivery Webhooks (Centralized)
+Route::post('/webhook/delivery/{provider}', [\App\Http\Controllers\DeliveryWebhookController::class, 'handle'])->name('api.webhook.delivery');
 

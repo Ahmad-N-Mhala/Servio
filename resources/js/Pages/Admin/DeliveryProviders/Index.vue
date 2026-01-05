@@ -49,7 +49,7 @@
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-blue-100 text-sm font-medium">Total Providers</p>
+                                <p class="text-blue-100 text-sm font-medium">{{ $t('common.total') }} Providers</p>
                                 <p class="text-3xl font-bold mt-2">{{ stats?.total_providers || 0 }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
@@ -77,7 +77,7 @@
                     <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-purple-100 text-sm font-medium">Total Integrations</p>
+                                <p class="text-purple-100 text-sm font-medium">{{ $t('common.total') }} Integrations</p>
                                 <p class="text-3xl font-bold mt-2">{{ totalIntegrations }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
@@ -153,9 +153,7 @@
                                 <Link 
                                     :href="route('admin.delivery-providers.edit', provider.id)"
                                     class="flex-1 text-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm"
-                                >
-                                    Edit
-                                </Link>
+                                >{{ $t('common.edit') }}</Link>
                                 <button 
                                     @click="toggleStatus(provider.id)"
                                     class="flex-1 px-4 py-2 rounded-lg transition-colors font-medium text-sm"
@@ -170,9 +168,7 @@
                                     class="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
                                     :disabled="provider.integrations_count > 0"
                                     :class="{ 'opacity-50 cursor-not-allowed': provider.integrations_count > 0 }"
-                                >
-                                    Delete
-                                </button>
+                                >{{ $t('common.delete') }}</button>
                             </div>
                         </div>
                     </div>

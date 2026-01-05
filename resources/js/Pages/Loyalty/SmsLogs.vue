@@ -4,12 +4,12 @@
             <!-- Header -->
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">SMS & OTP Logs</h1>
-                    <p class="mt-1 text-sm text-gray-500">Track all loyalty verification messages and SMS history</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('loyalty.sms_logs') || 'SMS & OTP Logs' }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ $t('loyalty.sms_description') || 'Track all loyalty verification messages and SMS history' }}</p>
                 </div>
                 <div class="flex gap-3">
                     <Link :href="route('loyalty.index')" class="btn-secondary">
-                        Back to Loyalty
+                        {{ $t('common.back') }}
                     </Link>
                 </div>
             </div>
@@ -17,18 +17,18 @@
             <!-- Logs Table -->
             <div class="glass-card rounded-2xl overflow-hidden shadow-sm border border-gray-100">
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/30">
-                    <h2 class="text-lg font-bold text-gray-900 font-display">Communication History</h2>
+                    <h2 class="text-lg font-bold text-gray-900 font-display">{{ $t('loyalty.comm_history') || 'Communication History' }}</h2>
                 </div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Recipient</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Message Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Content</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sent At</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('loyalty.recipient') || 'Recipient' }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('loyalty.msg_type') || 'Message Type' }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('loyalty.content') || 'Content' }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('common.status') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ $t('common.sent_at') || 'Sent At' }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -62,7 +62,7 @@
                                             'bg-yellow-100 text-yellow-800': log.status === 'pending'
                                         }"
                                     >
-                                        {{ log.status.toUpperCase() }}
+                                        {{ $t('common.' + log.status) || log.status.toUpperCase() }}
                                         <div v-if="log.status === 'failed' && log.error_message" 
                                              class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg hidden group-hover/tooltip:block z-50 text-center">
                                             {{ log.error_message }}
@@ -76,7 +76,7 @@
                             </tr>
                             <tr v-if="logs.data.length === 0">
                                 <td colspan="5" class="px-6 py-12 text-center text-gray-500 italic">
-                                    No SMS logs found.
+                                    {{ $t('charts.no_data') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -93,8 +93,11 @@
 
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
+
+const { locale } = useI18n();
 
 const props = defineProps<{
     logs: any;
@@ -104,7 +107,7 @@ const formatDateTime = (dateString: string) => {
     if (!dateString) return '-';
     try {
         const date = new Date(dateString);
-        return date.toLocaleString('en-US', {
+        return date.toLocaleString(locale.value === 'ar' ? 'ar-AE' : 'en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric',

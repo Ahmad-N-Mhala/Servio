@@ -51,7 +51,6 @@
                                         <div v-if="form.errors.logo" class="text-red-500 text-xs mt-1">{{ form.errors.logo }}</div>
                                     </div>
                                 </div>
-                            </div>
 
                             <!-- Service Type -->
                             <div class="pt-2">
@@ -216,7 +215,7 @@
                             </div>    
 
                             <div class="flex items-center justify-end pt-4">
-                                <Link :href="route('admin.restaurants.index')" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</Link>
+                                <Link :href="route('admin.restaurants.index')" class="text-gray-600 hover:text-gray-900 mr-4">{{ $t('common.cancel') }}</Link>
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">
                                     Create Restaurant
                                 </button>

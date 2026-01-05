@@ -42,15 +42,13 @@
                         <div class="mb-6">
                             <label class="flex items-center">
                                 <input v-model="form.is_enabled" type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="ml-2 text-sm text-gray-700">Active</span>
+                                <span class="ml-2 text-sm text-gray-700">{{ $t('common.active') }}</span>
                             </label>
                         </div>
 
                         <!-- Actions -->
                         <div class="flex justify-end gap-3">
-                            <Link :href="route('admin.integrations.index')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                                Cancel
-                            </Link>
+                            <Link :href="route('admin.integrations.index')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">{{ $t('common.cancel') }}</Link>
                             <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50">
                                 Update Integration
                             </button>

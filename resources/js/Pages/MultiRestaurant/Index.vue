@@ -145,13 +145,9 @@
                             </button>
 
                              <div v-if="restaurant.is_active" class="flex items-center text-emerald-600 text-xs sm:text-sm font-bold">
-                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
-                                Active
-                            </div>
+                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>{{ $t('common.active') }}</div>
                             <div v-else class="flex items-center text-red-600 text-xs sm:text-sm font-bold">
-                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full mr-1.5"></span>
-                                Inactive
-                            </div>
+                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full mr-1.5"></span>{{ $t('common.inactive') }}</div>
                         </div>
                     </div>
                 </div>

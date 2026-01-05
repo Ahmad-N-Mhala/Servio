@@ -4,7 +4,7 @@
             <!-- Stats Card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div class="glass-card rounded-2xl p-6 card-hover">
-                     <p class="text-sm font-medium text-gray-500">Total Loss Today</p>
+                     <p class="text-sm font-medium text-gray-500">{{ $t('common.total') }} Loss Today</p>
                      <p class="text-2xl font-bold text-red-600 mt-1">{{ formatCurrency(totalLoss) }}</p>
                  </div>
                  <div class="glass-card rounded-2xl p-6 card-hover">
@@ -69,19 +69,13 @@
                     <span v-if="row.deleted_at" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         Deleted
                     </span>
-                    <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Active
-                    </span>
+                    <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ $t('common.active') }}</span>
                 </template>
 
                 <template #actions="{ row }">
                     <div class="flex justify-end gap-2" v-if="!row.deleted_at">
-                        <Button size="sm" variant="secondary" @click="openUpdateModal(row)">
-                            Edit
-                        </Button>
-                        <Button size="sm" variant="danger" @click="deleteLog(row)">
-                            Delete
-                        </Button>
+                        <Button size="sm" variant="secondary" @click="openUpdateModal(row)">{{ $t('common.edit') }}</Button>
+                        <Button size="sm" variant="danger" @click="deleteLog(row)">{{ $t('common.delete') }}</Button>
                     </div>
                     <div class="flex justify-end gap-2" v-else>
                          <Button size="sm" variant="primary" @click="restoreLog(row)">
@@ -141,7 +135,7 @@
                     rows="2"
                 />
                 <div class="flex justify-end gap-3 mt-6">
-                    <Button type="button" variant="secondary" @click="closeAddModal">Cancel</Button>
+                    <Button type="button" variant="secondary" @click="closeAddModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" :loading="addForm.processing" variant="danger">Log Waste</Button>
                 </div>
             </form>
@@ -165,8 +159,8 @@
                 />
 
                 <div class="flex justify-end gap-3 mt-6">
-                    <Button type="button" variant="secondary" @click="closeUpdateModal">Cancel</Button>
-                    <Button type="submit" :loading="updateForm.processing" variant="primary">Update</Button>
+                    <Button type="button" variant="secondary" @click="closeUpdateModal">{{ $t('common.cancel') }}</Button>
+                    <Button type="submit" :loading="updateForm.processing" variant="primary">{{ $t('common.update') }}</Button>
                 </div>
             </form>
         </Modal>
@@ -212,7 +206,7 @@ const search = ref('');
 const getLocaleName = (name: any) => {
     if (!name) return '';
     if (typeof name === 'string') return name;
-    return name[locale.value] || name['en'] || 'Unknown';
+    return name[locale.value] || name[$i18n.locale] || 'Unknown';
 };
 
 const formatCurrency = (amount: any) => {

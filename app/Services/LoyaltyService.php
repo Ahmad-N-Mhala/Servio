@@ -171,35 +171,52 @@ class LoyaltyService
             'type' => 'redemption',
         ]);
 
-        // Send SMS via mock/log
-        try {
-            // Check if SMS provider is configured
-            // Real-world check: Check for API Key in .env or config
-            $apiKey = env('SMS_PROVIDER_KEY');
+        // Determine Driver
+        $driver = config('services.sms.driver', 'log');
 
-            if (empty($apiKey)) {
-                // Simulate Success for Testing/Demo when no provider is configured
+        try {
+            // If driver is 'log', we simulate success (Demo Mode)
+            if ($driver === 'log') {
                 \Illuminate\Support\Facades\Log::info("SIMULATED SMS to {$customer->phone}: OTP {$otpCode}");
 
-                // Log as 'sent' so the logs look correct in UI, but append (Simulated)
                 \App\Models\CommunicationLog::create([
                     'restaurant_id' => $customer->restaurant_id,
                     'recipient' => $customer->phone,
                     'type' => 'sms',
                     'status' => 'sent',
-                    'message' => "OTP for redemption: {$otpCode} (Simulated - No Provider Configured)",
+                    'message' => "OTP for redemption: {$otpCode} (Simulated - Log Driver)",
                     'sent_at' => now(),
                 ]);
 
                 return true;
             }
 
-            // If key exists, we proceed to mock send (or real send if implemented)
-            // app(SmsService::class)->send(...)
+            // Real Send Logic
+            $message = "Your Restrufy redemption code is: {$otpCode}. Valid for 10 minutes.";
+            $restaurant = \App\Models\Restaurant::find($customer->restaurant_id);
 
-            $this->sendSms($customer->phone, "Your Restrufy redemption code is: {$otpCode}. Valid for 10 minutes.");
+            // Check Balance
+            if ($restaurant && $restaurant->sms_balance <= 0) {
+                \Illuminate\Support\Facades\Log::warning("Restaurant {$restaurant->id} out of SMS credits.");
+                \App\Models\CommunicationLog::create([
+                    'restaurant_id' => $customer->restaurant_id,
+                    'recipient' => $customer->phone,
+                    'type' => 'sms',
+                    'status' => 'failed',
+                    'message' => "OTP for redemption: {$otpCode}",
+                    'error_message' => 'Insufficient SMS Balance',
+                    'sent_at' => now(),
+                ]);
+                return false;
+            }
 
-            // Log the SMS in CommunicationLog as SENT
+            $this->sendSms($driver, $customer->phone, $message);
+
+            if ($restaurant) {
+                $restaurant->decrement('sms_balance');
+            }
+
+            // Log Success
             \App\Models\CommunicationLog::create([
                 'restaurant_id' => $customer->restaurant_id,
                 'recipient' => $customer->phone,
@@ -212,7 +229,7 @@ class LoyaltyService
             return true;
 
         } catch (\Exception $e) {
-            // Log the SMS in CommunicationLog as FAILED
+            // Log Failure
             \App\Models\CommunicationLog::create([
                 'restaurant_id' => $customer->restaurant_id,
                 'recipient' => $customer->phone,
@@ -245,13 +262,90 @@ class LoyaltyService
         return false;
     }
 
-    protected function sendSms(string $phone, string $message): void
+    protected function sendSms(string $driver, string $to, string $message): void
     {
-        // Placeholder for SMS provider integration (e.g. Twilio, SMS.ae)
-        \Illuminate\Support\Facades\Log::info("SMS to {$phone}: {$message}");
+        switch ($driver) {
+            case 'twilio':
+                $this->sendViaTwilio($to, $message);
+                break;
+            case 'unifonic':
+                $this->sendViaUnifonic($to, $message);
+                break;
+            case 'sms_ae':
+                $this->sendViaSmsAe($to, $message);
+                break;
+            default:
+                // Fallback to log
+                \Illuminate\Support\Facades\Log::info("SMS (Log Driver) to {$to}: {$message}");
+                break;
+        }
+    }
 
-        // When integrating, you would call the SMS service here:
-        // app(SmsService::class)->send($phone, $message);
+    private function sendViaTwilio($to, $message)
+    {
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        $from = config('services.twilio.from');
+
+        if (!$sid || !$token || !$from) {
+            throw new \Exception("Twilio credentials missing");
+        }
+
+        $response = \Illuminate\Support\Facades\Http::asForm()
+            ->withBasicAuth($sid, $token)
+            ->post("https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json", [
+                'To' => $to,
+                'From' => $from,
+                'Body' => $message,
+            ]);
+
+        if (!$response->successful()) {
+            throw new \Exception("Twilio Error: " . $response->body());
+        }
+    }
+
+    private function sendViaUnifonic($to, $message)
+    {
+        $apiKey = config('services.unifonic.api_key');
+        $senderId = config('services.unifonic.sender_id');
+
+        if (!$apiKey) {
+            throw new \Exception("Unifonic API Key missing");
+        }
+
+        $response = \Illuminate\Support\Facades\Http::post("https://el.cloud.unifonic.com/rest/SMS/Messages", [
+            'AppSid' => $apiKey,
+            'SenderID' => $senderId,
+            'Recipient' => $to,
+            'Body' => $message,
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception("Unifonic Error: " . $response->body());
+        }
+    }
+
+    private function sendViaSmsAe($to, $message)
+    {
+        $user = config('services.sms_ae.username');
+        $pass = config('services.sms_ae.password');
+        $sender = config('services.sms_ae.sender_id');
+
+        if (!$user || !$pass) {
+            throw new \Exception("SMS.ae credentials missing");
+        }
+
+        $response = \Illuminate\Support\Facades\Http::get("https://www.sms.ae/api/http/send.aspx", [
+            'username' => $user,
+            'password' => $pass,
+            'recipient' => $to,
+            'sender' => $sender,
+            'message' => $message,
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception("SMS.ae Error: " . $response->body());
+        }
     }
 
     public function getCustomerByPhone(Restaurant $restaurant, string $phone): ?Customer

@@ -1,0 +1,74 @@
+[
+    {
+        "category": "Rent",
+        "description": null,
+        "amount": {
+            "$numberDecimal": "200.00"
+        },
+        "month": "2025-09",
+        "payment_status": "paid",
+        "paid_at": null,
+        "notes": null,
+        "restaurant_id": "694579e833231912b007b6c3",
+        "created_by": "694579e733231912b007b6c2",
+        "updated_at": "2025-12-19T17:38:10.867000Z",
+        "created_at": "2025-12-19T17:38:05.253000Z",
+        "id": {
+            "$oid": "69458d7d2d33b6a8db028aa3"
+        }
+    },
+    {
+        "category": "Rent",
+        "description": "ds",
+        "amount": {
+            "$numberDecimal": "5000.00"
+        },
+        "month": "2025-12",
+        "payment_status": "pending",
+        "paid_at": null,
+        "notes": "ds",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "created_by": "694579e733231912b007b6c2",
+        "updated_at": "2025-12-19T17:39:46.603000Z",
+        "created_at": "2025-12-19T17:39:10.919000Z",
+        "id": {
+            "$oid": "69458dbe2d33b6a8db028aa4"
+        }
+    },
+    {
+        "category": "Salaries",
+        "description": null,
+        "amount": {
+            "$numberDecimal": "7000.00"
+        },
+        "month": "2025-12",
+        "payment_status": "pending",
+        "paid_at": null,
+        "notes": null,
+        "restaurant_id": "694579e833231912b007b6c3",
+        "created_by": "694579e733231912b007b6c2",
+        "updated_at": "2025-12-19T17:39:20.032000Z",
+        "created_at": "2025-12-19T17:39:20.032000Z",
+        "id": {
+            "$oid": "69458dc82d33b6a8db028aa5"
+        }
+    },
+    {
+        "category": "Utilities",
+        "description": null,
+        "amount": {
+            "$numberDecimal": "3000.00"
+        },
+        "month": "2025-12",
+        "payment_status": "pending",
+        "paid_at": null,
+        "notes": null,
+        "restaurant_id": "694579e833231912b007b6c3",
+        "created_by": "694579e733231912b007b6c2",
+        "updated_at": "2025-12-19T17:39:27.999000Z",
+        "created_at": "2025-12-19T17:39:27.999000Z",
+        "id": {
+            "$oid": "69458dcf2d33b6a8db028aa6"
+        }
+    }
+]

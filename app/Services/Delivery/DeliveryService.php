@@ -17,7 +17,9 @@ class DeliveryService
             'noon' => new NoonProvider(),
             'talabat' => new TalabatProvider(),
             'keeta' => new KeetaProvider(),
-            default => new NoonProvider(), // Fallback to a generic structure (Noon is quite standard)
+            'uber_eats' => new \App\Services\Delivery\Providers\UberEatsProvider(),
+            'careem' => new \App\Services\Delivery\Providers\CareemProvider(),
+            default => new NoonProvider(), // Fallback
         };
     }
 }

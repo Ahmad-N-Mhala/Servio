@@ -59,12 +59,8 @@
                     </div>
                     
                     <div class="flex items-center gap-3 pt-4 border-t border-gray-50 mt-auto">
-                        <Link :href="route('admin.plans.edit', plan.id)" class="flex-1 bg-gray-50 text-gray-700 hover:bg-gray-100 py-2 rounded-lg text-sm font-semibold transition-colors text-center">
-                            Edit
-                        </Link>
-                        <button @click="deletePlan(plan)" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-sm font-semibold transition-colors">
-                            Delete
-                        </button>
+                        <Link :href="route('admin.plans.edit', plan.id)" class="flex-1 bg-gray-50 text-gray-700 hover:bg-gray-100 py-2 rounded-lg text-sm font-semibold transition-colors text-center">{{ $t('common.edit') }}</Link>
+                        <button @click="deletePlan(plan)" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-sm font-semibold transition-colors">{{ $t('common.delete') }}</button>
                     </div>
                 </div>
             </div>
@@ -93,7 +89,7 @@
                     </div>
 
                     <div v-if="selectedPlan.description">
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">Description</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $t('common.description') }}</h3>
                         <p class="text-gray-600">{{ selectedPlan.description }}</p>
                     </div>
 
@@ -111,7 +107,7 @@
                 </div>
 
                 <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
-                    <button @click="closePlanModal" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">Close</button>
+                    <button @click="closePlanModal" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors">{{ $t('common.close') }}</button>
                     <Link :href="route('admin.plans.edit', selectedPlan.id)" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover shadow-lg shadow-primary/30 transition-colors">
                         Edit Plan
                     </Link>

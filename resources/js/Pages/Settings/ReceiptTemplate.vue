@@ -3,8 +3,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">POS Receipt Template</h1>
-                <p class="mt-2 text-sm text-gray-600">Customize your receipt layout and content for POS printing</p>
+                <h1 class="text-3xl font-bold text-gray-900">{{ $t('receipt.title') }}</h1>
+                <p class="mt-2 text-sm text-gray-600">{{ $t('receipt.subtitle') }}</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -18,34 +18,34 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            Header Section
+                            {{ $t('receipt.header_section') }}
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="flex items-center gap-2 mb-2">
                                     <input type="checkbox" v-model="form.show_logo" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                    <span class="text-sm font-medium text-gray-700">Show Restaurant Logo</span>
+                                    <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_logo') }}</span>
                                 </label>
                             </div>
 
                             <div>
                                 <label class="flex items-center gap-2 mb-2">
                                     <input type="checkbox" v-model="form.show_restaurant_name" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                    <span class="text-sm font-medium text-gray-700">Show Restaurant Name</span>
+                                    <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_name') }}</span>
                                 </label>
                             </div>
 
                             <Input 
                                 v-model="form.header_text"
-                                label="Custom Header Text"
+                                :label="$t('receipt.header_text')"
                                 type="textarea"
                                 rows="2"
-                                placeholder="e.g., Thank you for dining with us!"
+                                :placeholder="$t('receipt.header_placeholder') || 'e.g., Thank you for dining with us!'"
                             />
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Header Alignment</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.alignment') }}</label>
                                 <select v-model="form.header_alignment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                                     <option value="left">Left</option>
                                     <option value="center">Center</option>
@@ -63,33 +63,33 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </div>
-                            Order Information
+                            {{ $t('receipt.order_info') }}
                         </h3>
                         
                         <div class="space-y-3">
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_order_number" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Transaction Number</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_transaction_no') || 'Show Transaction Number' }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_date_time" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Date & Time</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_date_time') || 'Show Date & Time' }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_table_number" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Table Number</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_table_no') || 'Show Table Number' }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_customer_name" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Customer Name</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_customer_name') || 'Show Customer Name' }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_server_name" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Server Name</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_server_name') || 'Show Server Name' }}</span>
                             </label>
                         </div>
                     </div>
@@ -102,17 +102,17 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                             </div>
-                            Items Display
+                            {{ $t('receipt.items_display') }}
                         </h3>
                         
                         <div class="space-y-3">
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_item_notes" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Item Notes</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_item_notes') }}</span>
                             </label>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Item Name Width</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.item_name_width') }}</label>
                                 <select v-model="form.item_name_width" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                                     <option value="50">50%</option>
                                     <option value="60">60%</option>
@@ -130,28 +130,28 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            Totals & Payment
+                            {{ $t('receipt.totals_payment') }}
                         </h3>
                         
                         <div class="space-y-3">
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_subtotal" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Subtotal</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_subtotal') }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_tax" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Tax</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_tax') }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_discount" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Discount (if applied)</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_discount') }}</span>
                             </label>
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_payment_method" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show Payment Method</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_payment_method') }}</span>
                             </label>
                         </div>
                     </div>
@@ -164,37 +164,37 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                                 </svg>
                             </div>
-                            Footer Section
+                            {{ $t('receipt.footer_section') }}
                         </h3>
                         
                         <div class="space-y-4">
                             <Input 
                                 v-model="form.footer_text"
-                                label="Footer Message"
+                                :label="$t('receipt.footer_text') || 'Footer Message'"
                                 type="textarea"
                                 rows="3"
-                                placeholder="e.g., Thank you for your visit! Please come again."
+                                :placeholder="$t('receipt.footer_placeholder') || 'e.g., Thank you for your visit! Please come again.'"
                             />
 
                             <Input 
                                 v-model="form.contact_info"
-                                label="Contact Information"
+                                :label="$t('receipt.contact_info') || 'Contact Information'"
                                 type="textarea"
                                 rows="2"
-                                placeholder="e.g., Tel: +971 50 123 4567"
+                                :placeholder="$t('receipt.contact_placeholder') || 'e.g., Tel: +971 50 123 4567'"
                             />
 
                             <label class="flex items-center gap-2">
                                 <input type="checkbox" v-model="form.show_qr_code" class="rounded border-gray-300 text-primary focus:ring-primary">
-                                <span class="text-sm font-medium text-gray-700">Show QR Code (for feedback/review)</span>
+                                <span class="text-sm font-medium text-gray-700">{{ $t('receipt.show_qr_code') || 'Show QR Code (for feedback/review)' }}</span>
                             </label>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Footer Alignment</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.alignment') || 'Alignment' }}</label>
                                 <select v-model="form.footer_alignment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="left">Left</option>
-                                    <option value="center">Center</option>
-                                    <option value="right">Right</option>
+                                    <option value="left">{{ $t('pos.left') || 'Left' }}</option>
+                                    <option value="center">{{ $t('pos.center') || 'Center' }}</option>
+                                    <option value="right">{{ $t('pos.right') || 'Right' }}</option>
                                 </select>
                             </div>
                         </div>
@@ -202,33 +202,33 @@
 
                     <!-- Paper Size -->
                     <div class="glass-card rounded-2xl p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Receipt Settings</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('nav.settings') }}</h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <Input 
                                     v-model="form.next_order_number"
-                                    label="Start Transaction/Order Number From"
+                                    :label="$t('orders.order_no') + ' ' + $t('common.start_from')"
                                     type="number"
-                                    placeholder="e.g. 1001"
+                                    :placeholder="$t('common.example_short') + ' 1001'"
                                 />
-                                <p class="text-xs text-gray-500 mt-1">First order will use this number, then continue counting sequentially.</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $t('receipt.number_help') }}</p>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Paper Width</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.paper_width') || 'Paper Width' }}</label>
                                 <select v-model="form.paper_width" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="58">58mm (Small)</option>
-                                    <option value="80">80mm (Standard)</option>
+                                    <option value="58">58mm ({{ $t('common.small') }})</option>
+                                    <option value="80">80mm ({{ $t('common.medium') }})</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Font Size</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.font_size') || 'Font Size' }}</label>
                                 <select v-model="form.font_size" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="small">Small</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="large">Large</option>
+                                    <option value="small">{{ $t('common.small') || 'Small' }}</option>
+                                    <option value="medium">{{ $t('common.medium') || 'Medium' }}</option>
+                                    <option value="large">{{ $t('common.large') || 'Large' }}</option>
                                 </select>
                             </div>
                         </div>
@@ -241,14 +241,14 @@
                             :loading="form.processing"
                             class="flex-1"
                         >
-                            Save Template
+                            {{ $t('common.save') }}
                         </Button>
                         <Button 
                             @click="resetToDefault" 
                             variant="secondary"
                             :disabled="form.processing"
                         >
-                            Reset to Default
+                            {{ $t('receipt.reset') }}
                         </Button>
                     </div>
                 </div>
@@ -256,7 +256,7 @@
                 <!-- Right: Live Preview -->
                 <div class="lg:sticky lg:top-8 h-fit">
                     <div class="glass-card rounded-2xl p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Live Preview</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('receipt.preview') }}</h3>
                         
                         <div id="receipt-preview-container" class="bg-white border-2 border-gray-300 rounded-lg p-6 shadow-inner" :style="{ width: form.paper_width === '58' ? '220px' : '300px', margin: '0 auto' }">
                             <ReceiptPreview 
@@ -271,7 +271,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
-                                Test Print
+                                {{ $t('common.print') }} {{ $t('receipt.receipt') || 'Test Print' }}
                             </button>
                         </div>
                     </div>
@@ -283,10 +283,13 @@
 
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import ReceiptPreview from '@/Components/ReceiptPreview.vue';
+
+const { t } = useI18n();
 
 const route = (window as any).route;
 
@@ -299,7 +302,7 @@ const props = defineProps<{
 
 const form = useForm({
     // Transaction
-    next_order_number: props.next_order_number ?? null,
+    next_order_number: props.next_order_number ?? '',
 
     // Header
     show_logo: props.template?.show_logo ?? true,
@@ -344,7 +347,7 @@ const saveTemplate = () => {
 };
 
 const resetToDefault = () => {
-    if (confirm('Are you sure you want to reset to default template? This will discard all your customizations.')) {
+    if (confirm(t('common.confirm'))) {
         form.reset();
     }
 };

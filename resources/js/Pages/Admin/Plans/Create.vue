@@ -11,7 +11,7 @@
                         <form @submit.prevent="submit" class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
                                     <input v-model="form.name" type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                     <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
                                 </div>
@@ -24,7 +24,7 @@
                             </div>
                             
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                                <label for="description" class="block text-sm font-medium text-gray-700">{{ $t('common.description') }}</label>
                                 <textarea v-model="form.description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                                 <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
                             </div>
@@ -99,12 +99,12 @@
                             <div>
                                 <label class="flex items-center">
                                     <input type="checkbox" v-model="form.is_active" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-600">Active</span>
+                                    <span class="ml-2 text-sm text-gray-600">{{ $t('common.active') }}</span>
                                 </label>
                             </div>
 
                             <div class="flex items-center justify-end">
-                                <Link :href="route('admin.plans.index')" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</Link>
+                                <Link :href="route('admin.plans.index')" class="text-gray-600 hover:text-gray-900 mr-4">{{ $t('common.cancel') }}</Link>
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">
                                     Create Plan
                                 </button>

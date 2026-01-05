@@ -63,15 +63,11 @@
                         <button 
                             @click="openEditModal(row)"
                             class="text-primary hover:text-primary/80 text-xs font-medium px-2 py-1 rounded hover:bg-primary/5 transition-colors mr-2"
-                        >
-                            Edit
-                        </button>
+                        >{{ $t('common.edit') }}</button>
                         <button 
                             @click="deleteSubscription(row.id)"
                             class="text-red-600 hover:text-red-900 text-xs font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
-                        >
-                            Delete
-                        </button>
+                        >{{ $t('common.delete') }}</button>
                     </template>
                 </Table>
             </div>
@@ -137,9 +133,9 @@
 
                         <!-- Status -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.status') }}</label>
                             <select v-model="form.status" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="active">Active</option>
+                                <option value="active">{{ $t('common.active') }}</option>
                                 <option value="cancelled">Cancelled</option>
                                 <option value="expired">Expired</option>
                             </select>
@@ -148,9 +144,7 @@
 
                         <!-- Actions -->
                         <div class="flex justify-end gap-3">
-                            <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                                Cancel
-                            </button>
+                            <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">{{ $t('common.cancel') }}</button>
                             <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50">
                                 Update Subscription
                             </button>

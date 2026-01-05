@@ -11,7 +11,7 @@
                         <form @submit.prevent="submit" class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                    <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
                                     <input v-model="form.name" type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                     <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
                                 </div>
@@ -51,9 +51,9 @@
                                 </div>
                                 
                                 <div>
-                                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                    <label for="status" class="block text-sm font-medium text-gray-700">{{ $t('common.status') }}</label>
                                     <select v-model="form.status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                        <option value="active">Active</option>
+                                        <option value="active">{{ $t('common.active') }}</option>
                                         <option value="suspended">Suspended</option>
                                     </select>
                                     <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</div>
@@ -227,7 +227,7 @@
 
                                 <!-- Description -->
                                 <div class="mb-4">
-                                    <label for="method_description" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <label for="method_description" class="block text-sm font-medium text-gray-700">{{ $t('common.description') }}</label>
                                     <textarea 
                                         v-model="form.earning_method_description"
                                         id="method_description"
@@ -357,7 +357,7 @@
                             </div>
 
                             <div class="flex items-center justify-end">
-                                <Link :href="route('admin.restaurants.index')" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</Link>
+                                <Link :href="route('admin.restaurants.index')" class="text-gray-600 hover:text-gray-900 mr-4">{{ $t('common.cancel') }}</Link>
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">
                                     Update Restaurant
                                 </button>

@@ -22,6 +22,7 @@ class MenuItem extends Model
     protected $fillable = [
         'restaurant_id',
         'menu_category_id',
+        'type', // item, meal
         'name',
         'description',
         'price',
@@ -32,6 +33,7 @@ class MenuItem extends Model
         'allergens',
         'images',
         'recipe',
+        'sku',
     ];
 
     protected $casts = [
@@ -58,6 +60,16 @@ class MenuItem extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function extras(): HasMany
+    {
+        return $this->hasMany(MenuItemExtra::class);
+    }
+
+    public function bundles(): HasMany
+    {
+        return $this->hasMany(MenuItemBundle::class, 'parent_menu_item_id');
+    }
+
     public function ingredients(): BelongsToMany
     {
         return $this->belongsToMany(Ingredient::class, 'menu_item_ingredients', 'menu_item_id', 'ingredient_id')
@@ -75,12 +87,31 @@ class MenuItem extends Model
             'missing_ingredients' => [],
         ];
 
+        // 1. If Meal, check bundled items
+        if (($this->type ?? 'item') === 'meal') {
+            if ($this->relationLoaded('bundles')) {
+                foreach ($this->bundles as $bundle) {
+                    if ($bundle->relationLoaded('childItem') && $bundle->childItem) {
+                        // Recursively check child status (this calls getInventoryStatusAttribute on child)
+                        $childStatus = $bundle->childItem->inventory_status;
+                        if ($childStatus['sold_out']) {
+                            $status['sold_out'] = true;
+                            $status['missing_ingredients'][] = $bundle->childItem->name['en'] ?? $bundle->childItem->name; // Simplified name access
+                        }
+                    }
+                }
+            }
+            // Extras don't usually block availability unless critical, but usually optional.
+            return $status;
+        }
+
+        // 2. If Item, check ingredients
         // Ensure ingredients are loaded to check stock
         if ($this->relationLoaded('ingredients')) {
             $ingredientsMap = $this->ingredients->keyBy('id');
             $recipe = $this->recipe ?? [];
 
-            // 1. Check Recipe (New Way)
+            // A. Check Recipe (New Way)
             if (!empty($recipe)) {
                 foreach ($recipe as $component) {
                     $ingId = $component['ingredient_id'] ?? null;
@@ -101,7 +132,7 @@ class MenuItem extends Model
                     }
                 }
             }
-            // 2. Check Legacy Pivot (Old Way)
+            // B. Check Legacy Pivot (Old Way)
             else {
                 foreach ($this->ingredients as $ing) {
                     $qtyNeeded = $ing->pivot->quantity ?? 1;

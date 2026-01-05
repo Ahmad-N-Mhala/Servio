@@ -2,17 +2,17 @@
     <MainLayout>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex justify-between items-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Tables</h1>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('tables.title') }}</h1>
                 <Button v-if="hasPermission('create_table')" @click="openModal()">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    New Table
+                    {{ $t('tables.add_table') }}
                 </Button>
             </div>
 
             <div v-if="tables.length === 0" class="text-center py-12">
-                <p class="text-gray-500">No tables found. Create one to get started.</p>
+                <p class="text-gray-500">{{ $t('charts.no_data') }}</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -39,12 +39,12 @@
                          <div :class="['w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold mb-3 shadow-sm border-4', getStatusColor(table.status)]">
                             {{ table.name }}
                         </div>
-                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ table.location || 'Main Hall' }}</span>
-                        <span class="text-xs text-gray-400 mt-1">{{ table.capacity }} Seats</span>
+                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ table.location || $t('tables.location') }}</span>
+                        <span class="text-xs text-gray-400 mt-1">{{ table.capacity }} {{ $t('tables.capacity') }}</span>
                     </div>
                     <div class="text-center">
                          <span :class="['px-3 py-1 rounded-full text-xs font-semibold capitalize', getStatusBadge(table.status)]">
-                            {{ table.status }}
+                            {{ $t('tables.' + table.status) }}
                         </span>
                     </div>
                 </div>
@@ -53,32 +53,32 @@
             <!-- Edit/Create Modal -->
             <Modal :show="showModal" @close="closeModal">
                 <div class="p-6">
-                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">{{ form.id ? 'Edit Table' : 'New Table' }}</h2>
+                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">{{ form.id ? $t('common.edit') + ' ' + $t('tables.table_name') : $t('tables.add_table') }}</h2>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.name') }}</label>
                             <input v-model="form.name" type="text" placeholder="e.g. T-12" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Capacity</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('tables.capacity') }}</label>
                             <input v-model="form.capacity" type="number" min="1" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('tables.location') }}</label>
                             <input v-model="form.location" type="text" placeholder="e.g. Patio" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                          <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.status') }}</label>
                             <select v-model="form.status" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option value="available">Available</option>
-                                <option value="occupied">Occupied</option>
-                                <option value="reserved">Reserved</option>
+                                <option value="available">{{ $t('tables.available') }}</option>
+                                <option value="occupied">{{ $t('tables.occupied') }}</option>
+                                <option value="reserved">{{ $t('tables.reserved') || 'Reserved' }}</option>
                             </select>
                         </div>
                     </div>
                     <div class="mt-8 flex justify-end gap-3">
-                        <Button variant="secondary" @click="closeModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</Button>
-                        <Button @click="submit" :disabled="form.processing">Save Table</Button>
+                        <Button variant="secondary" @click="closeModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">{{ $t('common.cancel') }}</Button>
+                        <Button @click="submit" :disabled="form.processing">{{ $t('common.save') }}</Button>
                     </div>
                 </div>
             </Modal>
@@ -86,7 +86,7 @@
             <!-- QR Code Modal -->
             <Modal :show="showQrModal" @close="closeQrModal">
                 <div class="p-6">
-                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">QR Code - {{ selectedTable?.name }}</h2>
+                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">{{ $t('tables.qr_code') }} - {{ selectedTable?.name }}</h2>
                     
                     <div class="text-center">
                         <!-- QR Code Display -->
@@ -108,13 +108,13 @@
                         <!-- Table Info -->
                         <div class="mb-6 text-left bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                             <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                <span class="font-semibold">Table:</span> {{ selectedTable?.name }}
+                                <span class="font-semibold">{{ $t('tables.table_name') }}:</span> {{ selectedTable?.name }}
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                <span class="font-semibold">Location:</span> {{ selectedTable?.location || 'Main Hall' }}
+                                <span class="font-semibold">{{ $t('tables.location') }}:</span> {{ selectedTable?.location || $t('tables.location') }}
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                <span class="font-semibold">Capacity:</span> {{ selectedTable?.capacity }} seats
+                                <span class="font-semibold">{{ $t('tables.capacity') }}:</span> {{ selectedTable?.capacity }} {{ $t('tables.capacity') }}
                             </p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 break-all">
                                 <span class="font-semibold">URL:</span> {{ selectedTable?.qr_code_url }}
@@ -146,9 +146,7 @@
                                 </svg>
                                 Regenerate
                             </Button>
-                            <Button variant="secondary" @click="closeQrModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">
-                                Close
-                            </Button>
+                            <Button variant="secondary" @click="closeQrModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">{{ $t('common.close') }}</Button>
                         </div>
                     </div>
                 </div>
@@ -161,10 +159,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import { usePermissions } from '@/Composables/usePermissions';
+
+const { t } = useI18n();
 
 const { hasPermission } = usePermissions();
 
@@ -216,7 +217,7 @@ const submit = () => {
 };
 
 const deleteTable = (table: any) => {
-    if (confirm('Are you sure you want to delete this table?')) {
+    if (confirm(t('common.confirm'))) {
         router.delete(route('tables.destroy', table.id));
     }
 };
@@ -254,7 +255,7 @@ const downloadQrCode = () => {
 };
 
 const regenerateQrCode = () => {
-    if (selectedTable.value && confirm('Are you sure you want to regenerate the QR code? The old QR code will no longer work.')) {
+    if (selectedTable.value && confirm(t('common.confirm'))) {
         router.post(route('tables.regenerate-qr', selectedTable.value.id), {}, {
             onSuccess: () => {
                 closeQrModal();

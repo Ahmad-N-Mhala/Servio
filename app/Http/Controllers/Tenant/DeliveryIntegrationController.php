@@ -170,26 +170,48 @@ class DeliveryIntegrationController extends Controller
             return back()->with('error', 'Integration is not active.');
         }
 
-        // Simulate Menu Push
-        // In reality, this would Dispatch a Job: PushMenuToProvider::dispatch($restaurant, $integration);
-        // And we would verify keys, etc.
+        // Real Menu Push Logic
+        try {
+            $service = \App\Services\Delivery\DeliveryService::getProvider($integration->provider);
 
-        // Simulated Delay and Random Success/Fail (mostly success)
-        sleep(1); // Simulate network call
+            // Construct Menu Data (Simplified for Demo / Implementation)
+            // In a real app, you'd fetch the restaurant's menu structure:
+            $menuData = [
+                'name' => $restaurant->name . ' Menu',
+                'categories' => $restaurant->menuCategories()->with('items')->get()->map(function ($cat) {
+                    return [
+                        'id' => $cat->id,
+                        'name' => $cat->name,
+                        'items' => $cat->items->map(function ($item) {
+                            return [
+                                'id' => $item->id,
+                                'name' => $item->name,
+                                'price' => $item->price,
+                                'description' => $item->description,
+                                'image' => $item->image,
+                                'is_available' => $item->is_available
+                            ];
+                        })
+                    ];
+                })
+            ];
 
-        $simulatedSuccess = true;
-        // if (rand(0, 10) > 8) $simulatedSuccess = false; // Optional random failure for testing user handling
+            $success = $service->pushMenu($integration, $menuData);
 
-        if ($simulatedSuccess) {
-            // Store the "Last Pushed" time in settings
-            $settings = $integration->settings ?? [];
-            $settings['last_menu_push'] = now()->toIso8601String();
-            $integration->settings = $settings;
-            $integration->save();
+            if ($success) {
+                // Store the "Last Pushed" time
+                $settings = $integration->settings ?? [];
+                $settings['last_menu_push'] = now()->toIso8601String();
+                $integration->settings = $settings;
+                $integration->save();
 
-            return back()->with('success', "Menu successfully pushed to {$provider}!");
-        } else {
-            return back()->with('error', "Failed to push menu to {$provider}. Please check credentials and try again.");
+                return back()->with('success', "Menu successfully pushed to {$provider}!");
+            } else {
+                return back()->with('error', "Failed to push menu to {$provider}. API returned error.");
+            }
+
+        } catch (\Exception $e) {
+            return back()->with('error', "System Error pushing menu: " . $e->getMessage());
         }
     }
 }

@@ -21,11 +21,11 @@
                     <p class="text-2xl font-bold text-primary mt-1">{{ customer.loyalty_points?.balance || 0 }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500">Total Spent</p>
+                    <p class="text-sm font-medium text-gray-500">{{ $t('common.total') }} Spent</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ customer.total_spent }} {{ currency }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500">Total Orders</p>
+                    <p class="text-sm font-medium text-gray-500">{{ $t('common.total') }} Orders</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ customer.total_orders }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
@@ -45,8 +45,8 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.description') }}</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Points</th>
                                     </tr>
                                 </thead>
@@ -83,9 +83,9 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.status') }}</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">

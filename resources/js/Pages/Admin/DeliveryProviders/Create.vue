@@ -73,9 +73,7 @@
                                 </div>
 
                                 <div class="mt-6">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Description
-                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.description') }}</label>
                                     <textarea 
                                         v-model="form.description" 
                                         rows="3"
@@ -295,9 +293,7 @@
                             <Link 
                                 :href="route('admin.delivery-providers.index')" 
                                 class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
-                            >
-                                Cancel
-                            </Link>
+                            >{{ $t('common.cancel') }}</Link>
                             <button 
                                 type="submit" 
                                 :disabled="processing"

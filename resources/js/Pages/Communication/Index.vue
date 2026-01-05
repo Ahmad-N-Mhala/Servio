@@ -87,7 +87,7 @@
 
             <!-- Active Filter Indicator -->
             <div v-if="params.template_id" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 animate-fade-in">
-                 <span class="text-sm font-medium">Filtering by rule logs</span>
+                 <span class="text-sm font-medium">{{ $t('common.filter') }}ing by rule logs</span>
                  <button @click="clearTemplateFilter" class="hover:text-blue-900">
                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -365,8 +365,8 @@
                                 <span class="underline">Sent: {{ template.logs_count || 0 }}</span>
                             </button>
                             <div class="flex gap-2">
-                                <button @click="openTemplateModal(template)" class="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
-                                <button @click="deleteTemplate(template)" class="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                                <button @click="openTemplateModal(template)" class="text-blue-600 hover:text-blue-800 font-medium">{{ $t('common.edit') }}</button>
+                                <button @click="deleteTemplate(template)" class="text-red-600 hover:text-red-800 font-medium">{{ $t('common.delete') }}</button>
                             </div>
                         </div>
                     </div>
@@ -400,12 +400,12 @@
                     <table class="w-full text-left text-sm text-gray-600">
                         <thead class="bg-gray-50 text-gray-900 border-b border-gray-100">
                             <tr>
-                                <th class="px-4 py-3 font-semibold">Date</th>
+                                <th class="px-4 py-3 font-semibold">{{ $t('common.date') }}</th>
                                 <th class="px-4 py-3 font-semibold">Rule</th>
                                 <th class="px-4 py-3 font-semibold">Recipient</th>
                                 <th class="px-4 py-3 font-semibold">Message</th>
                                 <th class="px-4 py-3 font-semibold">Channel</th>
-                                <th class="px-4 py-3 font-semibold">Status</th>
+                                <th class="px-4 py-3 font-semibold">{{ $t('common.status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -749,7 +749,7 @@
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                    <Button type="button" variant="secondary" @click="closeTemplateModal">Cancel</Button>
+                    <Button type="button" variant="secondary" @click="closeTemplateModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" :loading="templateForm.processing">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

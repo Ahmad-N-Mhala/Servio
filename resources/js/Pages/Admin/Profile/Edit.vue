@@ -19,7 +19,7 @@
 
                         <form @submit.prevent="form.patch(route('admin.profile.update'))" class="mt-6 space-y-6">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
                                 <input v-model="form.name" type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required autocomplete="name">
                                 <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
                             </div>
@@ -37,9 +37,7 @@
                             </div>
 
                             <div class="flex items-center gap-4">
-                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">
-                                    Save
-                                </button>
+                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">{{ $t('common.save') }}</button>
                                 <Transition enter-from-class="opacity-0" leave-to-class="opacity-0" class="transition ease-in-out">
                                     <p v-if="form.recentlySuccessful" class="text-sm text-gray-600">Saved.</p>
                                 </Transition>
@@ -78,9 +76,7 @@
                             </div>
 
                             <div class="flex items-center gap-4">
-                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="passwordForm.processing">
-                                    Save
-                                </button>
+                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="passwordForm.processing">{{ $t('common.save') }}</button>
                                 <Transition enter-from-class="opacity-0" leave-to-class="opacity-0" class="transition ease-in-out">
                                     <p v-if="passwordForm.recentlySuccessful" class="text-sm text-gray-600">Saved.</p>
                                 </Transition>

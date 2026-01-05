@@ -291,7 +291,8 @@
                                 />
                             </div>
 
-                            </div>
+
+
 
                             <!-- Service Type Configuration -->
                             <div class="pt-6 border-t border-gray-100">

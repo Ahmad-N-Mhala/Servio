@@ -371,7 +371,6 @@ Route::group([
             Route::put('communication-templates/{template}', [\App\Http\Controllers\Admin\CommunicationController::class, 'update'])->name('communication.update');
             Route::delete('communication-templates/{template}', [\App\Http\Controllers\Admin\CommunicationController::class, 'destroy'])->name('communication.destroy');
 
-
         });
     });
 

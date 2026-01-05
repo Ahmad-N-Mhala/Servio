@@ -133,11 +133,11 @@
                             <table class="w-full">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.time') }}</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('kitchen.notes') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

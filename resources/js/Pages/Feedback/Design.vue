@@ -268,7 +268,7 @@ const submit = () => {
                 <Cropper ref="cropperRef" class="h-full w-full" :src="croppingImage" :stencil-props="{ aspectRatio: cropperType === 'logo' ? 1 : 16/9 }" />
             </div>
             <div class="flex justify-end gap-3 mt-4">
-                <Button variant="secondary" @click="showCropper = false">Cancel</Button>
+                <Button variant="secondary" @click="showCropper = false">{{ $t('common.cancel') }}</Button>
                 <Button @click="saveCrop">Apply</Button>
             </div>
         </Modal>

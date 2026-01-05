@@ -13,7 +13,7 @@
                     <div class="flex gap-2">
                         <Button variant="secondary" @click="openExportModal">
                             <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            Export Log
+                            {{ $t('common.export') }} Log
                         </Button>
                         <Button @click="openCreateModal">
                             {{ $t('inventory.add_item', 'Add Raw Item') }}
@@ -44,7 +44,7 @@
                             v-if="parseFloat(row.current_stock) <= parseFloat(row.reorder_level || 0)" 
                             class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200"
                         >
-                            Low
+                            {{ $t('inventory_page.low_stock') }}
                         </span>
                     </div>
                 </template>
@@ -63,21 +63,21 @@
                             v-if="hasPermission('add_stock')"
                             @click="openAddStockModal(row)" 
                             class="text-green-600 hover:text-green-800 p-1 rounded-md hover:bg-green-50 transition-colors"
-                            title="Add Stock"
+                            :title="$t('inventory_page.add_stock')"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                         </button>
                         <button 
                             @click="openHistoryModal(row)" 
                             class="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors"
-                            title="History"
+                            :title="$t('inventory.history')"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </button>
                         <button 
                             @click="openEditModal(row)" 
                             class="text-gray-600 hover:text-gray-800 p-1 rounded-md hover:bg-gray-50 transition-colors"
-                            title="Edit"
+                            :title="$t('common.edit')"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00-2 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </button>
@@ -85,7 +85,7 @@
                             v-if="hasPermission('delete_inventory')"
                             @click="deleteItem(row)" 
                             class="text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-50 transition-colors"
-                            title="Delete"
+                            :title="$t('common.delete')"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
@@ -98,22 +98,22 @@
         <Modal :show="showCreateModal" @close="closeCreateModal">
             <div class="p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                    {{ isEditing ? 'Edit Ingredient' : 'Add New Ingredient' }}
+                    {{ isEditing ? $t('inventory.edit_item') : $t('inventory.add_item') }}
                 </h3>
                 <form @submit.prevent="submitCreate">
                     <div class="mb-4">
-                        <Input id="name" type="text" v-model="form.name" label="Name" required :error="form.errors.name" />
+                        <Input id="name" type="text" v-model="form.name" :label="$t('common.name')" required :error="form.errors.name" />
                     </div>
                     <div class="mb-4 grid grid-cols-2 gap-4">
                         <div>
-                            <Input id="stock" type="number" step="0.0001" v-model="form.current_stock" label="Initial Stock" required :disabled="isEditing" :error="form.errors.current_stock" />
+                            <Input id="stock" type="number" step="0.0001" v-model="form.current_stock" :label="$t('inventory_page.current_stock')" required :disabled="isEditing" :error="form.errors.current_stock" />
                             <p v-if="isEditing" class="text-xs text-gray-500 mt-1">Use 'Add Stock' to update inventory.</p>
                         </div>
                         <div>
                             <Select
                                 id="unit"
                                 v-model="form.unit"
-                                label="Unit"
+                                :label="$t('inventory_page.unit')"
                                 required
                                 :error="form.errors.unit"
                             >
@@ -143,7 +143,7 @@
                             <Input id="cost" type="number" step="0.01" v-model="form.cost" :label="$t('inventory.cost_unit')" required :error="form.errors.cost" />
                         </div>
                         <div>
-                            <Input id="reorder" type="number" step="0.0001" v-model="form.reorder_level" label="Low Stock Threshold" placeholder="e.g. 5" />
+                            <Input id="reorder" type="number" step="0.0001" v-model="form.reorder_level" :label="$t('inventory_page.low_stock_threshold')" placeholder="e.g. 5" />
                         </div>
                     </div>
                     <div class="mb-4">
@@ -188,8 +188,7 @@
         <!-- Add Stock Modal -->
         <Modal :show="showStockModal" @close="closeStockModal">
             <div class="p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                   Add Stock: {{ getLocaleName(selectedItem?.name) }}
+                   {{ $t('inventory_page.add_stock') }}: {{ getLocaleName(selectedItem?.name) }}
                 </h3>
                 <form @submit.prevent="submitAddStock">
                     <div class="mb-4">
@@ -237,11 +236,9 @@
                     </div>
                     <div class="flex justify-end mt-6">
                         <Button type="submit" class="ml-3" :class="{ 'opacity-25': stockForm.processing }" :disabled="stockForm.processing">
-                            Add Stock
+                            {{ $t('inventory_page.add_stock') }}
                         </Button>
-                         <Button type="button" variant="secondary" @click="closeStockModal" class="ml-2">
-                            Cancel
-                        </Button>
+                         <Button type="button" variant="secondary" @click="closeStockModal" class="ml-2">{{ $t('common.cancel') }}</Button>
                     </div>
                 </form>
             </div>
@@ -381,10 +378,10 @@
                      <p class="text-sm text-gray-500 mb-4">{{ $t('inventory.select_duration') }}</p>
                      <div class="mb-4 grid grid-cols-2 gap-4">
                          <div>
-                             <Input id="start_date" type="date" v-model="exportForm.start_date" label="Start Date" required />
+                             <Input id="start_date" type="date" v-model="exportForm.start_date" :label="$t('reports.start_date')" required />
                          </div>
                          <div>
-                             <Input id="end_date" type="date" v-model="exportForm.end_date" label="End Date" required />
+                             <Input id="end_date" type="date" v-model="exportForm.end_date" :label="$t('reports.end_date')" required />
                          </div>
                      </div>
                      <div class="flex justify-end mt-6">
@@ -415,7 +412,7 @@ import axios from 'axios';
 import { usePermissions } from '@/Composables/usePermissions';
 
 const { hasPermission } = usePermissions();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const route = (window as any).route;
 const page = usePage();
 
@@ -426,11 +423,11 @@ const props = defineProps<{
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const columns = computed(() => [
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'current_stock', label: 'Current Stock', sortable: true },
-    { key: 'unit', label: 'Unit', sortable: true },
-    { key: 'cost', label: 'Cost/Unit', sortable: true, format: 'currency' as const, currency: currency.value },
-    { key: 'total_value', label: 'Total Value', sortable: true, format: 'currency' as const, currency: currency.value },
+    { key: 'name', label: t('common.name'), sortable: true },
+    { key: 'current_stock', label: t('inventory_page.current_stock'), sortable: true },
+    { key: 'unit', label: t('inventory_page.unit'), sortable: true },
+    { key: 'cost', label: t('inventory.cost_unit'), sortable: true, format: 'currency' as const, currency: currency.value },
+    { key: 'total_value', label: t('common.total'), sortable: true, format: 'currency' as const, currency: currency.value },
 ]);
 
 const search = ref('');
@@ -472,7 +469,7 @@ const exportForm = ref({
 
 const getLocaleName = (name: any) => {
     if (typeof name === 'object' && name !== null) {
-        return name[locale.value] || name['en'] || Object.values(name)[0] || '';
+        return name[locale.value] || Object.values(name)[0] || '';
     }
     return name;
 };
@@ -552,7 +549,7 @@ const openEditModal = (item: any) => {
 
 const submitCreate = () => {
     if (isEditing.value) {
-        form.transform((data) => ({
+        form.transform((data: any) => ({
             ...data,
             _method: 'PUT',
         })).post(route('inventory.update', form.id), {
@@ -568,7 +565,7 @@ const submitCreate = () => {
 };
 
 const deleteItem = (item: any) => {
-    if (confirm('Are you sure you want to delete this item? This cannot be undone.')) {
+    if (confirm(t('common.confirm'))) {
         router.delete(route('inventory.destroy', item.id), {
             preserveScroll: true,
         });
@@ -593,7 +590,7 @@ const closeStockModal = () => {
 
 const submitAddStock = () => {
     // IMPORTANT: File uploads with PUT require POST + _method: 'PUT' in Laravel/Inertia
-    stockForm.transform((data) => ({
+    stockForm.transform((data: any) => ({
         ...data,
         _method: 'PUT',
     })).post(route('inventory.update', stockForm.id), {

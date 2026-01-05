@@ -97,7 +97,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-500">Total Sales</p>
+                                <p class="text-sm text-gray-500">{{ $t('common.total') }} Sales</p>
                                 <p class="text-lg font-bold text-gray-900">
                                     {{ formatCurrency(getTotalSales()) }}
                                 </p>
@@ -147,11 +147,11 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.time') }}</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('kitchen.notes') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -199,7 +199,7 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cashier</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Opening</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
@@ -262,7 +262,7 @@
                 />
 
                 <div class="flex justify-end gap-3 mt-6">
-                    <Button type="button" variant="secondary" @click="closeOpenModal">Cancel</Button>
+                    <Button type="button" variant="secondary" @click="closeOpenModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" :loading="openForm.processing">Open Register</Button>
                 </div>
             </form>
@@ -313,7 +313,7 @@
                 />
 
                 <div class="flex justify-end gap-3 mt-6">
-                    <Button type="button" variant="secondary" @click="closeCloseModal">Cancel</Button>
+                    <Button type="button" variant="secondary" @click="closeCloseModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" variant="danger" :loading="closeForm.processing">Close Register</Button>
                 </div>
             </form>
@@ -349,7 +349,7 @@
                 />
 
                 <div class="flex justify-end gap-3 mt-6">
-                    <Button type="button" variant="secondary" @click="closeWithdrawModal">Cancel</Button>
+                    <Button type="button" variant="secondary" @click="closeWithdrawModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" variant="danger" :loading="withdrawForm.processing">Withdraw</Button>
                 </div>
             </form>
@@ -380,7 +380,7 @@
                 />
 
                 <div class="flex justify-end gap-3 mt-6">
-                    <Button type="button" variant="secondary" @click="closeDepositModal">Cancel</Button>
+                    <Button type="button" variant="secondary" @click="closeDepositModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" variant="success" :loading="depositForm.processing">Add Cash</Button>
                 </div>
             </form>

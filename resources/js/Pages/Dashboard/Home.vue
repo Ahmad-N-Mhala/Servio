@@ -15,9 +15,7 @@
                          <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Export Excel
-                        </Button>
+                            </svg>{{ $t('common.export') }} Excel</Button>
                     </a>
                     <a 
                         :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf' })"
@@ -26,9 +24,7 @@
                         <Button variant="primary" class="bg-primary-600 text-white hover:bg-primary-700">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Export PDF
-                        </Button>
+                            </svg>{{ $t('common.export') }} PDF</Button>
                     </a>
                 </div>
             </div>
@@ -62,7 +58,7 @@
                 />
 
                 <StatsCard
-                    title="Net Profit"
+                    :title="$t('dashboard_page.net_profit')"
                     :value="formatCurrency(stats.net_profit)"
                     icon="revenue"
                     :color="stats.net_profit >= 0 ? 'green' : 'red'"
@@ -70,71 +66,71 @@
                 />
 
                 <StatsCard
-                    title="Low Stock"
+                    :title="$t('dashboard_page.low_stock')"
                     :value="stats.low_stock_count"
                     icon="waste"
                     color="red"
-                    subtitle="items to reorder"
+                    :subtitle="$t('dashboard_page.low_stock')"
                     class="cursor-pointer"
                     @click="fetchDetails('low_stock')"
                 />
 
                 <StatsCard
-                    title="Avg Dining Time"
+                    :title="$t('dashboard_page.avg_dining_time')"
                     :value="stats.avg_dining_time + ' min'"
                     icon="time"
                     color="purple"
-                    subtitle="monitor table turnover"
+                    :subtitle="$t('dashboard_page.avg_dining_time')"
                 />
             </div>
 
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <!-- Revenue Trend Chart -->
-                <ChartCard title="Revenue Trend" height="300px">
+                <ChartCard :title="$t('charts.revenue_trend')" height="300px">
                     <canvas ref="revenueChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Order Status Distribution -->
-                <ChartCard title="Order Status" height="300px">
+                <ChartCard :title="$t('charts.order_status')" height="300px">
                     <canvas ref="statusChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Payment Methods -->
-                <ChartCard title="Payment Methods" height="300px">
+                <ChartCard :title="$t('charts.payment_methods')" height="300px">
                     <canvas ref="paymentChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Top Menu Items -->
-                <ChartCard title="Top Menu Items" height="300px">
+                <ChartCard :title="$t('charts.top_menu_items')" height="300px">
                     <canvas ref="topItemsChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Peak Hours -->
-                <ChartCard title="Peak Hours" height="300px">
+                <ChartCard :title="$t('charts.peak_hours')" height="300px">
                     <canvas ref="peakHoursChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Waste Trend -->
-                <ChartCard title="Waste Trend (Money)" height="300px">
+                <ChartCard :title="$t('charts.waste_trend')" height="300px">
                     <canvas ref="wasteChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Top Categories -->
-                <ChartCard title="Top Categories (Sales)" height="300px">
+                <ChartCard :title="$t('charts.top_categories')" height="300px">
                     <canvas ref="topCategoriesChartCanvas"></canvas>
                 </ChartCard>
 
                 <!-- Top Customers -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Customers</h3>
+                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('charts.top_customers') }}</h3>
                      <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Orders</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.name') }}</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('charts.orders') }}</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -144,7 +140,7 @@
                                     <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white text-right">{{ formatCurrency(customer.total) }}</td>
                                 </tr>
                                 <tr v-if="topCustomers.length === 0">
-                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">No data available</td>
+                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">{{ $t('charts.no_data') }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -152,7 +148,7 @@
                 </div>
              <!-- Customer Retention -->
              <div class="col-span-1 lg:col-span-2 mb-8">
-                <ChartCard title="Customer Retention (Visit Funnel)" height="300px">
+                <ChartCard :title="$t('charts.customer_retention')" height="300px">
                     <canvas ref="retentionChartCanvas"></canvas>
                 </ChartCard>
              </div>
@@ -200,9 +196,7 @@
                 <p v-else class="text-gray-500 dark:text-gray-400 text-center py-4">No details available.</p>
                 
                  <div class="mt-6 flex justify-end">
-                    <button @click="showDetailsModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
-                        Close
-                    </button>
+                    <button @click="showDetailsModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">{{ $t('common.close') }}</button>
                 </div>
             </div>
         </Modal>
@@ -213,6 +207,7 @@
 import { computed, ref, onMounted, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { Chart, registerables } from 'chart.js';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
 import StatsCard from '@/Components/StatsCard.vue';
@@ -220,6 +215,8 @@ import ChartCard from '@/Components/ChartCard.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import axios from 'axios';
+
+const { t } = useI18n();
 
 Chart.register(...registerables);
 
@@ -333,7 +330,7 @@ const initRevenueChart = () => {
         data: {
             labels: revenueChart.value.map((item: any) => item.date),
             datasets: [{
-                label: 'Revenue',
+                label: t('charts.revenue'),
                 data: revenueChart.value.map((item: any) => item.revenue),
                 borderColor: 'rgb(255, 107, 53)',
                 backgroundColor: 'rgba(255, 107, 53, 0.1)',
@@ -441,7 +438,7 @@ const initPeakHoursChart = () => {
         data: {
             labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
             datasets: [{
-                label: 'Orders',
+                label: t('charts.orders'),
                 data: hourlyData,
                 backgroundColor: 'rgba(99, 102, 241, 0.8)',
             }],
@@ -454,13 +451,22 @@ const initPeakHoursChart = () => {
                     display: false,
                 },
             },
-            scales: {
+           scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
                     },
                 },
+            },
+            onClick: (_e: any, activeElements: any[]) => {
+                if (activeElements && activeElements.length > 0) {
+                    const firstElement = activeElements[0];
+                    if (firstElement && typeof firstElement.index !== 'undefined') {
+                        const hour = firstElement.index; // 0-23
+                        fetchDetails('peak_hour_slice', { hour });
+                    }
+                }
             },
         },
     });
@@ -481,7 +487,7 @@ const initTopItemsChart = () => {
         data: {
             labels: topMenuItems.value.map((item: any) => item.name),
             datasets: [{
-                label: 'Quantity Sold',
+                label: t('charts.quantity_sold'),
                 data: topMenuItems.value.map((item: any) => item.quantity),
                 backgroundColor: 'rgba(168, 85, 247, 0.8)',
             }],
@@ -526,7 +532,7 @@ const initPaymentChart = () => {
         data: {
             labels: paymentDistribution.value.map((item: any) => item.method),
             datasets: [{
-                data: paymentDistribution.value.map((item: any) => item.total), // Show Amount by default? Or Count? User probably cares about Revenue source.
+                data: paymentDistribution.value.map((item: any) => item.total),
                 backgroundColor: colors,
             }],
         },
@@ -547,6 +553,16 @@ const initPaymentChart = () => {
                     }
                 }
             },
+            onClick: (_e: any, activeElements: any[]) => {
+                if (activeElements && activeElements.length > 0) {
+                    const firstElement = activeElements[0];
+                    if (firstElement && typeof firstElement.index !== 'undefined') {
+                        const index = firstElement.index;
+                        const method = paymentDistribution.value[index].method;
+                        fetchDetails('payment_method_slice', { method });
+                    }
+                }
+             },
         },
     });
 };
@@ -566,7 +582,7 @@ const initWasteChart = () => {
         data: {
             labels: wasteChart.value.map((item: any) => item.date),
             datasets: [{
-                label: 'Waste Value',
+                label: t('charts.waste_value'),
                 data: wasteChart.value.map((item: any) => item.loss),
                 backgroundColor: 'rgba(239, 68, 68, 0.8)',
             }],
@@ -586,6 +602,16 @@ const initWasteChart = () => {
                         callback: (value) => formatCurrency(value as number),
                     },
                 },
+            },
+            onClick: (_e: any, activeElements: any[]) => {
+                if (activeElements && activeElements.length > 0) {
+                    const firstElement = activeElements[0];
+                    if (firstElement && typeof firstElement.index !== 'undefined') {
+                        const index = firstElement.index;
+                        const date = wasteChart.value[index].date;
+                        fetchDetails('waste_chart_point', { date });
+                    }
+                }
             },
         },
     });
@@ -615,7 +641,7 @@ const initTopCategoriesChart = () => {
         data: {
             labels: topCategories.value.map((item: any) => item.name),
             datasets: [{
-                label: 'Sales',
+                label: t('charts.sales'),
                 data: topCategories.value.map((item: any) => item.value),
                 backgroundColor: colors.slice(0, topCategories.value.length),
             }],
@@ -656,7 +682,7 @@ const initRetentionChart = () => {
         data: {
             labels: retentionStats.value.map((item: any) => item.label),
             datasets: [{
-                label: 'Retention %',
+                label: t('charts.retention'),
                 data: retentionStats.value.map((item: any) => item.percentage),
                 backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
                 borderColor: 'rgba(16, 185, 129, 1)',

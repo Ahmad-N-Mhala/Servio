@@ -46,7 +46,7 @@
                 <!-- Dashboard -->
                 <div>
                     <div class="px-3 mb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider" v-if="!isSidebarCollapsed">
-                        General
+                        {{ $t('nav.general') }}
                     </div>
                     <Link 
                         v-if="hasPermission('view_dashboard')"
@@ -74,7 +74,7 @@
                         class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
                         v-if="!isSidebarCollapsed"
                     >
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">Operations</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">{{ $t('nav.operations') }}</span>
                         <svg 
                             class="w-3 h-3 text-gray-400 transition-transform duration-200" 
                             :class="openMenus['operations'] ? 'rotate-180' : ''"
@@ -103,7 +103,7 @@
                                     <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2-2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
-                                    <span class="text-sm" v-if="!isSidebarCollapsed">Orders</span>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.orders') }}</span>
                                 </div>
                                 <svg 
                                     v-if="!isSidebarCollapsed"
@@ -128,7 +128,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
-                                    All Orders
+                                    {{ $t('nav.all_orders') }}
                                 </Link>
                                 <Link 
                                     v-if="hasPermission('create_order')"
@@ -139,7 +139,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                     </svg>
-                                    New Order
+                                    {{ $t('nav.new_order') }}
                                 </Link>
                                  <Link 
                                     v-if="hasPermission('view_kitchen') && hasFeature('kds')"
@@ -150,7 +150,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                     </svg>
-                                    Kitchen View
+                                    {{ $t('nav.kitchen_view') }}
                                 </Link>
                             </div>
                                 <Link 
@@ -166,7 +166,7 @@
                                     <svg class="w-4 h-4" :class="!isSidebarCollapsed ? 'mr-2' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                     </svg>
-                                    <span v-if="!isSidebarCollapsed">Inventory</span>
+                                    <span v-if="!isSidebarCollapsed">{{ $t('nav.inventory') }}</span>
                                 </Link>
                                 <Link 
                                     v-if="hasPermission('view_waste') && hasFeature('inventory')"
@@ -181,7 +181,7 @@
                                     <svg class="w-4 h-4" :class="!isSidebarCollapsed ? 'mr-2' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    <span v-if="!isSidebarCollapsed">Waste Management</span>
+                                    <span v-if="!isSidebarCollapsed">{{ $t('nav.waste_management') }}</span>
                                 </Link>
                         </div>
 
@@ -220,7 +220,7 @@
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Order Delivery</span>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.order_delivery') }}</span>
                         </Link>
 
                         <!-- Customer Status Screen -->
@@ -239,7 +239,7 @@
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Status Screen</span>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.status_screen') }}</span>
                         </Link>
                     </div>
                 </div>
@@ -280,7 +280,7 @@
                                     <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    <span class="text-sm" v-if="!isSidebarCollapsed">Restaurant</span>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.restaurant') }}</span>
                                 </div>
                                 <svg 
                                     v-if="!isSidebarCollapsed"
@@ -325,7 +325,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    Receipt Template
+                                    {{ $t('nav.receipt_template') }}
                                 </Link>
                             </div>
                         </div>
@@ -358,7 +358,7 @@
                         class="px-3 mb-1 flex items-center justify-between cursor-pointer group" 
                         v-if="!isSidebarCollapsed"
                     >
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">Growth</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">{{ $t('nav.growth') }}</span>
                         <svg 
                             class="w-3 h-3 text-gray-400 transition-transform duration-200" 
                             :class="openMenus['growth'] ? 'rotate-180' : ''"
@@ -388,7 +388,7 @@
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Customers</span>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.customers') }}</span>
                         </Link>
                         
                          <!-- Sub-Group: Loyalty -->
@@ -429,7 +429,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
-                                    Overview
+                                    {{ $t('nav.overview') }}
                                 </Link>
                                 <Link 
                                     v-if="hasPermission('manage_earning_rules')"
@@ -451,7 +451,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                     </svg>
-                                    SMS Logs (OTP)
+                                    {{ $t('nav.sms_logs') }}
                                 </Link>
                             </div>
                         </div>
@@ -472,7 +472,7 @@
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Delivery Integrations</span>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.delivery_integrations') }}</span>
                         </Link>
 
                         <!-- Feedback -->
@@ -491,7 +491,7 @@
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363 1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Feedback</span>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.feedback') }}</span>
                         </Link>
 
                         <!-- Communication -->
@@ -510,7 +510,7 @@
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
-                            <span class="text-sm" v-if="!isSidebarCollapsed">Communication</span>
+                            <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.communication') }}</span>
                         </Link>
 
                         <!-- Financial (Sub-Group) -->
@@ -528,7 +528,7 @@
                                     <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
-                                    <span class="text-sm" v-if="!isSidebarCollapsed">Financial</span>
+                                    <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.financial') }}</span>
                                 </div>
                                 <svg 
                                     v-if="!isSidebarCollapsed"
@@ -556,7 +556,7 @@
                                     <svg class="w-4 h-4" :class="!isSidebarCollapsed ? 'mr-2' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
-                                    <span v-if="!isSidebarCollapsed">Monthly Expenses</span>
+                                    <span v-if="!isSidebarCollapsed">{{ $t('nav.monthly_expenses') }}</span>
                                 </Link>
                                 <Link 
                                     v-if="hasPermission('view_sales_reports')"
@@ -567,7 +567,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    Sales Reports
+                                    {{ $t('nav.sales_reports') }}
                                 </Link>
                             </div>
                         </div>
@@ -575,7 +575,7 @@
                         <!-- System Section -->
                         <div v-if="hasAnyPermission(['manage_billing'])">
                             <div class="px-3 mb-1 mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider" v-if="!isSidebarCollapsed">
-                                System
+                                {{ $t('nav.system') }}
                             </div>
                             
                             <Link 
@@ -593,7 +593,7 @@
                                 <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                 </svg>
-                                <span class="text-sm" v-if="!isSidebarCollapsed">Billing & Plans</span>
+                                <span class="text-sm" v-if="!isSidebarCollapsed">{{ $t('nav.billing') }}</span>
                             </Link>
                         </div>
                     </div>

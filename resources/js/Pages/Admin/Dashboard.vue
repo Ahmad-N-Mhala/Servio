@@ -14,7 +14,7 @@
                     <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-blue-100 text-sm font-medium">Total Restaurants</p>
+                                <p class="text-blue-100 text-sm font-medium">{{ $t('common.total') }} Restaurants</p>
                                 <p class="text-3xl font-bold mt-2">{{ stats.total_restaurants || 0 }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
@@ -44,7 +44,7 @@
                     <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-purple-100 text-sm font-medium">Total Revenue</p>
+                                <p class="text-purple-100 text-sm font-medium">{{ $t('common.total') }} Revenue</p>
                                 <p class="text-3xl font-bold mt-2">${{ formatNumber(stats.total_revenue || 0) }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
@@ -59,7 +59,7 @@
                     <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-orange-100 text-sm font-medium">Total Orders</p>
+                                <p class="text-orange-100 text-sm font-medium">{{ $t('common.total') }} Orders</p>
                                 <p class="text-3xl font-bold mt-2">{{ formatNumber(stats.total_orders || 0) }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
@@ -74,7 +74,7 @@
                     <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl shadow-lg p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-pink-100 text-sm font-medium">Total Users</p>
+                                <p class="text-pink-100 text-sm font-medium">{{ $t('common.total') }} Users</p>
                                 <p class="text-3xl font-bold mt-2">{{ stats.total_users || 0 }}</p>
                             </div>
                             <div class="bg-white/20 p-3 rounded-lg">
@@ -113,7 +113,7 @@
 
                     <!-- Revenue Trend Chart -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Trend (Last 6 Months)</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('charts.revenue_trend') }} (Last 6 Months)</h3>
                         <div class="h-72">
                             <canvas ref="revenueTrendChart"></canvas>
                         </div>

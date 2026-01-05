@@ -1,17 +1,17 @@
 <template>
-    <MainLayout title="Monthly Expenses">
+    <MainLayout :title="$t('expenses.title')">
         <div class="py-8 px-4 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-8 flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Monthly Expenses</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('expenses.title') }}</h1>
                     <p class="mt-2 text-gray-600">Track and manage your monthly operating costs</p>
                 </div>
                 <button
                     @click="showAddModal = true"
                     class="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-hover transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
                 >
-                    + Add Expense
+                    + {{ $t('expenses.add_expense') }}
                 </button>
             </div>
 
@@ -19,7 +19,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Month Selector -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Select Month</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">{{ $t('expenses.select_month') }}</label>
                     <select
                         v-model="selectedMonth"
                         @change="filterByMonth"
@@ -33,17 +33,17 @@
 
                 <!-- Summary Cards -->
                 <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
-                    <div class="text-sm font-medium opacity-90">Total Expenses</div>
+                    <div class="text-sm font-medium opacity-90">{{ $t('expenses.total_expenses') }}</div>
                     <div class="text-3xl font-bold mt-2">{{ formatCurrency(summary.total) }}</div>
                 </div>
 
                 <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white">
-                    <div class="text-sm font-medium opacity-90">Paid</div>
+                    <div class="text-sm font-medium opacity-90">{{ $t('expenses.paid') }}</div>
                     <div class="text-3xl font-bold mt-2">{{ formatCurrency(summary.paid) }}</div>
                 </div>
 
                 <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 text-white">
-                    <div class="text-sm font-medium opacity-90">Pending</div>
+                    <div class="text-sm font-medium opacity-90">{{ $t('expenses.pending') }}</div>
                     <div class="text-3xl font-bold mt-2">{{ formatCurrency(summary.pending) }}</div>
                 </div>
             </div>
@@ -54,12 +54,12 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Category</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Description</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Amount</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Paid Date</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.category') }}</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.description') }}</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.amount') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.status') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.paid_date') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -70,7 +70,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                         </svg>
-                                        Inventory Purchases
+                                        {{ $t('expenses.inventory_purchases') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
@@ -82,7 +82,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                                        Auto
+                                        {{ $t('expenses.auto') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
@@ -114,7 +114,7 @@
                                         :class="expense.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
                                         class="px-3 py-1 text-xs font-semibold rounded-full"
                                     >
-                                        {{ expense.payment_status === 'paid' ? 'Paid' : 'Pending' }}
+                                        {{ expense.payment_status === 'paid' ? $t('expenses.paid') : $t('expenses.pending') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
@@ -124,15 +124,11 @@
                                     <button
                                         @click="editExpense(expense)"
                                         class="text-blue-600 hover:text-blue-800 font-medium mr-3 transition-colors"
-                                    >
-                                        Edit
-                                    </button>
+                                    >{{ $t('common.edit') }}</button>
                                     <button
                                         @click="deleteExpense(expense.id)"
                                         class="text-red-600 hover:text-red-800 font-medium transition-colors"
-                                    >
-                                        Delete
-                                    </button>
+                                    >{{ $t('common.delete') }}</button>
                                 </td>
                             </tr>
                             <tr v-if="expenses.length === 0">
@@ -151,25 +147,25 @@
                 <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                     <div class="p-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-6">
-                            {{ editingExpense ? 'Edit Expense' : 'Add New Expense' }}
+                            {{ editingExpense ? $t('expenses.edit_expense') : $t('expenses.add_new_expense') }}
                         </h2>
 
                         <form @submit.prevent="submitForm" class="space-y-6">
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.category') }} *</label>
                                     <select
                                         v-model="form.category"
                                         required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                     >
-                                        <option value="">Select category</option>
+                                        <option value="">{{ $t('expenses.select_category') }}</option>
                                         <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Amount ({{ currency }}) *</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.amount').replace('AED', currency) }} *</label>
                                     <input
                                         v-model="form.amount"
                                         type="number"
@@ -183,30 +179,30 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.description') }}</label>
                                 <input
                                     v-model="form.description"
                                     type="text"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="Brief description"
+                                    :placeholder="$t('expenses.brief_description')"
                                 />
                             </div>
 
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Status *</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.payment_status') }} *</label>
                                     <select
                                         v-model="form.payment_status"
                                         required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                     >
-                                        <option value="pending">Pending</option>
-                                        <option value="paid">Paid</option>
+                                        <option value="pending">{{ $t('expenses.pending') }}</option>
+                                        <option value="paid">{{ $t('expenses.paid') }}</option>
                                     </select>
                                 </div>
 
                                 <div v-if="form.payment_status === 'paid'">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Paid Date</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.paid_date') }}</label>
                                     <input
                                         v-model="form.paid_at"
                                         type="date"
@@ -216,12 +212,12 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.notes') }}</label>
                                 <textarea
                                     v-model="form.notes"
                                     rows="3"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="Additional notes..."
+                                    :placeholder="$t('expenses.additional_notes')"
                                 ></textarea>
                             </div>
 
@@ -231,13 +227,13 @@
                                     @click="closeModal"
                                     class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all"
                                 >
-                                    Cancel
+                                    {{ $t('expenses.cancel') }}
                                 </button>
                                 <button
                                     type="submit"
                                     class="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-hover font-semibold transition-all shadow-lg"
                                 >
-                                    {{ editingExpense ? 'Update' : 'Add' }} Expense
+                                    {{ editingExpense ? $t('common.update') : $t('common.create') }} {{ $t('expenses.add_expense') }}
                                 </button>
                             </div>
                         </form>

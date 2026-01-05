@@ -26,8 +26,8 @@
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name / Event</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject / Preview</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('common.status') }}</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -47,8 +47,8 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex justify-end gap-2">
-                                                <Button size="xs" variant="ghost" @click="editTemplate(template)">Edit</Button>
-                                                <Button size="xs" variant="danger" @click="deleteTemplate(template)">Delete</Button>
+                                                <Button size="xs" variant="ghost" @click="editTemplate(template)">{{ $t('common.edit') }}</Button>
+                                                <Button size="xs" variant="danger" @click="deleteTemplate(template)">{{ $t('common.delete') }}</Button>
                                             </div>
                                         </td>
                                     </tr>
@@ -174,7 +174,7 @@
                     </div>
 
                     <div class="flex items-center justify-end mt-4">
-                        <Button variant="ghost" @click="closeModal" class="mr-3">Cancel</Button>
+                        <Button variant="ghost" @click="closeModal" class="mr-3">{{ $t('common.cancel') }}</Button>
                         <Button variant="primary" :disabled="form.processing" type="submit">
                             {{ isEditing ? 'Update Template' : 'Create Template' }}
                         </Button>

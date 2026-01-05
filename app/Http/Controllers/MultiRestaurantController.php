@@ -194,9 +194,11 @@ class MultiRestaurantController extends Controller
         $subscription = $existingRestaurant->subscription;
         $plan = $subscription->plan;
 
-        $useTransactions = true;
+        $useTransactions = false; // Force false for local dev/standalone mongo
+        /*
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
+            $useTransactions = true;
         } catch (\Exception $e) {
             // Check if it's the "Transaction numbers are only allowed on a replica set member" error
             if (str_contains($e->getMessage(), 'replica set member')) {
@@ -206,6 +208,7 @@ class MultiRestaurantController extends Controller
                 throw $e;
             }
         }
+        */
 
         try {
             // 1. Create Restaurant
@@ -274,9 +277,11 @@ class MultiRestaurantController extends Controller
                 'ends_at' => $subscription->billing_cycle === 'yearly' ? now()->addYear() : now()->addMonth(),
             ]);
 
+            /*
             if ($useTransactions) {
                 \Illuminate\Support\Facades\DB::commit();
             }
+            */
 
             // Setup Session
             session(['active_restaurant_id' => $restaurant->id]);
@@ -284,9 +289,11 @@ class MultiRestaurantController extends Controller
             return redirect($user->getLandingRoute())->with('success', 'Restaurant created successfully!');
 
         } catch (\Exception $e) {
+            /*
             if ($useTransactions) {
                 \Illuminate\Support\Facades\DB::rollBack();
             }
+            */
             \Log::error('Restaurant Creation failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Creation failed: ' . $e->getMessage()]);
         }

@@ -4,14 +4,14 @@
             <!-- Header -->
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Loyalty Program</h1>
-                    <p class="mt-1 text-sm text-gray-500">Manage customer points and rewards</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('loyalty.title') }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ $t('loyalty.manage_description') }}</p>
                 </div>
                 <Button v-if="hasPermission('manage_rewards')" @click="showRewardModal = true" variant="primary">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Add Reward
+                    {{ $t('loyalty.add_reward') }}
                 </Button>
             </div>
 
@@ -23,7 +23,7 @@
                         class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
                         :class="activeTab === 'overview' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                     >
-                        Overview & Rewards
+                        {{ $t('loyalty.overview_rewards') }}
                     </button>
 
                     <button 
@@ -31,7 +31,7 @@
                          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
                          :class="activeTab === 'members' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                      >
-                         Members
+                         {{ $t('loyalty.members') }}
                     </button>
                 </nav>
             </div>
@@ -49,7 +49,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Total Members</p>
+                                <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.total_members') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">{{ customers.total }}</p>
                             </div>
                         </div>
@@ -63,7 +63,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Active Rewards</p>
+                                <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.active_rewards') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">{{ rewards.length }}</p>
                             </div>
                         </div>
@@ -77,7 +77,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Redemptions</p>
+                                <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.redemptions') }}</p>
                                 <p class="text-2xl font-bold text-gray-900">0</p>
                             </div>
                         </div>
@@ -89,26 +89,26 @@
                 <!-- Active Rewards List -->
                 <div class="border-t border-gray-200 pt-8">
                     <div class="flex justify-between items-center mb-6">
-                         <h2 class="text-lg font-bold text-gray-900">Active Rewards</h2>
+                         <h2 class="text-lg font-bold text-gray-900">{{ $t('loyalty.active_rewards') }}</h2>
                          <Button v-if="hasPermission('manage_rewards')" @click="showRewardModal = true" variant="secondary" size="sm">
-                            Add New Reward
+                            {{ $t('loyalty.add_new_reward') }}
                         </Button>
                     </div>
                    
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div v-for="reward in rewards" :key="reward.id" class="glass-card p-6 rounded-2xl border border-gray-100 hover:border-primary/30 transition-all group relative overflow-hidden">
                             <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                                <button v-if="hasPermission('manage_rewards')" @click="openDesignModal(reward)" class="text-purple-500 hover:text-purple-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Design Card">
+                                <button v-if="hasPermission('manage_rewards')" @click="openDesignModal(reward)" class="text-purple-500 hover:text-purple-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" :title="$t('loyalty.design_card')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                                     </svg>
                                 </button>
-                                <button v-if="hasPermission('manage_rewards')" @click="openEditModal(reward)" class="text-blue-500 hover:text-blue-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Edit Reward">
+                                <button v-if="hasPermission('manage_rewards')" @click="openEditModal(reward)" class="text-blue-500 hover:text-blue-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" :title="$t('loyalty.edit_reward')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <button v-if="hasPermission('manage_rewards')" @click="deleteReward(reward)" class="text-red-500 hover:text-red-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Delete Reward">
+                                <button v-if="hasPermission('manage_rewards')" @click="deleteReward(reward)" class="text-red-500 hover:text-red-700 bg-white/80 p-1 rounded-full shadow-sm backdrop-blur-sm transition-colors" :title="$t('loyalty.delete_reward')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -122,16 +122,16 @@
                                     </svg>
                                 </div>
                                 <span class="px-3 py-1 text-xs font-semibold text-primary bg-primary/10 rounded-full">
-                                    {{ reward.points_required }} Points
+                                    {{ reward.points_required }} {{ $t('loyalty.points') }}
                                 </span>
                             </div>
                             
                             <h3 class="text-lg font-bold text-gray-900 mb-1">{{ getLocaleName(reward.name) }}</h3>
-                            <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ reward.description || 'No description' }}</p>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ reward.description || $t('common.no_description') }}</p>
                             
                             <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">
-                                    Type: {{ formatRewardType(reward.reward_type) }}
+                                    {{ $t('loyalty.type') }}: {{ formatRewardType(reward.reward_type) }}
                                 </span>
                                 <span class="text-sm font-bold text-gray-900">
                                     {{ formatRewardValue(reward) }}
@@ -148,12 +148,12 @@
             <!-- Customers Table -->
             <div class="glass-card rounded-2xl overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-gray-900">Loyalty Members</h2>
+                    <h2 class="text-lg font-bold text-gray-900">{{ $t('loyalty.members') }}</h2>
                     <div class="relative">
                         <input 
                             v-model="params.search"
                             type="text" 
-                            placeholder="Search members..." 
+                            :placeholder="$t('loyalty.search_members')" 
                             class="pl-10 pr-4 py-2 rounded-xl border-gray-200 focus:border-primary focus:ring-primary text-sm"
                         >
                         <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +171,7 @@
                                     @click="sort('name')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Customer
+                                        {{ $t('orders.customer') }}
                                         <span v-if="params.sort_field === 'name'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -182,7 +182,7 @@
                                     @click="sort('phone')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Contact
+                                        {{ $t('orders.customer_phone') }}
                                         <span v-if="params.sort_field === 'phone'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -193,7 +193,7 @@
                                     @click="sort('points_balance')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Points Balance
+                                        {{ $t('loyalty.points_balance') }}
                                         <span v-if="params.sort_field === 'points_balance'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
@@ -204,13 +204,13 @@
                                     @click="sort('total_spent')"
                                 >
                                     <div class="flex items-center gap-1">
-                                        Total Spent
+                                        {{ $t('loyalty.total_spent') }}
                                         <span v-if="params.sort_field === 'total_spent'">
                                             {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
                                         </span>
                                     </div>
                                 </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('orders.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -221,8 +221,8 @@
                                             {{ customer.name ? customer.name.charAt(0).toUpperCase() : '?' }}
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ customer.name || 'Unknown' }}</div>
-                                            <div class="text-xs text-gray-500">Member since {{ new Date(customer.created_at).toLocaleDateString() }}</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ customer.name || $t('common.unknown') }}</div>
+                                            <div class="text-xs text-gray-500">{{ $t('loyalty.member_since') }} {{ new Date(customer.created_at).toLocaleDateString() }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -232,14 +232,14 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        {{ customer.loyalty_points?.balance || 0 }} pts
+                                        {{ customer.loyalty_points?.balance || 0 }} {{ $t('loyalty.points') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ currency }} {{ customer.total_spent || '0.00' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <Link :href="route('loyalty.customers.show', customer.id)" class="text-primary hover:text-primary-hover font-bold">View Details</Link>
+                                    <Link :href="route('loyalty.customers.show', customer.id)" class="text-primary hover:text-primary-hover font-bold">{{ $t('loyalty.view_details') }}</Link>
                                 </td>
                             </tr>
                         </tbody>
@@ -250,20 +250,20 @@
             </div>
 
             <!-- Add Reward Modal -->
-            <Modal :show="showRewardModal" @close="closeRewardModal" :title="editingRewardId ? 'Edit Reward' : 'Create New Reward'" size="lg">
+            <Modal :show="showRewardModal" @close="closeRewardModal" :title="editingRewardId ? $t('loyalty.edit_reward') : $t('loyalty.add_new_reward')" size="lg">
                 <form @submit.prevent="submitReward" class="space-y-6">
                     <!-- Reward Name (Multilingual) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input 
                             v-model="rewardForm.name.en"
-                            label="Name (English)"
+                            :label="$t('common.name_en')"
                             placeholder="e.g. Free Coffee"
                             required
                             :error="(rewardForm.errors as any)['name.en']"
                         />
                         <Input 
                             v-model="rewardForm.name.ar"
-                            label="Name (Arabic)"
+                            :label="$t('common.name_ar')"
                             placeholder="e.g. قهوة مجانية"
                             class="text-right"
                             dir="rtl"
@@ -273,12 +273,12 @@
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('common.description') }}</label>
                         <textarea 
                             v-model="rewardForm.description"
                             rows="2"
                             class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                            placeholder="Brief description of the reward..."
+                            :placeholder="$t('common.description') + '...'"
                         ></textarea>
                     </div>
 
@@ -286,7 +286,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input 
                             v-model="rewardForm.points_required"
-                            label="Points Required"
+                            :label="$t('loyalty.points_required')"
                             type="number"
                             min="1"
                             placeholder="e.g. 100"
@@ -295,18 +295,18 @@
                         />
                         <Input 
                             v-model="rewardForm.min_order_value"
-                            :label="'Min Order Amount (' + currency + ')'"
+                            :label="$t('loyalty.min_order_value') + ' (' + currency + ')'"
                             type="number"
                             min="0"
                             step="0.01"
-                            placeholder="Optional"
+                            :placeholder="$t('common.optional')"
                             :error="rewardForm.errors.min_order_value"
                         />
                     </div>
 
                     <!-- Reward Type Selection -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Reward Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('loyalty.reward_type') }}</label>
                         <div class="grid grid-cols-2 gap-3">
                             <label 
                                 v-for="type in rewardTypes" 
@@ -331,29 +331,29 @@
                         
                         <!-- Scope Selection -->
                         <div v-if="['discount_percentage', 'discount_fixed', 'free_item'].includes(rewardForm.reward_type)">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Apply On</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('loyalty.apply_on') }}</label>
                             <div class="flex gap-4">
                                 <label class="flex items-center cursor-pointer">
                                     <input type="radio" v-model="rewardForm.apply_on" value="all" class="h-4 w-4 text-primary border-gray-300 focus:ring-primary">
-                                    <span class="ml-2 text-sm text-gray-700">Whole Menu</span>
+                                    <span class="ml-2 text-sm text-gray-700">{{ $t('loyalty.whole_menu') }}</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer">
                                     <input type="radio" v-model="rewardForm.apply_on" value="specific" class="h-4 w-4 text-primary border-gray-300 focus:ring-primary">
-                                    <span class="ml-2 text-sm text-gray-700">Specific Item(s)</span>
+                                    <span class="ml-2 text-sm text-gray-700">{{ $t('loyalty.specific_items') }}</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- Item Selection Trigger -->
                         <div v-if="rewardForm.apply_on === 'specific' && ['discount_percentage', 'discount_fixed', 'free_item'].includes(rewardForm.reward_type)">
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Select Items</label>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('loyalty.select_items') }}</label>
                              <button 
                                 type="button" 
                                 @click="showItemModal = true"
                                 class="w-full py-2.5 px-4 border border-gray-300 rounded-xl text-left text-sm text-gray-700 hover:bg-white bg-white shadow-sm flex justify-between items-center transition-all"
                              >
-                                <span v-if="rewardForm.menu_item_ids.length === 0" class="text-gray-400">Choose items...</span>
-                                <span v-else class="font-medium text-primary">{{ rewardForm.menu_item_ids.length }} items selected</span>
+                                <span v-if="rewardForm.menu_item_ids.length === 0" class="text-gray-400">{{ $t('loyalty.choose_items') }}</span>
+                                <span v-else class="font-medium text-primary">{{ $t('loyalty.items_selected', { count: rewardForm.menu_item_ids.length }) }}</span>
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -364,7 +364,7 @@
                         <div v-if="rewardForm.reward_type === 'discount_percentage'">
                             <Input 
                                 v-model="rewardForm.discount_value"
-                                label="Discount Percentage"
+                                :label="$t('loyalty.discount_value_percent')"
                                 type="number"
                                 min="1"
                                 max="100"
@@ -373,13 +373,13 @@
                                 suffix="%"
                                 :error="rewardForm.errors.discount_value"
                             />
-                             <p class="mt-1 text-xs text-gray-500">Percentage to deduct.</p>
+                             <p class="mt-1 text-xs text-gray-500">{{ $t('loyalty.percent_deduct') }}</p>
                         </div>
 
                         <div v-else-if="rewardForm.reward_type === 'discount_fixed'">
                              <Input 
                                 v-model="rewardForm.discount_value"
-                                label="Discount Amount"
+                                :label="$t('loyalty.discount_value_amount')"
                                 type="number"
                                 min="1"
                                 placeholder="e.g. 50"
@@ -387,13 +387,13 @@
                                 :prefix="currency"
                                 :error="rewardForm.errors.discount_value"
                             />
-                            <p class="mt-1 text-xs text-gray-500">Fixed deduction amount.</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ $t('loyalty.fixed_deduct') }}</p>
                         </div>
 
                         <div v-else-if="rewardForm.reward_type === 'cashback'">
                             <Input 
                                 v-model="rewardForm.discount_value"
-                                label="Cashback Percentage"
+                                :label="$t('loyalty.cashback_percent')"
                                 type="number"
                                 min="1"
                                 max="100"
@@ -402,19 +402,19 @@
                                 suffix="%"
                                 :error="rewardForm.errors.discount_value"
                             />
-                            <p class="mt-1 text-xs text-gray-500">Percentage returned as points.</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ $t('loyalty.percent_returned') }}</p>
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" @click="closeRewardModal">Cancel</Button>
-                        <Button type="submit" :loading="rewardForm.processing">Create Reward</Button>
+                        <Button type="button" variant="secondary" @click="closeRewardModal">{{ $t('common.cancel') }}</Button>
+                        <Button type="submit" :loading="rewardForm.processing">{{ $t('loyalty.add_reward') }}</Button>
                     </div>
                 </form>
             </Modal>
 
              <!-- Design Reward Modal -->
-            <Modal :show="showDesignModal" @close="showDesignModal = false" :title="`Customize Design: ${getLocaleName(selectedRewardForDesign?.name) || 'Reward'}`" size="6xl">
+            <Modal :show="showDesignModal" @close="showDesignModal = false" :title="`${$t('loyalty.customize_design')}: ${getLocaleName(selectedRewardForDesign?.name) || 'Reward'}`" size="6xl">
                  <CardDesigner 
                     v-if="selectedRewardForDesign"
                     mode="reward" 
@@ -424,12 +424,12 @@
             </Modal>
 
             <!-- Item Selection Modal -->
-            <Modal :show="showItemModal" @close="showItemModal = false" title="Select Eligible Items" size="lg">
+            <Modal :show="showItemModal" @close="showItemModal = false" :title="$t('loyalty.select_eligible_items')" size="lg">
                 <div class="space-y-4">
                     <input 
                         v-model="itemSearch"
                         type="text"
-                        placeholder="Search items..."
+                        :placeholder="$t('common.search')"
                         class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
                     >
                     
@@ -449,13 +449,13 @@
                             <span class="ml-auto text-xs text-gray-400">{{ currency }} {{ item.price }}</span>
                         </label>
                         <div v-if="filteredModalItems.length === 0" class="p-4 text-center text-gray-500 text-sm">
-                            No items found
+                            {{ $t('loyalty.no_items_found') }}
                         </div>
                     </div>
 
                     <div class="flex justify-between items-center pt-2">
-                        <span class="text-sm text-gray-500">{{ rewardForm.menu_item_ids.length }} items selected</span>
-                        <Button @click="showItemModal = false">Done</Button>
+                        <span class="text-sm text-gray-500">{{ $t('loyalty.items_selected', { count: rewardForm.menu_item_ids.length }) }}</span>
+                        <Button @click="showItemModal = false">{{ $t('loyalty.done') }}</Button>
                     </div>
                 </div>
             </Modal>
@@ -505,7 +505,7 @@ const activeTab = ref('overview'); // Tab State
 const page = usePage();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const route = (window as any).route;
 const showRewardModal = ref(false);
 const showDesignModal = ref(false);
@@ -570,12 +570,12 @@ const toggleModalItem = (id: number) => {
     }
 };
 
-const rewardTypes = [
-    { value: 'discount_percentage', label: 'Percentage Discount' },
-    { value: 'discount_fixed', label: 'Fixed Amount Discount' },
-    { value: 'free_item', label: 'Free Menu Item' },
-    { value: 'cashback', label: 'Cashback' }
-];
+const rewardTypes = computed(() => [
+    { value: 'discount_percentage', label: t('loyalty.discount_percentage') },
+    { value: 'discount_fixed', label: t('loyalty.discount_fixed') },
+    { value: 'free_item', label: t('loyalty.free_item') },
+    { value: 'cashback', label: t('loyalty.cashback') }
+]);
 
 const rewardForm = useForm({
     name: { en: '', ar: '' },
@@ -590,25 +590,25 @@ const rewardForm = useForm({
 });
 
 const getLocaleName = (name: any) => {
-    if (!name) return 'Unknown';
+    if (!name) return t('common.unknown') || 'Unknown';
     if (typeof name === 'string') return name;
-    return name[locale.value] || name['en'] || 'Unknown';
+    return name[locale.value] || Object.values(name)[0] || '';
 };
 
 const formatRewardType = (type: string) => {
-    return rewardTypes.find(t => t.value === type)?.label || type;
+    return rewardTypes.value.find(t => t.value === type)?.label || type;
 };
 
 const formatRewardValue = (reward: any) => {
     switch (reward.reward_type) {
         case 'discount_percentage':
-            return `${reward.discount_value}% Off`;
+            return `${reward.discount_value}% ${t('loyalty.off')}`;
         case 'discount_fixed':
-            return `${currency.value} ${reward.discount_value} Off`;
+            return `${currency.value} ${reward.discount_value} ${t('loyalty.off')}`;
         case 'free_item':
-            return 'Free Item';
+            return t('loyalty.free_item_label');
         case 'cashback':
-            return `${reward.discount_value}% Cashback`;
+            return `${reward.discount_value}% ${t('loyalty.cashback')}`;
         default:
             return '';
     }
@@ -657,7 +657,7 @@ const submitReward = () => {
 };
 
 const deleteReward = (reward: any) => {
-    if (confirm('Are you sure you want to delete this reward?')) {
+    if (confirm(t('loyalty.confirm_delete_reward'))) {
         router.delete(route('loyalty.rewards.delete', reward.id));
     }
 };

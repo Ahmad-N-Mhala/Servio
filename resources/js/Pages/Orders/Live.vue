@@ -8,9 +8,7 @@
                         <Button class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Export
-                        </Button>
+                            </svg>{{ $t('common.export') }}</Button>
                     </a>
 
                     <Link v-if="hasPermission('create_order')" :href="route('orders.create')">
@@ -43,7 +41,7 @@
                 <!-- Order Number & Delivery Provider -->
                 <template #cell-order_number="{ row }">
                     <div class="flex flex-col">
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ row.order_number || 'N/A' }}</span>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ row.order_number || $t('common.na') || 'N/A' }}</span>
                         <span v-if="row.delivery_provider" 
                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium w-fit mt-1"
                             :class="{
@@ -79,7 +77,7 @@
                           class="text-xs font-medium uppercase"
                           :class="row.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'"
                     >
-                        {{ row.payment_status }}
+                        {{ row.payment_status === 'paid' ? $t('pos.paid') : $t('pos.unpaid') }}
                     </span>
                 </template>
 
@@ -273,7 +271,7 @@ const params = ref({
 const columns = computed(() => [
     { key: 'order_number', label: t('orders.order_number'), sortable: true },
     { key: 'customer_name', label: t('orders.customer'), sortable: true },
-    { key: 'waiter', label: 'Waiter' },
+    { key: 'waiter', label: t('orders.waiter') || 'Waiter' },
     { key: 'payment_method', label: t('orders.payment') },
     { key: 'status', label: t('orders.status'), sortable: true },
     { key: 'total', label: t('orders.total'), sortable: true, align: 'right' as const },
@@ -383,8 +381,10 @@ const calculateDuration = (created: string, completed?: string): string => {
     const diff = end - start;
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
+    const hLabel = t('common.hours_short') || 'h';
+    const mLabel = t('common.minutes_short') || 'm';
+    if (hours > 0) return `${hours}${hLabel} ${minutes}${mLabel}`;
+    return `${minutes}${mLabel}`;
 };
 
 const getStatusLabel = (status: string | null | undefined): string => {

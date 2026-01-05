@@ -21,13 +21,13 @@
                     </div>
                     <div class="flex gap-2">
                         <button @click="showWithdrawModal = true" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Withdraw
+                            {{ $t('cash_register.withdraw') || 'Withdraw' }}
                         </button>
                         <button @click="showDepositModal = true" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Deposit
+                            {{ $t('cash_register.deposit') || 'Deposit' }}
                         </button>
                         <button @click="showCloseModal = true" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                            {{ $t('common.close') }} Register
+                            {{ $t('common.close') }} {{ $t('cash_register.title') }}
                         </button>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                         <input 
                             v-model="searchQuery"
                             type="text"
-                            placeholder="Search active orders..."
+                            :placeholder="$t('common.search')"
                             class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                         >
                     </h2>
@@ -268,7 +268,7 @@
                                     <span class="text-xs">
                                         Discount 
                                         <span v-if="discountType === 'percent'" class="ml-1 text-[10px] bg-red-50 px-1 rounded">({{ discountValue }}%)</span>
-                                        <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'discount'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">Edit</button>
+                                        <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'discount'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">{{ $t('common.edit') }}</button>
                                     </span>
                                     <span class="text-xs font-bold">- {{ selectedOrder.currency || currentCurrency }} {{ totals.discountAmount.toFixed(2) }}</span>
                                 </div>
@@ -276,12 +276,12 @@
                                     <span class="text-xs">
                                         Extra Charge
                                         <span v-if="additionalChargeType === 'percent'" class="ml-1 text-[10px] bg-blue-50 px-1 rounded">({{ additionalChargeValue }}%)</span>
-                                         <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'extra'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">Edit</button>
+                                         <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'extra'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">{{ $t('common.edit') }}</button>
                                     </span>
                                     <span class="text-xs font-bold">+ {{ selectedOrder.currency || currentCurrency }} {{ totals.additionalChargeAmount.toFixed(2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
-                                    <span class="text-base font-bold text-gray-900">Total Amount</span>
+                                    <span class="text-base font-bold text-gray-900">{{ $t('common.total') }} Amount</span>
                                     <span class="text-xl font-bold text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.total.toFixed(2) }}</span>
                                 </div>
                             </div>
@@ -388,11 +388,11 @@
         <!-- Open Register Modal -->
         <div v-if="showOpenModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Open Cash Register</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $t('cash_register.open_cash_register') }}</h3>
                 <form @submit.prevent="submitOpen">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Opening Balance</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.opening_balance') }}</label>
                             <input
                                 v-model="openForm.opening_balance"
                                 type="number"
@@ -404,21 +404,21 @@
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.notes_optional') }}</label>
                             <textarea
                                 v-model="openForm.opening_notes"
                                 rows="3"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Any notes about the opening balance..."
+                                :placeholder="$t('cash_register.notes_placeholder')"
                             ></textarea>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="closeOpenModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Cancel
+                            {{ $t('cash_register.cancel') }}
                         </button>
                         <button type="submit" :disabled="openForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover disabled:opacity-50">
-                            {{ openForm.processing ? 'Opening...' : 'Open Register' }}
+                            {{ openForm.processing ? 'Opening...' : $t('cash_register.open_register') }}
                         </button>
                     </div>
                 </form>
@@ -472,9 +472,7 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
-                        <button type="button" @click="closeCloseModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Cancel
-                        </button>
+                        <button type="button" @click="closeCloseModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
                         <button type="submit" :disabled="closeForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
                             {{ closeForm.processing ? 'Closing...' : 'Close Register' }}
                         </button>
@@ -517,9 +515,7 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
-                        <button type="button" @click="closeWithdrawModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Cancel
-                        </button>
+                        <button type="button" @click="closeWithdrawModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
                         <button type="submit" :disabled="withdrawForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
                             {{ withdrawForm.processing ? 'Processing...' : 'Withdraw' }}
                         </button>
@@ -558,9 +554,7 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
-                        <button type="button" @click="closeDepositModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Cancel
-                        </button>
+                        <button type="button" @click="closeDepositModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
                         <button type="submit" :disabled="depositForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50">
                             {{ depositForm.processing ? 'Processing...' : 'Add Cash' }}
                         </button>
@@ -636,7 +630,7 @@
                                     <svg class="w-5 h-5 text-gray-400 peer-checked:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                     </svg>
-                                    <span class="font-semibold text-sm text-gray-700 peer-checked:text-primary">Dine In</span>
+                                    <span class="font-semibold text-sm text-gray-700 peer-checked:text-primary">{{ $t('kitchen.dine_in') }}</span>
                                 </div>
                             </label>
                             <label class="flex-1 cursor-pointer group">
@@ -645,7 +639,7 @@
                                     <svg class="w-5 h-5 text-gray-400 peer-checked:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                     </svg>
-                                    <span class="font-semibold text-sm text-gray-700 peer-checked:text-primary">Takeaway</span>
+                                    <span class="font-semibold text-sm text-gray-700 peer-checked:text-primary">{{ $t('kitchen.takeaway') }}</span>
                                 </div>
                             </label>
                         </div>
@@ -655,7 +649,7 @@
                                 v-model="updateForm.table_id" 
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                             >
-                                <option :value="null">No table assigned</option>
+                                <option :value="null">{{ $t('tables.no_table') || 'No table assigned' }}</option>
                                 <option v-for="table in tables" :key="table.id" :value="table.id" :disabled="!table.is_available && table.id !== selectedOrder.table_id">
                                     {{ table.name }} ({{ table.capacity }} seats){{ table.location ? ' - ' + table.location : '' }}{{ !table.is_available && table.id !== selectedOrder.table_id ? ' [OCCUPIED]' : '' }}
                                 </option>
@@ -671,7 +665,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </div>
-                            Current Order Items
+                            {{ $t('orders.summary') || 'Order Items' }}
                             <span class="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-semibold">{{ editableItems.length }} items</span>
                         </h4>
                         <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
@@ -708,7 +702,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
-                            Add Menu Items
+                            {{ $t('menu.add_item') }}
                         </h4>
                         
                         <!-- Category Tabs -->
@@ -770,9 +764,7 @@
                         <span class="text-2xl font-bold text-primary">{{ selectedOrder.currency || currentCurrency }} {{ calculateModalTotal().toFixed(2) }}</span>
                     </div>
                     <div class="flex justify-end gap-3">
-                        <button type="button" @click="closeUpdateOrderModal" class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all">
-                            Cancel
-                        </button>
+                        <button type="button" @click="closeUpdateOrderModal" class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all">{{ $t('common.cancel') }}</button>
                         <button 
                             @click="saveOrderUpdates" 
                             :disabled="processing"
@@ -794,8 +786,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { usePermissions } from '@/Composables/usePermissions';
+
+const { t } = useI18n();
 
 const page = usePage();
 const currentCurrency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
@@ -1435,15 +1430,15 @@ const printReceipt = (order: any) => {
                 
                 <div class="double-divider"></div>
                 
-                <div class="center bold">RECEIPT</div>
+                <div class="center bold">${t('receipt.title').toUpperCase()}</div>
                 <div class="spacer"></div>
                 
                 <div class="row">
-                    <span class="left">Order #:</span>
+                    <span class="left">${t('orders.order_no')}:</span>
                     <span class="right bold">${escapeHtml(order.order_number)}</span>
                 </div>
                 <div class="row">
-                    <span class="left">Date:</span>
+                    <span class="left">{{ $t('common.date') }}:</span>
                     <span class="right">${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
                 </div>
                 ${order.table ? `<div class="row"><span class="left">Table:</span><span class="right">${escapeHtml(order.table.name)}</span></div>` : ''}
@@ -1464,8 +1459,8 @@ const printReceipt = (order: any) => {
                         <tr>
                             <td class="bold">Item</td>
                             <td class="bold center" style="width: 15mm;">Qty</td>
-                            <td class="bold right" style="width: 15mm;">Price</td>
-                            <td class="bold right" style="width: 18mm;">Total</td>
+                            <td class="bold right" style="width: 15mm;">{{ $t('common.price') }}</td>
+                            <td class="bold right" style="width: 18mm;">{{ $t('common.total') }}</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -1508,15 +1503,15 @@ const printReceipt = (order: any) => {
                 <div class="double-divider"></div>
                 
                 <div class="row bold xlarge">
-                    <span class="left">TOTAL:</span>
+                    <span class="left">${t('common.total').toUpperCase()}:</span>
                     <span class="right">${order.currency || currentCurrency.value} ${totals.value.total.toFixed(2)}</span>
                 </div>
                 
                 <div class="double-divider"></div>
                 <div class="spacer"></div>
                 
-                <div class="center bold">Thank You!</div>
-                <div class="center">Please Come Again</div>
+                <div class="center bold">${t('common.thank_you')}</div>
+                <div class="center">${t('common.come_again')}</div>
                 
                 <div class="spacer-large"></div>
                 <div class="cut-line">- - - - - - - - - - - - - - - -</div>

@@ -2,7 +2,7 @@
     <AdminLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Delivery Integrations
+                {{ $t('nav.integrations') }}
             </h2>
         </template>
 
@@ -12,10 +12,10 @@
                     :columns="columns"
                     :data="integrations.data"
                     :pagination="integrations"
-                    title="Delivery Integrations"
+                    :title="$t('nav.integrations')"
                     v-model:search="search"
                     @sort="handleSort"
-                    empty-message="No delivery providers found. Add providers like Noon, Kareem, UberEats!"
+                    :empty-message="$t('charts.no_data')"
                 >
                     <template #header-actions>
                         <Link 
@@ -25,7 +25,7 @@
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            Add Integration
+                            {{ $t('common.add') }} {{ $t('nav.integrations') }}
                         </Link>
                     </template>
 
@@ -36,7 +36,7 @@
 
                     <!-- API Key Column -->
                     <template #cell-api_key="{ row }">
-                         <div class="text-sm text-gray-500">{{ row.api_key ? '••••••••' : 'Not set' }}</div>
+                         <div class="text-sm text-gray-500">{{ row.api_key ? '••••••••' : $t('common.not_set') || 'Not set' }}</div>
                     </template>
 
                     <!-- Status Column -->
@@ -45,7 +45,7 @@
                             'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
                             row.is_enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         ]">
-                            {{ row.is_enabled ? 'Active' : 'Inactive' }}
+                            {{ row.is_enabled ? $t('common.active') : $t('common.inactive') }}
                         </span>
                     </template>
 
@@ -54,15 +54,11 @@
                         <Link 
                             :href="route('admin.integrations.edit', row.id)" 
                             class="text-primary hover:text-primary/80"
-                        >
-                            Edit
-                        </Link>
+                        >{{ $t('common.edit') }}</Link>
                         <button 
                             @click="deleteIntegration(row.id)"
                             class="text-red-600 hover:text-red-900"
-                        >
-                            Delete
-                        </button>
+                        >{{ $t('common.delete') }}</button>
                     </template>
                 </Table>
             </div>
@@ -73,10 +69,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Table from '@/Components/Table.vue';
 // @ts-ignore
 import debounce from 'lodash/debounce';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     integrations: {
@@ -94,10 +93,10 @@ const props = defineProps<{
 const search = ref(props.filters?.search || '');
 
 const columns = [
-    { key: 'restaurant', label: 'Restaurant', sortable: false }, // Sorting via relationship needs backend logic, kept false for now or true if implemented
-    { key: 'provider', label: 'Provider', sortable: true },
-    { key: 'api_key', label: 'API Key', sortable: false },
-    { key: 'is_enabled', label: 'Status', sortable: true },
+    { key: 'restaurant', label: t('nav.restaurants'), sortable: false },
+    { key: 'provider', label: t('integrations.provider') || 'Provider', sortable: true },
+    { key: 'api_key', label: t('integrations.api_key') || 'API Key', sortable: false },
+    { key: 'is_enabled', label: t('common.status'), sortable: true },
 ];
 
 const handleSort = (key: string, direction: string) => {
@@ -119,7 +118,7 @@ watch(search, debounce((value: string) => {
 const route = (window as any).route;
 
 const deleteIntegration = (id: number) => {
-    if (confirm('Are you sure you want to delete this integration?')) {
+    if (confirm(t('common.confirm'))) {
         router.delete(route('admin.integrations.destroy', id));
     }
 };

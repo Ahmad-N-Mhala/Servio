@@ -18,10 +18,21 @@
                         <!-- Status Indicator -->
                         <div class="absolute top-4 right-4">
                             <span 
+                                v-if="!provider.integration_status || provider.integration_status === 'success'"
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                             >
                                 Connected
                             </span>
+                             <div  
+                                v-else 
+                                class="group relative inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-help"
+                            >
+                                Integration Error
+                                <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-20">
+                                    {{ provider.integration_error_message || 'Unknown configuration error' }}
+                                    <div class="absolute top-full right-8 border-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex items-start gap-4 mb-6">
@@ -135,7 +146,7 @@
                             </div>
                             
                              <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
-                                <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Actions</h4>
+                                <h4 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">{{ $t('common.actions') }}</h4>
                                 <div class="grid grid-cols-2 gap-3">
                                     <Button 
                                         @click="pushMenu(provider.id)"

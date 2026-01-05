@@ -5,7 +5,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('menu.title') }}</h1>
-                    <p class="mt-1 text-gray-500 dark:text-gray-400">Manage your restaurant menu and categories</p>
+                    <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $t('menu.subtitle') || 'Manage your restaurant menu and categories' }}</p>
                 </div>
                 <Button 
                     v-if="hasPermission('create_category')"
@@ -30,7 +30,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No menu categories yet</h3>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('charts.no_data') }}</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('menu.no_categories') }}</p>
                     <Button 
                         v-if="hasPermission('create_category')"
@@ -68,7 +68,7 @@
                                 <div>
                                     <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                         {{ getCategoryName(category.name) }}
-                                        <span v-if="!category.is_active" class="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600">Inactive</span>
+                                        <span v-if="!category.is_active" class="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600">{{ $t('common.inactive') }}</span>
                                     </h2>
                                     <p v-if="category.description" class="text-gray-500 dark:text-gray-400 mt-0.5">
                                         {{ category.description }}
@@ -86,9 +86,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
-                                    </template>
-                                    Edit
-                                </Button>
+                                    </template>{{ $t('common.edit') }}</Button>
                                 <Button 
                                     v-if="hasPermission('create_item')"
                                     @click="addItem(category)" 
@@ -151,7 +149,7 @@
                                     <div class="flex gap-2">
                                          <div v-if="!item.is_available" class="group/tooltip relative">
                                             <span class="px-2 py-1 bg-gray-200 text-gray-700 text-xs font-bold rounded uppercase">
-                                                Unavailable
+                                                {{ $t('common.inactive') }}
                                             </span>
                                         </div>
                                         <div v-else-if="item.inventory_status?.sold_out" class="group/tooltip relative">
@@ -169,7 +167,7 @@
                                             v-if="hasPermission('edit_item')"
                                             @click="editItem(category, item)"
                                             class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
-                                            title="Edit Item"
+                                            :title="$t('common.edit')"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -179,7 +177,7 @@
                                             v-if="hasPermission('delete_item')"
                                             @click="deleteItem(item)"
                                             class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
-                                            title="Delete Item"
+                                            :title="$t('common.delete')"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -221,7 +219,7 @@
 
             <Input
                 v-model="categoryForm.description"
-                label="Description"
+                :label="$t('common.description')"
                 type="textarea"
                 rows="3"
                 placeholder="Optional description..."
@@ -236,7 +234,7 @@
                     class="rounded border-gray-300 text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary/20 focus:ring-opacity-50"
                 >
                 <label for="category_active" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Category Active (Visible in Menu)
+                    {{ $t('common.active') }} ({{ $t('menu.visible_in_menu') || 'Visible in Menu' }})
                 </label>
             </div>
 
@@ -259,201 +257,268 @@
 
     <!-- Item Modal -->
     <Modal :show="showItemModal" @close="closeItemModal" :title="editingItem ? $t('menu.edit_item') : $t('menu.add_item')" size="lg">
-        <form @submit.prevent="submitItem" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input 
-                    v-model="itemForm.name.en"
-                    :label="$t('common.name_en')"
-                    placeholder="e.g. Beef Burger"
-                    required
-                    :error="(itemForm.errors as any)['name.en']"
-                />
-                <Input 
-                    v-model="itemForm.name.ar"
-                    :label="$t('common.name_ar')"
-                    placeholder="e.g. برجر لحم"
-                    class="text-right"
-                    dir="rtl"
-                    :error="(itemForm.errors as any)['name.ar']"
-                />
+        <form @submit.prevent="submitItem" class="flex flex-col h-[70vh]">
+            <!-- Tabs Header -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-0 overflow-x-auto bg-white dark:bg-gray-800 sticky top-0 z-10">
+                <button 
+                    v-for="tab in tabs" 
+                    :key="tab.id"
+                    type="button"
+                    @click="activeTab = tab.id"
+                    class="px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap outline-none focus:outline-none"
+                    :class="activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                >
+                    {{ tab.label }}
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input 
-                    v-model="itemForm.price"
-                    :label="$t('common.price')"
-                    type="number"
-                    step="0.01"
-                    min="0"
-
-                    required
-                    :error="itemForm.errors.price"
-                />
-                               <!-- Images Section -->
-                <div class="col-span-full space-y-4">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Item Images</label>
-                        <div class="flex gap-2">
-                             <input 
-                                type="file" 
-                                ref="fileInputRef"
-                                @change="handleImageUpload" 
-                                multiple
-                                accept="image/*"
-                                class="hidden"
-                            />
-                            <button type="button" @click="fileInputRef?.click()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                Upload Local
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-1 custom-scrollbar">
+                
+                <!-- Tab: Details -->
+                <div v-show="activeTab === 'details'" class="space-y-5 py-4">
+                    <!-- Type Selector -->
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg flex items-center justify-between border border-gray-100 dark:border-gray-700">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Item Type</span>
+                        <div class="flex bg-white dark:bg-gray-800 rounded p-1 shadow-sm">
+                            <button type="button" @click="itemForm.type = 'item'" 
+                                class="px-4 py-1.5 text-sm rounded transition-all"
+                                :class="itemForm.type === 'item' ? 'bg-primary text-white shadow' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'">
+                                Single Item
                             </button>
-                            <button type="button" @click="showUnsplashPicker = true" class="text-xs bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                From Unsplash
+                            <button type="button" @click="itemForm.type = 'meal'" 
+                                class="px-4 py-1.5 text-sm rounded transition-all"
+                                :class="itemForm.type === 'meal' ? 'bg-primary text-white shadow' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'">
+                                Meal Bundle
                             </button>
                         </div>
                     </div>
-                    
-                    <!-- Unified Image Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 min-h-[160px]">
-                         <!-- Kept Images (Existing) -->
-                        <div v-for="(img, idx) in itemForm.kept_images" :key="'kept-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-gray-200">
-                             <img :src="img.startsWith('http') ? img : '/storage/' + img" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                 <button 
-                                    type="button" 
-                                    @click="removeKeptImage(idx)"
-                                    class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-all shadow-lg"
-                                    title="Delete Image"
-                                 >
-                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                 </button>
-                             </div>
-                             <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 text-white text-[10px] rounded backdrop-blur-sm">Existing</div>
-                         </div>
-                         
-                         <!-- New Added Images -->
-                        <div v-for="(url, idx) in previewUrls" :key="'new-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-primary/30">
-                             <img :src="url" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                 <button 
-                                    type="button" 
-                                    @click="removeNewImage(idx)"
-                                    class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-all shadow-lg"
-                                    title="Remove Image"
-                                 >
-                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                 </button>
-                             </div>
-                             <div class="absolute top-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-[10px] rounded backdrop-blur-sm">New</div>
-                         </div>
-                         
-                         <!-- Empty State Placeholder -->
-                         <div v-if="itemForm.kept_images.length === 0 && newFiles.length === 0" class="col-span-full flex flex-col items-center justify-center text-gray-400 py-8">
-                            <svg class="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <span class="text-sm">No images added yet</span>
-                         </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input v-model="itemForm.name.en" :label="$t('common.name_en')" required />
+                        <Input v-model="itemForm.name.ar" :label="$t('common.name_ar')" dir="rtl" class="text-right" />
                     </div>
-                    <div v-if="itemForm.errors.images" class="text-red-500 text-xs mt-1">{{ itemForm.errors.images }}</div>
-                </div>
-            </div>
 
-            <Input
-                v-model="itemForm.description"
-                label="Description"
-                type="textarea"
-                rows="3"
-                placeholder="Ingredients, details..."
-            />
-
-             <!-- Available Status Toggle -->
-             <div class="flex items-center gap-2">
-                <input 
-                    type="checkbox" 
-                    id="item_available"
-                    v-model="itemForm.is_available"
-                    class="rounded border-gray-300 text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary/20 focus:ring-opacity-50"
-                >
-                <label for="item_available" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Item Available
-                </label>
-            </div>
-
-
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <h4 class="font-medium text-gray-900 dark:text-white mb-3">Recipe / Ingredients</h4>
-                
-                <!-- Cost Summary -->
-                 <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">Total Cost</p>
-                        <p class="text-lg font-bold text-blue-700 dark:text-blue-300">{{ totalIngredientCost.toFixed(2) }} <span class="text-xs font-normal">AED</span></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input v-model="itemForm.sku" label="SKU / Integration Code" placeholder="e.g. TB-1001" />
                     </div>
-                    <div class="text-right">
-                         <p class="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">Estimated Profit</p>
-                         <p class="text-lg font-bold" :class="estimatedProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                             {{ estimatedProfit.toFixed(2) }} <span class="text-xs font-normal">AED</span>
-                         </p>
-                    </div>
-                </div>
 
-                <div class="space-y-3">
-                    <div class="flex gap-2">
-                        <Select
-                            v-model="newIngredientId"
-                            placeholder="Select Ingredient..."
-                        >
-                            <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
-                                {{ getCategoryName(ing.name) }} ({{ ing.unit }}) - {{ ing.cost }} / unit
-                            </option>
-                        </Select>
-                        <div class="w-24">
-                            <Select
-                                v-model="newIngredientUnit"
-                                placeholder="Unit"
-                            >
-                                <option v-for="unit in getAvailableUnits" :key="unit" :value="unit">
-                                    {{ unit }}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                            <Select v-model="itemForm.menu_category_id" required class="w-full">
+                                <option :value="null" disabled>Select Category</option>
+                                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                                    {{ getCategoryName(cat.name) }}
                                 </option>
                             </Select>
                         </div>
-                        <div class="w-32">
-                            <Input 
-                                v-model="newIngredientQty" 
-                                type="number" 
-                                step="0.0001" 
-                                placeholder="Qty" 
-                                @keypress.enter.prevent="addIngredient"
-                            />
-                        </div>
-                        <Button type="button" @click="addIngredient" size="sm" :disabled="!newIngredientId || !newIngredientUnit">Add</Button>
+                        <Input v-model="itemForm.price" label="Selling Price" type="number" step="0.01" required />
                     </div>
 
-                    <!-- List -->
-                    <div v-if="itemForm.ingredients.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
-                        <div v-for="(ing, index) in itemForm.ingredients" :key="index" class="flex justify-between items-center text-sm p-2 bg-white dark:bg-gray-800 rounded shadow-sm">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-gray-700 dark:text-gray-300">
-                                    {{ getCategoryName(getIngredient(ing.id)?.name) }}
-                                </span>
-                                <span class="text-xs text-gray-500">
-                                     Stock Cost: {{ getIngredient(ing.id)?.cost }} x {{ Number(ing.quantity).toFixed(3) }} {{ getIngredient(ing.id)?.unit }} = {{ (getIngredient(ing.id)?.cost * ing.quantity).toFixed(2) }}
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-xs text-gray-500 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                                    {{ ing.usage_quantity || ing.quantity }} {{ ing.usage_unit || getIngredient(ing.id)?.unit }}
-                                </span>
-                                <button type="button" @click="removeIngredient(index)" class="text-red-500 hover:text-red-700 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input v-model="itemForm.sort_order" label="Sort Order" type="number" />
+                         <!-- Images Section -->
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Images</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button type="button" @click="triggerFileInput" class="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors">
+                                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    <span class="text-[10px]">Upload</span>
                                 </button>
+                                <button type="button" @click="showUnsplashPicker = true" class="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors">
+                                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span class="text-[10px]">Stock</span>
+                                </button>
+                                <!-- Existing Images -->
+                                <div v-for="(img, idx) in itemForm.kept_images" :key="'kept-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                    <img :src="img.startsWith('http') ? img : '/storage/' + img" class="w-full h-full object-cover" />
+                                    <button type="button" @click="removeKeptImage(idx)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                                <!-- New Images -->
+                                <div v-for="(url, idx) in previewUrls" :key="'new-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                    <img :src="url" class="w-full h-full object-cover" />
+                                     <button type="button" @click="removeNewImage(idx)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Hidden File Input -->
+                             <input 
+                                type="file" 
+                                ref="fileInputRef"
+                                class="hidden" 
+                                multiple 
+                                accept="image/*"
+                                @change="handleImageUpload"
+                             />
+                        </div>
+                    </div>
+
+                    <Input v-model="itemForm.description" label="Description" type="textarea" rows="3" placeholder="Ingredients, details..." />
+                    
+                    <div class="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <input type="checkbox" id="item_available" v-model="itemForm.is_available" class="rounded border-gray-300 text-primary focus:ring-primary">
+                        <label for="item_available" class="text-sm font-medium text-gray-700 dark:text-gray-300">Item is Available for Sale</label>
+                    </div>
+                </div>
+
+                <!-- Tab: Recipe -->
+                <div v-show="activeTab === 'recipe'" class="space-y-5 py-4">
+                     <!-- Cost Summary -->
+                     <div class="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-between border border-blue-100 dark:border-blue-800">
+                        <div>
+                            <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">{{ $t('common.total') }} Cost</p>
+                            <p class="text-xl font-black text-blue-700 dark:text-blue-300">{{ totalIngredientCost.toFixed(2) }} <span class="text-sm font-normal">AED</span></p>
+                        </div>
+                        <div class="text-right">
+                             <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Est. Profit</p>
+                             <p class="text-xl font-black" :class="estimatedProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                 {{ estimatedProfit.toFixed(2) }} <span class="text-sm font-normal">AED</span>
+                             </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 space-y-3">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Add Ingredient to Recipe</label>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="flex-1 min-w-[200px]">
+                                <Select v-model="newIngredientId" placeholder="Select Ingredient...">
+                                    <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
+                                        {{ getCategoryName(ing.name) }} ({{ ing.cost }} / {{ ing.unit }})
+                                    </option>
+                                </Select>
+                            </div>
+                            <div class="w-24">
+                                <Input v-model="newIngredientQty" type="number" step="0.0001" placeholder="Qty" @keypress.enter.prevent="addIngredient" />
+                            </div>
+                             <div class="w-24">
+                                <Select v-model="newIngredientUnit" placeholder="Unit">
+                                    <option v-for="unit in getAvailableUnits" :key="unit" :value="unit">{{ unit }}</option>
+                                </Select>
+                            </div>
+                            <Button type="button" @click="addIngredient" :disabled="!newIngredientId || !newIngredientUnit">{{ $t('common.add') }}</Button>
+                        </div>
+                    </div>
+
+                    <!-- Ingredients List -->
+                    <div class="space-y-2">
+                        <div v-for="(ing, index) in itemForm.ingredients" :key="index" class="flex justify-between items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                             <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                                    {{ index + 1 }}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">{{ getCategoryName(getIngredient(ing.id)?.name) }}</p>
+                                    <p class="text-xs text-gray-500">
+                                        {{ ing.usage_quantity || ing.quantity }} {{ ing.usage_unit || getIngredient(ing.id)?.unit }} x {{ getIngredient(ing.id)?.cost }}
+                                    </p>
+                                </div>
+                             </div>
+                             <div class="flex items-center gap-3">
+                                 <span class="font-bold text-gray-700 dark:text-gray-300">{{ (getIngredient(ing.id)?.cost * ing.quantity).toFixed(2) }} AED</span>
+                                 <button type="button" @click="removeIngredient(index)" class="text-gray-400 hover:text-red-500 p-1">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                 </button>
+                             </div>
+                        </div>
+                        <p v-if="itemForm.ingredients.length === 0" class="text-center text-gray-500 py-8 italic">No ingredients defining the recipe yet.</p>
+                    </div>
+                </div>
+
+                <!-- Tab: Bundles (Meal) -->
+                <div v-show="activeTab === 'bundles'" v-if="itemForm.type === 'meal'" class="space-y-4 py-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-medium text-gray-900 dark:text-white">Items included in this Meal</h4>
+                        <Button type="button" size="sm" @click="addBundleRow">Add Item</Button>
+                    </div>
+                    <div class="space-y-3">
+                        <div v-for="(bundle, idx) in itemForm.bundles" :key="idx" class="flex gap-3 items-start p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-700">
+                            <div class="flex-1">
+                                <label class="text-xs text-gray-500 mb-1 block">Item to Include</label>
+                                <Select v-model="bundle.child_menu_item_id">
+                                    <option :value="null">Select Item</option>
+                                    <option v-for="item in allItems" :key="item.id" :value="item.id">{{ getItemName(item.name) }}</option>
+                                </Select>
+                            </div>
+                            <div class="w-24">
+                                <label class="text-xs text-gray-500 mb-1 block">Qty</label>
+                                <Input v-model="bundle.quantity" type="number" min="1" />
+                            </div>
+                            <button type="button" @click="removeBundleRow(idx)" class="mt-6 text-red-500 p-2 hover:bg-red-50 rounded-full">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                         <p v-if="itemForm.bundles.length === 0" class="text-center text-gray-500 py-8 italic">No items bundled yet. Add items to create a meal combo.</p>
+                    </div>
+                </div>
+
+                <!-- Tab: Extras -->
+                <div v-show="activeTab === 'extras'" class="space-y-5 py-4">
+                     <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-white">Paid Add-ons & Modifiers</h4>
+                            <p class="text-xs text-gray-500">Allow customers to customize this item</p>
+                        </div>
+                        <Button type="button" size="sm" @click="addExtraRow" variant="secondary">+ Add Option</Button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div v-for="(extra, idx) in itemForm.extras" :key="idx" class="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800 relative group transition-shadow hover:shadow-md">
+                            <button type="button" @click="removeExtraRow(idx)" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors z-10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pr-8">
+                                <Input v-model="extra.name.en" :label="$t('common.name_en')" placeholder="e.g. Extra Cheese" />
+                                <Input v-model="extra.name.ar" label="Option Name (AR)" placeholder="e.g. جبne إضافية" dir="rtl" class="text-right" />
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-4 items-end">
+                                <div class="w-full md:w-1/3">
+                                    <Input v-model="extra.price" label="Extra Cost (Price)" type="number" step="0.01" prefix="AED" />
+                                </div>
+                                
+                                <!-- Inventory Link -->
+                                <div class="flex-1 w-full bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                                        Inventory Deduction 
+                                        <span class="text-[10px] font-normal normal-case text-gray-400">(Optional - Deduct from stock when sold)</span>
+                                    </label>
+                                    <div class="flex gap-2">
+                                        <div class="flex-1">
+                                            <Select v-model="extra.ingredient_id" placeholder="Link to Ingredient">
+                                                <option :value="null">None (No Deduction)</option>
+                                                <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
+                                                    {{ getCategoryName(ing.name) }} (Stock: {{ ing.unit }})
+                                                </option>
+                                            </Select>
+                                        </div>
+                                        <div class="w-24" v-if="extra.ingredient_id">
+                                            <Input v-model="extra.quantity" type="number" step="0.001" placeholder="Qty" />
+                                        </div>
+                                         <div class="w-28" v-if="extra.ingredient_id">
+                                            <Select v-model="extra.unit" placeholder="Unit">
+                                                 <option v-for="unit in getCompatibleUnits(extra.ingredient_id)" :key="unit" :value="unit">{{ unit }}</option>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <p v-else class="text-xs text-gray-500 italic">No ingredients linked to this item.</p>
+                     <div v-if="itemForm.extras.length === 0" class="text-center py-10 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/20">
+                        <p class="text-gray-500 font-medium">No extras defined.</p>
+                        <button type="button" @click="addExtraRow" class="text-primary hover:underline mt-2 text-sm font-medium">Add the first extra option</button>
+                    </div>
                 </div>
+
             </div>
 
-            <div class="flex justify-between pt-4">
+             <!-- Footer Actions -->
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800 shrink-0 mt-auto sticky bottom-0 z-20">
                 <Button 
                     v-if="editingItem && hasPermission('delete_item')"
                     type="button" 
@@ -462,7 +527,9 @@
                 >
                     {{ $t('common.delete') }}
                 </Button>
-                <div class="flex gap-3 ml-auto">
+                <div v-else></div> <!-- Spacer -->
+
+                <div class="flex gap-3">
                     <Button type="button" variant="secondary" @click="closeItemModal">{{ $t('common.cancel') }}</Button>
                     <Button type="submit" :loading="itemForm.processing">{{ editingItem ? $t('common.save') : $t('common.create') }}</Button>
                 </div>
@@ -514,33 +581,64 @@ const categoryForm = useForm({
     is_active: true
 });
 
+
+
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
 // Item State
 const showItemModal = ref(false);
 const editingItem = ref<any>(null);
-const newFiles = ref<File[]>([]); // Temp storage for selected files
+const newFiles = ref<File[]>([]); 
+const newIngredientId = ref<number | null>(null);
+const newIngredientQty = ref<number | string>('');
+const newIngredientUnit = ref<string>('');
+
+// Tabs Logic
+const activeTab = ref('details');
+const tabs = computed(() => {
+    const list = [
+        { id: 'details', label: t('common.details'), icon: '' },
+        { id: 'recipe', label: t('menu.recipe') || 'Recipe', icon: '' },
+        { id: 'extras', label: t('menu.extras') || 'Extras', icon: '' },
+    ];
+    if (itemForm.type === 'meal') {
+        list.splice(2, 0, { id: 'bundles', label: 'Bundled Items', icon: '' });
+    }
+    return list;
+});
 
 const itemForm = useForm({
     menu_category_id: null as number | null,
+    type: 'item', // item, meal
     name: { en: '', ar: '' },
     description: '',
+    sku: '',
     price: '',
-    // Image handling
-    images: [] as File[],      // For Create: all images
-    new_images: [] as File[],  // For Update: newly added images
-    kept_images: [] as string[], // For Update: paths of images to keep
-    
+    images: [] as File[],
+    new_images: [] as File[],
+    kept_images: [] as string[],
     sort_order: 0,
     allergens: [],
-    ingredients: [] as any[],
+    
+    ingredients: [] as any[], // Recipe
+    extras: [] as any[], // Modifiers
+    bundles: [] as any[], // Bundled Items (if meal)
+    
     is_available: true,
     _method: 'POST'
 });
 
-const fileInputRef = ref<HTMLInputElement | null>(null);
+// Computed All Items (Flattened)
+const allItems = computed(() => {
+    let items = props.categories.flatMap(cat => cat.items || []);
+    // Filter out current editing item to avoid self-bundling
+    if (editingItem.value) {
+        items = items.filter(i => i.id !== editingItem.value.id);
+    }
+    return items;
+});
 
-const newIngredientId = ref<number | null>(null);
-const newIngredientQty = ref<number | string>('');
-const newIngredientUnit = ref<string>('');
+
 
 const getIngredient = (id: number) => props.ingredients.find((i: any) => i.id === id);
 
@@ -564,8 +662,11 @@ const unitFactors: Record<string, number> = {
 
 const getAvailableUnits = computed(() => {
     if (!newIngredientId.value) return [];
-    
-    const ingredient = getIngredient(newIngredientId.value);
+    return getCompatibleUnits(newIngredientId.value);
+});
+
+const getCompatibleUnits = (ingredientId: number) => {
+    const ingredient = getIngredient(ingredientId);
     if (!ingredient) return [];
     
     const stockUnit = ingredient.unit?.toLowerCase();
@@ -577,8 +678,9 @@ const getAvailableUnits = computed(() => {
     if (massUnits.includes(stockUnit)) return massUnits;
     if (volUnits.includes(stockUnit)) return volUnits;
     
-    return [stockUnit]; // Default to just the stock unit if unknown type
-});
+    // If unknown or specific (pcs, box, etc), just return itself
+    return [stockUnit || '']; 
+};
 
 const calculateNormalizedQuantity = (qty: number, fromUnit: string, toUnit: string) => {
     const fromFactor = unitFactors[fromUnit.toLowerCase()] || 1;
@@ -773,11 +875,36 @@ const deleteCategory = () => {
 
 
 
+// Extras Logic
+const addExtraRow = () => {
+    itemForm.extras.push({
+        name: { en: '', ar: '' },
+        price: '',
+        ingredient_id: null,
+        quantity: 1,
+        unit: ''
+    });
+};
+const removeExtraRow = (index: number) => {
+    itemForm.extras.splice(index, 1);
+};
+
+// Bundles Logic
+const addBundleRow = () => {
+    itemForm.bundles.push({
+        child_menu_item_id: null,
+        quantity: 1
+    });
+};
+const removeBundleRow = (index: number) => {
+    itemForm.bundles.splice(index, 1);
+};
+
 // Item Actions
 const openItemModal = (category: any, item: any = null) => {
     itemForm.menu_category_id = category.id;
-    newFiles.value = []; // Reset new files
-    previewUrls.value = []; // Reset previews
+    newFiles.value = [];
+    previewUrls.value = [];
     itemForm.images = [];
     itemForm.new_images = [];
     itemForm.kept_images = [];
@@ -785,47 +912,44 @@ const openItemModal = (category: any, item: any = null) => {
     if (item) {
         editingItem.value = item;
         itemForm._method = 'PUT';
+        itemForm.type = item.type || 'item';
         itemForm.name.en = item.name.en || item.name;
         itemForm.name.ar = item.name.ar || '';
+        itemForm.name.ar = item.name.ar || '';
         itemForm.description = item.description;
+        itemForm.sku = item.sku || '';
         itemForm.price = item.price;
         itemForm.sort_order = item.sort_order;
-        itemForm.is_available = item.is_available !== false; // Default true
+        itemForm.is_available = item.is_available !== false;
         
         // Populate kept_images
-        // Priority: item.images (array), then item.image (string)
         if (item.images && Array.isArray(item.images)) {
              itemForm.kept_images = [...item.images];
         } else if (item.image) {
              itemForm.kept_images = [item.image];
         }
+        // Recipe
+        itemForm.ingredients = item.recipe ? item.recipe.map((r: any) => ({
+             id: r.ingredient_id,
+             quantity: r.quantity,
+             usage_quantity: r.usage_quantity || r.quantity,
+             usage_unit: r.usage_unit
+        })) : [];
 
-        // Populate ingredients from 'recipe' (new structure) or fallback to relation (old structure)
-        const sourceIngredients = item.recipe || item.ingredients;
+        // Extras
+        itemForm.extras = item.extras ? item.extras.map((e: any) => ({
+            name: { en: e.name.en || e.name, ar: e.name.ar || '' },
+            price: e.price,
+            ingredient_id: e.ingredient_id,
+            quantity: e.quantity,
+            unit: e.unit || ''
+        })) : [];
 
-        itemForm.ingredients = sourceIngredients ? sourceIngredients.map((i: any) => {
-            // New structure: { ingredient_id: '...', quantity: Q }
-            // Old Relation structure: { id: '...', pivot: { quantity: Q } }
-            
-            // Check for direct quantity or pivot quantity
-            let qty = 0;
-            let id = null;
-
-            if (item.recipe) {
-                // If using new recipe field
-                qty = i.quantity;
-                id = i.ingredient_id;
-            } else {
-                 // Fallback to old relation
-                 qty = i.pivot?.quantity ?? i.quantity ?? 0;
-                 id = i.id;
-            }
-
-            return {
-                id: id,
-                quantity: qty
-            };
-        }) : [];
+        // Bundles
+        itemForm.bundles = item.bundles ? item.bundles.map((b: any) => ({
+            child_menu_item_id: b.child_menu_item_id,
+            quantity: b.quantity
+        })) : [];
     } else {
         editingItem.value = null;
         itemForm._method = 'POST';
@@ -890,10 +1014,22 @@ const editItem = (category: any, item: any) => {
     openItemModal(category, item);
 };
 
-const deleteItem = (item: any) => {
+const triggerFileInput = () => {
+    fileInputRef.value?.click();
+};
+
+const deleteItem = (item: any = null) => {
+    const target = item || editingItem.value;
+    if (!target) return;
+    
     if (confirm('Are you sure you want to delete this menu item?')) {
-        itemForm.delete(route('menu.items.destroy', item.id), {
+        itemForm.delete(route('menu.items.destroy', target.id), {
             preserveScroll: true,
+            onSuccess: () => {
+                if (editingItem.value && editingItem.value.id === target.id) {
+                    closeItemModal();
+                }
+            }
         });
     }
 };

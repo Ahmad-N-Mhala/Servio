@@ -21,7 +21,7 @@
         <div class="text-sm space-y-1 mb-3">
             <div v-if="template.show_order_number">
                 <div class="flex justify-between text-xs text-gray-500 pb-1">
-                    <span class="font-semibold">Order #:</span>
+                    <span class="font-semibold">{{ $t('orders.order_number') || 'Order #:' }}</span>
                     <span class="uppercase">{{ displayOrder.number }}</span>
                 </div>
                 <div class="flex justify-between font-bold text-base border-t border-dashed border-gray-300 pt-1">
@@ -30,19 +30,19 @@
                 </div>
             </div>
             <div v-if="template.show_date_time" class="flex justify-between">
-                <span class="font-semibold">Date:</span>
+                <span class="font-semibold">{{ $t('common.date') || 'Date:' }}</span>
                 <span>{{ displayOrder.date }}</span>
             </div>
             <div v-if="template.show_table_number && displayOrder.table" class="flex justify-between">
-                <span class="font-semibold">Table:</span>
+                <span class="font-semibold">{{ $t('nav.tables') || 'Table:' }}</span>
                 <span>{{ displayOrder.table }}</span>
             </div>
             <div v-if="template.show_customer_name" class="flex justify-between">
-                <span class="font-semibold">Customer:</span>
+                <span class="font-semibold">{{ $t('orders.customer') || 'Customer:' }}</span>
                 <span>{{ displayOrder.customer }}</span>
             </div>
             <div v-if="template.show_server_name" class="flex justify-between">
-                <span class="font-semibold">Server:</span>
+                <span class="font-semibold">{{ $t('reports.waiter') || 'Server:' }}</span>
                 <span>{{ displayOrder.server }}</span>
             </div>
         </div>
@@ -52,9 +52,9 @@
         <!-- Items -->
         <div class="mb-3">
             <div class="text-xs font-bold mb-2 flex">
-                <span :style="{ width: template.item_name_width + '%' }">ITEM</span>
-                <span class="flex-1 text-center">QTY</span>
-                <span class="flex-1 text-right">PRICE</span>
+                <span :style="{ width: template.item_name_width + '%' }">{{ $t('common.items') || 'ITEM' }}</span>
+                <span class="flex-1 text-center">{{ $t('common.quantity') || 'QTY' }}</span>
+                <span class="flex-1 text-right">{{ $t('common.price') || 'PRICE' }}</span>
             </div>
             
             <div class="space-y-2 text-sm">
@@ -76,24 +76,24 @@
         <!-- Totals -->
         <div class="text-sm space-y-1 mb-3">
             <div v-if="template.show_subtotal" class="flex justify-between">
-                <span>Subtotal:</span>
+                <span>{{ $t('common.subtotal') || 'Subtotal:' }}</span>
                 <span>{{ formatPrice(displayOrder.subtotal) }}</span>
             </div>
             <div v-if="template.show_tax && Number(displayOrder.tax) > 0" class="flex justify-between">
-                <span>Tax:</span>
+                <span>{{ $t('pos.tax') || 'Tax:' }}</span>
                 <span>{{ formatPrice(displayOrder.tax) }}</span>
             </div>
             <div v-if="template.show_discount && Number(displayOrder.discount) > 0" class="flex justify-between text-red-600">
-                <span>Discount:</span>
+                <span>{{ $t('pos.discount') || 'Discount:' }}</span>
                 <span>-{{ formatPrice(displayOrder.discount) }}</span>
             </div>
             <div class="flex justify-between font-bold text-base pt-2 border-t border-gray-400">
-                <span>TOTAL:</span>
+                <span>{{ $t('common.total') || 'TOTAL:' }}</span>
                 <span>{{ formatPrice(displayOrder.total) }} {{ displayOrder.currency }}</span>
             </div>
             <div v-if="template.show_payment_method" class="flex justify-between text-xs pt-1">
-                <span>Payment:</span>
-                <span class="font-semibold uppercase">{{ displayOrder.payment_method || 'PENDING' }}</span>
+                <span>{{ $t('pos.payment_method') || 'Payment:' }}</span>
+                <span class="font-semibold uppercase">{{ displayOrder.payment_method ? $t('pos.' + displayOrder.payment_method.toLowerCase()) : $t('pos.pending') }}</span>
             </div>
         </div>
 

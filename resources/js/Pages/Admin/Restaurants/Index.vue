@@ -290,9 +290,9 @@
 
                         <!-- Status -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('common.status') }}</label>
                              <select v-model="subForm.status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="active">Active</option>
+                                <option value="active">{{ $t('common.active') }}</option>
                                 <option value="cancelled">Cancelled</option>
                                 <option value="expired">Expired</option>
                                 <option value="trial">Trial</option>
@@ -313,7 +313,7 @@
                         <div v-else></div>
 
                         <div class="flex items-center gap-3">
-                            <button type="button" @click="closeSubscriptionModal" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors">Cancel</button>
+                            <button type="button" @click="closeSubscriptionModal" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors">{{ $t('common.cancel') }}</button>
                             <button 
                                 type="submit" 
                                 :disabled="subForm.processing"

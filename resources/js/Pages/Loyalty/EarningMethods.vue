@@ -4,15 +4,15 @@
             <!-- Header & Search -->
             <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Earning Methods</h1>
-                    <p class="mt-1 text-sm text-gray-500">Configure how customers earn loyalty points</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('nav.earning_methods') || 'Earning Methods' }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ $t('loyalty.earning_description') || 'Configure how customers earn loyalty points' }}</p>
                 </div>
                 <div class="flex gap-4 w-full sm:w-auto">
                     <div class="relative flex-1 sm:flex-none">
                         <input 
                             v-model="params.search"
                             type="text" 
-                            placeholder="Search methods..." 
+                            :placeholder="$t('common.search')" 
                             class="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
                         >
                         <div class="absolute left-3 top-2.5 text-gray-400">
@@ -25,7 +25,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        Add Method
+                        {{ $t('common.add') }} {{ $t('common.method') || 'Method' }}
                     </Button>
                 </div>
             </div>
@@ -37,8 +37,8 @@
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                      </svg>
                  </div>
-                 <h3 class="text-lg font-medium text-gray-900">No earning methods configured</h3>
-                 <p class="text-gray-500 mt-1">Add a method to start rewarding your customers.</p>
+                 <h3 class="text-lg font-medium text-gray-900">{{ $t('charts.no_data') }}</h3>
+                 <p class="text-gray-500 mt-1">{{ $t('loyalty.no_methods_configured') || 'Add a method to start rewarding your customers.' }}</p>
             </div>
 
             <!-- Methods Grid -->
@@ -74,12 +74,12 @@
                              </svg>
                         </div>
                         <span class="px-3 py-1 text-xs font-semibold rounded-full border" :class="method.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100'">
-                             {{ method.is_active ? 'Active' : 'Inactive' }}
+                             {{ method.is_active ? $t('common.active') : $t('common.inactive') }}
                         </span>
                     </div>
 
                     <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">{{ getLocaleName(method.name) }}</h3>
-                    <p class="text-sm text-gray-500 line-clamp-2 mb-6 h-10">{{ method.description || 'No description provided' }}</p>
+                    <p class="text-sm text-gray-500 line-clamp-2 mb-6 h-10">{{ method.description || $t('common.no_description') }}</p>
 
                     <div class="flex items-center justify-between pt-4 border-t border-gray-100 bg-gray-50/50 -mx-6 -mb-6 px-6 py-4">
                         <span class="text-sm font-medium text-gray-600 flex items-center gap-2">
@@ -87,13 +87,13 @@
                         </span>
                         <div class="flex flex-col items-end">
                             <span class="text-lg font-bold text-gray-900 leading-none">
-                                {{ method.points }} Pts
+                                {{ method.points }} {{ $t('loyalty.points') }}
                             </span>
                             <span v-if="method.type === 'order_total'" class="text-[10px] text-gray-500 uppercase font-medium tracking-wide">
-                                per {{ method.currency_amount || 1 }} {{ currency }}
+                                {{ $t('loyalty.per') || 'per' }} {{ method.currency_amount || 1 }} {{ currency }}
                             </span>
                              <span v-else class="text-[10px] text-gray-500 uppercase font-medium tracking-wide">
-                                per Visit
+                                {{ $t('loyalty.per_visit') || 'per Visit' }}
                             </span>
                         </div>
                     </div>
@@ -141,7 +141,7 @@ const props = withDefaults(defineProps<{
     filters: () => ({})
 });
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const route = (window as any).route;
 const page = usePage();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
@@ -170,13 +170,14 @@ const methodsList = computed(() => props.methods.data || []);
 
 const getLocaleName = (name: any) => {
     if (typeof name === 'string') return name;
-    return name[locale.value] || name['en'] || 'Unknown';
+    if (!name) return t('common.unknown') || 'Unknown';
+    return name[locale.value] || Object.values(name)[0] || '';
 };
 
 const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-        order_total: 'Per Order Amount',
-        visit: 'Per Visit'
+        order_total: t('loyalty.order_amount') || 'Per Order Amount',
+        visit: t('loyalty.per_visit') || 'Per Visit'
     };
     return labels[type] || type;
 };
@@ -204,7 +205,7 @@ const closeModal = () => {
 const form = useForm({}); // Placeholder for delete
 
 const deleteMethod = (method: any) => {
-    if (confirm('Are you sure you want to delete this earning method?')) {
+    if (confirm(t('common.confirm'))) {
         form.delete(route('loyalty.earning-methods.destroy', method.id));
     }
 };

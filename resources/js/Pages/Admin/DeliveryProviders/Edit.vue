@@ -89,9 +89,7 @@
                                 </div>
 
                                 <div class="mt-6">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Description
-                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.description') }}</label>
                                     <textarea 
                                         v-model="form.description" 
                                         rows="3"
@@ -159,10 +157,10 @@
                                             Webhook URL Template
                                         </label>
                                         <input 
-                                            v-model="form.webhook_url_template" 
+                                            :value="`https://api.restofy.com/api/webhook/delivery/${form.slug}/{store_id}`"
+                                            readonly
                                             type="text" 
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-                                            placeholder="https://api.restofy.com/webhooks/delivery/{provider}/{store_id}"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-100 text-gray-500 cursor-not-allowed"
                                         />
                                         <p class="mt-1 text-xs text-gray-500">
                                             This is the callback URL we provide to the delivery platform to receive orders.
@@ -367,9 +365,7 @@
                                 <Link 
                                     :href="route('admin.delivery-providers.index')" 
                                     class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
-                                >
-                                    Cancel
-                                </Link>
+                                >{{ $t('common.cancel') }}</Link>
                                 <button 
                                     type="submit" 
                                     :disabled="processing"

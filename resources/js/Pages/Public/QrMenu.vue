@@ -287,7 +287,7 @@
                             <span>{{ restaurant.currency }} {{ tax.toFixed(2) }}</span>
                         </div>
                         <div class="pt-3 flex justify-between items-center border-t border-dashed border-gray-200">
-                            <span class="font-bold text-gray-900 text-lg">Total</span>
+                            <span class="font-bold text-gray-900 text-lg">{{ $t('common.total') }}</span>
                             <span class="font-bold text-primary text-2xl">{{ restaurant.currency }} {{ total.toFixed(2) }}</span>
                         </div>
                     </div>
@@ -383,7 +383,7 @@ const total = computed(() => {
 
 const getTranslatedName = (name: any) => {
     if (typeof name === 'string') return name;
-    return name[props.restaurant.locale] || name['en'] || Object.values(name)[0] || '';
+    return name[props.restaurant.locale] || name[$i18n.locale] || Object.values(name)[0] || '';
 };
 
 const getQty = (itemId: string) => {

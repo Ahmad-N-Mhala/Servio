@@ -88,6 +88,39 @@ class DeliveryWebhookController extends Controller
             'notes' => $orderData['notes'] ?? '',
         ]);
 
+        // 5. Create Order Items (Link to Menu & Inventory)
+        foreach ($orderData['items'] as $item) {
+            $menuItem = null;
+
+            // A. Try matching by SKU (External ID)
+            if (!empty($item['external_id'])) {
+                $menuItem = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
+                    ->where('sku', (string) $item['external_id'])
+                    ->first();
+            }
+
+            // B. Try matching by Name (if no SKU match)
+            if (!$menuItem && !empty($item['name'])) {
+                $menuItem = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
+                    ->where(function ($q) use ($item) {
+                        $q->where('name', $item['name'])
+                            ->orWhere('name->en', $item['name']) // JSON field assumption
+                            ->orWhere('name->ar', $item['name']);
+                    })
+                    ->first();
+            }
+
+            // Create Order Item
+            $order->items()->create([
+                'menu_item_id' => $menuItem ? $menuItem->id : null,
+                'name' => $item['name'], // Fallback name for display
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['price'],
+                'total_price' => $item['quantity'] * $item['price'],
+                'notes' => $item['notes'] ?? '',
+            ]);
+        }
+
         return response()->json(['success' => true, 'order_id' => $order->id]);
     }
 

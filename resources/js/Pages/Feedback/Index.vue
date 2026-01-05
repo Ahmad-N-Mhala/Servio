@@ -5,7 +5,7 @@
         <template #header>
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Customer Feedback
+                    {{ $t('feedback.title') }}
                 </h2>
                 
                 <div class="flex items-center gap-3" v-if="restaurant?.slug">
@@ -17,7 +17,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
-                        Test Feedback Form
+                        {{ $t('feedback.test_form') || 'Test Feedback Form' }}
                     </a>
                 </div>
             </div>
@@ -33,14 +33,14 @@
                         class="pb-3 px-1 border-b-2 font-medium text-sm transition-colors"
                         :class="currentTab === 'list' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                     >
-                        Feedback List
+                        {{ $t('feedback.responses') }}
                     </button>
                     <button 
                          @click="currentTab = 'design'"
                         class="pb-3 px-1 border-b-2 font-medium text-sm transition-colors"
                         :class="currentTab === 'design' ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                     >
-                        Form Design
+                        {{ $t('feedback.design') }}
                     </button>
                 </div>
 
@@ -52,7 +52,7 @@
                             <div class="flex-1">
                                 <Input 
                                     v-model="filters.search" 
-                                    placeholder="Search by customer name, comment, or order number..." 
+                                    :placeholder="$t('feedback.search_placeholder') || 'Search by customer name, comment, or order number...'" 
                                     type="search"
                                 />
                             </div>
@@ -61,12 +61,12 @@
                                     v-model="filters.rating" 
                                     class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
                                 >
-                                    <option value="">All Ratings</option>
-                                    <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
-                                    <option value="4">⭐⭐⭐⭐ (4 stars)</option>
-                                    <option value="3">⭐⭐⭐ (3 stars)</option>
-                                    <option value="2">⭐⭐ (2 stars)</option>
-                                    <option value="1">⭐ (1 star)</option>
+                                    <option value="">{{ $t('feedback.all_ratings') || 'All Ratings' }}</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ (5 {{ $t('feedback.stars') || 'stars' }})</option>
+                                    <option value="4">⭐⭐⭐⭐ (4 {{ $t('feedback.stars') || 'stars' }})</option>
+                                    <option value="3">⭐⭐⭐ (3 {{ $t('feedback.stars') || 'stars' }})</option>
+                                    <option value="2">⭐⭐ (2 {{ $t('feedback.stars') || 'stars' }})</option>
+                                    <option value="1">⭐ (1 {{ $t('feedback.stars') || 'stars' }})</option>
                                 </select>
                             </div>
                             <div class="w-full sm:w-auto">
@@ -85,8 +85,8 @@
                             :columns="columns" 
                             :data="feedback.data"
                             :pagination="feedback"
-                            title="Recent Feedback"
-                            empty-message="No feedback received yet."
+                            :title="$t('feedback.responses')"
+                            :empty-message="$t('feedback.no_feedback') || 'No feedback received yet.'"
                         >
                          <!-- Custom Cell Rendering -->
                          <template #cell-rating="{ row }">
@@ -106,7 +106,7 @@
                                 <div class="font-medium text-gray-900">{{ row.customer.name }}</div>
                                 <div class="text-xs text-gray-500">{{ row.customer.phone }}</div>
                              </div>
-                             <span v-else class="text-gray-400 italic">Guest</span>
+                             <span v-else class="text-gray-400 italic">{{ $t('common.guest') }}</span>
                         </template>
 
                          <template #cell-order="{ row }">
@@ -121,7 +121,7 @@
 
                         <template #cell-redirected_to_google="{ row }">
                             <span v-if="row.redirected_to_google" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Yes
+                                {{ $t('common.yes') }}
                             </span>
                             <span v-else class="text-gray-400 text-xs">-</span>
                         </template>
@@ -144,10 +144,12 @@ import Design from './Design.vue';
 import Input from '@/Components/Input.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { ref, reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ref, reactive, watch, computed } from 'vue';
 
+const { t } = useI18n();
 const props = defineProps<{
-    feedback: Object;
+    feedback: any;
     settings?: Record<string, any>;
     restaurant?: { id: string; name: string; slug: string; logo?: string } | null;
     filters?: {
@@ -197,14 +199,14 @@ const applyFilters = () => {
     });
 };
 
-const columns = [
-    { key: 'created_at', label: 'Received' },
-    { key: 'rating', label: 'Rating' },
-    { key: 'comment', label: 'Comment' },
-    { key: 'customer', label: 'Customer' },
-    { key: 'order', label: 'Order' },
-    { key: 'redirected_to_google', label: 'Google Redirect' },
-];
+const columns = computed(() => [
+    { key: 'created_at', label: t('common.date') || 'Received' },
+    { key: 'rating', label: t('feedback.rating') || 'Rating' },
+    { key: 'comment', label: t('feedback.comment') || 'Comment' },
+    { key: 'customer', label: t('customers.title') || 'Customer' },
+    { key: 'order', label: t('nav.orders') || 'Order' },
+    { key: 'redirected_to_google', label: t('feedback.google_redirect') || 'Google Redirect' },
+]);
 
 const route = (window as any).route;
 </script>

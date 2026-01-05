@@ -26,7 +26,7 @@ class MenuController extends Controller
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->with([
                 'items' => function ($query) {
-                    $query->with('ingredients')
+                    $query->with(['ingredients', 'extras', 'bundles.childItem'])
                         ->orderBy('sort_order');
                 }
             ])
@@ -158,15 +158,19 @@ class MenuController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('create_item');
         $validated = $request->validate([
             'menu_category_id' => ['required', 'exists:menu_categories,id'],
+            'type' => ['nullable', 'in:item,meal'],
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'images' => ['nullable', 'array'],
-            'images.*' => ['mimes:jpeg,png,jpg,gif,svg,webp,avif,heic,heif', 'max:10240'], // Multiple images, increased size limit to 10MB
+            'images.*' => ['mimes:jpeg,png,jpg,gif,svg,webp,avif,heic,heif', 'max:10240'],
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'ingredients' => ['nullable', 'array'],
             'is_available' => ['boolean'],
+            'extras' => ['nullable', 'array'],
+            'bundles' => ['nullable', 'array'],
+            'sku' => ['nullable', 'string', 'max:50'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -177,7 +181,6 @@ class MenuController extends Controller
         $duplicate = MenuItem::where('restaurant_id', $restaurant->id)
             ->where('menu_category_id', $validated['menu_category_id'])
             ->where(function ($query) use ($validated) {
-                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
                 $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
                     ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
@@ -198,17 +201,20 @@ class MenuController extends Controller
         $item = MenuItem::create([
             'restaurant_id' => $restaurant->id,
             'menu_category_id' => $validated['menu_category_id'],
+            'type' => $validated['type'] ?? 'item',
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'price' => $validated['price'],
             'currency' => $restaurant->currency ?? 'AED',
             'images' => $imagePaths,
-            'image' => $imagePaths[0] ?? null, // Primary image fallback
+            'image' => $imagePaths[0] ?? null,
             'sort_order' => $validated['sort_order'] ?? 0,
             'allergens' => $validated['allergens'] ?? null,
             'is_available' => $validated['is_available'] ?? true,
+            'sku' => $validated['sku'] ?? null,
         ]);
 
+        // Ingredients (Recipe)
         if ($request->has('ingredients')) {
             $rawIngredients = $request->input('ingredients');
             $ingredients = is_string($rawIngredients) ? json_decode($rawIngredients, true) : $rawIngredients;
@@ -224,7 +230,6 @@ class MenuController extends Controller
                             'usage_unit' => $ing['usage_unit'] ?? null,
                         ];
 
-                        // Sync Pivot
                         \App\Models\MenuItemIngredient::create([
                             'menu_item_id' => new ObjectId((string) $item->id),
                             'ingredient_id' => new ObjectId((string) $ing['id']),
@@ -237,6 +242,39 @@ class MenuController extends Controller
             $item->save();
         }
 
+        // Extras Logic
+        if (!empty($validated['extras'])) {
+            // Expecting extras to serve as array of objects
+            foreach ($validated['extras'] as $extra) {
+                // Decode if string (from FormData)
+                if (is_string($extra))
+                    $extra = json_decode($extra, true);
+
+                \App\Models\MenuItemExtra::create([
+                    'menu_item_id' => $item->id,
+                    'name' => $extra['name'],
+                    'price' => $extra['price'] ?? 0,
+                    'ingredient_id' => $extra['ingredient_id'] ?? null,
+                    'quantity' => $extra['quantity'] ?? 1,
+                    'unit' => $extra['unit'] ?? null,
+                ]);
+            }
+        }
+
+        // Bundles Logic
+        if (!empty($validated['bundles']) && ($validated['type'] ?? 'item') === 'meal') {
+            foreach ($validated['bundles'] as $bundle) {
+                if (is_string($bundle))
+                    $bundle = json_decode($bundle, true);
+
+                \App\Models\MenuItemBundle::create([
+                    'parent_menu_item_id' => $item->id,
+                    'child_menu_item_id' => $bundle['child_menu_item_id'],
+                    'quantity' => $bundle['quantity'] ?? 1,
+                ]);
+            }
+        }
+
         return redirect()->back()->with('message', __('menu.item_created'));
     }
 
@@ -247,6 +285,7 @@ class MenuController extends Controller
 
         $validated = $request->validate([
             'menu_category_id' => ['required', 'exists:menu_categories,id'],
+            'type' => ['nullable', 'in:item,meal'],
             'name' => ['required', 'array'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
@@ -257,17 +296,22 @@ class MenuController extends Controller
             'sort_order' => ['nullable', 'integer'],
             'allergens' => ['nullable', 'array'],
             'is_available' => ['boolean'],
-            'ingredients' => ['nullable'], // Relaxed for manual processing
+            'ingredients' => ['nullable'],
+            'extras' => ['nullable', 'array'],
+            'bundles' => ['nullable', 'array'],
+            'sku' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $itemData = collect($validated)->except(['new_images', 'kept_images'])->toArray();
+        $itemData = collect($validated)->except(['new_images', 'kept_images', 'extras', 'bundles', 'ingredients'])->toArray();
+        if (isset($validated['type'])) {
+            $itemData['type'] = $validated['type'];
+        }
 
         // Check for duplicate names (EN and AR) within the same category
         $duplicate = MenuItem::where('restaurant_id', $item->restaurant_id)
             ->where('_id', '!=', $item->id)
             ->where('menu_category_id', $validated['menu_category_id'])
             ->where(function ($query) use ($validated) {
-                // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
                 $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
                     ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
             })->exists();
@@ -293,7 +337,7 @@ class MenuController extends Controller
         // Update primary image (first one)
         $itemData['image'] = $finalImages[0] ?? null;
 
-        // Process Ingredients into 'recipe' fieldcompa
+        // Process Ingredients into 'recipe' field
         if ($request->has('ingredients')) {
             $rawIngredients = $request->input('ingredients');
             $ingredients = is_string($rawIngredients) ? json_decode($rawIngredients, true) : $rawIngredients;
@@ -327,7 +371,37 @@ class MenuController extends Controller
         }
 
         $item->update($itemData);
-        // Deprecated: MenuItemIngredient pivot handling removal
+
+        // Extras Logic
+        \App\Models\MenuItemExtra::where('menu_item_id', $item->id)->delete();
+        if (!empty($validated['extras'])) {
+            foreach ($validated['extras'] as $extra) {
+                if (is_string($extra))
+                    $extra = json_decode($extra, true);
+                \App\Models\MenuItemExtra::create([
+                    'menu_item_id' => $item->id,
+                    'name' => $extra['name'],
+                    'price' => $extra['price'] ?? 0,
+                    'ingredient_id' => $extra['ingredient_id'] ?? null,
+                    'quantity' => $extra['quantity'] ?? 1,
+                    'unit' => $extra['unit'] ?? null,
+                ]);
+            }
+        }
+
+        // Bundles Logic
+        \App\Models\MenuItemBundle::where('parent_menu_item_id', $item->id)->delete();
+        if (!empty($validated['bundles']) && ($item->type === 'meal')) {
+            foreach ($validated['bundles'] as $bundle) {
+                if (is_string($bundle))
+                    $bundle = json_decode($bundle, true);
+                \App\Models\MenuItemBundle::create([
+                    'parent_menu_item_id' => $item->id,
+                    'child_menu_item_id' => $bundle['child_menu_item_id'],
+                    'quantity' => $bundle['quantity'] ?? 1,
+                ]);
+            }
+        }
 
         return redirect()->back()->with('message', __('menu.item_updated'));
     }

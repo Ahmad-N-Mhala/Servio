@@ -13,7 +13,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Staff</p>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.total') }} {{ $t('nav.staff') }}</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
                         </div>
                     </div>
@@ -28,7 +28,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active</p>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.active') }}</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.active }}</p>
                         </div>
                     </div>
@@ -61,7 +61,7 @@
                 :data="staffList"
                 :pagination="paginationMeta"
                 v-model:search="params.search"
-                title="Staff Management"
+                :title="$t('staff.title')"
             >
                 <!-- Header Actions -->
                 <template #header-actions>
@@ -71,7 +71,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
                         </template>
-                        Add Staff Member
+                        {{ $t('staff.add_staff') }}
                     </Button>
                 </template>
 
@@ -110,43 +110,39 @@
                         v-if="hasPermission('edit_staff')"
                         @click="openEditModal(row)"
                         class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium mr-2"
-                    >
-                        Edit
-                    </button>
+                    >{{ $t('common.edit') }}</button>
                     <button 
                         v-if="hasPermission('edit_staff')"
                         @click="toggleActive(row)"
                         :class="['px-3 py-1.5 rounded-lg text-xs font-medium transition-colors mr-2', row.is_active ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-green-100 text-green-700 hover:bg-green-200']"
                     >
-                        {{ row.is_active ? 'Deactivate' : 'Activate' }}
+                        {{ row.is_active ? $t('common.inactive') : $t('common.active') }}
                     </button>
                     <button 
                         v-if="hasPermission('delete_staff')"
                         @click="deleteStaff(row.id)"
                         class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs font-medium"
-                    >
-                        Remove
-                    </button>
+                    >{{ $t('common.remove') }}</button>
                 </template>
             </Table>
         </div>
 
         <!-- Add/Edit Staff Modal -->
-        <Modal :show="showAddModal" :title="editingId ? 'Edit Staff Member' : 'Add Staff Member'" size="md" @close="closeAddModal">
+        <Modal :show="showAddModal" :title="editingId ? $t('staff.edit_staff') : $t('staff.add_staff')" size="md" @close="closeAddModal">
             <form @submit.prevent="submitForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('staff.name') }} *</label>
                     <Input 
                         v-model="form.name" 
                         type="text" 
-                        placeholder="Enter full name"
+                        :placeholder="$t('staff.name')"
                         required
                     />
                     <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('staff.email') }} *</label>
                     <Input 
                         v-model="form.email" 
                         type="email" 
@@ -157,7 +153,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('staff.phone') }} *</label>
                     <Input 
                         v-model="form.phone" 
                         type="tel" 
@@ -168,13 +164,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('staff.role') }} *</label>
                     <select 
                         v-model="form.role"
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                         required
                     >
-                        <option value="" disabled>Select a role</option>
+                        <option value="" disabled>{{ $t('common.select') }} {{ $t('staff.role') }}</option>
                         <option v-for="role in roles" :key="role.value" :value="role.value">
                             {{ role.label }}
                         </option>
@@ -188,9 +184,9 @@
             </form>
 
             <template #footer>
-                <Button variant="ghost" @click="closeAddModal">Cancel</Button>
+                <Button variant="ghost" @click="closeAddModal">{{ $t('common.cancel') }}</Button>
                 <Button variant="primary" @click="submitForm" :loading="form.processing">
-                    {{ editingId ? 'Save Changes' : 'Add Staff Member' }}
+                    {{ editingId ? $t('common.save') : $t('staff.add_staff') }}
                 </Button>
             </template>
         </Modal>
@@ -200,8 +196,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
+
+const { t } = useI18n();
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
@@ -264,12 +263,12 @@ const isRtl = computed(() => page.props.isRtl as boolean);
 const route = (window as any).route;
 
 const columns = [
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone', label: 'Phone' },
-    { key: 'role', label: 'Role', sortable: true },
-    { key: 'is_active', label: 'Status', sortable: true },
-    { key: 'joined_at', label: 'Joined', sortable: true },
+    { key: 'name', label: t('staff.name'), sortable: true },
+    { key: 'email', label: t('staff.email'), sortable: true },
+    { key: 'phone', label: t('staff.phone') },
+    { key: 'role', label: t('staff.role'), sortable: true },
+    { key: 'is_active', label: t('common.status'), sortable: true },
+    { key: 'joined_at', label: t('common.date'), sortable: true },
 ];
 
 const showAddModal = ref(false);
@@ -446,7 +445,7 @@ const toggleActive = (member: StaffMember) => {
     };
 
 const deleteStaff = (id: number) => {
-    if (confirm('Are you sure you want to remove this staff member?')) {
+    if (confirm(t('staff.delete_confirm'))) {
         router.delete(route('staff.destroy', id));
     }
 };
