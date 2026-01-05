@@ -431,7 +431,7 @@
                     </table>
                 </div>
                 <div class="mt-4">
-                    <Pagination :links="logs.links" />
+                    <Pagination :meta="logs" />
                 </div>
             </div>
 
@@ -539,7 +539,7 @@
                         <Input 
                             v-model="templateForm.sms_sender_name"
                             label="Sender Name (Optional)"
-                            placeholder="e.g. RestoFy, YourBrand"
+                            placeholder="e.g. Servio, YourBrand"
                             :error="templateForm.errors.sms_sender_name"
                             hint="Custom sender name (if supported by your SMS provider)"
                         />
@@ -580,7 +580,7 @@
                         <Input 
                             v-model="templateForm.subject"
                             label="Email Subject"
-                            placeholder="e.g. Welcome to RestoFy! 🎉"
+                            placeholder="e.g. Welcome to Servio! 🎉"
                             :required="templateForm.channels.includes('email')"
                             :error="templateForm.errors.subject"
                         />
@@ -613,7 +613,7 @@
                         <Input 
                             v-model="templateForm.email_footer"
                             label="Email Footer (Optional)"
-                            placeholder="e.g. Best regards, The RestoFy Team"
+                            placeholder="e.g. Best regards, The Servio Team"
                             :error="templateForm.errors.email_footer"
                             hint="Signature or closing message"
                         />
@@ -777,28 +777,67 @@ import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasFeature } = useFeatures();
 
-const props = defineProps({
-    balances: {
-        type: Object,
-        default: () => ({ sms: 0, email: 0 })
-    },
-    logs: {
-        type: Object,
-        default: () => ({ data: [] })
-    },
-    bundles: {
-        type: Array,
-        default: () => []
-    },
-    templates: {
-        type: Array,
-        default: () => []
-    },
-    filters: {
-        type: Object,
-        default: () => ({})
-    }
-});
+interface TemplateCondition {
+    min_order_amount?: number | null;
+    min_orders_count?: number | null;
+    days_since_last_order?: number | null;
+    min_rating?: number | null;
+    max_rating?: number | null;
+    loyalty_tier?: string;
+    feedback_points?: number | null;
+    google_review_link?: string;
+    delay_val?: number;
+    delay_unit?: string;
+}
+
+interface Template {
+    id: string;
+    name: string;
+    trigger_event: string;
+    channels: string[];
+    channel?: string; // Legacy support
+    subject?: string;
+    content?: string;
+    sms_sender_name?: string;
+    sms_content?: string;
+    email_header?: string;
+    email_footer?: string;
+    conditions?: TemplateCondition;
+    is_active: boolean;
+    timing_type?: string;
+    timing_days?: number;
+    timing_time?: string;
+    logs_count?: number;
+}
+
+interface Bundle {
+    id: string;
+    name: string;
+    type: string;
+    currency: string;
+    price: string;
+    quantity: number;
+}
+
+// Logs from Laravel Paginator match PaginationMeta structure + data array
+interface LogsPaginator {
+    data: any[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: any[]; // Laravel standard links array
+}
+
+const props = defineProps<{
+    balances: { sms: number; email: number };
+    logs: LogsPaginator;
+    bundles: Bundle[];
+    templates: Template[];
+    filters: any;
+}>();
 
 const route = (window as any).route;
 // Initialize activeTab from params if available (e.g. redirected from showLogs)
@@ -841,7 +880,7 @@ watch(activeTab, (val) => {
 });
 
 // --- Bundles ---
-const purchase = (bundle: any) => {
+const purchase = (bundle: Bundle) => {
     if (confirm(`Are you sure you want to purchase ${bundle.name} for ${bundle.currency} ${bundle.price}?`)) {
         router.post(route('communication.bundles.purchase', bundle.id));
     }
@@ -849,7 +888,7 @@ const purchase = (bundle: any) => {
 
 // --- Templates ---
 const showTemplateModal = ref(false);
-const editingTemplate = ref<any>(null);
+const editingTemplate = ref<Template | null>(null);
 
 const templateForm = useForm({
     name: '',
@@ -892,7 +931,7 @@ const feedbackForm = useForm({
 // Initialize form from existing template
 watch(() => props.templates, (newTemplates) => {
     // ...
-    const existing = newTemplates.find((t: any) => t.trigger_event === 'order_completed_feedback');
+    const existing = newTemplates.find((t: Template) => t.trigger_event === 'order_completed_feedback');
     if (existing) {
         feedbackTemplateId.value = existing.id;
         feedbackForm.is_active = !!existing.is_active;
@@ -974,7 +1013,7 @@ const saveFeedbackSettings = () => {
     }
 };
 
-const openTemplateModal = (template: any = null) => {
+const openTemplateModal = (template: Template | null = null) => {
     if (template) {
         editingTemplate.value = template;
         templateForm.name = template.name;
@@ -1034,13 +1073,13 @@ const submitTemplate = () => {
     }
 };
 
-const deleteTemplate = (template: any) => {
+const deleteTemplate = (template: Template) => {
     if (confirm('Are you sure you want to delete this rule?')) {
         router.delete(route('communication.templates.destroy', template.id));
     }
 };
 
-const showLogs = (template: any) => {
+const showLogs = (template: Template) => {
     // Navigate to index but with template_id filter and active_tab=logs
     router.get(route('communication.index'), {
         template_id: template.id,

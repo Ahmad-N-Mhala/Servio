@@ -6,8 +6,9 @@
         "dial_code": "+971",
         "rate": 1,
         "states": "[\"Abu Dhabi\",\"Dubai\",\"Sharjah\",\"Ajman\",\"Umm Al Quwain\",\"Ras Al Khaimah\",\"Fujairah\"]",
-        "updated_at": "2025-12-27T19:42:24.341000Z",
+        "updated_at": "2026-01-01T09:34:18.242000Z",
         "created_at": "2025-12-27T19:42:24.341000Z",
+        "timezone": "Asia\/Dubai",
         "id": {
             "$oid": "695036a0c2185338f50c0d62"
         }
@@ -19,8 +20,9 @@
         "dial_code": "+966",
         "rate": 1.02,
         "states": "[\"Riyadh\",\"Makkah\",\"Madinah\",\"Eastern Province\",\"Asir\",\"Tabuk\",\"Hail\",\"Northern Borders\",\"Jazan\",\"Najran\",\"Al Bahah\",\"Al Jawf\",\"Al Qassim\"]",
-        "updated_at": "2025-12-27T19:42:24.343000Z",
+        "updated_at": "2026-01-01T09:34:18.245000Z",
         "created_at": "2025-12-27T19:42:24.343000Z",
+        "timezone": "Asia\/Riyadh",
         "id": {
             "$oid": "695036a0c2185338f50c0d63"
         }
@@ -32,8 +34,9 @@
         "dial_code": "+974",
         "rate": 1,
         "states": "[\"Doha\",\"Al Rayyan\",\"Al Daayen\",\"Umm Salal\",\"Al Khor\",\"Al Wakrah\",\"Al Shamal\",\"Al Sheehaniya\"]",
-        "updated_at": "2025-12-27T19:42:24.343000Z",
+        "updated_at": "2026-01-01T09:34:18.246000Z",
         "created_at": "2025-12-27T19:42:24.343000Z",
+        "timezone": "Asia\/Qatar",
         "id": {
             "$oid": "695036a0c2185338f50c0d64"
         }
@@ -45,8 +48,9 @@
         "dial_code": "+965",
         "rate": 0.083,
         "states": "[\"Al Asimah\",\"Hawalli\",\"Farwaniya\",\"Ahmadi\",\"Jahra\",\"Mubarak Al-Kabeer\"]",
-        "updated_at": "2025-12-27T19:42:24.343000Z",
+        "updated_at": "2026-01-01T09:34:18.246000Z",
         "created_at": "2025-12-27T19:42:24.343000Z",
+        "timezone": "Asia\/Kuwait",
         "id": {
             "$oid": "695036a0c2185338f50c0d65"
         }
@@ -58,8 +62,9 @@
         "dial_code": "+973",
         "rate": 0.1,
         "states": "[\"Capital\",\"Muharraq\",\"Northern\",\"Southern\"]",
-        "updated_at": "2025-12-27T19:42:24.344000Z",
+        "updated_at": "2026-01-01T09:34:18.246000Z",
         "created_at": "2025-12-27T19:42:24.344000Z",
+        "timezone": "Asia\/Bahrain",
         "id": {
             "$oid": "695036a0c2185338f50c0d66"
         }
@@ -71,8 +76,9 @@
         "dial_code": "+968",
         "rate": 0.1,
         "states": "[\"Muscat\",\"Dhofar\",\"Musandam\",\"Buraimi\",\"Dakhiliyah\",\"North Batinah\",\"South Batinah\",\"North Sharqiyah\",\"South Sharqiyah\",\"Dhahirah\",\"Wusta\"]",
-        "updated_at": "2025-12-27T19:42:24.344000Z",
+        "updated_at": "2026-01-01T09:34:18.246000Z",
         "created_at": "2025-12-27T19:42:24.344000Z",
+        "timezone": "Asia\/Muscat",
         "id": {
             "$oid": "695036a0c2185338f50c0d67"
         }
@@ -84,8 +90,9 @@
         "dial_code": "+62",
         "rate": 4300,
         "states": "[\"Jakarta\",\"Bali\",\"West Java\",\"Central Java\",\"East Java\",\"Banten\",\"Yogyakarta\",\"North Sumatra\",\"South Sulawesi\"]",
-        "updated_at": "2025-12-27T19:42:24.345000Z",
+        "updated_at": "2026-01-01T09:34:18.247000Z",
         "created_at": "2025-12-27T19:42:24.345000Z",
+        "timezone": "Asia\/Jakarta",
         "id": {
             "$oid": "695036a0c2185338f50c0d68"
         }

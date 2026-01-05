@@ -13,7 +13,7 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         \App\Models\User::updateOrCreate(
-            ['email' => 'superadmin@restofy.com'],
+            ['email' => 'superadmin@servio.com'],
             [
                 'name' => 'Super Admin',
                 'password' => bcrypt('password'),

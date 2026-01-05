@@ -460,5 +460,89 @@
         "id": {
             "$oid": "695436ec16c87d3829059822"
         }
+    },
+    {
+        "migration": "2026_01_01_140300_add_bill_path_to_inventory_logs_table",
+        "batch": 13,
+        "id": {
+            "$oid": "6956466589dc7890160572d2"
+        }
+    },
+    {
+        "migration": "2026_01_01_153116_add_performance_indexes_for_production",
+        "batch": 14,
+        "id": {
+            "$oid": "69565b85a21dda53f90d0162"
+        }
+    },
+    {
+        "migration": "2026_01_02_233129_add_service_type_to_restaurants_table",
+        "batch": 15,
+        "id": {
+            "$oid": "69581d42f1dfd496e1058922"
+        }
+    },
+    {
+        "migration": "2026_01_03_121815_create_feedback_table",
+        "batch": 16,
+        "id": {
+            "$oid": "6958d0df20128c79b30f94e2"
+        }
+    },
+    {
+        "migration": "2026_01_04_000001_add_type_to_menu_items_table",
+        "batch": 17,
+        "id": {
+            "$oid": "695b70ff7adffd76410d4242"
+        }
+    },
+    {
+        "migration": "2026_01_04_000002_create_menu_item_extras_table",
+        "batch": 17,
+        "id": {
+            "$oid": "695b70ff7adffd76410d4243"
+        }
+    },
+    {
+        "migration": "2026_01_04_000003_create_menu_item_bundles_table",
+        "batch": 17,
+        "id": {
+            "$oid": "695b70ff7adffd76410d4244"
+        }
+    },
+    {
+        "migration": "2026_01_04_000004_add_extras_to_order_items_table",
+        "batch": 17,
+        "id": {
+            "$oid": "695b70ff7adffd76410d4245"
+        }
+    },
+    {
+        "migration": "2026_01_05_123855_add_unit_to_menu_item_extras_table",
+        "batch": 18,
+        "id": {
+            "$oid": "695b78bd25184c583f05ab72"
+        }
+    },
+    {
+        "migration": "2026_01_05_170406_create_landing_modules_table",
+        "batch": 19,
+        "id": {
+            "$oid": "695bb6de691bb7e15d093002"
+        }
+    },
+    {
+        "migration": "2026_01_05_170408_create_landing_settings_table",
+        "batch": 19,
+        "id": {
+            "$oid": "695bb6de691bb7e15d093003"
+        }
+    },
+    {
+        "migration": "2026_01_05_175657_create_landing_screenshots_table",
+        "batch": 20,
+        "id": {
+            "$oid": "695bc35dfc285d20cc04cb22"
+        }
     }
 ]

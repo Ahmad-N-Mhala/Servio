@@ -37,9 +37,9 @@ class TestEmail extends Command
         $this->newLine();
 
         try {
-            Mail::raw('This is a test email from RestoFy. If you receive this, your email configuration is working correctly!', function ($message) use ($recipient) {
+            Mail::raw('This is a test email from Servio. If you receive this, your email configuration is working correctly!', function ($message) use ($recipient) {
                 $message->to($recipient)
-                    ->subject('RestoFy Email Configuration Test');
+                    ->subject('Servio Email Configuration Test');
             });
 
             $this->info('✅ Test email sent successfully!');
@@ -65,7 +65,7 @@ class TestEmail extends Command
             $this->info('To generate Gmail App Password:');
             $this->info('1. Go to https://myaccount.google.com/');
             $this->info('2. Security > 2-Step Verification > App passwords');
-            $this->info('3. Generate password for "Mail" > "Other (RestoFy)"');
+            $this->info('3. Generate password for "Mail" > "Other (Servio)"');
             $this->info('4. Update MAIL_PASSWORD in .env with the 16-char password');
             $this->info('5. Run: php artisan config:clear');
 

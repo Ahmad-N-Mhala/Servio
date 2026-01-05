@@ -119,6 +119,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const props = defineProps<{
     template: any;
@@ -137,9 +140,9 @@ const displayOrder = computed(() => {
             id: props.order.id,
             number: props.order.order_number,
             transaction_number: props.order.transaction_number || '-',
-            date: new Date(props.order.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+            date: new Date(props.order.created_at).toLocaleString(locale.value === 'ar' ? 'ar-AE' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }),
             table: props.order.table?.name || null,
-            customer: props.order.customer_name || 'Guest',
+            customer: props.order.customer_name || t('common.guest'),
             server: props.order.waiter?.name || '-',
             items: props.order.items.map((item: any) => {
                 let name = item.menuItem?.name || item.menu_item?.name || 'Unknown Item';

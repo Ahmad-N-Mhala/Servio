@@ -217,7 +217,7 @@ class OnboardingController extends Controller
             // Redirect Logic
             if ($isFree) {
                 // CASE 1: FREE PLAN -> No Payment Required
-                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Your free account has been created successfully.');
+                return redirect($user->getLandingRoute())->with('success', 'Welcome to Servio! Your free account has been created successfully.');
             } else {
                 // CASE 2: PAID PLAN -> Should Redirect to Payment Gateway
                 // TODO: Integrate Stripe Checkout here.
@@ -227,7 +227,7 @@ class OnboardingController extends Controller
                 // return redirect()->route('payment.checkout', ['subscription_id' => ...]);
 
                 // Current Dev Fallback (Bypass Payment):
-                return redirect($user->getLandingRoute())->with('success', 'Welcome to RestoFy! Account created. (Payment simulation skipped)');
+                return redirect($user->getLandingRoute())->with('success', 'Welcome to Servio! Account created. (Payment simulation skipped)');
             }
 
         } catch (\Exception $e) {

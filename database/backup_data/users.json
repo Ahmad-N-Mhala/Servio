@@ -15,21 +15,23 @@
         "name": "Admin User",
         "password": "$2y$12$AZsRitaUzl6VV1K.O9Huzefq1.8x7Lrrpg.Buxn\/sipuOeTzFCHTG",
         "email_verified_at": "2025-12-19T16:14:31.993000Z",
-        "updated_at": "2025-12-19T16:49:46.006000Z",
+        "updated_at": "2026-01-01T19:44:47.837000Z",
         "created_at": "2025-12-19T16:14:31.999000Z",
         "role_id": [
             {
                 "$oid": "694576bd5de34597d4076ddf"
             },
-            "694576bd5de34597d4076de0"
+            "694576bd5de34597d4076de0",
+            "694576bd5de34597d4076ddf"
         ],
-        "phone": null,
+        "phone": "3424234",
         "restaurant_id": [
             "694579e833231912b007b6c3"
         ],
         "permission_id": [
             "69457dbe2d33b6a8db028a45"
         ],
+        "remember_token": "KKNV86PQurA2ygdNChNxcwQQBLmSpekKHDKi0AGNP9j3xIXQn73LhA8FfefI",
         "id": {
             "$oid": "694579e733231912b007b6c2"
         }

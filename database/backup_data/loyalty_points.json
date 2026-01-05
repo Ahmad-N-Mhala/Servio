@@ -12,10 +12,10 @@
     },
     {
         "customer_id": "694587c52d33b6a8db028a9a",
-        "balance": 51,
-        "total_earned": 51,
+        "balance": 513,
+        "total_earned": 513,
         "total_redeemed": 0,
-        "updated_at": "2025-12-22T15:41:25.587000Z",
+        "updated_at": "2026-01-02T19:48:21.976000Z",
         "created_at": "2025-12-19T17:13:58.089000Z",
         "id": {
             "$oid": "694587d62d33b6a8db028a9d"
@@ -23,10 +23,10 @@
     },
     {
         "customer_id": "694963aff8c92b5bc1060074",
-        "balance": 34,
-        "total_earned": 34,
+        "balance": 1188,
+        "total_earned": 1188,
         "total_redeemed": 0,
-        "updated_at": "2025-12-22T15:33:16.523000Z",
+        "updated_at": "2026-01-05T09:17:41.756000Z",
         "created_at": "2025-12-22T15:33:16.522000Z",
         "id": {
             "$oid": "694964bcf8c92b5bc106007a"
@@ -34,10 +34,10 @@
     },
     {
         "customer_id": "694964c5f8c92b5bc106007c",
-        "balance": 34,
-        "total_earned": 34,
+        "balance": 286,
+        "total_earned": 286,
         "total_redeemed": 0,
-        "updated_at": "2025-12-22T15:35:29.110000Z",
+        "updated_at": "2026-01-02T10:18:57.398000Z",
         "created_at": "2025-12-22T15:35:29.109000Z",
         "id": {
             "$oid": "69496541f8c92b5bc1060082"
@@ -52,6 +52,39 @@
         "created_at": "2025-12-22T15:53:07.908000Z",
         "id": {
             "$oid": "69496963f8c92b5bc1060092"
+        }
+    },
+    {
+        "customer_id": "6958217c263432b44a0246e3",
+        "balance": 126,
+        "total_earned": 126,
+        "total_redeemed": 0,
+        "updated_at": "2026-01-02T20:04:25.396000Z",
+        "created_at": "2026-01-02T20:04:25.395000Z",
+        "id": {
+            "$oid": "695824c9263432b44a0246e7"
+        }
+    },
+    {
+        "customer_id": "6958255b263432b44a0246e9",
+        "balance": 84,
+        "total_earned": 84,
+        "total_redeemed": 0,
+        "updated_at": "2026-01-02T20:07:56.428000Z",
+        "created_at": "2026-01-02T20:07:56.427000Z",
+        "id": {
+            "$oid": "6958259c263432b44a0246ed"
+        }
+    },
+    {
+        "customer_id": "695825f8263432b44a0246ef",
+        "balance": 84,
+        "total_earned": 84,
+        "total_redeemed": 0,
+        "updated_at": "2026-01-02T20:09:55.678000Z",
+        "created_at": "2026-01-02T20:09:55.677000Z",
+        "id": {
+            "$oid": "69582613263432b44a0246f4"
         }
     }
 ]

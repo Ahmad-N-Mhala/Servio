@@ -136,7 +136,7 @@ const selectImage = (image: any) => {
             </div>
             
             <div class="text-center text-xs text-gray-400 pt-4 border-t">
-                Photos provided by <a href="https://unsplash.com/?utm_source=RestoFy&utm_medium=referral" target="_blank" class="underline hover:text-gray-600">Unsplash</a>
+                Photos provided by <a href="https://unsplash.com/?utm_source=Servio&utm_medium=referral" target="_blank" class="underline hover:text-gray-600">Unsplash</a>
             </div>
         </div>
     </Modal>

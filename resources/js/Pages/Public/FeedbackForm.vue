@@ -159,7 +159,7 @@
         </div>
         
         <!-- Footer Info -->
-        <p class="mt-8 text-xs text-center text-gray-400">Powered by RestoFy</p>
+        <p class="mt-8 text-xs text-center text-gray-400">Powered by Servio</p>
     </div>
 </template>
 

@@ -829,7 +829,7 @@
         "table_id": "69457e2c2d33b6a8db028a80",
         "order_number": "QR-0790E347",
         "type": "dine_in",
-        "status": "processing",
+        "status": "served",
         "subtotal": {
             "$numberDecimal": "444.00"
         },
@@ -843,7 +843,7 @@
         "payment_method": "cash",
         "customer_name": "QR Order",
         "customer_phone": null,
-        "updated_at": "2025-12-28T17:19:00.140000Z",
+        "updated_at": "2026-01-01T09:42:55.627000Z",
         "created_at": "2025-12-27T12:03:18.266000Z",
         "completed_at": null,
         "id": {
@@ -855,7 +855,7 @@
         "table_id": "69457e2c2d33b6a8db028a80",
         "order_number": "QR-C2EA2139",
         "type": "dine_in",
-        "status": "processing",
+        "status": "served",
         "subtotal": {
             "$numberDecimal": "666.00"
         },
@@ -869,7 +869,7 @@
         "payment_method": "cash",
         "customer_name": "QR Order",
         "customer_phone": null,
-        "updated_at": "2025-12-28T17:19:00.883000Z",
+        "updated_at": "2026-01-01T09:42:56.387000Z",
         "created_at": "2025-12-27T12:03:36.611000Z",
         "completed_at": null,
         "id": {
@@ -881,7 +881,7 @@
         "table_id": "69457e2c2d33b6a8db028a80",
         "order_number": "QR-CCF71B62",
         "type": "dine_in",
-        "status": "processing",
+        "status": "served",
         "subtotal": {
             "$numberDecimal": "40.00"
         },
@@ -895,7 +895,7 @@
         "payment_method": "cash",
         "customer_name": "QR Order",
         "customer_phone": null,
-        "updated_at": "2025-12-28T17:19:01.447000Z",
+        "updated_at": "2026-01-01T09:42:56.969000Z",
         "created_at": "2025-12-27T12:04:37.897000Z",
         "completed_at": null,
         "id": {
@@ -907,7 +907,7 @@
         "table_id": "69457e2c2d33b6a8db028a80",
         "order_number": "QR-AE387095",
         "type": "dine_in",
-        "status": "processing",
+        "status": "served",
         "subtotal": {
             "$numberDecimal": "472.00"
         },
@@ -921,7 +921,7 @@
         "payment_method": "cash",
         "customer_name": "QR Order",
         "customer_phone": null,
-        "updated_at": "2025-12-27T12:07:57.124000Z",
+        "updated_at": "2026-01-01T09:42:58.413000Z",
         "created_at": "2025-12-27T12:07:28.458000Z",
         "completed_at": null,
         "id": {
@@ -1370,7 +1370,7 @@
         "restaurant_id": "694579e833231912b007b6c3",
         "customer_id": "694963aff8c92b5bc1060074",
         "order_number": "ORD-TI6NDJ5Q",
-        "status": "processing",
+        "status": "completed",
         "type": "takeaway",
         "table_id": null,
         "subtotal": {
@@ -1390,9 +1390,12 @@
         "customer_phone": "+971565616097",
         "notes": null,
         "waiter_id": "694579e733231912b007b6c2",
-        "updated_at": "2025-12-28T17:19:03.005000Z",
+        "updated_at": "2026-01-01T09:42:59.325000Z",
         "created_at": "2025-12-28T17:18:30.182000Z",
-        "completed_at": null,
+        "completed_at": "2026-01-01T09:42:59.325000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "points_earned": 487,
         "id": {
             "$oid": "695166662f954f9a240de5b2"
         }
@@ -1401,7 +1404,7 @@
         "restaurant_id": "694579e833231912b007b6c3",
         "customer_id": "694963aff8c92b5bc1060074",
         "order_number": "ORD-QGWPKFOQ",
-        "status": "processing",
+        "status": "completed",
         "type": "dine_in",
         "table_id": null,
         "subtotal": {
@@ -1421,11 +1424,885 @@
         "customer_phone": "+971565616097",
         "notes": null,
         "waiter_id": "694579e733231912b007b6c2",
-        "updated_at": "2025-12-28T17:19:03.889000Z",
+        "updated_at": "2026-01-01T09:43:00.600000Z",
         "created_at": "2025-12-28T17:18:43.897000Z",
-        "completed_at": null,
+        "completed_at": "2026-01-01T09:43:00.600000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "points_earned": 254,
         "id": {
             "$oid": "695166732f954f9a240de5b5"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "ORD-NW2PR9EA",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": "694ec9374c7837e511064b9f",
+        "subtotal": {
+            "$numberDecimal": "0.00"
+        },
+        "tax": {
+            "$numberDecimal": "0.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "0.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T09:19:34.488000Z",
+        "created_at": "2026-01-01T09:18:23.355000Z",
+        "completed_at": "2026-01-01T09:19:34.488000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "69563bdfaeff1b1ae101c528"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "ORD-YN3VYTXD",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": "694ec9374c7837e511064b9f",
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "3.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "63.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T09:20:44.013000Z",
+        "created_at": "2026-01-01T09:19:59.771000Z",
+        "completed_at": "2026-01-01T09:20:44.013000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "69563c3faeff1b1ae101c52c"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "ORD-G9MFJ32Q",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": "69457e2c2d33b6a8db028a80",
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "3.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "63.00"
+        },
+        "currency": "AED",
+        "customer_name": "Mhala",
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T09:54:38.322000Z",
+        "created_at": "2026-01-01T09:53:15.379000Z",
+        "completed_at": "2026-01-01T09:54:38.321000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "points_earned": 63,
+        "id": {
+            "$oid": "6956440baeff1b1ae101c531"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "69569fca01134f518209abf2",
+        "order_number": "ORD-38RUKWHH",
+        "status": "cancelled",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "180.00"
+        },
+        "tax": {
+            "$numberDecimal": "9.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "189.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+97148484848",
+        "notes": "Cancelled by Kitchen: Cancelled for testing",
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T16:36:50.276000Z",
+        "created_at": "2026-01-01T16:24:42.389000Z",
+        "completed_at": null,
+        "payment_method": "cash",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "69569fca01134f518209abf3"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "ORD-GIFSBQUH",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "40.00"
+        },
+        "tax": {
+            "$numberDecimal": "2.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "42.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T18:56:54.311000Z",
+        "created_at": "2026-01-01T16:35:08.643000Z",
+        "additional_charge": {
+            "$numberDecimal": "0.00"
+        },
+        "additional_charge_type": "fixed",
+        "additional_charge_value": {
+            "$numberDecimal": "0.00"
+        },
+        "discount_type": "fixed",
+        "discount_value": {
+            "$numberDecimal": "0.00"
+        },
+        "completed_at": "2026-01-01T18:56:54.311000Z",
+        "payment_method": "cash",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "6956a23c01134f518209abf7"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "ORD-GQD4ALDJ",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": "69457e2c2d33b6a8db028a80",
+        "subtotal": {
+            "$numberDecimal": "80.00"
+        },
+        "tax": {
+            "$numberDecimal": "4.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "84.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T18:56:54.845000Z",
+        "created_at": "2026-01-01T16:41:14.328000Z",
+        "completed_at": "2026-01-01T18:56:54.845000Z",
+        "payment_method": "cash",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "6956a3aa01134f518209abfa"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "ORD-26VSR28Z",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": "694ec9374c7837e511064b9f",
+        "subtotal": {
+            "$numberDecimal": "200.00"
+        },
+        "tax": {
+            "$numberDecimal": "10.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "210.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-01T18:57:17.482000Z",
+        "created_at": "2026-01-01T16:55:34.148000Z",
+        "additional_charge": {
+            "$numberDecimal": "0.00"
+        },
+        "additional_charge_type": "fixed",
+        "additional_charge_value": {
+            "$numberDecimal": "0.00"
+        },
+        "discount_type": "fixed",
+        "discount_value": {
+            "$numberDecimal": "0.00"
+        },
+        "completed_at": "2026-01-01T18:57:17.482000Z",
+        "payment_method": "cash",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "6956a70601134f518209abff"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "33",
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "240.00"
+        },
+        "tax": {
+            "$numberDecimal": "12.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "256.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T19:21:14.623000Z",
+        "created_at": "2026-01-01T19:17:39.054000Z",
+        "completed_at": "2026-01-02T19:21:14.623000Z",
+        "additional_charge": {
+            "$numberDecimal": "4.00"
+        },
+        "additional_charge_type": "fixed",
+        "additional_charge_value": {
+            "$numberDecimal": "4.00"
+        },
+        "discount_type": "fixed",
+        "discount_value": {
+            "$numberDecimal": "0.00"
+        },
+        "payment_method": "card",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "6956c85301134f518209ac04"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694964c5f8c92b5bc106007c",
+        "order_number": "ORD-QHW3FITY",
+        "transaction_number": 35,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "3.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "63.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+97143434",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T10:18:57.393000Z",
+        "created_at": "2026-01-01T19:21:21.548000Z",
+        "completed_at": "2026-01-02T10:18:57.393000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "points_earned": 63,
+        "id": {
+            "$oid": "6956c93101134f518209ac08"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694964c5f8c92b5bc106007c",
+        "order_number": "ORD-260102-0036",
+        "transaction_number": 36,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "180.00"
+        },
+        "tax": {
+            "$numberDecimal": "9.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "189.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+97143434",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T09:55:18.633000Z",
+        "created_at": "2026-01-02T09:40:23.788000Z",
+        "completed_at": "2026-01-02T09:55:18.633000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "points_earned": 189,
+        "id": {
+            "$oid": "695792873aaf0cdc0b05ce32"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "ORD-260102-0037",
+        "transaction_number": 37,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "20.00"
+        },
+        "tax": {
+            "$numberDecimal": "1.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "3.00"
+        },
+        "total": {
+            "$numberDecimal": "18.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T10:18:28.304000Z",
+        "created_at": "2026-01-02T09:41:07.631000Z",
+        "completed_at": "2026-01-02T10:18:28.304000Z",
+        "additional_charge": {
+            "$numberDecimal": "0.00"
+        },
+        "additional_charge_type": "fixed",
+        "additional_charge_value": {
+            "$numberDecimal": "0.00"
+        },
+        "discount_type": "fixed",
+        "discount_value": {
+            "$numberDecimal": "3.00"
+        },
+        "payment_method": "card",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "695792b33aaf0cdc0b05ce35"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694587c52d33b6a8db028a9a",
+        "order_number": "38",
+        "transaction_number": 38,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "440.00"
+        },
+        "tax": {
+            "$numberDecimal": "22.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "462.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+97133333",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T19:48:21.967000Z",
+        "created_at": "2026-01-02T09:50:38.889000Z",
+        "completed_at": "2026-01-02T19:48:21.967000Z",
+        "additional_charge": {
+            "$numberDecimal": "0.00"
+        },
+        "additional_charge_type": "fixed",
+        "additional_charge_value": {
+            "$numberDecimal": "0.00"
+        },
+        "discount_type": "fixed",
+        "discount_value": {
+            "$numberDecimal": "0.00"
+        },
+        "payment_method": "card",
+        "payment_status": "paid",
+        "points_earned": 462,
+        "id": {
+            "$oid": "695794ee3aaf0cdc0b05ce37"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "6958217c263432b44a0246e3",
+        "order_number": "39",
+        "transaction_number": 39,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "120.00"
+        },
+        "tax": {
+            "$numberDecimal": "6.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "126.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971434343434",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T20:04:25.393000Z",
+        "created_at": "2026-01-02T19:50:20.235000Z",
+        "completed_at": null,
+        "points_earned": 126,
+        "id": {
+            "$oid": "6958217c263432b44a0246e4"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "6958255b263432b44a0246e9",
+        "order_number": "40",
+        "transaction_number": 40,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "80.00"
+        },
+        "tax": {
+            "$numberDecimal": "4.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "84.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+9715656132323",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T20:07:56.425000Z",
+        "created_at": "2026-01-02T20:06:51.475000Z",
+        "points_earned": 84,
+        "id": {
+            "$oid": "6958255b263432b44a0246ea"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "695825f8263432b44a0246ef",
+        "order_number": "41",
+        "transaction_number": 41,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "80.00"
+        },
+        "tax": {
+            "$numberDecimal": "4.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "84.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+9715454545454545",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-02T20:09:55.674000Z",
+        "created_at": "2026-01-02T20:09:28.073000Z",
+        "completed_at": null,
+        "points_earned": 84,
+        "id": {
+            "$oid": "695825f8263432b44a0246f0"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694587c52d33b6a8db028a9a",
+        "order_number": "ORD-B3EEK60O",
+        "total": {
+            "$numberDecimal": "150.00"
+        },
+        "status": "completed",
+        "feedback_token": "KCx7joMSTxq6l2advHWFm4j6NIOsT3YG",
+        "payment_status": "paid",
+        "payment_method": "cash",
+        "updated_at": "2026-01-03T14:44:48.748000Z",
+        "created_at": "2026-01-03T14:44:48.748000Z",
+        "id": {
+            "$oid": "69592b608f3416fd510ecf42"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "42",
+        "transaction_number": 42,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "2.91"
+        },
+        "discount_amount": {
+            "$numberDecimal": "1.80"
+        },
+        "total": {
+            "$numberDecimal": "61.11"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:41.062000Z",
+        "created_at": "2026-01-04T20:00:16.872000Z",
+        "completed_at": "2026-01-05T09:17:41.062000Z",
+        "points_earned": 61,
+        "id": {
+            "$oid": "695ac6d050b9f0867608de0b"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "43",
+        "transaction_number": 43,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "3.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "63.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:41.237000Z",
+        "created_at": "2026-01-04T20:01:37.455000Z",
+        "completed_at": "2026-01-05T09:17:41.237000Z",
+        "points_earned": 63,
+        "id": {
+            "$oid": "695ac72150b9f0867608de0d"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "44",
+        "transaction_number": 44,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "2.91"
+        },
+        "discount_amount": {
+            "$numberDecimal": "1.80"
+        },
+        "total": {
+            "$numberDecimal": "61.11"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:41.408000Z",
+        "created_at": "2026-01-04T20:07:14.317000Z",
+        "completed_at": "2026-01-05T09:17:41.408000Z",
+        "points_earned": 61,
+        "id": {
+            "$oid": "695ac87250b9f0867608de0f"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "45",
+        "transaction_number": 45,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "20.00"
+        },
+        "tax": {
+            "$numberDecimal": "0.97"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.60"
+        },
+        "total": {
+            "$numberDecimal": "20.37"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:41.586000Z",
+        "created_at": "2026-01-04T20:13:32.054000Z",
+        "completed_at": "2026-01-05T09:17:41.586000Z",
+        "points_earned": 20,
+        "id": {
+            "$oid": "695ac9ec50b9f0867608de11"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "46",
+        "transaction_number": 46,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "2.91"
+        },
+        "discount_amount": {
+            "$numberDecimal": "1.80"
+        },
+        "total": {
+            "$numberDecimal": "61.11"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:41.753000Z",
+        "created_at": "2026-01-04T20:16:13.989000Z",
+        "completed_at": "2026-01-05T09:17:41.753000Z",
+        "points_earned": 61,
+        "id": {
+            "$oid": "695aca8d50b9f0867608de13"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "47",
+        "transaction_number": 47,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "3.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "63.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:40.726000Z",
+        "created_at": "2026-01-04T20:47:45.014000Z",
+        "completed_at": "2026-01-05T09:17:40.726000Z",
+        "points_earned": 63,
+        "id": {
+            "$oid": "695ad1f150b9f0867608de15"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": "694963aff8c92b5bc1060074",
+        "order_number": "48",
+        "transaction_number": 48,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "20.00"
+        },
+        "tax": {
+            "$numberDecimal": "1.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "21.00"
+        },
+        "currency": "AED",
+        "customer_name": null,
+        "customer_phone": "+971565616097",
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:40.889000Z",
+        "created_at": "2026-01-05T07:32:11.182000Z",
+        "completed_at": "2026-01-05T09:17:40.888000Z",
+        "points_earned": 21,
+        "id": {
+            "$oid": "695b68fbbb2bb5d336006182"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "49",
+        "transaction_number": 49,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "60.00"
+        },
+        "tax": {
+            "$numberDecimal": "3.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "63.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:36.540000Z",
+        "created_at": "2026-01-05T08:29:27.439000Z",
+        "completed_at": "2026-01-05T09:17:36.540000Z",
+        "id": {
+            "$oid": "695b7667bb2bb5d336006188"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "customer_id": null,
+        "order_number": "50",
+        "transaction_number": 50,
+        "status": "completed",
+        "type": "dine_in",
+        "table_id": null,
+        "subtotal": {
+            "$numberDecimal": "20.00"
+        },
+        "tax": {
+            "$numberDecimal": "1.00"
+        },
+        "discount_amount": {
+            "$numberDecimal": "0.00"
+        },
+        "total": {
+            "$numberDecimal": "21.00"
+        },
+        "currency": "AED",
+        "customer_name": "Guest",
+        "customer_phone": null,
+        "notes": null,
+        "waiter_id": "694579e733231912b007b6c2",
+        "updated_at": "2026-01-05T09:17:40.539000Z",
+        "created_at": "2026-01-05T08:33:21.107000Z",
+        "completed_at": "2026-01-05T09:17:40.539000Z",
+        "payment_method": "card",
+        "payment_status": "paid",
+        "id": {
+            "$oid": "695b7751bb2bb5d33600618c"
         }
     }
 ]

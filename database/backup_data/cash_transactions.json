@@ -220,5 +220,117 @@
         "id": {
             "$oid": "6950fe45b7507517d40c492c"
         }
+    },
+    {
+        "cash_register_id": "69564a57aeff1b1ae101c539",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "type": "opening",
+        "amount": {
+            "$numberDecimal": "3.00"
+        },
+        "balance_after": {
+            "$numberDecimal": "3.00"
+        },
+        "notes": "Cash register opened",
+        "updated_at": "2026-01-01T10:20:07.596000Z",
+        "created_at": "2026-01-01T10:20:07.596000Z",
+        "id": {
+            "$oid": "69564a57aeff1b1ae101c53a"
+        }
+    },
+    {
+        "cash_register_id": "69564a57aeff1b1ae101c539",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "order_id": "69569fca01134f518209abf3",
+        "type": "sale",
+        "amount": {
+            "$numberDecimal": "189.00"
+        },
+        "balance_after": {
+            "$numberDecimal": "192.00"
+        },
+        "notes": "Cash payment for order #69569fca01134f518209abf3",
+        "updated_at": "2026-01-01T16:28:47.266000Z",
+        "created_at": "2026-01-01T16:28:47.266000Z",
+        "id": {
+            "$oid": "6956a0bf01134f518209abf5"
+        }
+    },
+    {
+        "cash_register_id": "69564a57aeff1b1ae101c539",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "order_id": "6956a23c01134f518209abf7",
+        "type": "sale",
+        "amount": {
+            "$numberDecimal": "42.00"
+        },
+        "balance_after": {
+            "$numberDecimal": "234.00"
+        },
+        "notes": "Cash payment for order #6956a23c01134f518209abf7",
+        "updated_at": "2026-01-01T16:40:45.526000Z",
+        "created_at": "2026-01-01T16:40:45.526000Z",
+        "id": {
+            "$oid": "6956a38d01134f518209abf9"
+        }
+    },
+    {
+        "cash_register_id": "69564a57aeff1b1ae101c539",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "order_id": "6956a3aa01134f518209abfa",
+        "type": "sale",
+        "amount": {
+            "$numberDecimal": "84.00"
+        },
+        "balance_after": {
+            "$numberDecimal": "318.00"
+        },
+        "notes": "Cash payment for order #6956a3aa01134f518209abfa",
+        "updated_at": "2026-01-01T16:41:25.733000Z",
+        "created_at": "2026-01-01T16:41:25.733000Z",
+        "id": {
+            "$oid": "6956a3b501134f518209abfd"
+        }
+    },
+    {
+        "cash_register_id": "69564a57aeff1b1ae101c539",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "order_id": "6956a70601134f518209abff",
+        "type": "sale",
+        "amount": {
+            "$numberDecimal": "210.00"
+        },
+        "balance_after": {
+            "$numberDecimal": "528.00"
+        },
+        "notes": "Cash payment for order #6956a70601134f518209abff",
+        "updated_at": "2026-01-01T18:57:17.484000Z",
+        "created_at": "2026-01-01T18:57:17.484000Z",
+        "id": {
+            "$oid": "6956c38d01134f518209ac03"
+        }
+    },
+    {
+        "cash_register_id": "69564a57aeff1b1ae101c539",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "type": "closing",
+        "amount": {
+            "$numberDecimal": "0.00"
+        },
+        "balance_after": {
+            "$numberDecimal": "500.00"
+        },
+        "notes": "Cash register closed",
+        "updated_at": "2026-01-01T19:32:34.628000Z",
+        "created_at": "2026-01-01T19:32:34.628000Z",
+        "id": {
+            "$oid": "6956cbd201134f518209ac0b"
+        }
     }
 ]

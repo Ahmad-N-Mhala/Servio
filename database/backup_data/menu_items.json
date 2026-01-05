@@ -2,26 +2,6 @@
     {
         "restaurant_id": "694579e833231912b007b6c3",
         "menu_category_id": "694abaf65adaff86060a6d1e",
-        "name": "{\"en\":\"beef\",\"ar\":null}",
-        "description": null,
-        "price": {
-            "$numberDecimal": "222.00"
-        },
-        "currency": "AED",
-        "images": "[\"menu-items\\\/q3kaBUo5AnVPCKpig51xigL0Os8PR9LcHqIa7Z3V.jpg\"]",
-        "image": "menu-items\/q3kaBUo5AnVPCKpig51xigL0Os8PR9LcHqIa7Z3V.jpg",
-        "sort_order": "0",
-        "allergens": null,
-        "is_available": true,
-        "updated_at": "2025-12-27T12:00:04.676000Z",
-        "created_at": "2025-12-27T12:00:04.676000Z",
-        "id": {
-            "$oid": "694fca447b83a4bfd50194fa"
-        }
-    },
-    {
-        "restaurant_id": "694579e833231912b007b6c3",
-        "menu_category_id": "694abaf65adaff86060a6d1e",
         "name": "{\"en\":\"ds\",\"ar\":null}",
         "description": null,
         "price": {
@@ -32,31 +12,12 @@
         "image": null,
         "sort_order": "0",
         "allergens": null,
-        "is_available": true,
-        "updated_at": "2025-12-27T12:03:54.823000Z",
+        "is_available": "0",
+        "updated_at": "2026-01-05T09:12:36.218000Z",
         "created_at": "2025-12-27T12:03:54.823000Z",
+        "type": "item",
         "id": {
             "$oid": "694fcb2a7b83a4bfd50194ff"
-        }
-    },
-    {
-        "restaurant_id": "694579e833231912b007b6c3",
-        "menu_category_id": "694fcb2e7b83a4bfd5019500",
-        "name": "{\"en\":\"ds\",\"ar\":null}",
-        "description": null,
-        "price": {
-            "$numberDecimal": "8.00"
-        },
-        "currency": "AED",
-        "images": "[\"menu-items\\\/xTIRQ7lQRsP6dab6YuK4XglosJ7TRRkmT7vwnWbB.jpg\",\"menu-items\\\/haa3DzCxtDuRmC0RG2LmC2PsIp0ltPftzuANydsr.jpg\"]",
-        "image": "menu-items\/xTIRQ7lQRsP6dab6YuK4XglosJ7TRRkmT7vwnWbB.jpg",
-        "sort_order": "0",
-        "allergens": null,
-        "is_available": true,
-        "updated_at": "2025-12-31T04:44:20.726000Z",
-        "created_at": "2025-12-27T12:04:04.056000Z",
-        "id": {
-            "$oid": "694fcb347b83a4bfd5019501"
         }
     },
     {
@@ -82,21 +43,24 @@
     {
         "restaurant_id": "694579e833231912b007b6c3",
         "menu_category_id": "694fcb2e7b83a4bfd5019500",
-        "name": "{\"en\":\"y\",\"ar\":null}",
-        "description": null,
+        "name": "{\"en\":\"Burger\",\"ar\":\"\u0628\u064a\u0628\u0628\"}",
+        "description": "dsadasd dsadasdads,",
         "price": {
-            "$numberDecimal": "9.00"
+            "$numberDecimal": "60.00"
         },
         "currency": "AED",
-        "images": "[\"menu-items\\\/KF41Fp3QqAIfFdNEigBHJVmewbFEkML1bnGQAd1h.jpg\",\"menu-items\\\/9ANeDw1iVlvKOagjMEfCInauLpOpFZKVVnrgntvw.jpg\"]",
-        "image": "menu-items\/KF41Fp3QqAIfFdNEigBHJVmewbFEkML1bnGQAd1h.jpg",
+        "images": "[\"menu-items\\\/xBiRyCsB2EuP3sWNJidzgAC38epXbEHmL0wBmDB6.jpg\",\"menu-items\\\/izybwqMUNiw86c5Iwd6BuBXoncGFbJHlMEoWkFoT.jpg\"]",
+        "image": "menu-items\/xBiRyCsB2EuP3sWNJidzgAC38epXbEHmL0wBmDB6.jpg",
         "sort_order": "0",
         "allergens": null,
         "is_available": true,
-        "updated_at": "2025-12-30T19:17:34.740000Z",
-        "created_at": "2025-12-30T19:17:34.740000Z",
+        "updated_at": "2026-01-05T12:55:30.916000Z",
+        "created_at": "2026-01-01T09:18:00.190000Z",
+        "recipe": "[{\"ingredient_id\":\"69563aceaeff1b1ae101c522\",\"quantity\":0.05,\"usage_quantity\":0.05,\"usage_unit\":null}]",
+        "type": "item",
+        "sku": null,
         "id": {
-            "$oid": "6954254eed481145dc0e0e02"
+            "$oid": "69563bc8aeff1b1ae101c526"
         }
     }
 ]

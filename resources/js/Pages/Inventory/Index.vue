@@ -188,7 +188,8 @@
         <!-- Add Stock Modal -->
         <Modal :show="showStockModal" @close="closeStockModal">
             <div class="p-6">
-                   {{ $t('inventory_page.add_stock') }}: {{ getLocaleName(selectedItem?.name) }}
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                    {{ $t('inventory_page.add_stock') }}: {{ getLocaleName(selectedItem?.name) }}
                 </h3>
                 <form @submit.prevent="submitAddStock">
                     <div class="mb-4">

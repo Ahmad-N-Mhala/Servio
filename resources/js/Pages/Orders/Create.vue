@@ -136,9 +136,9 @@
                             v-model="form.table_id" 
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition-colors"
                         >
-                            <option :value="null">No table assigned</option>
+                            <option :value="null">{{ $t('orders.no_table_assigned') }}</option>
                             <option v-for="table in tablesList" :key="table.id" :value="table.id" :disabled="!table.is_available">
-                                {{ table.name }} ({{ table.capacity }} seats) - {{ table.location || 'Main' }}{{ !table.is_available ? ' [OCCUPIED]' : '' }}
+                                {{ table.name }} ({{ table.capacity }} {{ $t('common.guest') }}) - {{ table.location || 'Main' }}{{ !table.is_available ? ' [' + $t('common.sold_out') + ']' : '' }}
                             </option>
                         </select>
                         <p v-if="form.errors.table_id" class="mt-1 text-sm text-red-600">{{ form.errors.table_id }}</p>
@@ -173,7 +173,7 @@
                                         v-if="selectedReward?.reward_type === 'free_item' && (selectedReward.menu_item_ids ? selectedReward.menu_item_ids.includes(item.id) : selectedReward.menu_item_id === item.id)" 
                                         class="absolute top-3 left-3 z-20 bg-green-500 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-full shadow-sm"
                                     >
-                                        Free
+                                        {{ $t('loyalty.free') }}
                                     </div>
 
                                     <!-- Stock Warning Overlay -->
@@ -186,7 +186,7 @@
                                             :class="item.inventory_status?.sold_out ? 'bg-red-600' : 'bg-gray-900/80'"
                                             :title="item.inventory_status?.sold_out ? 'Missing: ' + item.inventory_status.missing_ingredients.join(', ') : ''"
                                         >
-                                            {{ item.inventory_status?.sold_out ? 'SOLD OUT' : getStockMessage(item.id) }}
+                                            {{ item.inventory_status?.sold_out ? $t('common.sold_out') : getStockMessage(item.id) }}
                                         </span>
                                     </div>
 
@@ -268,9 +268,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                             </svg>
                         </div>
-                        {{ $t('loyalty.redeem') || 'Redeem Loyalty Rewards' }}
+                        {{ $t('loyalty.redeem_rewards') }}
                         <span v-if="selectedCustomer" class="ml-auto text-sm font-normal text-gray-500">
-                            {{ selectedCustomer.loyalty_points }} points available
+                            {{ selectedCustomer.loyalty_points }} {{ $t('loyalty.points') }} {{ $t('common.available') }}
                         </span>
                     </h3>
                     
@@ -302,14 +302,14 @@
                             <div class="mt-3 flex items-center justify-between">
                                 <span :class="['px-2 py-1 rounded-full text-xs font-semibold', 
                                     canRedeemReward(reward) ? 'bg-purple-100 text-purple-700' : 'bg-gray-200 text-gray-600']">
-                                    {{ reward.points_required }} points
+                                    {{ reward.points_required }} {{ $t('loyalty.points') }}
                                 </span>
                                 <span class="text-sm font-semibold text-green-600">
                                     {{ getRewardValue(reward) }}
                                 </span>
                             </div>
                              <p v-if="reward.min_order_value && subtotal < reward.min_order_value" class="text-xs text-red-500 mt-1">
-                                Min Order: {{ currencyCode }} {{ reward.min_order_value }}
+                                {{ $t('loyalty.min_order', { amount: currencyCode + ' ' + reward.min_order_value }) }}
                             </p>
                         </div>
                     </div>
@@ -318,7 +318,7 @@
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        Enter customer phone to check loyalty points and redeem rewards
+                        {{ $t('loyalty.check_points_hint') }}
                     </p>
                 </div>
 
@@ -343,7 +343,7 @@
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2">
                                         <span class="font-medium">{{ item.name }}</span>
-                                        <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">1 FREE</span>
+                                        <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">{{ $t('loyalty.one_free') }}</span>
                                         <span class="text-gray-500">× {{ item.qty }}</span>
                                     </div>
                                     <div v-if="item.extras && item.extras.length > 0" class="mt-1 text-xs text-blue-600 font-medium space-y-0.5">
@@ -383,7 +383,7 @@
                     
                     <div class="space-y-2 pt-3 border-t-2 border-gray-200">
                         <div class="flex justify-between text-gray-600">
-                            <span>Subtotal</span>
+                            <span>{{ $t('common.subtotal') }}</span>
                             <span>{{ currencyCode }} {{ subtotal.toFixed(2) }}</span>
                         </div>
                         
@@ -393,13 +393,13 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                                 </svg>
-                                Reward Discount
+                                {{ $t('loyalty.reward_discount') }}
                             </span>
                             <span>-{{ currencyCode }} {{ discountAmount.toFixed(2) }}</span>
                         </div>
                         
                         <div class="flex justify-between text-gray-500">
-                            <span>Tax (5%)</span>
+                            <span>{{ $t('pos.tax') }} (5%)</span>
                             <span>{{ currencyCode }} {{ tax.toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between text-xl font-bold text-primary pt-2">
@@ -413,8 +413,8 @@
                         <div v-if="selectedReward && !otpVerified" class="mt-4 p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
                             <div class="flex flex-col gap-3">
                                 <div class="flex justify-between items-center">
-                                    <label class="text-sm font-bold text-gray-700">Verify Redemption</label>
-                                    <span class="text-xs text-gray-500">Code sent to {{ selectedCustomer?.phone }}</span>
+                                    <label class="text-sm font-bold text-gray-700">{{ $t('loyalty.verify_redemption') }}</label>
+                                    <span class="text-xs text-gray-500">{{ $t('loyalty.code_sent_to', { phone: selectedCustomer?.phone }) }}</span>
                                 </div>
                                 
                                 <div class="flex gap-2">
@@ -422,7 +422,7 @@
                                         v-model="otpInput"
                                         type="text" 
                                         maxlength="6"
-                                        placeholder="Enter 6-digit OTP"
+                                        :placeholder="$t('loyalty.enter_otp')"
                                         class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-center font-mono tracking-widest uppercase transition-colors"
                                         :class="{'border-red-500 bg-red-50': otpError}"
                                         @input="otpError = ''"
@@ -433,7 +433,7 @@
                                         size="sm"
                                         @click="requestOtp"
                                     >
-                                        Send Code
+                                        {{ $t('loyalty.send_code') }}
                                     </Button>
                                     <Button 
                                         type="button" 
@@ -442,7 +442,7 @@
                                         @click="verifyOtp"
                                         :disabled="otpInput.length !== 6"
                                     >
-                                        Verify
+                                        {{ $t('common.verify') }}
                                     </Button>
                                 </div>
 
@@ -452,14 +452,14 @@
                                 </div>
 
                                 <div v-if="otpSent || otpTimer > 0" class="flex justify-between items-center text-xs">
-                                    <span v-if="otpSent" class="text-green-600">OTP Sent!</span>
+                                    <span v-if="otpSent" class="text-green-600">{{ $t('loyalty.otp_sent') }}</span>
                                     <button 
                                         type="button" 
                                         @click="requestOtp" 
                                         :disabled="otpTimer > 0"
                                         class="text-purple-600 font-medium hover:underline disabled:text-gray-400 disabled:no-underline"
                                     >
-                                        {{ otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend Code' }}
+                                        {{ otpTimer > 0 ? $t('loyalty.resend_in', { seconds: otpTimer }) : $t('loyalty.resend_code') }}
                                     </button>
                                 </div>
                             </div>
@@ -469,10 +469,10 @@
                         <div v-if="selectedReward && otpVerified" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
                             <span class="flex items-center gap-2 text-sm font-bold text-green-700">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                Reward Verified
+                                {{ $t('loyalty.reward_verified') }}
                             </span>
                             <button @click="otpVerified = false; form.otp = ''; otpInput = ''" class="text-xs text-gray-500 underline hover:text-red-500">
-                                Change
+                                {{ $t('loyalty.change') }}
                             </button>
                         </div>
                     </div>
@@ -480,12 +480,12 @@
 
                 <!-- Notes -->
                 <div class="glass-card rounded-2xl p-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Special Instructions (optional)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('orders.special_instructions') }} ({{ $t('common.optional') }})</label>
                     <textarea 
                         v-model="form.notes"
                         rows="3"
                         class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4"
-                        placeholder="Any special requests or instructions..."
+                        :placeholder="$t('orders.instructions_placeholder')"
                     ></textarea>
                 </div>
 
@@ -540,24 +540,24 @@
 
 
         <!-- Customize Item Modal -->
-        <Modal :show="showCustomizeModal" @close="showCustomizeModal = false" :title="customizingItem ? getLocaleName(customizingItem.name) : 'Customize'" size="md">
+        <Modal :show="showCustomizeModal" @close="showCustomizeModal = false" :title="customizingItem ? getLocaleName(customizingItem.name) : $t('menu.customize')" size="md">
             <div v-if="customizingItem" class="space-y-6">
                 <!-- Meal Contents -->
                 <div v-if="customizingItem.type === 'meal'" class="bg-blue-50 p-4 rounded-xl">
-                    <h4 class="font-bold text-blue-900 mb-2 text-sm uppercase">Meal Includes:</h4>
+                    <h4 class="font-bold text-blue-900 mb-2 text-sm uppercase">{{ $t('menu.meal_includes') }}:</h4>
                     <ul class="list-disc list-inside text-sm text-blue-800 space-y-1">
                         <!-- Ideally fetch child item names via relations in controller -->
                         <!-- For now, assuming bundle logic backend handles availability checks -->
                         <li v-for="(bundle, idx) in customizingItem.bundles" :key="idx">
                              {{ bundle.quantity }}x Item #{{ bundle.child_menu_item_id }}
                         </li>
-                        <li v-if="!customizingItem.bundles?.length">No items listed.</li>
+                        <li v-if="!customizingItem.bundles?.length">{{ $t('menu.no_options') }}</li>
                     </ul>
                 </div>
 
                 <!-- Extras -->
                 <div v-if="customizingItem.extras && customizingItem.extras.length > 0">
-                    <h4 class="font-bold text-gray-900 mb-3">Add Extras</h4>
+                    <h4 class="font-bold text-gray-900 mb-3">{{ $t('menu.add_extras') }}</h4>
                     <div class="space-y-2">
                         <div 
                             v-for="extra in customizingItem.extras" 
@@ -571,8 +571,8 @@
                             <span class="font-medium text-gray-700">
                                 {{ getLocaleName(extra.name) }}
                                 <span v-if="extra.ingredient_id" class="text-xs text-gray-400 block font-normal">
-                                    Stock: {{ props.ingredientStocks?.[extra.ingredient_id]?.current_stock || 'N/A' }} 
-                                    (Req: {{ extra.quantity }})
+                                    {{ $t('menu.stock_available', { stock: props.ingredientStocks?.[extra.ingredient_id]?.current_stock || 'N/A' }) }} 
+                                    ({{ $t('menu.required', { qty: extra.quantity }) }})
                                 </span>
                             </span>
                             <span class="text-primary font-bold">+ {{ currencyCode }} {{ Number(extra.price).toFixed(2) }}</span>
@@ -580,12 +580,12 @@
                     </div>
                 </div>
                 <div v-else class="text-center text-gray-500 italic py-4">
-                    No extra options available for this item.
+                    {{ $t('menu.no_options') }}
                 </div>
 
                 <div class="flex gap-3 pt-2">
                     <Button type="button" variant="secondary" @click="showCustomizeModal = false" class="flex-1">{{ $t('common.cancel') }}</Button>
-                    <Button type="button" @click="addCustomizedItem" class="flex-1" :disabled="selectedExtras.length > 0 && !canAddCustomizedItem">Add to Order</Button>
+                    <Button type="button" @click="addCustomizedItem" class="flex-1" :disabled="selectedExtras.length > 0 && !canAddCustomizedItem">{{ $t('menu.add_to_order') }}</Button>
                 </div>
             </div>
         </Modal>
@@ -1006,10 +1006,10 @@ const getStockMessage = (itemId: number): string => {
     if (!canAddItem(itemId)) {
          // Check if it's due to Sold Out status
          const itemInMenu = categoriesList.value.flatMap(c => c.items).find(i => i.id === itemId);
-         if (itemInMenu?.inventory_status?.sold_out) return 'Sold Out';
+         if (itemInMenu?.inventory_status?.sold_out) return t('common.sold_out');
          
          // If not sold out but can't add, it's low stock/max reached
-         return 'Max stock reached';
+         return t('common.sold_out'); // or specific max_message if we had one
     }
 
     const stockInfo = props.stockAvailability?.[itemId];
@@ -1021,18 +1021,18 @@ const getStockMessage = (itemId: number): string => {
     const remaining = stockInfo.max_quantity - currentQty;
     
     if (!stockInfo.available || stockInfo.max_quantity === 0) {
-        return 'Out of stock';
+        return t('common.sold_out');
     }
     
     if (remaining === 0) {
-        return 'Maximum quantity reached';
+        return t('common.sold_out');
     }
     
     if (remaining <= 3) {
-        return `Only ${remaining} left`;
+        return t('menu.stock_available', { stock: remaining });
     }
     
-    return `${stockInfo.max_quantity} available`;
+    return t('menu.stock_available', { stock: stockInfo.max_quantity });
 };
 
 
@@ -1099,13 +1099,13 @@ const toggleReward = (reward: Reward) => {
 const getRewardTypeLabel = (reward: Reward): string => {
     switch (reward.reward_type) {
         case 'discount_percentage':
-            return `${reward.discount_value}% off your order`;
+            return t('loyalty.discount_percentage_off', { value: reward.discount_value });
         case 'discount_fixed':
-            return `${currencyCode.value} ${reward.discount_value} off`;
+            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + reward.discount_value });
         case 'free_item':
-            return 'Free item';
+            return t('loyalty.free_item');
         case 'cashback':
-            return `${reward.discount_value}% cashback`;
+            return t('loyalty.cashback_back', { value: reward.discount_value });
         default:
             return '';
     }
@@ -1114,13 +1114,13 @@ const getRewardTypeLabel = (reward: Reward): string => {
 const getRewardValue = (reward: Reward): string => {
     switch (reward.reward_type) {
         case 'discount_percentage':
-            return `-${reward.discount_value}%`;
+            return t('loyalty.discount_percentage_off', { value: reward.discount_value });
         case 'discount_fixed':
-            return `-${currencyCode.value} ${reward.discount_value}`;
+            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + reward.discount_value });
         case 'free_item':
-            return 'FREE';
+            return t('loyalty.free_item');
         case 'cashback':
-            return `${reward.discount_value}% back`;
+            return t('loyalty.cashback_back', { value: reward.discount_value });
         default:
             return '';
     }

@@ -1009,5 +1009,130 @@
         "id": {
             "$oid": "6950fbaf6395a5219c017b92"
         }
+    },
+    {
+        "guard_name": "web",
+        "name": "edit_restaurant",
+        "group": "settings",
+        "updated_at": "2026-01-01T09:36:45.641000Z",
+        "created_at": "2026-01-01T09:36:45.641000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "6956402d103e0fc9a10bdb62"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "customize_receipt_template",
+        "updated_at": "2026-01-01T18:00:06.760000Z",
+        "created_at": "2026-01-01T18:00:06.760000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "6956b626c4518f5c40057112"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "view_order_status_screen",
+        "group": "orders",
+        "updated_at": "2026-01-02T09:23:18.629000Z",
+        "created_at": "2026-01-02T09:23:18.629000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "69578e865d8b6bba7d00d4d2"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "manage_order_status_screen",
+        "group": "orders",
+        "updated_at": "2026-01-02T20:02:19.856000Z",
+        "created_at": "2026-01-02T20:02:19.856000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "6958244bd09034543301ca42"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "view_feedback",
+        "group": "feedback",
+        "updated_at": "2026-01-03T08:33:22.916000Z",
+        "created_at": "2026-01-03T08:33:22.916000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "6958d452aa605fd0f500eb92"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "reply_feedback",
+        "group": "feedback",
+        "updated_at": "2026-01-03T08:33:22.918000Z",
+        "created_at": "2026-01-03T08:33:22.918000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "6958d452aa605fd0f500eb93"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "view_plans",
+        "updated_at": "2026-01-04T19:34:43.820000Z",
+        "created_at": "2026-01-04T19:34:43.820000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "695ac0d37a93e4d98307b6f2"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "view_sms_logs",
+        "updated_at": "2026-01-04T19:34:43.822000Z",
+        "created_at": "2026-01-04T19:34:43.822000Z",
+        "model_has_permissions": [
+            {
+                "model_id": "694576bd5de34597d4076ddf",
+                "model_type": "App\\Models\\Role"
+            }
+        ],
+        "id": {
+            "$oid": "695ac0d37a93e4d98307b6f3"
+        }
     }
 ]

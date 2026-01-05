@@ -31,5 +31,12 @@ return [
     'cancel_order' => 'إلغاء الطلب',
     'delete_order' => 'حذف الطلب',
     'status_updated' => 'تم تحديث حالة الطلب بنجاح',
+    'special_instructions' => 'تعليمات خاصة',
+    'instructions_placeholder' => 'أي طلبات خاصة أو تعليمات...',
+    'save_note' => 'حفظ الملاحظة',
+    'save_shortcut' => 'اضغط Cmd/Ctrl + Enter للحفظ بسرعة',
+    'no_table_assigned' => 'لم يتم تعيين طاولة',
+    'summary' => 'ملخص الطلب',
+    'type' => 'نوع الطلب',
 ];
 

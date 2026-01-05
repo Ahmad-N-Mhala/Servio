@@ -2,7 +2,7 @@
     {
         "guard_name": "web",
         "name": "owner",
-        "updated_at": "2025-12-28T09:55:25.616000Z",
+        "updated_at": "2026-01-04T19:36:39.936000Z",
         "created_at": "2025-12-19T16:01:01.328000Z",
         "model_has_roles": [
             {
@@ -36,65 +36,77 @@
             {
                 "model_id": "69503e50eaf319e883077713",
                 "model_type": "App\\Models\\User"
+            },
+            {
+                "model_id": "694579e733231912b007b6c2",
+                "model_type": "App\\Models\\User"
             }
         ],
         "permission_id": [
-            "69457db52d33b6a8db028a44",
-            "69457dbe2d33b6a8db028a45",
-            "69457dda2d33b6a8db028a46",
-            "69457dda2d33b6a8db028a47",
-            "69457dda2d33b6a8db028a48",
-            "69457dda2d33b6a8db028a49",
-            "69457dda2d33b6a8db028a4a",
-            "69457dda2d33b6a8db028a4b",
-            "69457dda2d33b6a8db028a4c",
-            "69457dda2d33b6a8db028a4d",
-            "69457dda2d33b6a8db028a4e",
-            "69457dda2d33b6a8db028a4f",
-            "69457dda2d33b6a8db028a50",
-            "69457dda2d33b6a8db028a52",
-            "69457dda2d33b6a8db028a53",
-            "69457dda2d33b6a8db028a54",
-            "69457dda2d33b6a8db028a55",
-            "69457dda2d33b6a8db028a56",
-            "69457dda2d33b6a8db028a57",
-            "69457dda2d33b6a8db028a58",
-            "69457dda2d33b6a8db028a59",
-            "69457dda2d33b6a8db028a5a",
-            "69457dda2d33b6a8db028a5b",
-            "69457dda2d33b6a8db028a5d",
+            "6958d452aa605fd0f500eb93",
+            "6958d452aa605fd0f500eb92",
+            "69457df72d33b6a8db028a7f",
+            "69457df72d33b6a8db028a7e",
+            "6956b626c4518f5c40057112",
+            "6950fbaf6395a5219c017b92",
+            "6956402d103e0fc9a10bdb62",
+            "69457df72d33b6a8db028a79",
+            "69457df72d33b6a8db028a7a",
+            "69457def2d33b6a8db028a76",
+            "69457def2d33b6a8db028a71",
+            "69457def2d33b6a8db028a72",
+            "69457def2d33b6a8db028a75",
+            "69457def2d33b6a8db028a77",
+            "69457def2d33b6a8db028a6f",
+            "69457def2d33b6a8db028a6e",
+            "69457def2d33b6a8db028a6d",
+            "69457def2d33b6a8db028a70",
+            "69457def2d33b6a8db028a6a",
+            "69457def2d33b6a8db028a68",
+            "6950f584f3b9cfba2b0e5d63",
+            "69457def2d33b6a8db028a67",
+            "69457def2d33b6a8db028a69",
+            "69457def2d33b6a8db028a6b",
+            "69496029f8c92b5bc1060072",
+            "69457def2d33b6a8db028a64",
+            "69457def2d33b6a8db028a63",
+            "69457def2d33b6a8db028a62",
+            "69457def2d33b6a8db028a66",
             "69457dda2d33b6a8db028a5e",
             "69457dda2d33b6a8db028a5f",
             "69457dda2d33b6a8db028a60",
             "69457dda2d33b6a8db028a61",
-            "69457def2d33b6a8db028a62",
-            "69457def2d33b6a8db028a63",
-            "69457def2d33b6a8db028a64",
-            "69457def2d33b6a8db028a66",
-            "69457def2d33b6a8db028a67",
-            "69457def2d33b6a8db028a68",
-            "69457def2d33b6a8db028a69",
-            "69457def2d33b6a8db028a6a",
-            "69457def2d33b6a8db028a6b",
-            "69457def2d33b6a8db028a6d",
-            "69457def2d33b6a8db028a6e",
-            "69457def2d33b6a8db028a6f",
-            "69457def2d33b6a8db028a70",
-            "69457def2d33b6a8db028a71",
-            "69457def2d33b6a8db028a72",
-            "69457def2d33b6a8db028a75",
-            "69457def2d33b6a8db028a76",
-            "69457def2d33b6a8db028a77",
-            "69457df72d33b6a8db028a79",
-            "69457df72d33b6a8db028a7a",
-            "69457df72d33b6a8db028a7b",
-            "69457df72d33b6a8db028a7e",
-            "69457df72d33b6a8db028a7f",
-            "6945814011de44885201d953",
-            "69496029f8c92b5bc1060072",
+            "69457dda2d33b6a8db028a59",
+            "69457dda2d33b6a8db028a5a",
+            "69457dda2d33b6a8db028a5b",
+            "69457dda2d33b6a8db028a5d",
+            "69457dda2d33b6a8db028a56",
+            "69457dda2d33b6a8db028a53",
+            "69457dda2d33b6a8db028a54",
+            "69457dda2d33b6a8db028a55",
+            "69457dda2d33b6a8db028a58",
+            "69457dda2d33b6a8db028a52",
+            "69457dda2d33b6a8db028a57",
+            "69457dda2d33b6a8db028a50",
+            "69457dda2d33b6a8db028a4f",
+            "69578e865d8b6bba7d00d4d2",
+            "69457dda2d33b6a8db028a4a",
+            "69457dda2d33b6a8db028a4d",
+            "69457dda2d33b6a8db028a46",
+            "69457dda2d33b6a8db028a4e",
+            "6958244bd09034543301ca42",
+            "69457dda2d33b6a8db028a4b",
+            "69457dda2d33b6a8db028a4c",
             "6950f584f3b9cfba2b0e5d62",
-            "6950f584f3b9cfba2b0e5d63",
-            "6950fbaf6395a5219c017b92"
+            "69457dda2d33b6a8db028a48",
+            "6945814011de44885201d953",
+            "69457dda2d33b6a8db028a47",
+            "69457dda2d33b6a8db028a49",
+            "69457dbe2d33b6a8db028a45",
+            "69457db52d33b6a8db028a44",
+            "69457df72d33b6a8db028a7b",
+            "695ac0d37a93e4d98307b6f3",
+            "695ac0d37a93e4d98307b6f2"
         ],
         "id": {
             "$oid": "694576bd5de34597d4076ddf"
@@ -103,7 +115,7 @@
     {
         "guard_name": "web",
         "name": "manager",
-        "updated_at": "2025-12-19T16:01:01.330000Z",
+        "updated_at": "2026-01-01T19:49:54.910000Z",
         "created_at": "2025-12-19T16:01:01.330000Z",
         "permission_id": [
             "69457df72d33b6a8db028a7a",
@@ -117,14 +129,14 @@
                 "model_type": "App\\Models\\User"
             },
             {
-                "model_id": "694579e733231912b007b6c2",
-                "model_type": "App\\Models\\User"
-            },
-            {
                 "model_id": "69516c052f954f9a240de5b8",
                 "model_type": "App\\Models\\User"
             }
         ],
+        "display_name": {
+            "en": "Manageers",
+            "ar": "3"
+        },
         "id": {
             "$oid": "694576bd5de34597d4076de0"
         }
@@ -225,6 +237,19 @@
         "created_at": "2025-12-26T18:01:02.896000Z",
         "id": {
             "$oid": "694ecd5e4c7837e511064ba1"
+        }
+    },
+    {
+        "guard_name": "web",
+        "name": "ss",
+        "display_name": {
+            "en": "SSe",
+            "ar": "3"
+        },
+        "updated_at": "2026-01-01T19:50:41.505000Z",
+        "created_at": "2026-01-01T19:50:35.982000Z",
+        "id": {
+            "$oid": "6956d00b01134f518209ac0c"
         }
     }
 ]

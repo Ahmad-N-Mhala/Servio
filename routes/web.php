@@ -26,9 +26,9 @@ Route::group([
     ],
 ], function () {
     // Public Routes
-    Route::get('/', function () {
-        return redirect()->route('login');
-    });
+    // Public Routes
+    Route::get('/', [\App\Http\Controllers\LandingPageController::class, 'index'])->name('home');
+    Route::post('/register-interest', [\App\Http\Controllers\LandingPageController::class, 'registerInterest'])->name('register.interest');
 
     // Public Feedback Routes (Localized) - using /f/ to avoid conflict with admin /feedback/ routes
     Route::get('/f/{identifier}', [\App\Http\Controllers\Tenant\CustomerFeedbackController::class, 'create'])->name('public.feedback.create');
@@ -370,6 +370,17 @@ Route::group([
             Route::post('communication-templates', [\App\Http\Controllers\Admin\CommunicationController::class, 'store'])->name('communication.store');
             Route::put('communication-templates/{template}', [\App\Http\Controllers\Admin\CommunicationController::class, 'update'])->name('communication.update');
             Route::delete('communication-templates/{template}', [\App\Http\Controllers\Admin\CommunicationController::class, 'destroy'])->name('communication.destroy');
+
+            // Landing Page Management
+            Route::get('landing-page', [\App\Http\Controllers\Admin\LandingPageController::class, 'index'])->name('landing.index');
+            Route::post('landing-page/settings', [\App\Http\Controllers\Admin\LandingPageController::class, 'updateSettings'])->name('landing.settings.update');
+            Route::post('landing-page/modules', [\App\Http\Controllers\Admin\LandingPageController::class, 'storeModule'])->name('landing.modules.store');
+            Route::put('landing-page/modules/{landingModule}', [\App\Http\Controllers\Admin\LandingPageController::class, 'updateModule'])->name('landing.modules.update');
+            Route::delete('landing-page/modules/{landingModule}', [\App\Http\Controllers\Admin\LandingPageController::class, 'destroyModule'])->name('landing.modules.destroy');
+
+            // Landing Screenshots
+            Route::post('landing-page/screenshots', [\App\Http\Controllers\Admin\LandingPageController::class, 'storeScreenshot'])->name('landing.screenshots.store');
+            Route::delete('landing-page/screenshots/{landingScreenshot}', [\App\Http\Controllers\Admin\LandingPageController::class, 'destroyScreenshot'])->name('landing.screenshots.destroy');
 
         });
     });

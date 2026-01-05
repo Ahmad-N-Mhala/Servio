@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'welcome' => 'مرحباً بك في RestaurFy',
+    'welcome' => 'Welcome to Servio',
     'subtitle' => 'إدارة عمليات مطعمك',
     'total_orders' => 'إجمالي الطلبات',
     'today_orders' => 'طلبات اليوم',
@@ -16,4 +16,3 @@ return [
     'low_stock_status' => 'مخزون منخفض',
     'critical_status' => 'حرج: لا يكفي لـ :items',
 ];
-

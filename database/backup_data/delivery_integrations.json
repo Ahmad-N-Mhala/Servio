@@ -17,24 +17,5 @@
         "id": {
             "$oid": "694ed40f4c7837e511064ba4"
         }
-    },
-    {
-        "restaurant_id": "694579e833231912b007b6c3",
-        "provider": "sad",
-        "api_key": null,
-        "api_secret": null,
-        "store_id": "ds",
-        "client_id": null,
-        "client_secret": null,
-        "username": null,
-        "password": null,
-        "webhook_secret": "eyJpdiI6Ilh6ZG9WeWxtdURFa3Z4R1N3c2plOVE9PSIsInZhbHVlIjoiV3pIRU44MHZYZEVqb0pscVVjb2c1UT09IiwibWFjIjoiMjU4MjJlYjI2NTkyZTQyYWJhNDNmYzMxZjFmMDc3ZThmZGE2NmViYzU5YWMwMDE1YjQzMDQ5ZWUwZjMxODY2NyIsInRhZyI6IiJ9",
-        "is_enabled": true,
-        "settings": "[]",
-        "updated_at": "2025-12-26T18:37:29.082000Z",
-        "created_at": "2025-12-26T18:37:23.600000Z",
-        "id": {
-            "$oid": "694ed5e34c7837e511064ba5"
-        }
     }
 ]

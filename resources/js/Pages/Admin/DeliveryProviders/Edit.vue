@@ -157,7 +157,7 @@
                                             Webhook URL Template
                                         </label>
                                         <input 
-                                            :value="`https://api.restofy.com/api/webhook/delivery/${form.slug}/{store_id}`"
+                                            :value="`https://api.servio.com/api/webhook/delivery/${form.slug}/{store_id}`"
                                             readonly
                                             type="text" 
                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-100 text-gray-500 cursor-not-allowed"

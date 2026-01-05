@@ -59,7 +59,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Servio';
 
 const i18n = createI18n({
     legacy: false,
-    locale: 'en',
+    locale: document.documentElement.lang || 'en',
     fallbackLocale: 'en',
     messages: {
         en,

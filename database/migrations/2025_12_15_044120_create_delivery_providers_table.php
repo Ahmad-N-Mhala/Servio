@@ -30,7 +30,7 @@ return new class extends Migration {
             $table->json('configuration_fields')->nullable(); // Additional custom fields definition
 
             // Integration Settings (How WE connect to THEM or THEY connect to US)
-            $table->string('webhook_url_template')->nullable(); // e.g. https://api.restofy.com/webhooks/delivery/{provider}/{store_id}
+            $table->string('webhook_url_template')->nullable(); // e.g. https://api.servio.com/webhooks/delivery/{provider}/{store_id}
             $table->json('supported_webhook_events')->nullable(); // ['order.created', 'order.cancelled', etc.]
             $table->json('api_settings')->nullable(); // Internal setting for Auth type, API Base URL, etc.
 

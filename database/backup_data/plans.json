@@ -9,10 +9,14 @@
             "$numberDecimal": "990.00"
         },
         "currency": "AED",
-        "features": "[\"menu_management\",\"pos_system\",\"order_management\",\"qr_ordering\",\"table_management\",\"customer_loyalty\",\"customer_management\",\"inventory_management\",\"staff_management\",\"reports_analytics\"]",
+        "features": "[\"plan_features.one_restaurant\",\"plan_features.staff_limit_5\",\"plan_features.basic_menu\",\"plan_features.order_tracking\",\"plan_features.kds\",\"plan_features.email_support\"]",
         "is_active": true,
-        "updated_at": "2025-12-27T11:42:52.684000Z",
+        "updated_at": "2026-01-05T13:31:24.802000Z",
         "created_at": "2025-12-19T16:11:29.520000Z",
+        "enabled_features": [
+            "pos",
+            "kds"
+        ],
         "id": {
             "$oid": "6945793119aaa592e0054aa2"
         }
@@ -27,10 +31,18 @@
             "$numberDecimal": "2990.00"
         },
         "currency": "AED",
-        "features": "[\"menu_management\",\"pos_system\",\"order_management\",\"qr_ordering\",\"table_management\",\"kds\",\"customer_loyalty\",\"customer_management\",\"inventory_management\",\"waste_management\",\"staff_management\",\"reports_analytics\",\"financial_management\",\"communication\"]",
+        "features": "[\"plan_features.three_restaurants\",\"plan_features.unlimited_staff\",\"plan_features.advanced_menu\",\"plan_features.realtime_tracking\",\"plan_features.kds\",\"plan_features.qr_ordering\",\"plan_features.analytics_reports\",\"plan_features.priority_support\"]",
         "is_active": true,
-        "updated_at": "2025-12-27T11:42:52.684000Z",
+        "updated_at": "2026-01-05T13:31:24.804000Z",
         "created_at": "2025-12-19T16:11:29.522000Z",
+        "enabled_features": [
+            "pos",
+            "inventory",
+            "loyalty",
+            "analytics",
+            "kds",
+            "qr_ordering"
+        ],
         "id": {
             "$oid": "6945793119aaa592e0054aa3"
         }
@@ -45,14 +57,25 @@
             "$numberDecimal": "7990.00"
         },
         "currency": "AED",
-        "features": "[\"menu_management\",\"pos_system\",\"order_management\",\"qr_ordering\",\"table_management\",\"kds\",\"customer_loyalty\",\"customer_management\",\"inventory_management\",\"waste_management\",\"staff_management\",\"reports_analytics\",\"financial_management\",\"delivery_integration\",\"communication\",\"multi_restaurant\",\"api_access\"]",
+        "features": "[\"plan_features.unlimited_restaurants\",\"plan_features.unlimited_staff\",\"plan_features.advanced_menu\",\"plan_features.realtime_tracking\",\"plan_features.kds\",\"plan_features.qr_ordering\",\"plan_features.advanced_analytics\",\"plan_features.api_access\",\"plan_features.custom_integrations\",\"plan_features.dedicated_support\"]",
         "is_active": true,
-        "updated_at": "2025-12-27T11:42:52.685000Z",
+        "updated_at": "2026-01-05T13:31:24.805000Z",
         "created_at": "2025-12-19T16:11:29.522000Z",
         "description": null,
-        "max_orders_per_month": 2,
-        "max_restaurants": 2,
-        "max_users": 2,
+        "max_orders_per_month": 20000,
+        "max_restaurants": 3,
+        "max_users": 3,
+        "enabled_features": [
+            "pos",
+            "inventory",
+            "loyalty",
+            "analytics",
+            "marketing",
+            "feedback",
+            "delivery",
+            "kds",
+            "qr_ordering"
+        ],
         "id": {
             "$oid": "6945793119aaa592e0054aa4"
         }

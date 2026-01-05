@@ -6,7 +6,7 @@ return [
     | System Roles
     |--------------------------------------------------------------------------
     |
-    | This file defines all available roles in the RestoFy system.
+    | This file defines all available roles in the Servio system.
     | This is the single source of truth for roles across the application.
     |
     */

@@ -129,7 +129,7 @@
                 <div class="mt-12 text-center p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl">
                     <h4 class="text-xl font-bold text-gray-900 mb-2">Need a Custom Plan?</h4>
                     <p class="text-gray-600 mb-4">Contact our sales team for enterprise solutions tailored to your needs</p>
-                    <a href="mailto:sales@restofy.com" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all">
+                    <a href="mailto:sales@servio.com" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>

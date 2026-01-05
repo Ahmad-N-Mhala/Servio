@@ -142,7 +142,7 @@
                                             v-model="form.webhook_url_template" 
                                             type="text" 
                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-                                            placeholder="https://api.restofy.com/webhooks/delivery/{provider}/{store_id}"
+                                            placeholder="https://api.servio.com/webhooks/delivery/{provider}/{store_id}"
                                         />
                                         <p class="mt-1 text-xs text-gray-500">
                                             This is the callback URL we provide to the delivery platform to receive orders.

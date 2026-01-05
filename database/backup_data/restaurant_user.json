@@ -5,7 +5,7 @@
         "role": "owner",
         "is_active": true,
         "created_at": "2025-12-19T16:14:32.003000Z",
-        "updated_at": "2025-12-28T17:42:39.692000Z",
+        "updated_at": "2026-01-02T09:09:28.766000Z",
         "user_id": {
             "$oid": "694579e733231912b007b6c2"
         },
@@ -17,9 +17,9 @@
         "restaurant_id": "69503d88eaf319e883077708",
         "email": "ahmad.n.mhala@gmail.com",
         "role": "owner",
-        "is_active": true,
+        "is_active": false,
         "created_at": "2025-12-27T20:11:52.577000Z",
-        "updated_at": "2025-12-27T20:11:52.577000Z",
+        "updated_at": "2026-01-02T09:06:19.831000Z",
         "id": {
             "$oid": "69503d88eaf319e883077709"
         }
@@ -44,6 +44,17 @@
         "updated_at": "2025-12-27T20:15:12.779000Z",
         "id": {
             "$oid": "69503e50eaf319e883077715"
+        }
+    },
+    {
+        "restaurant_id": "695b8388bb2bb5d336006196",
+        "email": "admin@demo.com",
+        "role": "owner",
+        "is_active": true,
+        "created_at": "2026-01-05T09:25:29.002000Z",
+        "updated_at": "2026-01-05T09:25:29.002000Z",
+        "id": {
+            "$oid": "695b8389bb2bb5d336006197"
         }
     }
 ]

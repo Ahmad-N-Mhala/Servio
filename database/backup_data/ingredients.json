@@ -36,5 +36,24 @@
         "id": {
             "$oid": "69504d0ceaf319e883077727"
         }
+    },
+    {
+        "name": "{\"en\":\"Tomato\",\"ar\":\"Tomato\"}",
+        "unit": "kg",
+        "current_stock": {
+            "$numberDecimal": "10.8500"
+        },
+        "cost": {
+            "$numberDecimal": "4.00"
+        },
+        "reorder_level": {
+            "$numberDecimal": "0.0000"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "updated_at": "2026-01-05T08:29:44.367000Z",
+        "created_at": "2026-01-01T09:13:50.440000Z",
+        "id": {
+            "$oid": "69563aceaeff1b1ae101c522"
+        }
     }
 ]

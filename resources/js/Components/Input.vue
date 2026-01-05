@@ -32,7 +32,7 @@
 import { ref } from 'vue';
 
 defineProps<{
-    modelValue: string | number;
+    modelValue: string | number | null;
     label?: string;
     error?: string;
     help?: string;
