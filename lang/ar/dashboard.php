@@ -15,4 +15,6 @@ return [
     'status' => 'الحالة',
     'low_stock_status' => 'مخزون منخفض',
     'critical_status' => 'حرج: لا يكفي لـ :items',
+    'net_profit' => 'صافي الربح',
+    'total_revenue' => 'إجمالي الإيرادات',
 ];

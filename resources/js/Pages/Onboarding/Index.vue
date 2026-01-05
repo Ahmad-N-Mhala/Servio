@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
         
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
@@ -8,551 +8,277 @@
                      <Logo class="h-20 w-20" iconClass="w-20 h-20" :showText="true" />
                  </div>
                  <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-                     {{ step === 1 ? 'Select Your Plan' : 'Create Your Account' }}
+                     {{ $t('landing.plans_pricing') }}
                  </h1>
                  <p class="mt-4 text-xl text-gray-500 max-w-2xl mx-auto">
-                     {{ step === 1 ? 'Choose the plan that fits your restaurant best.' : 'Finalize your setup for ' + selectedPlan?.name }}
+                     {{ $t('landing.choose_plan') }}
                  </p>
             </div>
 
-            <!-- Step 1: Plan Selection -->
-            <div v-show="step === 1" class="transition-opacity duration-300">
-                
-                <!-- Billing Toggle -->
-                <div class="flex justify-center mb-12">
-                    <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200 inline-flex">
-                        <button
-                            type="button"
-                            @click="form.billing_cycle = 'monthly'"
-                            class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-200"
-                            :class="form.billing_cycle === 'monthly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
-                        >
-                            Monthly
-                        </button>
-                        <button
-                            type="button"
-                            @click="form.billing_cycle = 'yearly'"
-                            class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-200 flex items-center gap-2"
-                            :class="form.billing_cycle === 'yearly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
-                        >
-                            Yearly
-                            <span :class="form.billing_cycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'" class="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Save 20%</span>
-                        </button>
+            <!-- Language Switcher -->
+            <div class="absolute top-6 right-6 z-10">
+                <button 
+                    @click="toggleLanguage" 
+                    class="bg-white/50 backdrop-blur-md p-2.5 rounded-xl hover:bg-white/80 transition-all shadow-sm border border-white/50 flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-primary group"
+                >
+                    <span class="uppercase font-extrabold tracking-wider">{{ locale }}</span>
+                    <span class="w-px h-4 bg-gray-300 group-hover:bg-primary/30 transition-colors"></span>
+                    <div class="bg-white rounded-full p-1 shadow-sm group-hover:shadow group-hover:scale-110 transition-all duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.546-3.131 1.457-4.341" />
+                    </svg>
                     </div>
-                </div>
+                </button>
+            </div>
 
-                <!-- Plans Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                    <div
-                        v-for="plan in plans"
-                        :key="plan.id"
-                        @click="selectPlan(plan)"
-                        class="bg-white rounded-3xl p-8 border-2 transition-all duration-300 relative group flex flex-col h-full cursor-pointer overflow-hidden"
+            <!-- Billing Toggle -->
+            <div class="flex justify-center mb-12">
+                <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200 inline-flex">
+                    <button
+                        type="button"
+                        @click="billingCycle = 'monthly'"
+                        class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-200"
+                        :class="billingCycle === 'monthly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
+                    >
+                        {{ $t('landing.monthly') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="billingCycle = 'yearly'"
+                        class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-200 flex items-center gap-2"
+                        :class="billingCycle === 'yearly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
+                    >
+                        {{ $t('landing.yearly') }}
+                        <span :class="billingCycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'" class="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">{{ $t('landing.discount_20') }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Plans Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                <div
+                    v-for="plan in plans"
+                    :key="plan.id"
+                    class="bg-white rounded-3xl p-8 border-2 transition-all duration-300 relative group flex flex-col h-full overflow-hidden"
+                    :class="[
+                        plan.is_featured 
+                            ? 'border-primary shadow-2xl ring-4 ring-primary-100 transform -translate-y-2' 
+                            : 'border-gray-200 shadow-lg hover:border-primary-300 hover:shadow-xl hover:-translate-y-1'
+                    ]"
+                >
+                    <!-- Best Value Indicator -->
+                    <div v-if="plan.is_featured" class="absolute top-0 right-0 p-4">
+                        <div class="bg-primary px-3 py-1 rounded-full shadow-lg">
+                            <span class="text-xs font-bold text-white uppercase">{{ $t('landing.most_popular') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 relative z-10">
+                        <h3 class="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
+                             {{ plan.slug ? ($t('plans.' + plan.slug) !== 'plans.' + plan.slug ? $t('plans.' + plan.slug) : plan.name) : plan.name }}
+                        </h3>
+                        <p class="text-gray-500 text-sm mt-2 min-h-[40px]">{{ plan.description }}</p>
+                    </div>
+
+                    <div class="mb-8 p-6 bg-gray-50 rounded-2xl group-hover:bg-primary-50 transition-colors duration-300">
+                            <div class="flex items-baseline justify-center">
+                            <span class="text-4xl font-extrabold text-gray-900 group-hover:text-primary transition-colors duration-300">
+                                {{ plan.currency || $t('landing.currency') }} {{ billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly }}
+                            </span>
+                            <span class="text-gray-500 ml-1 font-medium">{{ billingCycle === 'monthly' ? $t('landing.per_month') : $t('landing.per_year') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow mb-8 relative z-10">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 group-hover:text-primary-400">{{ $t('landing.plan_features') }}</h4>
+                        <ul class="space-y-4">
+                            <li v-for="(feature, index) in plan.features" :key="index" class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5 group-hover:bg-primary-100 transition-colors">
+                                    <svg class="w-3 h-3 text-green-600 group-hover:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-gray-600 text-sm font-medium group-hover:text-gray-900 transition-colors">{{ $t(feature) !== feature ? $t(feature) : feature }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button
+                        @click="openRegisterModal(plan)"
+                        class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-md"
                         :class="[
-                            selectedPlan?.id === plan.id 
-                                ? 'border-primary shadow-2xl ring-4 ring-primary-100 transform -translate-y-2' 
-                                : 'border-gray-200 shadow-lg hover:border-primary-300 hover:shadow-xl hover:-translate-y-1'
+                            plan.is_featured
+                                ? 'bg-primary text-white shadow-primary/30 hover:bg-primary-hover'
+                                : 'bg-gray-900 text-white hover:bg-gray-800'
                         ]"
                     >
-                        <!-- Selected Indicator -->
-                        <div v-if="selectedPlan?.id === plan.id" class="absolute top-0 right-0 p-4">
-                            <div class="bg-primary rounded-full p-1 shadow-lg animate-pulse-glow">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                        </div>
-
-
-
-                        <div class="mb-6 relative z-10">
-                            <h3 class="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">{{ plan.name }}</h3>
-                            <p class="text-gray-500 text-sm mt-2 min-h-[40px]">{{ plan.description || getPlanDescription(plan.slug) }}</p>
-                        </div>
-
-                        <div class="mb-8 p-6 bg-gray-50 rounded-2xl group-hover:bg-primary-50 transition-colors duration-300">
-                             <div class="flex items-baseline justify-center">
-                                <span class="text-4xl font-extrabold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                                    {{ currentCountryData.currency }} {{ getConvertedPrice(form.billing_cycle === 'yearly' ? plan.price_yearly : plan.price_monthly) }}
-                                </span>
-                                <span class="text-gray-500 ml-1 font-medium">/{{ form.billing_cycle === 'yearly' ? 'year' : 'month' }}</span>
-                            </div>
-                        </div>
-
-                        <div class="flex-grow mb-8 relative z-10">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 group-hover:text-primary-400">What's Included</h4>
-                            <ul class="space-y-4">
-                                <li v-for="(feature, index) in plan.features" :key="index" class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5 group-hover:bg-primary-100 transition-colors">
-                                        <svg class="w-3 h-3 text-green-600 group-hover:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
-                                    <span class="text-gray-600 text-sm font-medium group-hover:text-gray-900 transition-colors">{{ availableFeatures[feature] || feature }}</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <button
-                            class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-md"
-                            :class="[
-                                selectedPlan?.id === plan.id
-                                    ? 'bg-primary text-white shadow-primary/30'
-                                    : 'bg-white text-gray-900 border-2 border-gray-100 group-hover:border-primary group-hover:text-primary'
-                            ]"
-                        >
-                            {{ selectedPlan?.id === plan.id ? 'Selected' : 'Select Plan' }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Continue Button (Only visible when plan selected) -->
-                <div v-if="selectedPlan" class="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-gray-200 flex justify-center z-50 animate-slide-up">
-                    <div class="max-w-7xl w-full flex justify-between items-center px-4 sm:px-6">
-                        <div class="hidden sm:block">
-                            <p class="text-sm text-gray-500">Selected Plan:</p>
-                            <p class="text-lg font-bold text-gray-900">{{ selectedPlan.name }} <span class="text-primary">({{ planPriceDisplay(selectedPlan) }})</span></p>
-                        </div>
-                        <button 
-                            @click="continueToSetup"
-                            class="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:shadow-primary/30 transition-all transform hover:-translate-y-1 flex items-center gap-2"
-                        >
-                            Continue to Setup
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
+                        {{ $t('landing.select_plan') }}
+                    </button>
                 </div>
             </div>
 
-            <!-- Step 2: Registration Form -->
-            <div v-show="step === 2" class="max-w-2xl mx-auto transition-opacity duration-300">
-                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
-                    <div class="p-8 md:p-10">
-                        <button 
-                            @click="step = 1" 
-                            class="mb-6 flex items-center text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors"
-                        >
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            Back to Plans
-                        </button>
-
-                        <!-- Global Error Alert -->
-                        <div v-if="(form.errors as any).error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 animate-fade-in">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <!-- Registration Modal -->
+            <Modal :show="showRegisterModal" @close="showRegisterModal = false">
+                    <div class="p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
+                        </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('landing.register_interest') }}</h3>
+                            <p class="text-gray-500">
+                            {{ $t('landing.for_plan', { plan: selectedPlan?.slug ? ($t('plans.' + selectedPlan.slug) !== 'plans.' + selectedPlan.slug ? $t('plans.' + selectedPlan.slug) : selectedPlan.name) : selectedPlan?.name }) }}
+                            </p>
+                    </div>
+
+                    <form @submit.prevent="submitInterest" class="space-y-4">
                             <div>
-                                <h3 class="text-sm font-bold text-red-800">Registration Error</h3>
-                                <p class="text-sm text-red-700 mt-1">{{ (form.errors as any).error }}</p>
-                            </div>
+                            <Input 
+                                v-model="form.name"
+                                :label="$t('landing.full_name')"
+                                required
+                                :error="form.errors.name"
+                            />
+                        </div>
+                            <div>
+                            <Input 
+                                v-model="form.email"
+                                :label="$t('landing.email_address')"
+                                type="email"
+                                required
+                                :error="form.errors.email"
+                            />
+                        </div>
+                        <div>
+                            <Input 
+                                v-model="form.phone"
+                                :label="$t('landing.phone_number')"
+                                type="tel"
+                                required
+                                :error="form.errors.phone"
+                            />
+                        </div>
+                            <div>
+                            <Input 
+                                v-model="form.restaurant_name"
+                                :label="$t('landing.restaurant_name')"
+                                required
+                                :error="form.errors.restaurant_name"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('landing.message') }}</label>
+                            <textarea 
+                                v-model="form.message"
+                                rows="3"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                            ></textarea>
                         </div>
 
-                        <div class="mb-8">
-                            <h2 class="text-2xl font-bold text-gray-900">Finish Setting Up</h2>
-                            <p class="text-gray-500 mt-1">You selected the <span class="text-indigo-600 font-bold">{{ selectedPlan?.name }}</span> plan.</p>
+                        <div class="pt-4">
+                                <Button class="w-full justify-center py-3 text-lg" :loading="form.processing">
+                                {{ $t('landing.submit') }}
+                            </Button>
                         </div>
+                    </form>
+                    </div>
+            </Modal>
 
-                        <form @submit.prevent="submit" class="space-y-6">
-                            
-                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                <Input
-                                    v-model="form.restaurant_name"
-                                    label="Restaurant Name"
-                                    type="text"
-                                    placeholder="e.g. My Great Bistro"
-                                    required
-                                    :error="form.errors.restaurant_name"
-                                />
-                            </div>
-
-                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-4">
-                                <h3 class="text-lg font-bold text-gray-900">Location Details</h3>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Country <span class="text-red-500">*</span></label>
-                                        <select 
-                                            v-model="form.country" 
-                                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
-                                            required
-                                        >
-                                            <option value="" disabled>Select Country</option>
-                                            <option v-for="country in countries" :key="country" :value="country">{{ country }}</option>
-                                        </select>
-                                        <div v-if="form.errors.country" class="text-red-500 text-xs mt-1">{{ form.errors.country }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">State / Province <span class="text-red-500">*</span></label>
-                                        <select 
-                                            v-model="form.state" 
-                                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
-                                            required
-                                        >
-                                            <option value="" disabled>Select State</option>
-                                            <option v-for="state in availableStates" :key="state" :value="state">{{ state }}</option>
-                                        </select>
-                                        <div v-if="form.errors.state" class="text-red-500 text-xs mt-1">{{ form.errors.state }}</div>
-
-                                        <!-- Custom State Input -->
-                                        <div v-if="form.state === 'Other'" class="mt-3 animate-fade-in">
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Enter State Name <span class="text-red-500">*</span></label>
-                                            <input 
-                                                v-model="form.state_custom"
-                                                type="text"
-                                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-6">
-                                     <Input
-                                        v-model="form.google_map_location"
-                                        label="Google Map Location (Optional)"
-                                        type="url"
-                                        placeholder="https://maps.google.com/..."
-                                        :error="form.errors.google_map_location"
-                                    />
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Input
-                                        v-model="form.city"
-                                        label="City"
-                                        type="text"
-                                        placeholder="e.g. Downtown"
-                                        required
-                                        :error="form.errors.city"
-                                    />
-                                    <Input
-                                        v-model="form.zip_code"
-                                        label="Zip / Postal Code"
-                                        type="text"
-                                        placeholder="e.g. 00000"
-                                        :error="form.errors.zip_code"
-                                    />
-                                </div>
-
-                                <Input
-                                    v-model="form.address"
-                                    label="Street Name / Address"
-                                    type="text"
-                                    placeholder="e.g. Sheikh Zayed Road, Building 5"
-                                    required
-                                    :error="form.errors.address"
-                                />
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Input
-                                    v-model="form.name"
-                                    label="Full Name"
-                                    type="text"
-                                    required
-                                    :error="form.errors.name"
-                                />
-                                <Input
-                                    v-model="form.phone"
-                                    label="Phone Number"
-                                    type="tel"
-                                    placeholder="e.g. +1 234 567 8900"
-                                    required
-                                    :error="form.errors.phone"
-                                />
-                            </div>
-
-                            <div>
-                                <Input
-                                    v-model="form.email"
-                                    label="Email"
-                                    type="email"
-                                    required
-                                    autocomplete="new-password"
-                                    :error="form.errors.email"
-                                />
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Input
-                                    v-model="form.password"
-                                    label="Password"
-                                    type="password"
-                                    required
-                                    autocomplete="new-password"
-                                    :error="form.errors.password"
-                                />
-                                <Input
-                                    v-model="form.password_confirmation"
-                                    label="Confirm Password"
-                                    type="password"
-                                    required
-                                    autocomplete="new-password"
-                                    :error="form.errors.password_confirmation"
-                                />
-                            </div>
-
-
-
-
-                            <!-- Service Type Configuration -->
-                            <div class="pt-6 border-t border-gray-100">
-                                <h3 class="text-lg font-bold text-gray-900 mb-4">Service Configuration</h3>
-                                <label class="block text-sm font-medium text-gray-700">Service Model</label>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                                    <div 
-                                        @click="form.service_type = 'both'"
-                                        class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                        :class="form.service_type === 'both' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                    >
-                                        <div class="font-bold text-gray-900 text-center">Both</div>
-                                        <div class="text-xs text-gray-500 text-center mt-1">Table & Self Service</div>
-                                    </div>
-                                    <div 
-                                        @click="form.service_type = 'table_service'"
-                                        class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                        :class="form.service_type === 'table_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                    >
-                                        <div class="font-bold text-gray-900 text-center">Table Service</div>
-                                        <div class="text-xs text-gray-500 text-center mt-1">Waiter Only</div>
-                                    </div>
-                                    <div 
-                                        @click="form.service_type = 'self_service'"
-                                        class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                        :class="form.service_type === 'self_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                    >
-                                        <div class="font-bold text-gray-900 text-center">Self Service</div>
-                                        <div class="text-xs text-gray-500 text-center mt-1">Pickup/Kiosk</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Loyalty Setup -->
-                            <div class="pt-6 border-t border-gray-100">
-                                <h3 class="text-lg font-bold text-gray-900 mb-4">Loyalty Program Setup</h3>
-                                <div class="space-y-4">
-                                    <label class="block text-sm font-medium text-gray-700">How should customers earn points?</label>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div 
-                                            @click="form.earning_method_type = 'order_total'"
-                                            class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                            :class="form.earning_method_type === 'order_total' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                        >
-                                            <div class="flex items-center gap-3">
-                                                <div class="p-2 rounded-full" :class="form.earning_method_type === 'order_total' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-gray-900">Per Spend</div>
-                                                    <div class="text-xs text-gray-500">Earn points based on bill total</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div 
-                                            @click="form.earning_method_type = 'visit'"
-                                            class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                            :class="form.earning_method_type === 'visit' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                        >
-                                            <div class="flex items-center gap-3">
-                                                <div class="p-2 rounded-full" :class="form.earning_method_type === 'visit' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-gray-900">Per Visit</div>
-                                                    <div class="text-xs text-gray-500">Fixed points per order/visit</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4 bg-gray-50 p-4 rounded-xl">
-                                         <Input
-                                            v-model="form.earning_points"
-                                            :label="form.earning_method_type === 'order_total' ? `Points per 1 ${currentCountryData.currency} Spent` : 'Points per Visit'"
-                                            type="number"
-                                            min="1"
-                                            required
-                                            :error="(form.errors as any).earning_points"
-                                        />
-                                        <p class="text-xs text-gray-500 mt-2">
-                                            {{ form.earning_method_type === 'order_total' ? `Example: If set to 1, a 100 ${currentCountryData.currency} order earns 100 points.` : 'Example: If set to 10, every visit earns 10 points regardless of spend.' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pt-4">
-                                <Button
-                                    type="submit"
-                                    :loading="form.processing"
-                                    block
-                                    size="xl"
-                                    class="w-full text-lg font-bold py-4 rounded-xl"
-                                >
-                                    Create Account
-                                </Button>
-                            </div>
-                        </form>
+            <!-- Success Notification -->
+            <Transition
+                enter-active-class="transform ease-out duration-300 transition"
+                enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+                enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div v-if="successMessage" class="fixed bottom-0 right-0 p-6 z-50">
+                    <div class="bg-green-600 rounded-xl shadow-lg p-4 flex items-center gap-3 text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p class="font-bold">{{ successMessage }}</p>
                     </div>
                 </div>
-            </div>
+            </Transition>
 
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
+import Modal from '@/Components/Modal.vue';
 
 const props = defineProps<{
     plans: any[];
-    availableFeatures: Record<string, string>;
-    defaultCountry: string;
-    countries: any[]; // Now receiving countries from backend
 }>();
 
-// Use countries from props instead of hardcoded array
-const countriesData = computed(() => props.countries);
+const { t, locale } = useI18n();
+const route = (window as any).route;
 
-const countries = computed(() => countriesData.value.map((c: any) => c.name));
-
-const step = ref(1);
+const billingCycle = ref<'monthly' | 'yearly'>('monthly');
+const showRegisterModal = ref(false);
 const selectedPlan = ref<any>(null);
+const successMessage = ref('');
 
 const form = useForm({
-    restaurant_name: '',
-    plan_id: null as number | null,
-    billing_cycle: 'monthly',
-    
-    // Location Details
-    country: props.defaultCountry || 'United Arab Emirates',
-    state: '',
-    state_custom: '', // Temporary field for "Other" input
-    city: '',
-    address: '',
-    zip_code: '',
-    google_map_location: '',
-
+    plan_id: '',
+    plan_name: '',
     name: '',
-    phone: '',
     email: '',
-    password: '',
-    password_confirmation: '',
-    earning_method_type: 'order_total',
-    earning_points: 1,
-    service_type: 'both',
+    phone: '',
+    restaurant_name: '',
+    message: ''
 });
 
-// Computed properties for dynamic localization
-const currentCountryData = computed(() => {
-    return countriesData.value.find((c: any) => c.name === form.country) || countriesData.value[0];
-});
-
-// Computed states list that includes 'Other'
-const availableStates = computed(() => {
-    const states = currentCountryData.value.states || [];
-    return [...states, 'Other'];
-});
-
-// Watch country change to update phone prefix
-watch(() => form.country, (newCountry, oldCountry) => {
-    const newCountryData = countriesData.value.find((c: any) => c.name === newCountry);
-    const oldCountryData = countriesData.value.find((c: any) => c.name === oldCountry);
+const toggleLanguage = () => {
+    const newLocale = locale.value === 'en' ? 'ar' : 'en';
     
-    // Reset state when country changes
-    form.state = '';
-    form.state_custom = '';
-
-    if (newCountryData) {
-        let currentPhone = form.phone || '';
-        let oldPrefix = oldCountryData ? oldCountryData.dial_code : '';
-
-        // Clean user input by removing the old prefix if present
-        if (oldPrefix && currentPhone.startsWith(oldPrefix)) {
-            // Remove prefix and any immediate whitespace
-            const numberPart = currentPhone.substring(oldPrefix.length).trim();
-            form.phone = newCountryData.dial_code + ' ' + numberPart;
-        } else if (!currentPhone || currentPhone.trim() === '') {
-             // If empty, just set the new prefix
-            form.phone = newCountryData.dial_code + ' ';
-        } else {
-            // If it has some other content that doesnt match old prefix (e.g. user manually typed),
-            // we try to keep it but prepend/replace prefix if it looks like a full number
-            // For now, let's just prepend if it doesn't start with '+'.
-            if (!currentPhone.startsWith('+')) {
-                 form.phone = newCountryData.dial_code + ' ' + currentPhone.trim();
-            }
-            // If it starts with +, we assume user knows what they are doing or it's already correct.
-        }
-    }
-}, { immediate: true });
-
-const getConvertedPrice = (priceInAED: number) => {
-    const rate = currentCountryData.value.rate;
-    const converted = priceInAED * rate;
-    // Format nicely: no decimals if large number, 2 decimals if small
-    // Special case for IDR (large numbers, no decimals usually needed)
-    if (currentCountryData.value.code === 'ID') {
-         return Math.floor(converted).toLocaleString();
-    }
-    return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(2);
-};
-
-const getPlanDescription = (slug: string) => {
-    switch(slug) {
-        case 'basic': return 'Perfect for getting started.';
-        case 'pro': return 'Everything you need to grow.';
-        case 'enterprise': return 'Advanced control for chains.';
-        default: return 'Business plan.';
+    // Quick URL patch for LaravelLocalization
+    const currentPath = window.location.pathname; 
+    const segments = currentPath.split('/'); 
+    if (segments[1] && (segments[1] === 'en' || segments[1] === 'ar')) {
+        segments[1] = newLocale;
+        window.location.href = segments.join('/');
+    } else {
+            // If no locale in URL (default), append or redirect
+            // This depends on prefix strategy. Assuming prefix always exists for non-default or configured so.
+            // If default is /en hidden, then /ar works.
+            window.location.href = `/${newLocale}`;
     }
 };
 
-const planPriceDisplay = (plan: any) => {
-    const basePrice = form.billing_cycle === 'yearly' ? plan.price_yearly : plan.price_monthly;
-    const convertedPrice = getConvertedPrice(basePrice);
-    const period = form.billing_cycle === 'yearly' ? 'year' : 'month';
-    return `${currentCountryData.value.currency} ${convertedPrice}/${period}`;
-};
-
-const selectPlan = (plan: any) => {
+const openRegisterModal = (plan: any) => {
     selectedPlan.value = plan;
     form.plan_id = plan.id;
+    form.plan_name = plan.name;
+    showRegisterModal.value = true;
 };
 
-const continueToSetup = () => {
-    step.value = 2;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-const submit = () => {
-    form.transform((data) => ({
-        ...data,
-        state: data.state === 'Other' ? data.state_custom : data.state,
-        // Ensure empty string is converted to null for nullable URL field if needed
-        google_map_location: data.google_map_location || null,
-    })).post((window as any).route('onboard.store'), {
+const submitInterest = () => {
+    form.post(route('register.interest'), {
         preserveScroll: true,
-        onError: (errors) => {
-            console.error('Onboarding validation errors:', errors);
-            // Scroll to the first error
-            const firstErrorKey = Object.keys(errors)[0];
-            if (firstErrorKey) {
-                // If it's a global error 'error', scroll to top
-                if (firstErrorKey === 'error') {
-                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    // Try to scroll to specific input if possible, or just top of form
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-                }
-            }
-        },
-        onFinish: () => {
-             // Optional: Stop loading state if needed manually, but form.processing handles it
+        onSuccess: () => {
+            showRegisterModal.value = false;
+            form.reset();
+            successMessage.value = t('landing.form_success');
+            setTimeout(() => successMessage.value = '', 5000);
         }
     });
 };
 </script>
+
+<style scoped>
+html {
+    scroll-behavior: smooth;
+}
+</style>
 

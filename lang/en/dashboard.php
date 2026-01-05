@@ -15,5 +15,6 @@ return [
     'status' => 'Status',
     'low_stock_status' => 'Low Stock',
     'critical_status' => 'Critical: Not enough for :items',
+    'net_profit' => 'Net Profit',
+    'total_revenue' => 'Total Revenue',
 ];
-

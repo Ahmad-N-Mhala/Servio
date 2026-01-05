@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Arr;
 
 class LocalizationController extends Controller
 {
@@ -85,14 +86,19 @@ class LocalizationController extends Controller
             'file' => 'required|string',
             'key' => 'required|string',
             'value' => 'nullable|string',
+            'lang' => 'required|string|in:en,ar',
         ]);
 
         $file = $request->file;
         $key = $request->key;
         $value = $request->value;
-        $lang = 'ar'; // Fixing to Arabic as per requirement
-
+        $lang = $request->lang;
         $path = lang_path($lang . '/' . $file . '.php');
+
+        // Ensure directory exists
+        if (!File::exists(dirname($path))) {
+            File::makeDirectory(dirname($path), 0755, true);
+        }
 
         // Load existing
         $data = File::exists($path) ? include $path : [];
@@ -107,6 +113,115 @@ class LocalizationController extends Controller
         File::put($path, $content);
 
         return redirect()->back()->with('success', 'Translation updated successfully.');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'key' => 'required|string',
+            'en_value' => 'required|string',
+            'ar_value' => 'nullable|string',
+        ]);
+
+        $fullKey = $request->key;
+        $parts = explode('.', $fullKey, 2);
+
+        if (count($parts) === 2) {
+            $file = $parts[0];
+            $key = $parts[1];
+        } else {
+            // Default to 'common' if no dot notation provided
+            $file = 'common';
+            $key = $fullKey;
+        }
+
+        // Check for duplicates in English file (primary source)
+        $path = lang_path('en/' . $file . '.php');
+        $data = File::exists($path) ? include $path : [];
+
+        if (Arr::has($data, $key)) {
+            return redirect()->back()->withErrors(['key' => "The key '{$fullKey}' already exists in {$file}.php"]);
+        }
+
+        // Save English
+        $this->saveTranslation('en', $file, $key, $request->en_value);
+
+        // Save Arabic (if provided, or create empty entry)
+        if ($request->ar_value) {
+            $this->saveTranslation('ar', $file, $key, $request->ar_value);
+        }
+
+        return redirect()->back()->with('success', 'Translation created successfully.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt,xlsx',
+        ]);
+
+        $file = $request->file('file');
+
+        // Simple CSV parser for now
+        $handle = fopen($file->getRealPath(), "r");
+        $header = fgetcsv($handle, 1000, ","); // Skip header: key, en, ar
+
+        // Basic validation for header structure could be added here
+
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            // Assuming order: key, en, ar
+            $fullKey = $data[0] ?? null;
+            $enVal = $data[1] ?? null;
+            $arVal = $data[2] ?? null;
+
+            if (!$fullKey || !$enVal)
+                continue;
+
+            $parts = explode('.', $fullKey, 2);
+            if (count($parts) === 2) {
+                $fileKey = $parts[0];
+                $innerKey = $parts[1];
+            } else {
+                $fileKey = 'common';
+                $innerKey = $fullKey;
+            }
+
+            // Save English
+            $this->saveTranslation('en', $fileKey, $innerKey, $enVal);
+
+            // Save Arabic if present
+            if ($arVal) {
+                $this->saveTranslation('ar', $fileKey, $innerKey, $arVal);
+            }
+        }
+        fclose($handle);
+
+        return redirect()->back()->with('success', 'Translations imported successfully.');
+    }
+
+    private function saveTranslation($lang, $file, $key, $value)
+    {
+        $path = lang_path($lang . '/' . $file . '.php');
+
+        // Ensure directory exists
+        if (!File::exists(dirname($path))) {
+            File::makeDirectory(dirname($path), 0755, true);
+        }
+
+        // Always load fresh data to avoid race conditions or stale data overwrites
+        $data = File::exists($path) ? include $path : [];
+        if (!is_array($data))
+            $data = [];
+
+        Arr::set($data, $key, $value);
+
+        $content = "<?php\n\nreturn " . $this->varExport($data) . ";\n";
+        File::put($path, $content);
+
+        // Clear OPCache if enabled to reflect changes immediately
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($path, true);
+        }
     }
 
     // Helper to format array output nicer than var_export

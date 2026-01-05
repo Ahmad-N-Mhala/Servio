@@ -4,11 +4,11 @@
             <div class="flex flex-wrap gap-2">
                 <button
                     v-for="preset in presets"
-                    :key="preset.label"
+                    :key="preset.key"
                     @click="selectPreset(preset)"
                     :class="[
                         'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                        selectedPreset === preset.label
+                        selectedPresetKey === preset.key
                             ? 'bg-primary text-white shadow-md'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     ]"
@@ -25,7 +25,7 @@
                         @change="onDateChange"
                         class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
                     />
-                    <span class="text-gray-500 dark:text-gray-400">to</span>
+                    <span class="text-gray-500 dark:text-gray-400">{{ $t('reports.to') }}</span>
                     <input
                         type="date"
                         v-model="endDate"
@@ -39,7 +39,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
     (e: 'update', value: { startDate: string; endDate: string }): void;
@@ -52,15 +55,15 @@ const props = defineProps<{
 
 const startDate = ref('');
 const endDate = ref('');
-const selectedPreset = ref(''); // Default to empty (custom)
+const selectedPresetKey = ref(''); // Store key instead of label
 
-const presets = [
-    { label: 'Today', days: 0 },
-    { label: 'Yesterday', days: 1, isYesterday: true },
-    { label: 'Last 7 Days', days: 7 },
-    { label: 'Last 30 Days', days: 30 },
-    { label: 'This Month', isMonth: true },
-];
+const presets = computed(() => [
+    { key: 'today', label: t('dashboard_page.today'), days: 0 },
+    { key: 'yesterday', label: t('common.yesterday'), days: 1, isYesterday: true },
+    { key: 'last_7_days', label: t('common.last_7_days'), days: 7 },
+    { key: 'last_30_days', label: t('common.last_30_days'), days: 30 },
+    { key: 'this_month', label: t('dashboard_page.this_month'), isMonth: true },
+]);
 
 const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -69,7 +72,7 @@ const formatDate = (date: Date): string => {
     return `${year}-${month}-${day}`;
 };
 
-const getPresetDates = (preset: typeof presets[0]) => {
+const getPresetDates = (preset: any) => {
     const today = new Date();
     let start = '';
     let end = '';
@@ -95,8 +98,8 @@ const getPresetDates = (preset: typeof presets[0]) => {
     return { start, end };
 };
 
-const selectPreset = (preset: typeof presets[0]) => {
-    selectedPreset.value = preset.label;
+const selectPreset = (preset: any) => {
+    selectedPresetKey.value = preset.key;
     const { start, end } = getPresetDates(preset);
     startDate.value = start;
     endDate.value = end;
@@ -104,7 +107,7 @@ const selectPreset = (preset: typeof presets[0]) => {
 };
 
 const onDateChange = () => {
-    selectedPreset.value = ''; // Clear preset on manual change
+    selectedPresetKey.value = ''; // Clear preset on manual change
     emitUpdate();
 };
 
@@ -123,20 +126,20 @@ const syncWithProps = () => {
         endDate.value = props.initialEndDate;
         
         // Try to match specific preset
-        const match = presets.find(p => {
+        const match = presets.value.find(p => {
              const { start, end } = getPresetDates(p);
              return start === props.initialStartDate && end === props.initialEndDate;
         });
         
         if (match) {
-            selectedPreset.value = match.label;
+            selectedPresetKey.value = match.key;
         } else {
-             selectedPreset.value = '';
+             selectedPresetKey.value = '';
         }
     } else {
         // Default to Last 7 Days if no props provided (initial load only preferably)
-         const defaultPreset = presets[2];
-         selectPreset(defaultPreset);
+         const defaultPreset = presets.value[2];
+         if (defaultPreset) selectPreset(defaultPreset);
     }
 };
 

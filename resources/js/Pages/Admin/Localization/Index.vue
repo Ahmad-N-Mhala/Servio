@@ -6,15 +6,34 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Localization Management</h1>
                     <p class="text-gray-600 dark:text-gray-400">Manage English and Arabic translations</p>
                 </div>
-                <button 
-                    @click="showAddModal = true"
-                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-2"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Translation
-                </button>
+                <div class="flex items-center">
+                    <button 
+                        @click="showAddModal = true"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Translation
+                    </button>
+                    <button 
+                        @click="showImportModal = true"
+                        class="ml-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Import
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            <div v-if="$page.props.flash.success" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">{{ $page.props.flash.success }}</span>
+            </div>
+            <div v-if="$page.props.flash.error" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">{{ $page.props.flash.error }}</span>
             </div>
 
             <!-- Search -->
@@ -30,23 +49,23 @@
 
             <!-- Table -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">File</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-48">Key</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">English</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Arabic</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-24">{{ $t('common.actions') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/6">File</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">Key</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">English</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">Arabic</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-24">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="(translation, index) in translations.data" :key="translation.full_key" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white truncate" :title="translation.file">
                                 {{ translation.file }}
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ translation.key }}
+                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 break-all">
+                                {{ translation.full_key }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
                                 <input 
@@ -57,7 +76,7 @@
                                     @keyup.enter="saveTranslation(translation, 'en')"
                                     @keyup.esc="cancelEdit"
                                 />
-                                <span v-else class="cursor-pointer hover:text-primary" @click="editTranslation(translation, 'en')">
+                                <span v-else class="cursor-pointer hover:text-primary block break-words" @click="editTranslation(translation, 'en')">
                                     {{ translation.en }}
                                 </span>
                             </td>
@@ -71,7 +90,7 @@
                                     @keyup.enter="saveTranslation(translation, 'ar')"
                                     @keyup.esc="cancelEdit"
                                 />
-                                <span v-else class="block text-right cursor-pointer hover:text-primary" @click="editTranslation(translation, 'ar')">{{ translation.ar || '—' }}</span>
+                                <span v-else class="block text-right cursor-pointer hover:text-primary break-words" @click="editTranslation(translation, 'ar')">{{ translation.ar || '—' }}</span>
                             </td>
                              <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <button 
@@ -127,23 +146,11 @@
                         <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Add New Translation</h3>
                             <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">File</label>
-                                    <select v-model="addForm.file" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600">
-                                        <option value="common">common</option>
-                                        <option value="nav">nav</option>
-                                        <option value="pos">pos</option>
-                                        <option value="orders">orders</option>
-                                        <option value="inventory">inventory</option>
-                                        <option value="loyalty">loyalty</option>
-                                        <option value="dashboard">dashboard</option>
-                                        <option value="auth">auth</option>
-                                        <option value="validation">validation</option>
-                                    </select>
-                                </div>
+                                <!-- File selection removed as per requirement -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Key (dot notation allowed)</label>
                                     <input v-model="addForm.key" type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600" placeholder="e.g. welcome_msg">
+                                    <p v-if="props.errors?.key" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ props.errors.key }}</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">English Value</label>
@@ -167,6 +174,50 @@
                 </div>
             </div>
         </div>
+        <!-- Import Modal -->
+        <div v-if="showImportModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div @click="showImportModal = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                     <form @submit.prevent="importTranslations">
+                        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Import Translations</h3>
+                            <div class="space-y-4">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    Upload an Excel or CSV file with the following headers: <strong>key, en, ar</strong>.
+                                    <br>
+                                    <a href="/templates/translations_template.csv" download class="text-primary hover:underline">Download Template</a>
+                                </p>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">File</label>
+                                    <input 
+                                        type="file" 
+                                        @change="handleFileUpload" 
+                                        accept=".csv,.xlsx"
+                                        class="mt-1 block w-full text-sm text-gray-500
+                                            file:mr-4 file:py-2 file:px-4
+                                            file:rounded-full file:border-0
+                                            file:text-sm file:font-semibold
+                                            file:bg-primary/10 file:text-primary
+                                            hover:file:bg-primary/20
+                                            dark:file:bg-gray-700 dark:file:text-gray-300"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm" :disabled="importForm.processing">
+                                Import
+                            </button>
+                            <button @click="showImportModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </MainLayout>
 </template>
 
@@ -177,7 +228,8 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 
 const props = defineProps({
     translations: Object,
-    filters: Object
+    filters: Object,
+    errors: Object
 });
 
 const searchQuery = ref(props.filters.search || '');
@@ -186,7 +238,6 @@ const editValue = ref('');
 const showAddModal = ref(false);
 
 const addForm = reactive({
-    file: 'common',
     key: '',
     en_value: '',
     ar_value: '',
@@ -242,7 +293,6 @@ const saveTranslation = (translation, lang) => {
 const addTranslation = () => {
     addForm.processing = true;
     router.post(route('admin.localization.store'), {
-        file: addForm.file,
         key: addForm.key,
         en_value: addForm.en_value,
         ar_value: addForm.ar_value
@@ -263,5 +313,30 @@ const addTranslation = () => {
 const cancelEdit = () => {
     editingKey.value = null;
     editValue.value = '';
+};
+
+// Import Functionality
+const showImportModal = ref(false);
+const importForm = useForm({
+    file: null,
+    processing: false
+});
+
+const handleFileUpload = (event) => {
+    importForm.file = event.target.files[0];
+};
+
+const importTranslations = () => {
+    importForm.processing = true;
+    importForm.post(route('admin.localization.import'), {
+        onSuccess: () => {
+            showImportModal.value = false;
+            importForm.reset();
+            importForm.processing = false;
+        },
+        onError: () => {
+            importForm.processing = false;
+        }
+    });
 };
 </script>

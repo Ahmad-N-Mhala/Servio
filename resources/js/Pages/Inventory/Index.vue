@@ -13,10 +13,10 @@
                     <div class="flex gap-2">
                         <Button variant="secondary" @click="openExportModal">
                             <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            {{ $t('common.export') }} Log
+                            {{ $t('common.export') }} {{ $t('inventory.history') }}
                         </Button>
                         <Button @click="openCreateModal">
-                            {{ $t('inventory.add_item', 'Add Raw Item') }}
+                            {{ $t('inventory.add_item') }}
                         </Button>
                     </div>
                 </template>
@@ -117,17 +117,17 @@
                                 required
                                 :error="form.errors.unit"
                             >
-                                <option value="" disabled>Select Unit</option>
-                                <optgroup label="Mass (Weight)">
+                                <option value="" disabled>{{ $t('inventory.select_unit') }}</option>
+                                <optgroup :label="$t('inventory.mass')">
                                     <option value="kg">Kilogram (kg)</option>
                                     <option value="g">Gram (g)</option>
                                     <option value="mg">Milligram (mg)</option>
                                 </optgroup>
-                                <optgroup label="Volume (Liquid)">
+                                <optgroup :label="$t('inventory.volume')">
                                     <option value="l">Liter (l)</option>
                                     <option value="ml">Milliliter (ml)</option>
                                 </optgroup>
-                                <optgroup label="Count">
+                                <optgroup :label="$t('inventory.count')">
                                     <option value="pcs">Pieces (pcs)</option>
                                     <option value="box">Box</option>
                                     <option value="pack">Pack</option>
@@ -147,7 +147,7 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <Input id="expiry" type="date" v-model="form.expiration_date" :label="$t('inventory.expiry_date') + ' (Optional)'" />
+                        <Input id="expiry" type="date" v-model="form.expiration_date" :label="$t('inventory.expiry_date') + ' (' + $t('common.optional') + ')'" />
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('inventory.notes_optional') }}</label>
@@ -205,7 +205,7 @@
                             :error="stockForm.errors.added_cost" 
                         />
                         <p class="text-xs text-gray-500 mt-1">
-                            This will create a new batch with the specified cost. Using FIFO (First-In, First-Out) for usage.
+                            {{ $t('inventory.fifo_note') || 'This will create a new batch with the specified cost. Using FIFO (First-In, First-Out) for usage.' }}
                         </p>
                     </div>
                     <div class="mb-4">
@@ -255,7 +255,7 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.date') || 'Date' }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('common.date') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.action') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.change') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.new_level') }}</th>

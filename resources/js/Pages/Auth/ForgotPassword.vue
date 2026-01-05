@@ -1,12 +1,29 @@
 <template>
     <div class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-gray-50 to-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Language Switcher -->
+        <div class="absolute top-6 right-6 z-10">
+            <button 
+                @click="toggleLanguage" 
+                class="bg-white/50 backdrop-blur-md p-2.5 rounded-xl hover:bg-white/80 transition-all shadow-sm border border-white/50 flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-primary group"
+            >
+                <span class="uppercase font-extrabold tracking-wider">{{ locale }}</span>
+                <span class="w-px h-4 bg-gray-300 group-hover:bg-primary/30 transition-colors"></span>
+                <div class="bg-white rounded-full p-1 shadow-sm group-hover:shadow group-hover:scale-110 transition-all duration-300">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.546-3.131 1.457-4.341" />
+                    </svg>
+                </div>
+            </button>
+        </div>
+
         <div class="max-w-md w-full">
             <div class="text-center mb-10 flex flex-col items-center justify-center">
                 <div class="flex justify-center w-full mb-6">
                     <Logo class="h-20 w-20" iconClass="w-20 h-25" :showText="true" />
                 </div>
-                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Forgot Password?</h1>
-                <p class="mt-3 text-lg text-gray-600">No worries, we'll send you reset instructions.</p>
+                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">{{ $t('auth.forgot_password_title') }}</h1>
+                <p class="mt-3 text-lg text-gray-600">{{ $t('auth.forgot_password_subtitle') }}</p>
             </div>
 
             <form @submit.prevent="submit" class="bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 md:p-10 border border-white/50 transition-all duration-300">
@@ -27,7 +44,7 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Email Address</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">{{ $t('auth.email_address') }}</label>
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +58,7 @@
                             autofocus
                             class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
                             :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': form.errors.email }"
-                            placeholder="Enter your email"
+                            :placeholder="$t('auth.enter_email_placeholder')"
                         />
                     </div>
                 </div>
@@ -55,13 +72,13 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Send Reset Link</span>
+                    <span>{{ $t('auth.send_reset_link') }}</span>
                 </button>
 
                 <div class="mt-6 text-center">
                     <p class="text-sm text-gray-600">
-                        Remember your password? 
-                        <Link :href="route('login')" class="font-semibold text-primary hover:text-primary-hover transition-colors">Back to login</Link>
+                        {{ $t('auth.remember_password') }} 
+                        <Link :href="route('login')" class="font-semibold text-primary hover:text-primary-hover transition-colors">{{ $t('auth.back_to_login') }}</Link>
                     </p>
                 </div>
             </form>
@@ -71,7 +88,27 @@
 
 <script setup lang="ts">
 import { useForm, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
+
+const { locale } = useI18n();
+
+const toggleLanguage = () => {
+    const newLocale = locale.value === 'en' ? 'ar' : 'en';
+    
+    // Quick URL patch for LaravelLocalization
+    const currentPath = window.location.pathname; 
+    const segments = currentPath.split('/'); 
+    if (segments[1] && (segments[1] === 'en' || segments[1] === 'ar')) {
+        segments[1] = newLocale;
+        window.location.href = segments.join('/');
+    } else {
+            // If no locale in URL (default), append or redirect
+            // This depends on prefix strategy. Assuming prefix always exists for non-default or configured so.
+            // If default is /en hidden, then /ar works.
+            window.location.href = `/${newLocale}`;
+    }
+};
 
 const route = (window as any).route;
 

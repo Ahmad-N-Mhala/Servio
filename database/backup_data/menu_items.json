@@ -12,10 +12,11 @@
         "image": null,
         "sort_order": "0",
         "allergens": null,
-        "is_available": "0",
-        "updated_at": "2026-01-05T09:12:36.218000Z",
+        "is_available": "1",
+        "updated_at": "2026-01-05T18:45:14.184000Z",
         "created_at": "2025-12-27T12:03:54.823000Z",
         "type": "item",
+        "sku": null,
         "id": {
             "$oid": "694fcb2a7b83a4bfd50194ff"
         }
@@ -43,7 +44,7 @@
     {
         "restaurant_id": "694579e833231912b007b6c3",
         "menu_category_id": "694fcb2e7b83a4bfd5019500",
-        "name": "{\"en\":\"Burger\",\"ar\":\"\u0628\u064a\u0628\u0628\"}",
+        "name": "{\"en\":\"Burger\",\"ar\":\"بيبب\"}",
         "description": "dsadasd dsadasdads,",
         "price": {
             "$numberDecimal": "60.00"

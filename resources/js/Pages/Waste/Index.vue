@@ -4,11 +4,11 @@
             <!-- Stats Card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div class="glass-card rounded-2xl p-6 card-hover">
-                     <p class="text-sm font-medium text-gray-500">{{ $t('common.total') }} Loss Today</p>
+                     <p class="text-sm font-medium text-gray-500">{{ $t('waste.loss_today') }}</p>
                      <p class="text-2xl font-bold text-red-600 mt-1">{{ formatCurrency(totalLoss) }}</p>
                  </div>
                  <div class="glass-card rounded-2xl p-6 card-hover">
-                     <p class="text-sm font-medium text-gray-500">Records</p>
+                     <p class="text-sm font-medium text-gray-500">{{ $t('waste.records') }}</p>
                      <p class="text-2xl font-bold text-gray-900 mt-1">{{ logsList.length }}</p>
                  </div>
             </div>
@@ -19,7 +19,7 @@
                 :data="filteredLogs"
                 :pagination="props.logs"
                 v-model:search="search"
-                title="Waste Tracking"
+                :title="$t('waste.tracking_title')"
             >
                 <template #header-actions>
                     <div class="flex items-center gap-4">
@@ -32,7 +32,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            Log Waste
+                            {{ $t('waste.log_waste') }}
                         </Button>
                     </div>
                 </template>
@@ -44,7 +44,7 @@
 
                 <template #cell-ingredient.name="{ row }">
                     <div>
-                        <span class="font-medium text-gray-900 block">{{ getLocaleName(row.ingredient?.name) || 'Unknown' }}</span>
+                        <span class="font-medium text-gray-900 block">{{ getLocaleName(row.ingredient?.name) || $t('common.unknown') }}</span>
                         <span class="text-xs text-gray-400" v-if="row.ingredient?.unit">({{ row.ingredient.unit }})</span>
                     </div>
                 </template>
@@ -67,7 +67,7 @@
 
                 <template #cell-status="{ row }">
                     <span v-if="row.deleted_at" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        Deleted
+                        {{ $t('waste.deleted') }}
                     </span>
                     <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ $t('common.active') }}</span>
                 </template>
@@ -79,7 +79,7 @@
                     </div>
                     <div class="flex justify-end gap-2" v-else>
                          <Button size="sm" variant="primary" @click="restoreLog(row)">
-                            Restore
+                            {{ $t('waste.restore') }}
                         </Button>
                     </div>
                 </template>
@@ -87,30 +87,32 @@
         </div>
 
         <!-- Add Waste Modal -->
-        <Modal :show="showAddModal" @close="closeAddModal" title="Log Ingredient Waste">
+        <Modal :show="showAddModal" @close="closeAddModal" :title="$t('waste.log_ingredient_waste')">
             <form @submit.prevent="submitAdd" class="space-y-4">
                 <Select
                     v-model="addForm.ingredient_id"
                     @update:modelValue="addForm.ingredient_batch_id = ''"
-                    label="Select Ingredient"
-                    placeholder="Select an ingredient"
+                    :label="$t('waste.select_ingredient')"
+                    :placeholder="$t('waste.select_ingredient')"
                     required
                 >
                     <option v-for="item in ingredients" :key="item.id" :value="item.id">
-                        {{ getLocaleName(item.name) }} (Total: {{ item.current_stock }} {{ item.unit }})
-                        <span v-if="!item.is_active"> - Inactive</span>
+                        {{ getLocaleName(item.name) }} ({{ $t('waste.total_stock') }}: {{ item.current_stock }} {{ item.unit }})
                     </option>
                 </Select>
                 <p v-if="ingredients.length === 0" class="mt-2 text-sm text-red-600">
-                    No ingredients found for this restaurant. Please add ingredients in the 
-                    <a :href="route('inventory.index')" class="font-semibold underline hover:text-red-800">Inventory page</a> first.
+                    <i18n-t keypath="waste.no_ingredients_link">
+                        <template #link>
+                             <a :href="route('inventory.index')" class="font-semibold underline hover:text-red-800">{{ $t('inventory.title') }}</a>
+                        </template>
+                    </i18n-t>
                 </p>
 
                 <div v-if="addForm.ingredient_id">
                     <Select
                         v-model="addForm.ingredient_batch_id"
-                        label="Select Batch"
-                        placeholder="Select a batch (FIFO)"
+                        :label="$t('waste.select_batch')"
+                        :placeholder="$t('waste.select_batch') + ' (FIFO)'"
                         required
                     >
                         <option v-for="batch in availableBatches" :key="batch.id" :value="batch.id">
@@ -122,7 +124,7 @@
 
                 <Input 
                     v-model="addForm.waste_amount"
-                    label="Quantity Wasted"
+                    :label="$t('waste.qty_wasted')"
                     type="number"
                     min="0.01"
                     step="0.01"
@@ -130,28 +132,28 @@
                 />
                 <Input
                     v-model="addForm.notes"
-                    label="Notes (Optional)"
+                    :label="$t('inventory.notes_optional')"
                     type="textarea"
                     rows="2"
                 />
                 <div class="flex justify-end gap-3 mt-6">
                     <Button type="button" variant="secondary" @click="closeAddModal">{{ $t('common.cancel') }}</Button>
-                    <Button type="submit" :loading="addForm.processing" variant="danger">Log Waste</Button>
+                    <Button type="submit" :loading="addForm.processing" variant="danger">{{ $t('waste.log_waste') }}</Button>
                 </div>
             </form>
         </Modal>
 
         <!-- Update Waste Modal -->
-        <Modal :show="showUpdateModal" @close="closeUpdateModal" title="Update Waste Log">
+        <Modal :show="showUpdateModal" @close="closeUpdateModal" :title="$t('waste.update_log')">
             <form @submit.prevent="submitUpdate" class="space-y-4">
                 <div class="bg-gray-50 p-4 rounded-xl mb-4">
-                    <p class="text-sm text-gray-500">Ingredient: <span class="font-bold text-gray-900">{{ getLocaleName(selectedLog?.ingredient?.name) }}</span></p>
-                    <p class="text-sm text-gray-500">Cost Basis: <span class="font-bold text-gray-900">{{ selectedLog?.cost_per_unit }}</span></p>
+                    <p class="text-sm text-gray-500">{{ $t('inventory_page.ingredient_name') }}: <span class="font-bold text-gray-900">{{ getLocaleName(selectedLog?.ingredient?.name) }}</span></p>
+                    <p class="text-sm text-gray-500">{{ $t('waste.cost_basis') }}: <span class="font-bold text-gray-900">{{ selectedLog?.cost_per_unit }}</span></p>
                 </div>
 
                 <Input 
                     v-model="updateForm.waste_amount"
-                    label="Quantity Wasted"
+                    :label="$t('waste.qty_wasted')"
                     type="number"
                     min="0.01"
                     step="0.01"
@@ -184,20 +186,20 @@ const props = defineProps<{
     filters: any;
 }>();
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const route = (window as any).route;
 const page = usePage();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const columns = [
-    { key: 'log_date', label: 'Date', sortable: true, format: 'date' as const },
-    { key: 'user.name', label: 'User', sortable: true },
-    { key: 'ingredient.name', label: 'Ingredient', sortable: true },
-    { key: 'stock_before', label: 'Before', align: 'right' as const },
-    { key: 'waste_amount', label: 'Wasted', align: 'right' as const },
-    { key: 'stock_after', label: 'After', align: 'right' as const },
-    { key: 'total_loss', label: 'Loss', align: 'right' as const },
-    { key: 'status', label: 'Status', align: 'center' as const },
+    { key: 'log_date', label: t('common.date'), sortable: true, format: 'date' as const },
+    { key: 'user.name', label: t('staff.name'), sortable: true },
+    { key: 'ingredient.name', label: t('inventory_page.ingredient_name'), sortable: true },
+    { key: 'stock_before', label: t('reports.start_date').replace('Date', ''), align: 'right' as const }, // reusing 'Start' if possible or just use localized 'Before'
+    { key: 'waste_amount', label: t('common.quantity'), align: 'right' as const },
+    { key: 'stock_after', label: t('reports.end_date').replace('Date', ''), align: 'right' as const }, // reusing 'End'
+    { key: 'total_loss', label: t('waste.loss_today').replace('Today', ''), align: 'right' as const },
+    { key: 'status', label: t('common.status'), align: 'center' as const },
 ];
 
 const search = ref('');
@@ -206,7 +208,7 @@ const search = ref('');
 const getLocaleName = (name: any) => {
     if (!name) return '';
     if (typeof name === 'string') return name;
-    return name[locale.value] || name[$i18n.locale] || 'Unknown';
+    return name[locale.value] || name['en'] || 'Unknown';
 };
 
 const formatCurrency = (amount: any) => {
@@ -294,13 +296,13 @@ const submitUpdate = () => {
 };
 
 const deleteLog = (log: any) => {
-    if (confirm('Are you sure you want to delete this waste record? This will restore the stock to inventory.')) {
+    if (confirm(t('waste.delete_confirm'))) {
         router.delete(route('waste.destroy', log.id));
     }
 };
 
 const restoreLog = (log: any) => {
-    if (confirm('Are you sure you want to restore this waste record? This will deduct the stock from inventory again.')) {
+    if (confirm(t('waste.restore_confirm'))) {
         router.post(route('waste.restore', log.id));
     }
 };

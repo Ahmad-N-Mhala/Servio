@@ -15,7 +15,7 @@
                          <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>{{ $t('common.export') }} Excel</Button>
+                            </svg>{{ $t('inventory.download_excel') }}</Button>
                     </a>
                     <a 
                         :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf' })"
@@ -52,7 +52,7 @@
                     :value="formatCurrency(stats.revenue)"
                     icon="revenue"
                     color="yellow"
-                    subtitle="total revenue"
+                    :subtitle="$t('dashboard_page.total_revenue_subtitle')"
                     class="cursor-pointer"
                     @click="fetchDetails('revenue')"
                 />
@@ -62,7 +62,7 @@
                     :value="formatCurrency(stats.net_profit)"
                     icon="revenue"
                     :color="stats.net_profit >= 0 ? 'green' : 'red'"
-                    subtitle="after expenses & waste"
+                    :subtitle="$t('dashboard_page.net_profit_subtitle')"
                 />
 
                 <StatsCard
@@ -77,10 +77,10 @@
 
                 <StatsCard
                     :title="$t('dashboard_page.avg_dining_time')"
-                    :value="stats.avg_dining_time + ' min'"
+                    :value="stats.avg_dining_time + ' ' + $t('kitchen.min')"
                     icon="time"
                     color="purple"
-                    :subtitle="$t('dashboard_page.avg_dining_time')"
+                    :subtitle="$t('dashboard_page.avg_dining_time_subtitle')"
                 />
             </div>
 
@@ -193,7 +193,7 @@
                     </table>
                 </div>
                 
-                <p v-else class="text-gray-500 dark:text-gray-400 text-center py-4">No details available.</p>
+                <p v-else class="text-gray-500 dark:text-gray-400 text-center py-4">{{ $t('common.no_details') }}</p>
                 
                  <div class="mt-6 flex justify-end">
                     <button @click="showDetailsModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">{{ $t('common.close') }}</button>
@@ -263,7 +263,7 @@ const fetchDetails = async (type: string, params: any = {}) => {
         detailsData.value = response.data.data;
     } catch (error) {
         console.error('Failed to fetch dashboard details', error);
-        detailsTitle.value = 'Error';
+        detailsTitle.value = t('common.error');
     } finally {
         loadingDetails.value = false;
     }

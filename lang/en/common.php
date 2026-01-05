@@ -38,4 +38,5 @@ return [
     'no_data' => 'No data available',
     'confirm_delete' => 'Are you sure you want to delete this item?',
     'confirm_cancellation' => 'Are you sure you want to cancel?',
+    'welcome' => 'Welcome',
 ];

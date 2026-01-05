@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Monthly Expenses',
+    'add_expense' => 'Add Expense',
+    'add_new_expense' => 'Add New Expense',
+    'edit_expense' => 'Edit Expense',
+    'amount' => 'Amount (AED)',
+    'category' => 'Category',
+    'select_category' => 'Select category',
+    'description' => 'Description',
+    'brief_description' => 'Brief description',
+    'payment_status' => 'Payment Status',
+    'pending' => 'Pending',
+    'paid' => 'Paid',
+    'notes' => 'Notes',
+    'additional_notes' => 'Additional notes',
+    'cancel' => 'Cancel',
+    'save' => 'Save',
+    'actions' => 'Actions',
+    'paid_date' => 'Paid Date',
+    'status' => 'Status',
+    'auto' => 'Auto',
+    'select_month' => 'Select Month',
+    'total_expenses' => 'Total Expenses',
+    'breakdown_by_category' => 'Breakdown by Category',
+    'inventory_purchases' => 'Inventory Purchases',
+];

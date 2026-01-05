@@ -3,15 +3,15 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Page Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Cash Register History</h1>
-                <p class="mt-1 text-gray-500 dark:text-gray-400">View historical cash register sessions and transactions</p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('cash_register.history_title') }}</h1>
+                <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $t('cash_register.history_subtitle') }}</p>
             </div>
 
             <!-- Filters -->
             <div class="glass-card rounded-2xl p-6 mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('reports.start_date') }}</label>
                         <input
                             v-model="filters.start_date"
                             type="date"
@@ -19,7 +19,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('reports.end_date') }}</label>
                         <input
                             v-model="filters.end_date"
                             type="date"
@@ -32,7 +32,7 @@
                             @click="applyFilters"
                             class="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium"
                         >
-                            Apply Filters
+                            {{ $t('reports.apply') }}
                         </button>
                     </div>
                 </div>
@@ -56,10 +56,11 @@
                                         {{ register.status.toUpperCase() }}
                                     </span>
                                 </div>
-                                <p class="text-sm text-gray-500">Cashier: {{ register.user?.name || 'Unknown' }}</p>
+                                </div>
+                                <p class="text-sm text-gray-500">{{ $t('cash_register.cashier') }}: {{ register.user?.name || 'Unknown' }}</p>
                                 <p class="text-xs text-gray-400">
-                                    Opened: {{ formatTime(register.opened_at) }}
-                                    <span v-if="register.closed_at"> • Closed: {{ formatTime(register.closed_at) }}</span>
+                                    {{ $t('cash_register.opened') }}: {{ formatTime(register.opened_at) }}
+                                    <span v-if="register.closed_at"> • {{ $t('cash_register.closed') }}: {{ formatTime(register.closed_at) }}</span>
                                 </p>
                             </div>
                             <div class="flex items-center gap-2">
@@ -71,13 +72,13 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    Export CSV
+                                    {{ $t('cash_register.export_csv') }}
                                 </a>
                                 <button
                                     @click="toggleDetails(register.id)"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                                 >
-                                    {{ expandedRegisters.includes(register.id) ? 'Hide Details' : 'Show Details' }}
+                                    {{ expandedRegisters.includes(register.id) ? $t('cash_register.hide_details') : $t('cash_register.show_details') }}
                                 </button>
                             </div>
                         </div>
@@ -85,19 +86,19 @@
                         <!-- Summary Stats -->
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
                             <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Opening</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('cash_register.opening_balance') }}</p>
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ formatCurrency(register.opening_balance) }}</p>
                             </div>
                             <div v-if="register.status === 'closed'" class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Expected</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('common.expected') }}</p>
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ formatCurrency(register.expected_balance) }}</p>
                             </div>
                             <div v-if="register.status === 'closed'" class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Actual</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('cash_register.actual_balance') || 'Actual' }}</p>
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ formatCurrency(register.closing_balance) }}</p>
                             </div>
                             <div v-if="register.status === 'closed'" class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Difference</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('common.difference') }}</p>
                                 <p class="text-lg font-bold" :class="{
                                     'text-green-600': register.difference > 0,
                                     'text-red-600': register.difference < 0,
@@ -107,7 +108,7 @@
                                 </p>
                             </div>
                             <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Transactions</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('cash_register.transactions_count') }}</p>
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ register.transactions?.length || 0 }}</p>
                             </div>
                         </div>
@@ -115,11 +116,11 @@
                         <!-- Notes -->
                         <div v-if="register.opening_notes || register.closing_notes" class="mt-4 space-y-2">
                             <div v-if="register.opening_notes" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-                                <p class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">Opening Notes:</p>
+                                <p class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">{{ $t('cash_register.opening_notes') }}:</p>
                                 <p class="text-sm text-blue-900 dark:text-blue-100">{{ register.opening_notes }}</p>
                             </div>
                             <div v-if="register.closing_notes" class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
-                                <p class="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Closing Notes:</p>
+                                <p class="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">{{ $t('cash_register.closing_notes') }}:</p>
                                 <p class="text-sm text-purple-900 dark:text-purple-100">{{ register.closing_notes }}</p>
                             </div>
                         </div>
@@ -127,16 +128,16 @@
 
                     <!-- Transaction Details (Expandable) -->
                     <div v-if="expandedRegisters.includes(register.id)" class="p-6">
-                        <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Transaction History</h4>
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-4">{{ $t('cash_register.transaction_history') }}</h4>
                         
                         <div v-if="register.transactions && register.transactions.length > 0" class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.time') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.type') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.amount') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('cash_register.balance_after') }}</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('kitchen.notes') }}</th>
                                     </tr>
                                 </thead>
@@ -178,7 +179,7 @@
                             </table>
                         </div>
                         <div v-else class="text-center py-8 text-gray-500">
-                            No transactions recorded
+                            {{ $t('cash_register.no_transactions') }}
                         </div>
                     </div>
                 </div>
@@ -191,8 +192,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Records Found</h3>
-                <p class="text-gray-500">No cash register sessions match your filters</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ $t('cash_register.no_records_title') }}</h3>
+                <p class="text-gray-500">{{ $t('cash_register.no_records_desc') }}</p>
             </div>
 
             <!-- Pagination -->

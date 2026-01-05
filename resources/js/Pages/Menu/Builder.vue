@@ -234,7 +234,7 @@
                     class="rounded border-gray-300 text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary/20 focus:ring-opacity-50"
                 >
                 <label for="category_active" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ $t('common.active') }} ({{ $t('menu.visible_in_menu') || 'Visible in Menu' }})
+                    {{ $t('common.active') }} ({{ $t('menu.visible_in_menu') }})
                 </label>
             </div>
 
@@ -279,17 +279,17 @@
                 <div v-show="activeTab === 'details'" class="space-y-5 py-4">
                     <!-- Type Selector -->
                     <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg flex items-center justify-between border border-gray-100 dark:border-gray-700">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Item Type</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.item_type') }}</span>
                         <div class="flex bg-white dark:bg-gray-800 rounded p-1 shadow-sm">
                             <button type="button" @click="itemForm.type = 'item'" 
                                 class="px-4 py-1.5 text-sm rounded transition-all"
                                 :class="itemForm.type === 'item' ? 'bg-primary text-white shadow' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'">
-                                Single Item
+                                {{ $t('menu.single_item') }}
                             </button>
                             <button type="button" @click="itemForm.type = 'meal'" 
                                 class="px-4 py-1.5 text-sm rounded transition-all"
                                 :class="itemForm.type === 'meal' ? 'bg-primary text-white shadow' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'">
-                                Meal Bundle
+                                {{ $t('menu.meal_bundle') }}
                             </button>
                         </div>
                     </div>
@@ -300,35 +300,35 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input v-model="itemForm.sku" label="SKU / Integration Code" placeholder="e.g. TB-1001" />
+                        <Input v-model="itemForm.sku" :label="$t('menu.sku_code')" :placeholder="$t('menu.sku_placeholder')" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.categories') }}</label>
                             <Select v-model="itemForm.menu_category_id" required class="w-full">
-                                <option :value="null" disabled>Select Category</option>
+                                <option :value="null" disabled>{{ $t('menu.select_category') }}</option>
                                 <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                                     {{ getCategoryName(cat.name) }}
                                 </option>
                             </Select>
                         </div>
-                        <Input v-model="itemForm.price" label="Selling Price" type="number" step="0.01" required />
+                        <Input v-model="itemForm.price" :label="$t('menu.selling_price')" type="number" step="0.01" required />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input v-model="itemForm.sort_order" label="Sort Order" type="number" />
+                        <Input v-model="itemForm.sort_order" :label="$t('menu.sort_order')" type="number" />
                          <!-- Images Section -->
                         <div class="space-y-1">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Images</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.images') }}</label>
                             <div class="grid grid-cols-4 gap-2">
                                 <button type="button" @click="triggerFileInput" class="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors">
                                     <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                    <span class="text-[10px]">Upload</span>
+                                    <span class="text-[10px]">{{ $t('menu.upload') }}</span>
                                 </button>
                                 <button type="button" @click="showUnsplashPicker = true" class="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors">
                                     <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span class="text-[10px]">Stock</span>
+                                    <span class="text-[10px]">{{ $t('menu.stock_image') }}</span>
                                 </button>
                                 <!-- Existing Images -->
                                 <div v-for="(img, idx) in itemForm.kept_images" :key="'kept-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
@@ -357,11 +357,11 @@
                         </div>
                     </div>
 
-                    <Input v-model="itemForm.description" label="Description" type="textarea" rows="3" placeholder="Ingredients, details..." />
+                    <Input v-model="itemForm.description" :label="$t('common.description')" type="textarea" rows="3" :placeholder="$t('menu.description_placeholder')" />
                     
                     <div class="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <input type="checkbox" id="item_available" v-model="itemForm.is_available" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        <label for="item_available" class="text-sm font-medium text-gray-700 dark:text-gray-300">Item is Available for Sale</label>
+                        <label for="item_available" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.item_available_sale') }}</label>
                     </div>
                 </div>
 
@@ -370,11 +370,11 @@
                      <!-- Cost Summary -->
                      <div class="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-between border border-blue-100 dark:border-blue-800">
                         <div>
-                            <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">{{ $t('common.total') }} Cost</p>
+                            <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">{{ $t('menu.total_cost') }}</p>
                             <p class="text-xl font-black text-blue-700 dark:text-blue-300">{{ totalIngredientCost.toFixed(2) }} <span class="text-sm font-normal">AED</span></p>
                         </div>
                         <div class="text-right">
-                             <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Est. Profit</p>
+                             <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">{{ $t('menu.est_profit') }}</p>
                              <p class="text-xl font-black" :class="estimatedProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                                  {{ estimatedProfit.toFixed(2) }} <span class="text-sm font-normal">AED</span>
                              </p>
@@ -382,20 +382,20 @@
                     </div>
 
                     <div class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 space-y-3">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Add Ingredient to Recipe</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.add_ingredient_recipe') }}</label>
                         <div class="flex flex-wrap gap-2">
                             <div class="flex-1 min-w-[200px]">
-                                <Select v-model="newIngredientId" placeholder="Select Ingredient...">
-                                    <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
+                                <Select v-model="newIngredientId" :placeholder="$t('menu.select_ingredient_placeholder')">
+                                    <option v-for="ing in ingredients.filter(i => !itemForm.ingredients.find(existing => existing.id === i.id))" :key="ing.id" :value="ing.id">
                                         {{ getCategoryName(ing.name) }} ({{ ing.cost }} / {{ ing.unit }})
                                     </option>
                                 </Select>
                             </div>
                             <div class="w-24">
-                                <Input v-model="newIngredientQty" type="number" step="0.0001" placeholder="Qty" @keypress.enter.prevent="addIngredient" />
+                                <Input v-model="newIngredientQty" type="number" step="0.0001" :placeholder="$t('menu.qty')" @keypress.enter.prevent="addIngredient" />
                             </div>
                              <div class="w-24">
-                                <Select v-model="newIngredientUnit" placeholder="Unit">
+                                <Select v-model="newIngredientUnit" :placeholder="$t('menu.unit')">
                                     <option v-for="unit in getAvailableUnits" :key="unit" :value="unit">{{ unit }}</option>
                                 </Select>
                             </div>
@@ -424,34 +424,34 @@
                                  </button>
                              </div>
                         </div>
-                        <p v-if="itemForm.ingredients.length === 0" class="text-center text-gray-500 py-8 italic">No ingredients defining the recipe yet.</p>
+                        <p v-if="itemForm.ingredients.length === 0" class="text-center text-gray-500 py-8 italic">{{ $t('menu.no_ingredients_recipe') }}</p>
                     </div>
                 </div>
 
                 <!-- Tab: Bundles (Meal) -->
                 <div v-show="activeTab === 'bundles'" v-if="itemForm.type === 'meal'" class="space-y-4 py-4">
                     <div class="flex justify-between items-center">
-                        <h4 class="font-medium text-gray-900 dark:text-white">Items included in this Meal</h4>
-                        <Button type="button" size="sm" @click="addBundleRow">Add Item</Button>
+                        <h4 class="font-medium text-gray-900 dark:text-white">{{ $t('menu.bundled_items') }}</h4>
+                        <Button type="button" size="sm" @click="addBundleRow">{{ $t('menu.add_item') }}</Button>
                     </div>
                     <div class="space-y-3">
                         <div v-for="(bundle, idx) in itemForm.bundles" :key="idx" class="flex gap-3 items-start p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-700">
                             <div class="flex-1">
-                                <label class="text-xs text-gray-500 mb-1 block">Item to Include</label>
+                                <label class="text-xs text-gray-500 mb-1 block">{{ $t('menu.item_to_include') }}</label>
                                 <Select v-model="bundle.child_menu_item_id">
-                                    <option :value="null">Select Item</option>
+                                    <option :value="null">{{ $t('menu.select_item') }}</option>
                                     <option v-for="item in allItems" :key="item.id" :value="item.id">{{ getItemName(item.name) }}</option>
                                 </Select>
                             </div>
                             <div class="w-24">
-                                <label class="text-xs text-gray-500 mb-1 block">Qty</label>
+                                <label class="text-xs text-gray-500 mb-1 block">{{ $t('menu.qty') }}</label>
                                 <Input v-model="bundle.quantity" type="number" min="1" />
                             </div>
                             <button type="button" @click="removeBundleRow(idx)" class="mt-6 text-red-500 p-2 hover:bg-red-50 rounded-full">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
-                         <p v-if="itemForm.bundles.length === 0" class="text-center text-gray-500 py-8 italic">No items bundled yet. Add items to create a meal combo.</p>
+                         <p v-if="itemForm.bundles.length === 0" class="text-center text-gray-500 py-8 italic">{{ $t('menu.no_items_bundled') }}</p>
                     </div>
                 </div>
 
@@ -459,10 +459,10 @@
                 <div v-show="activeTab === 'extras'" class="space-y-5 py-4">
                      <div class="flex justify-between items-center">
                         <div>
-                            <h4 class="font-medium text-gray-900 dark:text-white">Paid Add-ons & Modifiers</h4>
-                            <p class="text-xs text-gray-500">Allow customers to customize this item</p>
+                            <h4 class="font-medium text-gray-900 dark:text-white">{{ $t('menu.paid_addons') }}</h4>
+                            <p class="text-xs text-gray-500">{{ $t('menu.customize_item_desc') }}</p>
                         </div>
-                        <Button type="button" size="sm" @click="addExtraRow" variant="secondary">+ Add Option</Button>
+                        <Button type="button" size="sm" @click="addExtraRow" variant="secondary">+ {{ $t('menu.add_option') }}</Button>
                     </div>
 
                     <div class="space-y-4">
@@ -473,34 +473,34 @@
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pr-8">
                                 <Input v-model="extra.name.en" :label="$t('common.name_en')" placeholder="e.g. Extra Cheese" />
-                                <Input v-model="extra.name.ar" label="Option Name (AR)" placeholder="e.g. جبne إضافية" dir="rtl" class="text-right" />
+                                <Input v-model="extra.name.ar" :label="$t('common.name_ar')" placeholder="e.g. جبne إضافية" dir="rtl" class="text-right" />
                             </div>
 
                             <div class="flex flex-col md:flex-row gap-4 items-end">
                                 <div class="w-full md:w-1/3">
-                                    <Input v-model="extra.price" label="Extra Cost (Price)" type="number" step="0.01" prefix="AED" />
+                                    <Input v-model="extra.price" :label="$t('menu.extra_cost_price')" type="number" step="0.01" prefix="AED" />
                                 </div>
                                 
                                 <!-- Inventory Link -->
                                 <div class="flex-1 w-full bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
-                                        Inventory Deduction 
-                                        <span class="text-[10px] font-normal normal-case text-gray-400">(Optional - Deduct from stock when sold)</span>
+                                        {{ $t('menu.inventory_deduction') }} 
+                                        <span class="text-[10px] font-normal normal-case text-gray-400">{{ $t('menu.deduct_stock_desc') }}</span>
                                     </label>
                                     <div class="flex gap-2">
                                         <div class="flex-1">
-                                            <Select v-model="extra.ingredient_id" placeholder="Link to Ingredient">
-                                                <option :value="null">None (No Deduction)</option>
+                                            <Select v-model="extra.ingredient_id" :placeholder="$t('menu.link_ingredient')">
+                                                <option :value="null">{{ $t('menu.no_deduction') }}</option>
                                                 <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
-                                                    {{ getCategoryName(ing.name) }} (Stock: {{ ing.unit }})
+                                                    {{ getCategoryName(ing.name) }} ({{ $t('common.stock') }}: {{ ing.unit }})
                                                 </option>
                                             </Select>
                                         </div>
                                         <div class="w-24" v-if="extra.ingredient_id">
-                                            <Input v-model="extra.quantity" type="number" step="0.001" placeholder="Qty" />
+                                            <Input v-model="extra.quantity" type="number" step="0.001" :placeholder="$t('menu.qty')" />
                                         </div>
                                          <div class="w-28" v-if="extra.ingredient_id">
-                                            <Select v-model="extra.unit" placeholder="Unit">
+                                            <Select v-model="extra.unit" :placeholder="$t('menu.unit')">
                                                  <option v-for="unit in getCompatibleUnits(extra.ingredient_id)" :key="unit" :value="unit">{{ unit }}</option>
                                             </Select>
                                         </div>
@@ -510,8 +510,8 @@
                         </div>
                     </div>
                      <div v-if="itemForm.extras.length === 0" class="text-center py-10 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/20">
-                        <p class="text-gray-500 font-medium">No extras defined.</p>
-                        <button type="button" @click="addExtraRow" class="text-primary hover:underline mt-2 text-sm font-medium">Add the first extra option</button>
+                        <p class="text-gray-500 font-medium">{{ $t('menu.no_extras_defined') }}</p>
+                        <button type="button" @click="addExtraRow" class="text-primary hover:underline mt-2 text-sm font-medium">{{ $t('menu.add_first_extra') }}</button>
                     </div>
                 </div>
 
@@ -598,11 +598,11 @@ const activeTab = ref('details');
 const tabs = computed(() => {
     const list = [
         { id: 'details', label: t('common.details'), icon: '' },
-        { id: 'recipe', label: t('menu.recipe') || 'Recipe', icon: '' },
-        { id: 'extras', label: t('menu.extras') || 'Extras', icon: '' },
+        { id: 'recipe', label: t('menu.recipe'), icon: '' },
+        { id: 'extras', label: t('menu.extras'), icon: '' },
     ];
     if (itemForm.type === 'meal') {
-        list.splice(2, 0, { id: 'bundles', label: 'Bundled Items', icon: '' });
+        list.splice(2, 0, { id: 'bundles', label: t('menu.meal_bundle'), icon: '' });
     }
     return list;
 });
@@ -700,26 +700,12 @@ const addIngredient = () => {
         ingredient?.unit || newIngredientUnit.value
     );
 
-    // Check if already exists
-    const existing = itemForm.ingredients.find(i => i.id === newIngredientId.value);
-    if (existing) {
-        // If updating, we keep the FIRST unit selected or update it? 
-        // For simplicity, just add to the normalized quantity.
-        // But the UI shows usage_quantity. This is tricky for mixed units.
-        // We will just add a new row if units differ? No, duplicate IDs might be issue.
-        // Let's simplified: Update the quantity.
-        existing.quantity += normalizedQty;
-        // Optionally update usage display
-        // existing.usage_quantity = Number(existing.usage_quantity) + Number(newIngredientQty.value); 
-        // The above is wrong if units differ.
-    } else {
-        itemForm.ingredients.push({
-            id: newIngredientId.value,
-            quantity: normalizedQty,
-            usage_quantity: Number(newIngredientQty.value),
-            usage_unit: newIngredientUnit.value
-        });
-    }
+    itemForm.ingredients.push({
+        id: newIngredientId.value,
+        quantity: normalizedQty,
+        usage_quantity: Number(newIngredientQty.value),
+        usage_unit: newIngredientUnit.value
+    });
     
     newIngredientQty.value = '';
     // Keep unit or reset?

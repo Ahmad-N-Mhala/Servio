@@ -363,6 +363,8 @@ Route::group([
             // Localization
             Route::get('localization', [\App\Http\Controllers\Admin\LocalizationController::class, 'index'])->name('localization.index');
             Route::post('localization', [\App\Http\Controllers\Admin\LocalizationController::class, 'update'])->name('localization.update');
+            Route::post('localization/store', [\App\Http\Controllers\Admin\LocalizationController::class, 'store'])->name('localization.store');
+            Route::post('localization/import', [\App\Http\Controllers\Admin\LocalizationController::class, 'import'])->name('localization.import');
 
             // System Communication (Email & SMS)
             Route::get('email-templates', [\App\Http\Controllers\Admin\CommunicationController::class, 'indexEmail'])->name('email.index');

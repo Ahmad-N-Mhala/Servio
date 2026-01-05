@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'المصاريف الشهرية',
+    'add_expense' => 'إضافة مصروف',
+    'add_new_expense' => 'إضافة مصروف جديد',
+    'edit_expense' => 'تعديل المصروف',
+    'amount' => 'المبلغ (درهم)',
+    'category' => 'الفئة',
+    'select_category' => 'اختر الفئة',
+    'description' => 'الوصف',
+    'brief_description' => 'وصف مختصر',
+    'payment_status' => 'حالة الدفع',
+    'pending' => 'معلق',
+    'paid' => 'مدفوع',
+    'notes' => 'ملاحظات',
+    'additional_notes' => 'ملاحظات إضافية',
+    'cancel' => 'إلغاء',
+    'save' => 'حفظ',
+    'actions' => 'الإجراءات',
+    'paid_date' => 'تاريخ الدفع',
+    'status' => 'الحالة',
+    'auto' => 'تلقائي',
+    'select_month' => 'اختر الشهر',
+    'total_expenses' => 'إجمالي المصاريف',
+    'breakdown_by_category' => 'التوزيع حسب الفئة',
+    'inventory_purchases' => 'مشتريات المخزون',
+];

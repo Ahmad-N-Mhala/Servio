@@ -89,6 +89,17 @@ createInertiaApp({
         app.use(i18n);
         app.use(ZiggyVue);
 
+        // Merge backend translations
+        const backendTranslations = props.initialPage.props.translations as any;
+        if (backendTranslations) {
+            if (backendTranslations.en) {
+                i18n.global.mergeLocaleMessage('en', backendTranslations.en);
+            }
+            if (backendTranslations.ar) {
+                i18n.global.mergeLocaleMessage('ar', backendTranslations.ar);
+            }
+        }
+
         setup(pinia);
 
         app.mount(el);

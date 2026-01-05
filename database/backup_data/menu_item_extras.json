@@ -1,22 +1,5 @@
 [
     {
-        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
-        "name": "{\"en\":{\"ar\":null},\"ar\":null}",
-        "price": {
-            "$numberDecimal": "3.00"
-        },
-        "ingredient_id": "69563aceaeff1b1ae101c522",
-        "quantity": {
-            "$numberDecimal": "1.0000"
-        },
-        "unit": null,
-        "updated_at": "2026-01-05T09:12:36.220000Z",
-        "created_at": "2026-01-05T09:12:36.220000Z",
-        "id": {
-            "$oid": "695b8084bb2bb5d33600618e"
-        }
-    },
-    {
         "menu_item_id": "69563bc8aeff1b1ae101c526",
         "name": "{\"en\":\"tomatto\",\"ar\":null}",
         "price": {
@@ -31,6 +14,23 @@
         "created_at": "2026-01-05T12:55:30.920000Z",
         "id": {
             "$oid": "695bb4c29d00e5cc10061ae3"
+        }
+    },
+    {
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "name": "{\"en\":{\"ar\":null},\"ar\":null}",
+        "price": {
+            "$numberDecimal": "3.00"
+        },
+        "ingredient_id": "69563aceaeff1b1ae101c522",
+        "quantity": {
+            "$numberDecimal": "1.0000"
+        },
+        "unit": null,
+        "updated_at": "2026-01-05T18:45:14.192000Z",
+        "created_at": "2026-01-05T18:45:14.192000Z",
+        "id": {
+            "$oid": "695c06babc5c0bf6780a1992"
         }
     }
 ]

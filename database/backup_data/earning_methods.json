@@ -1,7 +1,7 @@
 [
     {
         "restaurant_id": "69503a8eeaf319e8830776ee",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -15,7 +15,7 @@
     },
     {
         "restaurant_id": "69503b2deaf319e8830776f6",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -29,7 +29,7 @@
     },
     {
         "restaurant_id": "69503b69eaf319e8830776fc",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -43,7 +43,7 @@
     },
     {
         "restaurant_id": "69503b7feaf319e883077702",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -57,7 +57,7 @@
     },
     {
         "restaurant_id": "69503d88eaf319e883077708",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -71,7 +71,7 @@
     },
     {
         "restaurant_id": "69503dc8eaf319e88307770e",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -85,7 +85,7 @@
     },
     {
         "restaurant_id": "69503e50eaf319e883077714",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set during onboarding.",
         "type": "order_total",
         "points": 1,
@@ -114,7 +114,7 @@
     },
     {
         "restaurant_id": "695b8388bb2bb5d336006196",
-        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"نقاط الولاء\"}",
         "description": "Default earning method set.",
         "type": "order_total",
         "points": 1,

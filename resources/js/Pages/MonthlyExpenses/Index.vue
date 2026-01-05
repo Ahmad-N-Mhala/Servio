@@ -5,7 +5,7 @@
             <div class="mb-8 flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">{{ $t('expenses.title') }}</h1>
-                    <p class="mt-2 text-gray-600">Track and manage your monthly operating costs</p>
+                    <p class="mt-2 text-gray-600">{{ $t('expenses.manage_description') }}</p>
                 </div>
                 <button
                     @click="showAddModal = true"
@@ -74,8 +74,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-700 italic">Auto-calculated from inventory stock additions</div>
-                                    <div class="text-xs text-gray-500 mt-1">This value updates automatically when you add stock</div>
+                                    <div class="text-sm text-gray-700 italic">{{ $t('expenses.auto_calculated_inventory') }}</div>
+                                    <div class="text-xs text-gray-500 mt-1">{{ $t('expenses.inventory_update_note') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <span class="text-lg font-bold text-purple-900">{{ formatCurrency(inventoryPurchases) }}</span>
@@ -133,8 +133,8 @@
                             </tr>
                             <tr v-if="expenses.length === 0">
                                 <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                    <div class="text-lg font-medium">No expenses for this month</div>
-                                    <p class="text-sm mt-2">Click "Add Expense" to get started</p>
+                                    <div class="text-lg font-medium">{{ $t('expenses.no_expenses') }}</div>
+                                    <p class="text-sm mt-2">{{ $t('expenses.click_add_to_start') }}</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -247,9 +247,11 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 
 const page = usePage();
+const { t } = useI18n();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const props = defineProps<{
@@ -313,7 +315,7 @@ const editExpense = (expense: any) => {
 };
 
 const deleteExpense = (id: string) => {
-    if (confirm('Are you sure you want to delete this expense?')) {
+    if (confirm(t('expenses.delete_confirm') || 'Are you sure you want to delete this expense?')) {
         router.delete((window as any).route('monthly-expenses.destroy', id));
     }
 };

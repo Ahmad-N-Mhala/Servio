@@ -3,13 +3,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Order Delivery</h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage orders ready to be served to tables</p>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('nav.order_delivery') }}</h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('delivery.manage_ready_orders') || 'Manage orders ready to be served to tables' }}</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-gray-500 bg-white dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm border border-gray-100 flex items-center gap-2">
                         <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                        Live Updates
+                        {{ $t('common.live_updates') || 'Live Updates' }}
                     </span>
                 </div>
             </div>
@@ -22,14 +22,14 @@
                         <div class="p-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50 flex justify-between items-start">
                             <div>
                                 <h3 class="text-2xl font-black text-gray-900 dark:text-white">
-                                    {{ order.table?.name || (order.type === 'dine_in' ? 'Dine In (No Table)' : order.type?.toUpperCase() || 'No Table') }}
+                                    {{ order.table?.name || (order.type === 'dine_in' ? ($t('pos.dine_in') + ' (' + $t('common.no_table') + ')') : (order.type ? $t('pos.' + order.type) : $t('common.no_table'))) }}
                                 </h3>
                                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">
                                     #{{ order.order_number }}
                                 </p>
                             </div>
                             <div class="text-right">
-                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold">READY</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold">{{ $t('kitchen.ready') || 'READY' }}</span>
                                 <p class="text-xs text-gray-500 mt-1">{{ formatTime(order.updated_at) }}</p>
                             </div>
                         </div>
@@ -39,7 +39,7 @@
                             <ul class="space-y-3 mb-6">
                                 <li v-for="item in order.items" :key="item.id" class="flex items-start gap-3 text-sm">
                                     <span class="font-bold text-gray-900 dark:text-white min-w-[1.5rem]">{{ item.quantity }}x</span>
-                                    <span class="text-gray-600 dark:text-gray-300 leading-tight">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                    <span class="text-gray-600 dark:text-gray-300 leading-tight">{{ item.menu_item?.name?.en || item.menu_item?.name || $t('common.unknown_item') }}</span>
                                 </li>
                             </ul>
 
@@ -56,7 +56,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    Mark as Served
+                                    {{ $t('delivery.mark_as_served') || 'Mark as Served' }}
                                 </span>
                             </button>
                         </div>
@@ -71,8 +71,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">All Caught Up!</h3>
-                <p class="text-gray-500 max-w-sm">There are no orders ready to be served at the moment. Good job!</p>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ $t('delivery.all_caught_up') || 'All Caught Up!' }}</h3>
+                <p class="text-gray-500 max-w-sm">{{ $t('delivery.no_ready_orders') || 'There are no orders ready to be served at the moment. Good job!' }}</p>
             </div>
         </div>
     </MainLayout>

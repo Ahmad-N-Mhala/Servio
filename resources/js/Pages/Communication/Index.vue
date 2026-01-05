@@ -4,15 +4,15 @@
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Communication & Messaging</h1>
-                    <p class="mt-1 text-sm text-gray-500">Manage your SMS and Email credits and view logs.</p>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('communication.title') }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ $t('communication.manage_description') }}</p>
                 </div>
                 <div v-if="activeTab === 'templates'">
                     <Button @click="openTemplateModal()" class="flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        New Automation Rule
+                        {{ $t('communication.new_rule') }}
                     </Button>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                             <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">SMS</span>
                         </div>
                         <h3 class="text-4xl font-bold mb-1">{{ balances.sms }}</h3>
-                        <p class="text-sm font-medium text-blue-100 opacity-90">SMS Credits</p>
+                        <p class="text-sm font-medium text-blue-100 opacity-90">{{ $t('communication.sms_credits') }}</p>
                     </div>
                 </div>
 
@@ -49,7 +49,7 @@
                             <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">Email</span>
                         </div>
                         <h3 class="text-4xl font-bold mb-1">{{ balances.email }}</h3>
-                        <p class="text-sm font-medium text-purple-100 opacity-90">Email Credits</p>
+                        <p class="text-sm font-medium text-purple-100 opacity-90">{{ $t('communication.email_credits') }}</p>
                     </div>
                 </div>
             </div>
@@ -63,7 +63,8 @@
                         activeTab === 'templates' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
                     ]"
                 >
-                    Automation Rules
+                >
+                    {{ $t('communication.automation_rules') }}
                 </button>
                 <button 
                     @click="activeTab = 'logs'"
@@ -72,7 +73,7 @@
                         activeTab === 'logs' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
                     ]"
                 >
-                    Communication Logs
+                    {{ $t('communication.communication_logs') }}
                 </button>
                 <button 
                     @click="activeTab = 'feedback'"
@@ -81,7 +82,7 @@
                         activeTab === 'feedback' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
                     ]"
                 >
-                    Feedback Automation
+                    {{ $t('communication.feedback_automation') }}
                 </button>
             </div>
 
@@ -311,7 +312,7 @@
         <!-- FILTER OUT FEEDBACK TEMPLATE FROM LIST TO AVOID DUPES -->
             <div v-if="templates.filter(t => t.trigger_event !== 'order_completed_feedback').length === 0" class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
                 <!-- ... empty state ... -->
-                <h3 class="text-lg font-medium text-gray-900">No custom automation rules defined</h3>
+                <h3 class="text-lg font-medium text-gray-900">{{ $t('communication.no_rules_defined') }}</h3>
                 <!-- ... -->
             </div>
 
@@ -348,7 +349,7 @@
                                 </div>
                             </div>
                             <span :class="template.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'" class="px-2 py-1 text-xs rounded-full font-medium">
-                                {{ template.is_active ? 'Active' : 'Inactive' }}
+                                {{ template.is_active ? $t('common.active') : $t('common.inactive') }}
                             </span>
                         </div>
 
@@ -362,7 +363,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
-                                <span class="underline">Sent: {{ template.logs_count || 0 }}</span>
+                                <span class="underline">{{ $t('common.sent') }}: {{ template.logs_count || 0 }}</span>
                             </button>
                             <div class="flex gap-2">
                                 <button @click="openTemplateModal(template)" class="text-blue-600 hover:text-blue-800 font-medium">{{ $t('common.edit') }}</button>
@@ -377,17 +378,17 @@
             <div v-if="activeTab === 'logs'" class="glass-card rounded-2xl overflow-hidden animate-fade-in p-6">
                 <div class="flex flex-col sm:flex-row gap-4 mb-6">
                     <div class="flex-1">
-                        <Input v-model="params.search" placeholder="Search logs..." type="search" />
+                        <Input v-model="params.search" :placeholder="$t('communication.search_logs')" type="search" />
                     </div>
                     <select v-model="params.type" class="rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]">
-                        <option value="">All Channels</option>
-                        <option value="sms">SMS</option>
-                        <option value="email">Email</option>
+                        <option value="">{{ $t('communication.all_channels') }}</option>
+                        <option value="sms">{{ $t('communication.sms') }}</option>
+                        <option value="email">{{ $t('communication.email') }}</option>
                     </select>
                     <select v-model="params.status" class="rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]">
-                        <option value="">All Statuses</option>
-                        <option value="sent">Sent</option>
-                        <option value="failed">Failed</option>
+                        <option value="">{{ $t('communication.all_statuses') }}</option>
+                        <option value="sent">{{ $t('common.sent') }}</option>
+                        <option value="failed">{{ $t('common.failed') }}</option>
                     </select>
                     <DateRangePicker 
                         :initial-start-date="params.date_from"
@@ -401,10 +402,10 @@
                         <thead class="bg-gray-50 text-gray-900 border-b border-gray-100">
                             <tr>
                                 <th class="px-4 py-3 font-semibold">{{ $t('common.date') }}</th>
-                                <th class="px-4 py-3 font-semibold">Rule</th>
-                                <th class="px-4 py-3 font-semibold">Recipient</th>
-                                <th class="px-4 py-3 font-semibold">Message</th>
-                                <th class="px-4 py-3 font-semibold">Channel</th>
+                                <th class="px-4 py-3 font-semibold">{{ $t('communication.rule') }}</th>
+                                <th class="px-4 py-3 font-semibold">{{ $t('communication.recipient') }}</th>
+                                <th class="px-4 py-3 font-semibold">{{ $t('communication.message') }}</th>
+                                <th class="px-4 py-3 font-semibold">{{ $t('communication.channel') }}</th>
                                 <th class="px-4 py-3 font-semibold">{{ $t('common.status') }}</th>
                             </tr>
                         </thead>
@@ -425,7 +426,7 @@
                                 </td>
                             </tr>
                             <tr v-if="logs.data.length === 0">
-                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">No logs found.</td>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">{{ $t('communication.no_logs') }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -452,13 +453,13 @@
                     <div class="my-4">
                         <span class="text-3xl font-bold text-gray-900">{{ bundle.currency }} {{ bundle.price }}</span>
                     </div>
-                    <p class="text-gray-500 mb-6">{{ bundle.quantity }} {{ bundle.type.toUpperCase() }} Credits</p>
-                    <Button @click="purchase(bundle)" class="w-full justify-center">Purchase</Button>
+                    <p class="text-gray-500 mb-6">{{ bundle.quantity }} {{ bundle.type.toUpperCase() }} {{ $t('communication.credits') }}</p>
+                    <Button @click="purchase(bundle)" class="w-full justify-center">{{ $t('communication.purchase') }}</Button>
                 </div>
             </div>
 
         <!-- Create/Edit Template Modal -->
-        <Modal :show="showTemplateModal" @close="closeTemplateModal" :title="editingTemplate ? 'Edit Automation Rule' : 'New Automation Rule'" size="2xl">
+        <Modal :show="showTemplateModal" @close="closeTemplateModal" :title="editingTemplate ? $t('communication.edit_rule') : $t('communication.new_rule')" size="2xl">
             <form @submit.prevent="submitTemplate" class="space-y-6">
                 <!-- Rule Information Section -->
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-100">
@@ -754,7 +755,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        {{ editingTemplate ? 'Update Rule' : 'Create Rule' }}
+                        {{ editingTemplate ? $t('communication.update_rule') : $t('communication.create_rule') }}
                     </Button>
                 </div>
             </form>
