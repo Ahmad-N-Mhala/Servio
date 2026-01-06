@@ -1,0 +1,338 @@
+[
+    {
+        "_id": {
+            "$oid": "69457cdb2d33b6a8db028a42"
+        },
+        "user_id": "694579e733231912b007b6c2",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766161627373"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766775245191"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766161627373"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694ec6234c7837e511064b97"
+        },
+        "user_id": "694ec6234c7837e511064b96",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role": "kitchen_staff",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766770211202"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766770211202"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766770211202"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694ec7564c7837e511064b9a"
+        },
+        "user_id": "694ec7564c7837e511064b99",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role": "waiter",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766770518300"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766770518300"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766770518300"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694ec8204c7837e511064b9d"
+        },
+        "user_id": "694ec8204c7837e511064b9c",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role": "waiter",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766770720448"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766770720448"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766770720448"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fc0107b83a4bfd50194eb"
+        },
+        "user_id": "694fc0107b83a4bfd50194ea",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role": "manager",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766834192411"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766834192411"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766834192411"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fc1497b83a4bfd50194f3"
+        },
+        "user_id": "694fc1497b83a4bfd50194f2",
+        "restaurant_id": "694579e833231912b007b6c3",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766834505960"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766834505961"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766834505961"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503a8eeaf319e8830776f0"
+        },
+        "restaurant_id": "69503a8eeaf319e8830776ee",
+        "user_id": "69503a8eeaf319e8830776ed",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766865550110"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865550110"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865550110"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503b2deaf319e8830776f8"
+        },
+        "restaurant_id": "69503b2deaf319e8830776f6",
+        "user_id": "69503b2deaf319e8830776f5",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766865709388"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865709388"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865709388"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503b69eaf319e8830776fe"
+        },
+        "restaurant_id": "69503b69eaf319e8830776fc",
+        "user_id": "69503b69eaf319e8830776fb",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766865769366"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865769366"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865769366"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503b7feaf319e883077704"
+        },
+        "restaurant_id": "69503b7feaf319e883077702",
+        "user_id": "69503b7feaf319e883077701",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766865791271"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865791271"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865791271"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503d88eaf319e88307770a"
+        },
+        "restaurant_id": "69503d88eaf319e883077708",
+        "user_id": "69503d88eaf319e883077707",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766866312577"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866312577"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866312577"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503dc8eaf319e883077710"
+        },
+        "restaurant_id": "69503dc8eaf319e88307770e",
+        "user_id": "69503dc8eaf319e88307770d",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766866376064"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866376064"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866376064"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503e50eaf319e883077716"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "user_id": "69503e50eaf319e883077713",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1766866512779"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866512779"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866512779"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b8389bb2bb5d336006198"
+        },
+        "restaurant_id": "695b8388bb2bb5d336006196",
+        "user_id": "694579e733231912b007b6c2",
+        "role": "owner",
+        "is_active": true,
+        "joined_at": {
+            "$date": {
+                "$numberLong": "1767605129006"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767605129006"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767605129006"
+            }
+        }
+    }
+]

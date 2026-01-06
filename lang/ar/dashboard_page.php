@@ -14,4 +14,12 @@ return [
     'recent_orders' => 'الطلبات الأخيرة',
     'low_stock' => 'أصناف منخفضة المخزون',
     'quick_actions' => 'إجراءات سريعة',
+    'subtitle' => 'إليك ما يحدث في مطعمك اليوم.',
+    'revenue' => 'الإيرادات',
+    'total_revenue_subtitle' => 'إجمالي الإيرادات من الطلبات المكتملة',
+    'net_profit' => 'صافي الربح',
+    'net_profit_subtitle' => 'الإيرادات - (المصاريف + الهدر)',
+    'avg_dining_time' => 'متوسط وقت تناول الطعام',
+    'avg_dining_time_subtitle' => 'متوسط الوقت من الطلب حتى الاكتمال',
+    'details' => 'التفاصيل',
 ];

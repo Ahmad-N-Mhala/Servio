@@ -40,7 +40,7 @@ class POSController extends Controller
         // Get menu items for order updates
         $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
             ->where('is_available', true)
-            ->with('category')
+            ->with(['category', 'extras'])
             ->orderBy('name->en')
             ->get();
 
@@ -61,6 +61,7 @@ class POSController extends Controller
             'menuItems' => $menuItems,
             'currentRegister' => $currentRegister,
             'currentBalance' => $currentRegister ? $currentRegister->getCurrentBalance() : 0,
+            'google_map_location' => $restaurant->google_map_location,
         ]);
     }
 

@@ -21,10 +21,10 @@
                     </div>
                     <div class="flex gap-2">
                         <button @click="showWithdrawModal = true" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            {{ $t('cash_register.withdraw') || 'Withdraw' }}
+                            {{ $t('cash_register.withdraw') }}
                         </button>
                         <button @click="showDepositModal = true" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                            {{ $t('cash_register.deposit') || 'Deposit' }}
+                            {{ $t('cash_register.deposit') }}
                         </button>
                         <button @click="showCloseModal = true" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
                             {{ $t('common.close') }} {{ $t('cash_register.title') }}
@@ -68,9 +68,9 @@
                 </Link>
             </div>
 
-            <div class="flex gap-8 h-[calc(100vh-12rem)]">
+            <div class="flex flex-col lg:flex-row gap-8 h-auto lg:h-[calc(100vh-12rem)]">
                 <!-- Left Column: Unpaid Orders -->
-                <div class="w-1/2 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+                <div class="w-full lg:w-1/2 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar min-h-[500px] lg:min-h-0">
                     <h2 class="text-lg font-bold text-gray-900 sticky top-0 bg-gray-50 pb-2 z-10 flex flex-col gap-2">
                         <div class="flex items-center justify-between">
                             {{ $t('pos.active_orders') }}
@@ -130,7 +130,7 @@
 
                                     <!-- Status Badge (for delivery/special statuses) -->
                                     <span v-if="order.status === 'pending_approval'" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
-                                        Pending Approval
+                                        {{ $t('orders.pending_approval') }}
                                     </span>
                                 </div>
                                 <span class="text-xs" :class="selectedOrder?.id === order.id ? 'text-white/80' : 'text-gray-400'">
@@ -146,7 +146,7 @@
 
 
                 <!-- Right Column: Bill Details & Payment -->
-                <div class="w-1/2 flex flex-col">
+                <div class="w-full lg:w-1/2 flex flex-col">
                     <div v-if="selectedOrder" class="glass-card flex flex-col h-full rounded-2xl overflow-hidden border border-gray-200 shadow-xl">
                         <!-- Bill Header -->
                         <div class="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center shrink-0">
@@ -174,7 +174,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
-                                Update Order
+                                {{ $t('orders.update_order') }}
                             </button>
                             
                             <div v-for="item in editableItems" :key="item.id" class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0 group">
@@ -185,7 +185,7 @@
                                     </div>
                                     
                                     <div>
-                                        <p class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Item' }}</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || $t('common.item') }}</p>
                                         <p v-if="item.notes" class="text-xs text-gray-500 italic">{{ item.notes }}</p>
                                     </div>
                                 </div>
@@ -194,7 +194,7 @@
                                 </span>
                             </div>
                             <div v-if="editableItems.length === 0" class="text-center text-gray-400 text-sm py-4">
-                                No items in order.
+                                {{ $t('orders.no_items') }}
                             </div>
                         </div>
 
@@ -204,10 +204,10 @@
                             <!-- Adjustments Toggle -->
                             <div v-if="adjustmentMode === 'none'" class="flex gap-2">
                                 <button @click="adjustmentMode = 'discount'" class="flex-1 py-2 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-                                    + Add Discount
+                                    {{ $t('pos.add_discount') }}
                                 </button>
                                 <button @click="adjustmentMode = 'extra'" class="flex-1 py-2 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-                                    + Add Extra Charge
+                                    {{ $t('pos.add_extra_charge') }}
                                 </button>
                             </div>
 
@@ -215,7 +215,7 @@
                             <div v-else class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm animate-fade-in-up">
                                 <div class="flex justify-between items-center mb-2">
                                     <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500">
-                                        {{ adjustmentMode === 'discount' ? 'Apply Discount' : 'Add Extra Charge' }}
+                                        {{ adjustmentMode === 'discount' ? $t('pos.apply_discount') : $t('pos.apply_extra_charge') }}
                                     </h4>
                                     <button @click="adjustmentMode = 'none'" class="text-gray-400 hover:text-gray-600">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -230,7 +230,7 @@
                                         <button 
                                             @click="activeType = 'fixed'"
                                             :class="['flex-1 text-xs font-bold transition-colors', activeType === 'fixed' ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-500 hover:bg-gray-50']"
-                                        >Fixed</button>
+                                        >{{ $t('pos.fixed') }}</button>
                                         <div class="w-px bg-gray-200"></div>
                                         <button 
                                             @click="activeType = 'percent'"
@@ -250,23 +250,23 @@
                                     </div>
                                 </div>
                                 <button @click="applyAdjustment" class="w-full py-1.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors">
-                                    Apply {{ adjustmentMode === 'discount' ? 'Discount' : 'Charge' }}
+                                    {{ $t('common.apply') }} {{ adjustmentMode === 'discount' ? $t('pos.discount') : $t('pos.charge') }}
                                 </button>
                             </div>
 
                             <!-- Totals Display (Live Preview) -->
                             <div class="space-y-1">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xs text-gray-500">Subtotal</span>
+                                    <span class="text-xs text-gray-500">{{ $t('pos.subtotal') }}</span>
                                     <span class="text-xs font-medium text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.subtotal.toFixed(2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xs text-gray-500">Tax</span>
+                                    <span class="text-xs text-gray-500">{{ $t('pos.tax') }}</span>
                                     <span class="text-xs font-medium text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.tax.toFixed(2) }}</span>
                                 </div>
                                 <div v-if="totals.discountAmount > 0" class="flex justify-between items-center text-red-600">
                                     <span class="text-xs">
-                                        Discount 
+                                        {{ $t('pos.discount') }} 
                                         <span v-if="discountType === 'percent'" class="ml-1 text-[10px] bg-red-50 px-1 rounded">({{ discountValue }}%)</span>
                                         <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'discount'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">{{ $t('common.edit') }}</button>
                                     </span>
@@ -274,14 +274,14 @@
                                 </div>
                                 <div v-if="totals.additionalChargeAmount > 0" class="flex justify-between items-center text-blue-600">
                                     <span class="text-xs">
-                                        Extra Charge
+                                        {{ $t('pos.extra_charge') }}
                                         <span v-if="additionalChargeType === 'percent'" class="ml-1 text-[10px] bg-blue-50 px-1 rounded">({{ additionalChargeValue }}%)</span>
                                          <button v-if="adjustmentMode === 'none'" @click="adjustmentMode = 'extra'" class="ml-2 text-gray-400 hover:text-gray-600 hover:underline text-[10px]">{{ $t('common.edit') }}</button>
                                     </span>
                                     <span class="text-xs font-bold">+ {{ selectedOrder.currency || currentCurrency }} {{ totals.additionalChargeAmount.toFixed(2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
-                                    <span class="text-base font-bold text-gray-900">{{ $t('common.total') }} Amount</span>
+                                    <span class="text-base font-bold text-gray-900">{{ $t('pos.total_amount') }}</span>
                                     <span class="text-xl font-bold text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.total.toFixed(2) }}</span>
                                 </div>
                             </div>
@@ -289,7 +289,7 @@
                             <!-- Sync Button if items changed -->
                             <div v-if="hasUnsavedChanges" class="animate-pulse">
                                 <button @click="updateOrder" :disabled="processing" class="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold rounded-lg shadow-sm">
-                                    Changes Detected - Update Bill
+                                    {{ $t('pos.changes_detected') }}
                                 </button>
                             </div>
                             
@@ -306,7 +306,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2v4h10z" />
                                 </svg>
-                                {{ hasUnsavedChanges ? 'Save Changes to Print' : 'Print Receipt' }}
+                                {{ hasUnsavedChanges ? $t('pos.save_to_print') : $t('pos.print_receipt') }}
                             </button>
 
                             <!-- Print Bill Checkbox -->
@@ -321,13 +321,13 @@
                                     <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                     </svg>
-                                    Print Bill (POS Printer)
+                                    {{ $t('pos.print_bill_pos') }}
                                 </label>
                             </div>
 
                             <!-- Payment Section -->
                             <div class="pt-2">
-                                <label class="block text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wide">Payment Method</label>
+                                <label class="block text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wide">{{ $t('pos.payment_method') }}</label>
                                 <div class="grid grid-cols-3 gap-2 mb-3">
                                     <button 
                                         v-for="method in ['cash', 'card', 'online']" 
@@ -343,7 +343,7 @@
                                         ]"
                                         :title="method === 'cash' && !currentRegister ? 'Cash register must be open to accept cash payments' : ''"
                                     >
-                                        <span class="text-[10px] font-bold uppercase">{{ method }}</span>
+                                        <span class="text-[10px] font-bold uppercase">{{ $t('pos.' + method) }}</span>
                                         <svg v-if="method === 'cash' && !currentRegister" class="w-3 h-3 text-red-500 absolute top-1 right-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" />
                                         </svg>
@@ -363,7 +363,7 @@
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                     <span v-else>
-                                        {{ paymentMethod ? `Settle ${selectedOrder.currency || currentCurrency} ${totals.total.toFixed(2)}` : 'Select Payment Method' }}
+                                        {{ paymentMethod ? `${$t('pos.settle')} ${selectedOrder.currency || currentCurrency} ${totals.total.toFixed(2)}` : $t('pos.select_payment_method') }}
                                     </span>
                                 </button>
                             </div>
@@ -377,8 +377,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 36v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <p class="text-xl font-medium text-gray-900">No Order Selected</p>
-                        <p class="mt-2 text-center text-sm">Select an active order from the list<br>to view bill details and process payment.</p>
+                        <p class="text-xl font-medium text-gray-900">{{ $t('pos.no_order_selected') }}</p>
+                        <p class="mt-2 text-center text-sm" v-html="$t('pos.select_order_hint')"></p>
                     </div>
                 </div>
             </div>
@@ -428,15 +428,15 @@
         <!-- Close Register Modal -->
         <div v-if="showCloseModal && currentRegister" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Close Cash Register</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $t('cash_register.close_register') }}</h3>
                 <div class="bg-gray-50 rounded-xl p-4 mb-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <p class="text-sm text-gray-500">Expected Balance</p>
+                            <p class="text-sm text-gray-500">{{ $t('cash_register.expected_balance') }}</p>
                             <p class="text-xl font-bold text-gray-900">{{ formatCurrency(currentBalance) }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Difference</p>
+                            <p class="text-sm text-gray-500">{{ $t('cash_register.difference') }}</p>
                             <p class="text-xl font-bold" :class="{
                                 'text-green-600': calculateDifference() > 0,
                                 'text-red-600': calculateDifference() < 0,
@@ -450,7 +450,7 @@
                 <form @submit.prevent="submitClose">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Actual Closing Balance</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.actual_balance') }}</label>
                             <input
                                 v-model="closeForm.closing_balance"
                                 type="number"
@@ -458,23 +458,23 @@
                                 min="0"
                                 required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Count the cash in the register..."
+                                :placeholder="$t('cash_register.count_placeholder')"
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Closing Notes (Optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.closing_notes') }}</label>
                             <textarea
                                 v-model="closeForm.closing_notes"
                                 rows="3"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="Any notes about the closing..."
+                                :placeholder="$t('cash_register.closing_notes_placeholder')"
                             ></textarea>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="closeCloseModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
                         <button type="submit" :disabled="closeForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
-                            {{ closeForm.processing ? 'Closing...' : 'Close Register' }}
+                            {{ closeForm.processing ? $t('cash_register.closing') : $t('cash_register.close_action') }}
                         </button>
                     </div>
                 </form>
@@ -484,14 +484,14 @@
         <!-- Withdraw Modal -->
         <div v-if="showWithdrawModal && currentRegister" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Withdraw Cash</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $t('cash_register.withdraw_cash') }}</h3>
                 <div class="bg-blue-50 rounded-xl p-4 mb-4">
-                    <p class="text-sm text-blue-700">Current Balance: <span class="font-bold">{{ formatCurrency(currentBalance) }}</span></p>
+                    <p class="text-sm text-blue-700">{{ $t('cash_register.current_balance') }}: <span class="font-bold">{{ formatCurrency(currentBalance) }}</span></p>
                 </div>
                 <form @submit.prevent="submitWithdraw">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount to Withdraw</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.withdraw_amount') }}</label>
                             <input
                                 v-model="withdrawForm.amount"
                                 type="number"
@@ -504,20 +504,20 @@
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Withdrawal <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.withdraw_reason') }} <span class="text-red-500">*</span></label>
                             <textarea
                                 v-model="withdrawForm.notes"
                                 rows="3"
                                 required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., Bank deposit, petty cash, etc..."
+                                :placeholder="$t('cash_register.withdraw_reason_placeholder')"
                             ></textarea>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="closeWithdrawModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
                         <button type="submit" :disabled="withdrawForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
-                            {{ withdrawForm.processing ? 'Processing...' : 'Withdraw' }}
+                            {{ withdrawForm.processing ? $t('common.processing') : $t('cash_register.withdraw') }}
                         </button>
                     </div>
                 </form>
@@ -527,11 +527,11 @@
         <!-- Deposit Modal -->
         <div v-if="showDepositModal && currentRegister" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Add Cash</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $t('cash_register.add_cash') }}</h3>
                 <form @submit.prevent="submitDeposit">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount to Add</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.add_amount') }}</label>
                             <input
                                 v-model="depositForm.amount"
                                 type="number"
@@ -543,20 +543,20 @@
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Deposit <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.deposit_reason') }} <span class="text-red-500">*</span></label>
                             <textarea
                                 v-model="depositForm.notes"
                                 rows="3"
                                 required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., Change from bank, returned cash, etc..."
+                                :placeholder="$t('cash_register.deposit_reason_placeholder')"
                             ></textarea>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="closeDepositModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
                         <button type="submit" :disabled="depositForm.processing" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50">
-                            {{ depositForm.processing ? 'Processing...' : 'Add Cash' }}
+                            {{ depositForm.processing ? $t('common.processing') : $t('cash_register.add_cash') }}
                         </button>
                     </div>
                 </form>
@@ -569,8 +569,8 @@
                 <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-blue-50">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Update Order #{{ selectedOrder.order_number }}</h3>
-                            <p class="text-sm text-gray-600 mt-1">Modify customer details, order type, table, and items</p>
+                            <h3 class="text-2xl font-bold text-gray-900">{{ $t('orders.update_order') }} #{{ selectedOrder.order_number }}</h3>
+                            <p class="text-sm text-gray-600 mt-1">{{ $t('orders.modify_details') }}</p>
                         </div>
                         <button @click="closeUpdateOrderModal" class="text-gray-400 hover:text-gray-600 transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -589,24 +589,24 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </div>
-                            Customer Details
+                            {{ $t('customers.details') }}
                         </h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Customer Name</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('customers.customer_name') }}</label>
                                 <input 
                                     v-model="updateForm.customer_name"
                                     type="text"
-                                    placeholder="Optional"
+                                    :placeholder="$t('common.optional')"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                 />
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1.5">Phone Number</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('customers.phone_number') }}</label>
                                 <input 
                                     v-model="updateForm.customer_phone"
                                     type="tel"
-                                    placeholder="Optional"
+                                    :placeholder="$t('common.optional')"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                 />
                             </div>
@@ -621,7 +621,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                             </div>
-                            Order Type & Table
+                            {{ $t('orders.type_table') }}
                         </h4>
                         <div class="flex gap-3 mb-4">
                             <label class="flex-1 cursor-pointer group">
@@ -644,14 +644,14 @@
                             </label>
                         </div>
                         <div v-if="updateForm.type === 'dine_in'" class="animate-fade-in-up">
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">Select Table</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('common.select') }} {{ $t('common.table') }}</label>
                             <select 
                                 v-model="updateForm.table_id" 
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                             >
-                                <option :value="null">{{ $t('tables.no_table') || 'No table assigned' }}</option>
+                                <option :value="null">{{ $t('common.no_table') }}</option>
                                 <option v-for="table in tables" :key="table.id" :value="table.id" :disabled="!table.is_available && table.id !== selectedOrder.table_id">
-                                    {{ table.name }} ({{ table.capacity }} seats){{ table.location ? ' - ' + table.location : '' }}{{ !table.is_available && table.id !== selectedOrder.table_id ? ' [OCCUPIED]' : '' }}
+                                    {{ table.name }} ({{ table.capacity }} seats){{ table.location ? ' - ' + table.location : '' }}{{ !table.is_available && table.id !== selectedOrder.table_id ? ' [' + $t('tables.occupied') + ']' : '' }}
                                 </option>
                             </select>
                         </div>
@@ -665,8 +665,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </div>
-                            {{ $t('orders.summary') || 'Order Items' }}
-                            <span class="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-semibold">{{ editableItems.length }} items</span>
+                            {{ $t('orders.items') }}
+                            <span class="ml-auto text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-semibold">{{ editableItems.length }} {{ $t('common.items') }}</span>
                         </h4>
                         <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
                             <div v-for="(item, index) in editableItems" :key="item.id" class="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-primary/30 transition-all">
@@ -689,7 +689,7 @@
                                 <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                 </svg>
-                                No items in order. Add items below.
+                                {{ $t('orders.no_items_add_below') }}
                             </div>
                         </div>
                     </div>
@@ -758,8 +758,8 @@
                 <div class="p-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <div class="text-sm text-gray-600">
-                            <span class="font-medium">Updated Total:</span>
-                            <span class="text-xs text-gray-500 ml-2">(Subtotal + 5% Tax)</span>
+                            <span class="font-medium">{{ $t('orders.updated_total') }}</span>
+                            <span class="text-xs text-gray-500 ml-2">{{ $t('orders.tax_hint') }}</span>
                         </div>
                         <span class="text-2xl font-bold text-primary">{{ selectedOrder.currency || currentCurrency }} {{ calculateModalTotal().toFixed(2) }}</span>
                     </div>
@@ -774,7 +774,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            {{ processing ? 'Saving Changes...' : 'Save All Changes' }}
+                            {{ processing ? $t('common.saving') : $t('common.save_changes') }}
                         </button>
                     </div>
                 </div>
@@ -803,6 +803,7 @@ const props = defineProps<{
     menuItems: any[];
     currentRegister: any;
     currentBalance: number;
+    google_map_location?: string;
 }>();
 
 // Cash Register Modals
@@ -877,6 +878,65 @@ const filteredMenuItems = computed(() => {
     return category?.items || [];
 });
 
+// Local orders state for real-time updates
+const localOrders = ref<any[]>([]);
+
+// Initialize localOrders
+watch(() => props.orders, (newOrders) => {
+    localOrders.value = [...newOrders];
+}, { immediate: true });
+
+// Echo Listener
+onMounted(() => {
+    if (window.Echo && currentRestaurant.value) {
+        window.Echo.channel(`restaurant.${currentRestaurant.value.id}.orders`)
+            .listen('.order.created', (e: any) => {
+                if (e.order) {
+                    // Check if exists (shouldn't, but safe check)
+                    const index = localOrders.value.findIndex(o => o.id === e.order.id);
+                    if (index === -1) {
+                         // Add to top
+                         localOrders.value.unshift(e.order);
+                    }
+                }
+            })
+            .listen('.order.updated', (e: any) => {
+                 if (e.order) {
+                    const index = localOrders.value.findIndex(o => o.id === e.order.id);
+                    if (index !== -1) {
+                        localOrders.value[index] = e.order;
+                         // If selected, update it
+                        if (selectedOrder.value?.id === e.order.id && !hasUnsavedChanges.value) {
+                             selectedOrder.value = e.order;
+                        }
+                    }
+                 }
+            })
+            .listen('.order.status_changed', (e: any) => {
+                if (e.order) {
+                     const index = localOrders.value.findIndex(o => o.id === e.order.id);
+                     // If status is still one of 'pending', etc., update
+                     // If finalized/paid depending on logic, maybe remove?
+                     // POS shows "active" orders. If status becomes 'completed' and 'paid', standard query excludes it.
+                     // But here we might just update it.
+                     // Let's assume we keep it until refresh or let user handle it.
+                     if (index !== -1) {
+                         localOrders.value[index] = e.order;
+                          if (selectedOrder.value?.id === e.order.id && !hasUnsavedChanges.value) {
+                             selectedOrder.value = e.order;
+                        }
+                     }
+                }
+            });
+    }
+});
+
+onUnmounted(() => {
+    if (window.Echo && currentRestaurant.value) {
+        window.Echo.leave(`restaurant.${currentRestaurant.value.id}.orders`);
+    }
+});
+
 watch(selectedOrder, (newOrder) => {
     if (newOrder) {
         editableItems.value = JSON.parse(JSON.stringify(newOrder.items)).map((item: any) => ({
@@ -923,24 +983,21 @@ watch(selectedOrder, (newOrder) => {
     }
 });
 
-// Sync selected order when props update
-watch(() => props.orders, (newOrders) => {
+// Sync selected order when localOrders update
+watch(localOrders, (newOrders) => {
     if (selectedOrder.value) {
         const freshOrder = newOrders.find(o => o.id === selectedOrder.value.id);
-        if (freshOrder) {
-            // Update selected order with fresh data from server
+        if (freshOrder && !hasUnsavedChanges.value) {
+            // Update selected order with fresh data from server IF no unsaved edits
             selectedOrder.value = freshOrder; 
-            // Note: We don't overwrite editableItems here to avoid interrupting user editing
-            // But if we just settled/saved, we should.
-            // Simplified: if processing was true (we saved), then overwrite.
         }
     }
-});
+},{ deep: true });
 
 const filteredOrders = computed(() => {
-    if (!searchQuery.value) return props.orders;
+    if (!searchQuery.value) return localOrders.value;
     const query = searchQuery.value.toLowerCase();
-    return props.orders.filter(order => 
+    return localOrders.value.filter(order => 
         order.order_number.toLowerCase().includes(query) ||
         (order.customer_name && order.customer_name.toLowerCase().includes(query)) ||
         (order.table && order.table.name.toLowerCase().includes(query))
@@ -1198,7 +1255,7 @@ const settleBill = () => {
 
 // Enhanced Thermal Printer Receipt Function
 // Supports multiple printer types: 80mm, 58mm thermal printers, and standard A4 printers
-const printReceipt = (order: any) => {
+const printReceipt = async (order: any) => {
     try {
         // Create a hidden iframe for printing
         const printFrame = document.createElement('iframe');
@@ -1229,8 +1286,22 @@ const printReceipt = (order: any) => {
         // This format works with:
         // - 80mm thermal printers (Epson TM-T88, Star TSP100, etc.)
         // - 58mm thermal printers (smaller POS printers)
-        // - ESC/POS compatible printers
-        // - Standard A4 printers (as fallback)
+        if (printFrame.contentDocument) {
+            printFrame.contentDocument.body.innerHTML = '';
+        }
+
+        // Generate QR Code if location is available
+        let qrCodeDataUrl = '';
+        if (props.google_map_location) {
+            try {
+                // @ts-ignore
+                const QRCode = (await import('qrcode')).default;
+                qrCodeDataUrl = await QRCode.toDataURL(props.google_map_location, { margin: 1, width: 100 });
+            } catch (e) {
+                console.error('QR Gen Error', e);
+            }
+        }
+
         const receiptHTML = `
             <!DOCTYPE html>
             <html>
@@ -1282,12 +1353,15 @@ const printReceipt = (order: any) => {
                     body {
                         font-family: 'Courier New', Courier, 'Lucida Console', monospace;
                         font-size: 12px;
-                        line-height: 1.5;
+                        line-height: 1.2; /* Tighter line height for receipts */
                         color: #000;
                         background: #fff;
+                        width: 100%;
                         max-width: 80mm;
                         margin: 0 auto;
-                        padding: 3mm 5mm;
+                        padding: 0; /* Let page margins handle padding if needed, or minimal padding */
+                        overflow-wrap: break-word;
+                        word-break: break-word; /* Ensure long words wrap */
                     }
                     
                     /* Responsive for different paper widths */
@@ -1513,6 +1587,13 @@ const printReceipt = (order: any) => {
                 <div class="center bold">${t('common.thank_you')}</div>
                 <div class="center">${t('common.come_again')}</div>
                 
+                ${qrCodeDataUrl ? `
+                <div class="spacer"></div>
+                <div class="center">
+                    <img src="${qrCodeDataUrl}" style="width: 100px; height: 100px;" />
+                </div>
+                ` : ''}
+
                 <div class="spacer-large"></div>
                 <div class="cut-line">- - - - - - - - - - - - - - - -</div>
             </body>
@@ -1544,50 +1625,54 @@ const printReceipt = (order: any) => {
                 // Extended timeout to ensure print job is queued
                 setTimeout(() => {
                     try {
-                        if (document.body.contains(printFrame)) {
-                            document.body.removeChild(printFrame);
-                        }
-                    } catch (cleanupError) {
-                        console.warn('Cleanup error:', cleanupError);
+                        document.body.removeChild(printFrame);
+                    } catch (cleanupErr) {
+                       // ignore
                     }
-                }, 2000);
+                }, 5000);
 
-            } catch (printError) {
-                console.error('Print execution error:', printError);
-                alert('Print dialog may have been blocked. Please check your browser settings and try again.');
-                
-                // Cleanup on error
-                if (document.body.contains(printFrame)) {
+            } catch (err) {
+                console.error('Execute print error:', err);
+                alert('Print execution failed. Please check printer connection.');
+                 try {
                     document.body.removeChild(printFrame);
-                }
+                } catch (e) {}
             }
         };
 
-        // Wait for content and images to load before printing
-        if (printFrame.contentWindow) {
-            printFrame.contentWindow.addEventListener('load', () => {
-                // Additional delay to ensure images are loaded
-                setTimeout(executePrint, 500);
-            });
-
-            // Fallback: if load event doesn't fire
-            setTimeout(() => {
-                if (printFrame.contentWindow && document.body.contains(printFrame)) {
-                    executePrint();
+        // If we have images (logo or QR), wait for them to load
+        const images = printFrame.contentDocument ? printFrame.contentDocument.getElementsByTagName('img') : [];
+        if (images.length > 0) {
+            let loaded = 0;
+            const checkLoaded = () => {
+                loaded++;
+                if (loaded >= images.length) {
+                    setTimeout(executePrint, 250); // Small delay to ensure render
                 }
-            }, 1500);
-        }
+            };
 
+            for (let i = 0; i < images.length; i++) {
+                if (images[i].complete) {
+                    checkLoaded();
+                } else {
+                    images[i].onload = checkLoaded;
+                    images[i].onerror = checkLoaded; // Proceed even if image fails
+                }
+            }
+        } else {
+            // No images, print immediately
+            setTimeout(executePrint, 250);
+        }
     } catch (error) {
-        console.error('Receipt print error:', error);
         alert('Failed to print receipt. Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
 };
 
-const printCurrentReceipt = () => {
+const printCurrentReceipt = async () => {
     if (!selectedOrder.value || hasUnsavedChanges.value) return;
-    const url = route('orders.receipt', selectedOrder.value.id);
-    window.open(url, 'receipt', 'left=100,top=100,width=400,height=600,toolbar=0,scrollbars=1,status=0');
+
+    // Use the existing printReceipt function for iframe printing
+    await printReceipt(selectedOrder.value);
 };
 
 // Helper functions for cash register

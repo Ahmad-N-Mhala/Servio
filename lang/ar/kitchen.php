@@ -28,5 +28,6 @@ return [
     'reason_placeholder' => 'مثال: نفذ المخزون، طلب العميل...',
     'keep_order' => 'الاحتفاظ بالطلب',
     'confirm_cancellation' => 'تأكيد الإلغاء',
-    'min' => 'دقيقة',
+    'min' => 'د',
+    'ready' => 'جاهز',
 ];

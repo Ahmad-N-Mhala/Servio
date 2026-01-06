@@ -34,9 +34,8 @@ class InventoryService
             // Determine deduction amount for this batch
             $deduct = min($remainingQty, (float) $batch->quantity_remaining);
 
-            // Update batch
-            $batch->quantity_remaining = (float) $batch->quantity_remaining - $deduct;
-            $batch->save();
+            // Update batch (Atomic Decrement)
+            $batch->decrement('quantity_remaining', $deduct);
 
             $remainingQty -= $deduct;
             $batchesUsed[] = "{$batch->batch_number} ({$deduct})";

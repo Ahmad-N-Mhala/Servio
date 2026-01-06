@@ -107,7 +107,7 @@
             <div v-if="template.show_qr_code" class="mt-3 flex justify-center">
                 <!-- Placeholder QR Code or Real one if we implement generation -->
                 <div class="w-20 h-20 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
-                    <img v-if="displayOrder.qr_code_url" :src="displayOrder.qr_code_url" class="w-full h-full object-cover">
+                    <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" class="w-full h-full object-cover">
                     <svg v-else class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v3h-3v2h5v-5zM13 13h2v2h-2v-2zm2 2h2v2h-2v-2zm2 2h2v2h-2v-2zm0-4h2v2h-2v-2z"/>
                     </svg>
@@ -118,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
@@ -128,7 +128,35 @@ const props = defineProps<{
     logo?: string | null;
     restaurantName?: string;
     order?: any;
+    googleMapLocation?: string | null;
 }>();
+
+const qrCodeDataUrl = ref<string | null>(null);
+
+const generateQrCode = async () => {
+    if (props.googleMapLocation) {
+        try {
+            // @ts-ignore
+            const QRCode = (await import('qrcode')).default;
+            qrCodeDataUrl.value = await QRCode.toDataURL(props.googleMapLocation, { margin: 1, width: 100 });
+        } catch (e) {
+            console.error('QR Gen Error', e);
+        }
+    } else {
+        qrCodeDataUrl.value = null;
+    }
+};
+
+onMounted(() => {
+    if (props.template?.show_qr_code) {
+        generateQrCode();
+    }
+});
+
+watch(() => props.googleMapLocation, generateQrCode);
+watch(() => props.template?.show_qr_code, (val) => {
+    if (val) generateQrCode();
+});
 
 const formatPrice = (val: any) => {
     return Number(val || 0).toFixed(2);
@@ -224,7 +252,10 @@ const displayOrder = computed(() => {
 @media print {
     .receipt-preview {
         width: 100% !important;
-        padding: 0;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow-wrap: break-word;
+        word-break: break-all;
     }
 }
 </style>

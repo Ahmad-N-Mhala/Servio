@@ -34,6 +34,7 @@ class QrOrderController extends Controller
             ->with([
                 'items' => function ($query) {
                     $query->where('is_available', true)
+                        ->with('extras')
                         ->orderBy('sort_order');
                 }
             ])
@@ -65,6 +66,7 @@ class QrOrderController extends Controller
                             'image' => $imageUrl,
                             'images' => $item->images, // Pass generic images array
                             'currency' => $item->currency ?? 'AED',
+                            'extras' => $item->extras,
                         ];
                     })->toArray(),
                 ];
@@ -155,6 +157,9 @@ class QrOrderController extends Controller
 
         // Update table status
         $table->update(['status' => 'occupied']);
+
+        // Broadcast order created event to POS
+        broadcast(new \App\Events\OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
 
         return response()->json([
             'success' => true,

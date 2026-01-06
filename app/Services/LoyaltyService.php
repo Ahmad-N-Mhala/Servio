@@ -171,11 +171,11 @@ class LoyaltyService
             'type' => 'redemption',
         ]);
 
-        // Determine Driver
+        // Determine Driver for Logging/Simulation check
         $driver = config('services.sms.driver', 'log');
 
         try {
-            // If driver is 'log', we simulate success (Demo Mode)
+            // If driver is 'log', we simulate success (Demo Mode) and explicitly log the OTP
             if ($driver === 'log') {
                 \Illuminate\Support\Facades\Log::info("SIMULATED SMS to {$customer->phone}: OTP {$otpCode}");
 
@@ -210,7 +210,8 @@ class LoyaltyService
                 return false;
             }
 
-            $this->sendSms($driver, $customer->phone, $message);
+            // Use the centralized SmsService
+            app(\App\Services\SmsService::class)->send($customer->phone, $message);
 
             if ($restaurant) {
                 $restaurant->decrement('sms_balance');
@@ -260,92 +261,6 @@ class LoyaltyService
         }
 
         return false;
-    }
-
-    protected function sendSms(string $driver, string $to, string $message): void
-    {
-        switch ($driver) {
-            case 'twilio':
-                $this->sendViaTwilio($to, $message);
-                break;
-            case 'unifonic':
-                $this->sendViaUnifonic($to, $message);
-                break;
-            case 'sms_ae':
-                $this->sendViaSmsAe($to, $message);
-                break;
-            default:
-                // Fallback to log
-                \Illuminate\Support\Facades\Log::info("SMS (Log Driver) to {$to}: {$message}");
-                break;
-        }
-    }
-
-    private function sendViaTwilio($to, $message)
-    {
-        $sid = config('services.twilio.sid');
-        $token = config('services.twilio.token');
-        $from = config('services.twilio.from');
-
-        if (!$sid || !$token || !$from) {
-            throw new \Exception("Twilio credentials missing");
-        }
-
-        $response = \Illuminate\Support\Facades\Http::asForm()
-            ->withBasicAuth($sid, $token)
-            ->post("https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json", [
-                'To' => $to,
-                'From' => $from,
-                'Body' => $message,
-            ]);
-
-        if (!$response->successful()) {
-            throw new \Exception("Twilio Error: " . $response->body());
-        }
-    }
-
-    private function sendViaUnifonic($to, $message)
-    {
-        $apiKey = config('services.unifonic.api_key');
-        $senderId = config('services.unifonic.sender_id');
-
-        if (!$apiKey) {
-            throw new \Exception("Unifonic API Key missing");
-        }
-
-        $response = \Illuminate\Support\Facades\Http::post("https://el.cloud.unifonic.com/rest/SMS/Messages", [
-            'AppSid' => $apiKey,
-            'SenderID' => $senderId,
-            'Recipient' => $to,
-            'Body' => $message,
-        ]);
-
-        if (!$response->successful()) {
-            throw new \Exception("Unifonic Error: " . $response->body());
-        }
-    }
-
-    private function sendViaSmsAe($to, $message)
-    {
-        $user = config('services.sms_ae.username');
-        $pass = config('services.sms_ae.password');
-        $sender = config('services.sms_ae.sender_id');
-
-        if (!$user || !$pass) {
-            throw new \Exception("SMS.ae credentials missing");
-        }
-
-        $response = \Illuminate\Support\Facades\Http::get("https://www.sms.ae/api/http/send.aspx", [
-            'username' => $user,
-            'password' => $pass,
-            'recipient' => $to,
-            'sender' => $sender,
-            'message' => $message,
-        ]);
-
-        if (!$response->successful()) {
-            throw new \Exception("SMS.ae Error: " . $response->body());
-        }
     }
 
     public function getCustomerByPhone(Restaurant $restaurant, string $phone): ?Customer

@@ -1,0 +1,19 @@
+[
+    {
+        "_id": {
+            "$oid": "69457db52d33b6a8db028a43"
+        },
+        "role": "owner",
+        "permissions": "[\"view_analytics\",\"view_dashboard\",\"create_order\",\"view_pos\",\"void_order\",\"discount_order\",\"cancel_order\",\"edit_order\",\"print_bill\",\"view_orders\",\"delete_order\",\"view_kitchen\",\"update_item_status\",\"complete_order\",\"edit_category\",\"create_category\",\"view_menu\",\"delete_category\",\"create_item\",\"edit_item\",\"delete_item\",\"view_tables\",\"delete_table\",\"create_table\",\"manage_zones\",\"edit_table\",\"edit_customer\",\"create_customer\",\"view_customers\",\"delete_customer\",\"create_staff\",\"view_staff\",\"delete_staff\",\"manage_permissions\",\"edit_staff\",\"deduct_stock\",\"record_waste\",\"add_stock\",\"view_waste\",\"view_inventory\",\"manage_suppliers\",\"view_loyalty\",\"manage_rewards\",\"manage_earning_rules\",\"adjust_points\",\"view_delivery_settings\",\"toggle_providers\",\"manage_menus_sync\",\"send_campaigns\",\"purchase_sms_bundles\",\"view_communication\",\"manage_templates\",\"view_staff_performance\",\"view_expense_reports\",\"view_sales_reports\",\"export_reports\",\"manage_printers\",\"update_restaurant_profile\",\"view_settings\",\"manage_billing\",\"menu_management\",\"pos_system\",\"delete_inventory\"]",
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766161845396"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766416427006"
+            }
+        }
+    }
+]

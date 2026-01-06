@@ -33,4 +33,5 @@ return [
     'billing' => 'الفواتير والخطط',
     'receipt_template' => 'قالب الإيصال',
     'overview' => 'نظرة عامة',
+    'orders_create' => 'إنشاء طلب',
 ];

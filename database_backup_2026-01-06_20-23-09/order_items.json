@@ -1,0 +1,2050 @@
+[
+    {
+        "_id": {
+            "$oid": "6945852f2d33b6a8db028a95"
+        },
+        "menu_item_id": "694583ac2d33b6a8db028a91",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "34.00"
+        },
+        "total_price": {
+            "$numberDecimal": "34.00"
+        },
+        "order_id": "6945852f2d33b6a8db028a94",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766163759291"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766163759291"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694585c02d33b6a8db028a98"
+        },
+        "menu_item_id": "694583ac2d33b6a8db028a91",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "34.00"
+        },
+        "total_price": {
+            "$numberDecimal": "34.00"
+        },
+        "order_id": "694585c02d33b6a8db028a97",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766163904659"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766163904659"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694587c52d33b6a8db028a9c"
+        },
+        "menu_item_id": "694583ac2d33b6a8db028a91",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "34.00"
+        },
+        "total_price": {
+            "$numberDecimal": "34.00"
+        },
+        "order_id": "694587c52d33b6a8db028a9b",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766164421052"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766164421052"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947cccf08e952aa320b5347"
+        },
+        "menu_item_id": "6947c5d708e952aa320b5342",
+        "quantity": 14,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "56.00"
+        },
+        "order_id": "6947cccf08e952aa320b5346",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766313167128"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766313167128"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947cd7b08e952aa320b534b"
+        },
+        "menu_item_id": "6947c5d708e952aa320b5342",
+        "quantity": 14,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "56.00"
+        },
+        "order_id": "6947cd7b08e952aa320b534a",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766313339830"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766313339830"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947ce6308e952aa320b534e"
+        },
+        "menu_item_id": "6947ce1c08e952aa320b534c",
+        "quantity": 37,
+        "unit_price": {
+            "$numberDecimal": "22.00"
+        },
+        "total_price": {
+            "$numberDecimal": "814.00"
+        },
+        "order_id": "6947ce6308e952aa320b534d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766313571173"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766313571173"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947cf2e08e952aa320b5350"
+        },
+        "menu_item_id": "6947c81e08e952aa320b5343",
+        "quantity": 16,
+        "unit_price": {
+            "$numberDecimal": "3.00"
+        },
+        "total_price": {
+            "$numberDecimal": "48.00"
+        },
+        "order_id": "6947cf2e08e952aa320b534f",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766313774870"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766313774870"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947cf2e08e952aa320b5351"
+        },
+        "menu_item_id": "6947ce1c08e952aa320b534c",
+        "quantity": 19,
+        "unit_price": {
+            "$numberDecimal": "22.00"
+        },
+        "total_price": {
+            "$numberDecimal": "418.00"
+        },
+        "order_id": "6947cf2e08e952aa320b534f",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766313774873"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766313774873"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947d06e08e952aa320b5354"
+        },
+        "menu_item_id": "6947d05308e952aa320b5352",
+        "quantity": 12,
+        "unit_price": {
+            "$numberDecimal": "3.00"
+        },
+        "total_price": {
+            "$numberDecimal": "36.00"
+        },
+        "order_id": "6947d06e08e952aa320b5353",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766314094885"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766314094885"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6947d0bd08e952aa320b535a"
+        },
+        "menu_item_id": "6947d0b308e952aa320b5358",
+        "quantity": 5,
+        "unit_price": {
+            "$numberDecimal": "3.00"
+        },
+        "total_price": {
+            "$numberDecimal": "15.00"
+        },
+        "order_id": "6947d0bd08e952aa320b5359",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766314173621"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766314173621"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694963aff8c92b5bc1060076"
+        },
+        "menu_item_id": "6949638cf8c92b5bc1060073",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "33.00"
+        },
+        "total_price": {
+            "$numberDecimal": "33.00"
+        },
+        "order_id": "694963aff8c92b5bc1060075",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766417327602"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766417327602"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694964c5f8c92b5bc106007e"
+        },
+        "menu_item_id": "6949638cf8c92b5bc1060073",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "33.00"
+        },
+        "total_price": {
+            "$numberDecimal": "33.00"
+        },
+        "order_id": "694964c5f8c92b5bc106007d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766417605994"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766417605994"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69496527f8c92b5bc1060081"
+        },
+        "menu_item_id": "6949651ff8c92b5bc106007f",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "69496527f8c92b5bc1060080",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766417703008"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766417703008"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69496661f8c92b5bc1060085"
+        },
+        "menu_item_id": "6949651ff8c92b5bc106007f",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "69496661f8c92b5bc1060084",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766418017924"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766418017924"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69496689f8c92b5bc1060087"
+        },
+        "menu_item_id": "6949651ff8c92b5bc106007f",
+        "quantity": 4,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "16.00"
+        },
+        "order_id": "69496689f8c92b5bc1060086",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766418057308"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766418057308"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69496773f8c92b5bc106008a"
+        },
+        "menu_item_id": "6949651ff8c92b5bc106007f",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "8.00"
+        },
+        "order_id": "69496773f8c92b5bc1060089",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766418291724"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766418291724"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6949684ef8c92b5bc106008c"
+        },
+        "menu_item_id": "6949651ff8c92b5bc106007f",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "4.00"
+        },
+        "total_price": {
+            "$numberDecimal": "8.00"
+        },
+        "order_id": "6949684ef8c92b5bc106008b",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766418510769"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766418510769"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6949690ef8c92b5bc1060091"
+        },
+        "menu_item_id": "694968f0f8c92b5bc106008e",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "order_id": "6949690ef8c92b5bc1060090",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766418702760"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766418702760"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69498323f8c92b5bc1060098"
+        },
+        "menu_item_id": "69498313f8c92b5bc1060096",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69498323f8c92b5bc1060097",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766425379013"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766425379013"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694984d8f8c92b5bc10600a0"
+        },
+        "menu_item_id": "694983ebf8c92b5bc106009d",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "3.00"
+        },
+        "total_price": {
+            "$numberDecimal": "3.00"
+        },
+        "order_id": "694984d8f8c92b5bc106009f",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766425816346"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766425816346"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69498ba1f8c92b5bc10600ae"
+        },
+        "menu_item_id": "694987a4f8c92b5bc10600a7",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69498ba1f8c92b5bc10600ad",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766427553235"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766427553235"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69498caff8c92b5bc10600b0"
+        },
+        "menu_item_id": "694987a4f8c92b5bc10600a7",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69498caff8c92b5bc10600af",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766427823621"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766427823621"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69498d98f8c92b5bc10600b3"
+        },
+        "menu_item_id": "694987a4f8c92b5bc10600a7",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69498d98f8c92b5bc10600b2",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766428056017"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766428056017"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69499192f8c92b5bc10600c0"
+        },
+        "menu_item_id": "694987a4f8c92b5bc10600a7",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69499192f8c92b5bc10600bf",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766429074137"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766429074137"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69499559f8c92b5bc10600c5"
+        },
+        "menu_item_id": "694987a4f8c92b5bc10600a7",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69499559f8c92b5bc10600c4",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766430041371"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766430041371"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694996f1f8c92b5bc10600c7"
+        },
+        "menu_item_id": "694987a4f8c92b5bc10600a7",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "694996f1f8c92b5bc10600c6",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766430449147"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766430449147"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcb067b83a4bfd50194fc"
+        },
+        "order_id": "694fcb067b83a4bfd50194fb",
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 2,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766836998269"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766836998269"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcb187b83a4bfd50194fe"
+        },
+        "order_id": "694fcb187b83a4bfd50194fd",
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 3,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766837016612"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837016612"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcb557b83a4bfd5019503"
+        },
+        "order_id": "694fcb557b83a4bfd5019502",
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 2,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766837077898"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837077898"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcc007b83a4bfd5019505"
+        },
+        "order_id": "694fcc007b83a4bfd5019504",
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 2,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766837248459"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837248459"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcc007b83a4bfd5019506"
+        },
+        "order_id": "694fcc007b83a4bfd5019504",
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766837248460"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837248460"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcc007b83a4bfd5019507"
+        },
+        "order_id": "694fcc007b83a4bfd5019504",
+        "menu_item_id": "694fcb347b83a4bfd5019501",
+        "quantity": 1,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766837248460"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837248460"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fcc377b83a4bfd5019509"
+        },
+        "order_id": "694fcc377b83a4bfd5019508",
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 1,
+        "notes": "beeeef",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766837303936"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837303936"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fd0087b83a4bfd501950b"
+        },
+        "order_id": "694fd0087b83a4bfd501950a",
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 3,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766838280806"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766838280806"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fd0087b83a4bfd501950c"
+        },
+        "order_id": "694fd0087b83a4bfd501950a",
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 2,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766838280806"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766838280806"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fd0087b83a4bfd501950d"
+        },
+        "order_id": "694fd0087b83a4bfd501950a",
+        "menu_item_id": "694fcb347b83a4bfd5019501",
+        "quantity": 6,
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766838280806"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766838280806"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fd4267b83a4bfd501950f"
+        },
+        "order_id": "694fd4267b83a4bfd501950e",
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "222.00"
+        },
+        "total_price": {
+            "$numberDecimal": "444.00"
+        },
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766839334579"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766839334579"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "694fd4267b83a4bfd5019510"
+        },
+        "order_id": "694fd4267b83a4bfd501950e",
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 4,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "80.00"
+        },
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766840069566"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766839334579"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950424feaf319e88307771c"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "6950424feaf319e88307771b",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766867535271"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766867535271"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69504256eaf319e88307771e"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "2.00"
+        },
+        "order_id": "69504256eaf319e88307771d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766867542577"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766867542577"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695044a0eaf319e883077720"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "695044a0eaf319e88307771f",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766868128044"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766868128044"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950472beaf319e883077723"
+        },
+        "order_id": "6950472beaf319e883077722",
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "notes": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766868779247"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766868779247"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950f629b7507517d40c491e"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 10,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "order_id": "6950f629b7507517d40c491d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766914072113"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766913577177"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950fc32b7507517d40c4920"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "6950fc32b7507517d40c491f",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766915122939"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766915122939"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950fc54b7507517d40c4922"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "6950fc54b7507517d40c4921",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766915156348"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766915156348"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950fc88b7507517d40c4924"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "6950fc88b7507517d40c4923",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766915208109"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766915208109"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6950fd7bb7507517d40c492b"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "4.00"
+        },
+        "order_id": "6950fd7bb7507517d40c492a",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766915451712"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766915451712"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6951002fb7507517d40c492e"
+        },
+        "menu_item_id": "69504248eaf319e88307771a",
+        "quantity": 3,
+        "unit_price": {
+            "$numberDecimal": "2.00"
+        },
+        "total_price": {
+            "$numberDecimal": "6.00"
+        },
+        "order_id": "6951002fb7507517d40c492d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766916143755"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766916143755"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695166662f954f9a240de5b3"
+        },
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "222.00"
+        },
+        "total_price": {
+            "$numberDecimal": "444.00"
+        },
+        "order_id": "695166662f954f9a240de5b2",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766942310187"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766942310187"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695166662f954f9a240de5b4"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "order_id": "695166662f954f9a240de5b2",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766942310189"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766942310189"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695166732f954f9a240de5b6"
+        },
+        "menu_item_id": "694fca447b83a4bfd50194fa",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "222.00"
+        },
+        "total_price": {
+            "$numberDecimal": "222.00"
+        },
+        "order_id": "695166732f954f9a240de5b5",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766942323897"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766942323897"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695166732f954f9a240de5b7"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "order_id": "695166732f954f9a240de5b5",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766942323898"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766942323898"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69563bdfaeff1b1ae101c529"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "0.00"
+        },
+        "total_price": {
+            "$numberDecimal": "0.00"
+        },
+        "order_id": "69563bdfaeff1b1ae101c528",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767259103359"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767259103359"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69563c3faeff1b1ae101c52d"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "order_id": "69563c3faeff1b1ae101c52c",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767259199772"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767259199772"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956440baeff1b1ae101c532"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "order_id": "6956440baeff1b1ae101c531",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767261195379"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767261195379"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69569fca01134f518209abf4"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 3,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "180.00"
+        },
+        "notes": null,
+        "order_id": "69569fca01134f518209abf3",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767284682394"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767284682394"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956a23c01134f518209abf8"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "40.00"
+        },
+        "notes": null,
+        "order_id": "6956a23c01134f518209abf7",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767285431741"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767285308644"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956a3aa01134f518209abfb"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "6956a3aa01134f518209abfa",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767285674329"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767285674329"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956a3aa01134f518209abfc"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "6956a3aa01134f518209abfa",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767285674329"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767285674329"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956a70601134f518209ac00"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "6956a70601134f518209abff",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767286534149"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767286534149"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956a70601134f518209ac01"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 3,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "180.00"
+        },
+        "notes": null,
+        "order_id": "6956a70601134f518209abff",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767286799484"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767286534149"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956c85301134f518209ac05"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 3,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "6956c85301134f518209ac04",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767295059054"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767295059054"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956c85301134f518209ac06"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 3,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "180.00"
+        },
+        "notes": null,
+        "order_id": "6956c85301134f518209ac04",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767295848439"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767295059055"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6956c93101134f518209ac09"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "6956c93101134f518209ac08",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767295281549"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767295281549"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695792873aaf0cdc0b05ce33"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 3,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "180.00"
+        },
+        "notes": null,
+        "order_id": "695792873aaf0cdc0b05ce32",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767346823793"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767346823793"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695792b33aaf0cdc0b05ce36"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695792b33aaf0cdc0b05ce35",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767346867631"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767346867631"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695794ee3aaf0cdc0b05ce38"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 4,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "80.00"
+        },
+        "notes": null,
+        "order_id": "695794ee3aaf0cdc0b05ce37",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767347595129"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767347438890"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695794ee3aaf0cdc0b05ce39"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 6,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "360.00"
+        },
+        "notes": null,
+        "order_id": "695794ee3aaf0cdc0b05ce37",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767347438891"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767347438891"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6958217c263432b44a0246e5"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "120.00"
+        },
+        "notes": null,
+        "order_id": "6958217c263432b44a0246e4",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767383420238"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767383420238"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6958255b263432b44a0246eb"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "6958255b263432b44a0246ea",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767384411476"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767384411476"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "6958255b263432b44a0246ec"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "6958255b263432b44a0246ea",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767384411476"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767384411476"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695825f8263432b44a0246f1"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695825f8263432b44a0246f0",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767384568074"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767384568074"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695825f8263432b44a0246f2"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695825f8263432b44a0246f0",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767384568075"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767384568075"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695ac6d050b9f0867608de0c"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695ac6d050b9f0867608de0b",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767556816873"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767556816873"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695ac72150b9f0867608de0e"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695ac72150b9f0867608de0d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767556897456"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767556897456"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695ac87250b9f0867608de10"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695ac87250b9f0867608de0f",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767557234318"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767557234318"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695ac9ec50b9f0867608de12"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695ac9ec50b9f0867608de11",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767557612055"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767557612055"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695aca8d50b9f0867608de14"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695aca8d50b9f0867608de13",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767557773990"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767557773990"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695ad1f150b9f0867608de16"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695ad1f150b9f0867608de15",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767559665015"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767559665015"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b68fbbb2bb5d336006183"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695b68fbbb2bb5d336006182",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767598331188"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767598331188"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b7667bb2bb5d336006189"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695b7667bb2bb5d336006188",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767601767440"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767601767440"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b7751bb2bb5d33600618d"
+        },
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695b7751bb2bb5d33600618c",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767602001108"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767602001108"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695d63b39ee9d56b960c225e"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695d63b39ee9d56b960c225d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767728051659"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767728051659"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695d63b39ee9d56b960c225f"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695d63b39ee9d56b960c225d",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767728051663"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767728051663"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695d65c29ee9d56b960c2262"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "120.00"
+        },
+        "notes": null,
+        "order_id": "695d65c29ee9d56b960c2261",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767728578071"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767728578071"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695d65c29ee9d56b960c2263"
+        },
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695d65c29ee9d56b960c2261",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767728578072"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767728578072"
+            }
+        }
+    }
+]

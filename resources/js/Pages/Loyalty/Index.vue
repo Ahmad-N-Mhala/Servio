@@ -600,15 +600,17 @@ const formatRewardType = (type: string) => {
 };
 
 const formatRewardValue = (reward: any) => {
+    const value = Math.round(reward.discount_value || 0);
+
     switch (reward.reward_type) {
         case 'discount_percentage':
-            return `${reward.discount_value}% ${t('loyalty.off')}`;
+            return t('loyalty.discount_percentage_off', { value });
         case 'discount_fixed':
-            return `${currency.value} ${reward.discount_value} ${t('loyalty.off')}`;
+            return t('loyalty.discount_fixed_off', { amount: currency.value + ' ' + value });
         case 'free_item':
-            return t('loyalty.free_item_label');
+            return t('loyalty.free_item');
         case 'cashback':
-            return `${reward.discount_value}% ${t('loyalty.cashback')}`;
+            return t('loyalty.cashback_back', { value });
         default:
             return '';
     }

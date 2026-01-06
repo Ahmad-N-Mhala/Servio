@@ -72,7 +72,7 @@
                             <select v-model="form.status" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="available">{{ $t('tables.available') }}</option>
                                 <option value="occupied">{{ $t('tables.occupied') }}</option>
-                                <option value="reserved">{{ $t('tables.reserved') || 'Reserved' }}</option>
+                                <option value="reserved">{{ $t('tables.reserved') }}</option>
                             </select>
                         </div>
                     </div>
@@ -123,12 +123,12 @@
 
                         <!-- Instructions -->
                         <div class="mb-6 text-left bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                            <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">How to use:</h3>
+                            <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">{{ $t('tables.how_to_use') }}</h3>
                             <ol class="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
-                                <li>Download the QR code</li>
-                                <li>Print it on paper or display on a screen</li>
-                                <li>Place it on the table</li>
-                                <li>Customers scan to order</li>
+                                <li>{{ $t('tables.step_1') }}</li>
+                                <li>{{ $t('tables.step_2') }}</li>
+                                <li>{{ $t('tables.step_3') }}</li>
+                                <li>{{ $t('tables.step_4') }}</li>
                             </ol>
                         </div>
 
@@ -138,13 +138,13 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                Download PNG
+                                {{ $t('common.download_png') }}
                             </Button>
                             <Button v-if="hasPermission('edit_table')" @click="regenerateQrCode" variant="secondary" class="bg-orange-600 hover:bg-orange-700 text-white">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
-                                Regenerate
+                                {{ $t('common.regenerate') }}
                             </Button>
                             <Button variant="secondary" @click="closeQrModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">{{ $t('common.close') }}</Button>
                         </div>

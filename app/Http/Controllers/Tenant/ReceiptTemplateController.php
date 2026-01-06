@@ -32,6 +32,7 @@ class ReceiptTemplateController extends Controller
             'restaurant_logo' => $logoUrl,
             'restaurant_name' => $restaurant->name,
             'next_order_number' => $restaurant->next_order_number,
+            'google_map_location' => $restaurant->google_map_location,
         ]);
     }
 

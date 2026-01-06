@@ -21,6 +21,14 @@ return [
     'duplicate_name_item' => 'An item with this name already exists in this category (English or Arabic).',
 
     // Builder / Modals
+    'customize' => 'Customize',
+    'meal_includes' => 'Meal Includes',
+    'add_extras' => 'Add Extras',
+    'no_options' => 'No options available',
+    'add_to_order' => 'Add to Order',
+    'stock_available' => 'Available: {stock}',
+    'required' => 'Required: {qty}',
+
     'subtitle' => 'Manage your restaurant menu and categories',
     'edit_category' => 'Edit Category',
     'visible_in_menu' => 'Visible in Menu',

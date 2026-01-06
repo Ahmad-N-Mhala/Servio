@@ -15,4 +15,5 @@ return [
     'active' => 'Active',
     'inactive' => 'Inactive',
     'delete_confirm' => 'Are you sure you want to delete this staff member?',
+    'birth_date' => 'Birth Date',
 ];

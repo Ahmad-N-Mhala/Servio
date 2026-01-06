@@ -26,6 +26,7 @@
                 :order="orderComputed" 
                 :logo="logo" 
                 :restaurant-name="restaurantName"
+                :google-map-location="google_map_location"
             />
         </div>
     </div>
@@ -43,6 +44,7 @@ const props = defineProps<{
     template: any;
     logo?: string;
     restaurantName?: string;
+    google_map_location?: string;
 }>();
 
 // Ensure order items are mapped correctly if structure differs
@@ -86,10 +88,20 @@ onMounted(() => {
     }
     /* Ensure receipt wrapper takes priority */
     .receipt-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         box-shadow: none !important;
         border: none !important;
-        width: 100% !important; 
-        /* The inner ReceiptPreview sets max-width by mm, which is correct */
+        overflow: visible !important;
+    }
+    
+    /* Hide everything else */
+    body > :not(.receipt-wrapper) {
+        display: none !important;
     }
 }
 </style>

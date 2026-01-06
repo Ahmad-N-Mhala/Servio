@@ -10,7 +10,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
-                            Table: {{ table.name }}
+                            {{ $t('common.table') }}: {{ table.name }}
                         </p>
                     </div>
                     <button 
@@ -194,8 +194,16 @@
                         >
                             <div class="flex justify-between items-start gap-4 mb-4">
                                 <div>
-                                    <h3 class="font-bold text-gray-900 text-lg mb-1">{{ item.name }}</h3>
-                                    <p class="text-primary font-bold">{{ restaurant.currency }} {{ (item.price * item.quantity).toFixed(2) }}</p>
+                                    <div class="flex flex-col">
+                                        <h3 class="font-bold text-gray-900 text-lg mb-0.5">{{ item.name }}</h3>
+                                        <!-- Show extras if any -->
+                                        <div v-if="item.extras && item.extras.length > 0" class="text-xs text-blue-600 mb-1">
+                                             <span v-for="(ex, i) in item.extras" :key="i">
+                                                 + {{ ex.name }} ({{ restaurant.currency }} {{ Number(ex.price).toFixed(2) }})<span v-if="i < item.extras.length - 1">, </span>
+                                             </span>
+                                        </div>
+                                        <p class="text-primary font-bold">{{ restaurant.currency }} {{ ((item.price + (item.extras?.reduce((s:number,e:any)=>s+Number(e.price),0)||0)) * item.quantity).toFixed(2) }}</p>
+                                    </div>
                                 </div>
                                 <button 
                                     @click="removeFromCart(index)"
@@ -337,11 +345,59 @@
             </div>
         </div>
     </div>
+        </div>
+
+        <!-- Customize Item Modal -->
+        <Modal :show="showCustomizeModal" @close="showCustomizeModal = false" :title="customizingItem ? getTranslatedName(customizingItem.name) : 'Customize'" size="md">
+            <div v-if="customizingItem" class="space-y-6">
+                 <!-- Meal Contents -->
+                 <div v-if="customizingItem.type === 'meal'" class="bg-blue-50 p-4 rounded-xl">
+                    <h4 class="font-bold text-blue-900 mb-2 text-sm uppercase">Meal Includes:</h4>
+                    <ul class="list-disc list-inside text-sm text-blue-800 space-y-1">
+                        <li v-for="(bundle, idx) in customizingItem.bundles" :key="idx">
+                             {{ bundle.quantity }}x {{ bundle.childItem ? getTranslatedName(bundle.childItem.name) : 'Item #'+bundle.child_menu_item_id }}
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Extras -->
+                <div v-if="customizingItem.extras && customizingItem.extras.length > 0">
+                    <h4 class="font-bold text-gray-900 mb-3">Add Extras</h4>
+                    <div class="space-y-2">
+                        <div 
+                            v-for="extra in customizingItem.extras" 
+                            :key="extra.id"
+                            @click="toggleExtra(extra)"
+                            class="flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all"
+                            :class="selectedExtras.some(e => e.id === extra.id) 
+                                ? 'border-primary bg-primary/5' 
+                                : 'border-gray-100 hover:border-gray-300'"
+                        >
+                            <span class="font-medium text-gray-700">
+                                {{ getTranslatedName(extra.name) }}
+                            </span>
+                            <span class="text-primary font-bold">+ {{ restaurant.currency }} {{ Number(extra.price).toFixed(2) }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-center text-gray-500 italic py-4">
+                    No options available
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" @click="showCustomizeModal = false" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">Cancel</button>
+                    <button type="button" @click="addCustomizedItem" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/30">Add to Order</button>
+                </div>
+            </div>
+        </Modal>
+
+    </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import Carousel from '@/Components/Carousel.vue';
+import Modal from '@/Components/Modal.vue';
 
 const props = defineProps<{
     table: {
@@ -364,13 +420,16 @@ const placing = ref(false);
 const customerName = ref('');
 const customerPhone = ref('');
 const orderNumber = ref('');
+const showCustomizeModal = ref(false);
+const customizingItem = ref<any>(null);
+const selectedExtras = ref<any[]>([]);
 
 const cartItemCount = computed(() => {
     return cart.value.reduce((sum, item) => sum + item.quantity, 0);
 });
 
 const subtotal = computed(() => {
-    return cart.value.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.value.reduce((sum, item) => sum + ((item.price + (item.extras?.reduce((s:number,e:any)=>s+Number(e.price),0)||0)) * item.quantity), 0);
 });
 
 const tax = computed(() => {
@@ -383,28 +442,83 @@ const total = computed(() => {
 
 const getTranslatedName = (name: any) => {
     if (typeof name === 'string') return name;
-    return name[props.restaurant.locale] || name[$i18n.locale] || Object.values(name)[0] || '';
+    // @ts-ignore
+    return name[props.restaurant.locale] || name['en'] || Object.values(name)[0] || '';
 };
 
 const getQty = (itemId: string) => {
-    const item = cart.value.find(cartItem => cartItem.id === itemId);
-    return item ? item.quantity : 0;
+    // Sum quantites of all cart items with this base ID (ignoring variations)
+    return cart.value
+        .filter(i => i.id === itemId)
+        .reduce((sum, i) => sum + i.quantity, 0);
 };
 
 const addItem = (item: any) => {
-    const existingItem = cart.value.find(cartItem => cartItem.id === item.id);
-    
-    if (existingItem) {
-        existingItem.quantity++;
+    // If item has extras or is a meal, trigger modal
+    if ((item.extras && item.extras.length > 0) || item.type === 'meal') {
+        customizingItem.value = item;
+        selectedExtras.value = [];
+        showCustomizeModal.value = true;
+        return;
+    }
+
+    addToCart(item, []);
+};
+
+const addToCart = (item: any, extras: any[]) => {
+    // Check for identical item (same ID AND same extras)
+    const existingIndex = cart.value.findIndex(cartItem => {
+        if (cartItem.id !== item.id) return false;
+        
+        const cartExtras = cartItem.extras || [];
+        if (cartExtras.length !== extras.length) return false;
+
+        const cartIds = cartExtras.map((e:any) => e.id).sort();
+        const newIds = extras.map((e:any) => e.id).sort();
+
+        return cartIds.every((id:any, index:number) => id === newIds[index]);
+    });
+
+    if (existingIndex !== -1) {
+        cart.value[existingIndex].quantity++;
     } else {
         cart.value.push({
             id: item.id,
             name: getTranslatedName(item.name),
-            price: item.price,
+            price: Number(item.price), // ensure number
             quantity: 1,
             notes: '',
+            extras: extras,
+            type: item.type || 'item'
         });
     }
+};
+
+const toggleExtra = (extra: any) => {
+    const idx = selectedExtras.value.findIndex(e => e.id === extra.id);
+    if (idx > -1) {
+        selectedExtras.value.splice(idx, 1);
+    } else {
+        selectedExtras.value.push(extra);
+    }
+};
+
+const addCustomizedItem = () => {
+    if (!customizingItem.value) return;
+
+    const extrasToAdd = selectedExtras.value.map(e => ({
+        id: e.id,
+        name: getTranslatedName(e.name),
+        price: Number(e.price),
+        quantity: e.quantity,
+        ingredient_id: e.ingredient_id
+    }));
+
+    addToCart(customizingItem.value, extrasToAdd);
+
+    showCustomizeModal.value = false;
+    customizingItem.value = null;
+    selectedExtras.value = [];
 };
 
 const removeItem = (item: any) => {
@@ -453,6 +567,7 @@ const placeOrder = async () => {
                     id: item.id,
                     quantity: item.quantity,
                     notes: item.notes || null,
+                    extras: item.extras ? item.extras.map((e:any) => ({ id: e.id, quantity: e.quantity || 1 })) : []
                 })),
                 customer_name: customerName.value || null,
                 customer_phone: customerPhone.value || null,

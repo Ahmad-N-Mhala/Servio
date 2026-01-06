@@ -23,8 +23,8 @@ return [
     'add_extras' => 'إضافة إضافات',
     'no_options' => 'لا توجد خيارات متاحة',
     'add_to_order' => 'إضافة للطلب',
-    'stock_available' => 'المتوفر: :stock',
-    'required' => 'مطلوب: :qty',
+    'stock_available' => 'المتوفر: {stock}',
+    'required' => 'مطلوب: {qty}',
     'missing' => 'مكونات مفقودة',
 
     // Builder / Modals

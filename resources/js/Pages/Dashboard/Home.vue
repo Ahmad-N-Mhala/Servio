@@ -389,7 +389,7 @@ const initStatusChart = () => {
     statusChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: statusDistribution.value.map((item: any) => item.status),
+            labels: statusDistribution.value.map((item: any) => t('orders.' + item.status)),
             datasets: [{
                 data: statusDistribution.value.map((item: any) => item.count),
                 backgroundColor: statusDistribution.value.map((item: any) => colors[item.status as keyof typeof colors] || 'rgb(156, 163, 175)'),
@@ -530,7 +530,7 @@ const initPaymentChart = () => {
     paymentChartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: paymentDistribution.value.map((item: any) => item.method),
+            labels: paymentDistribution.value.map((item: any) => t('orders.' + item.method)),
             datasets: [{
                 data: paymentDistribution.value.map((item: any) => item.total),
                 backgroundColor: colors,

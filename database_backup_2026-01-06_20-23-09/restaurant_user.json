@@ -1,0 +1,100 @@
+[
+    {
+        "_id": {
+            "$oid": "694579e833231912b007b6c4"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "email": "admin@demo.com",
+        "role": "owner",
+        "is_active": true,
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766160872003"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767344968766"
+            }
+        },
+        "user_id": {
+            "$oid": "694579e733231912b007b6c2"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503d88eaf319e883077709"
+        },
+        "restaurant_id": "69503d88eaf319e883077708",
+        "email": "ahmad.n.mhala@gmail.com",
+        "role": "owner",
+        "is_active": false,
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866312577"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767344779831"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503dc8eaf319e88307770f"
+        },
+        "restaurant_id": "69503dc8eaf319e88307770e",
+        "email": "ahmad.n.mhala2@gmail.com",
+        "role": "owner",
+        "is_active": true,
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866376064"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766914649523"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503e50eaf319e883077715"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "email": "ahmad.n.mhala@ds.com",
+        "role": "owner",
+        "is_active": true,
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866512779"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866512779"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b8389bb2bb5d336006197"
+        },
+        "restaurant_id": "695b8388bb2bb5d336006196",
+        "email": "admin@demo.com",
+        "role": "owner",
+        "is_active": true,
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767605129002"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767605129002"
+            }
+        }
+    }
+]

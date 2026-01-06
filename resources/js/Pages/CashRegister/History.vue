@@ -56,7 +56,6 @@
                                         {{ register.status.toUpperCase() }}
                                     </span>
                                 </div>
-                                </div>
                                 <p class="text-sm text-gray-500">{{ $t('cash_register.cashier') }}: {{ register.user?.name || 'Unknown' }}</p>
                                 <p class="text-xs text-gray-400">
                                     {{ $t('cash_register.opened') }}: {{ formatTime(register.opened_at) }}

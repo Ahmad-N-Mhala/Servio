@@ -33,4 +33,5 @@ return [
     'billing' => 'Billing & Plans',
     'receipt_template' => 'Receipt Template',
     'overview' => 'Overview',
+    'orders_create' => 'Create Order',
 ];

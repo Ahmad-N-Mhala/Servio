@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'welcome' => 'Welcome to Servio',
+    'welcome' => 'مرحباً بك في RestoFy',
     'subtitle' => 'إدارة عمليات مطعمك',
     'total_orders' => 'إجمالي الطلبات',
     'today_orders' => 'طلبات اليوم',
@@ -17,4 +17,14 @@ return [
     'critical_status' => 'حرج: لا يكفي لـ :items',
     'net_profit' => 'صافي الربح',
     'total_revenue' => 'إجمالي الإيرادات',
+    'your_restaurants' => 'مطاعمك',
+    'select_restaurant_manage' => 'اختر مطعماً لإدارته',
+    'add_new_restaurant' => 'إضافة مطعم جديد',
+    'expand_business_desc' => 'وسع أعمالك بإضافة فرع آخر.',
+    'upgrade_to_add_more' => 'قم بالترقية لإضافة المزيد',
+    'view_upgrade_options' => 'عرض خيارات الترقية',
+    'current_plan_allowance' => 'تسمح لك خطتك <span class="font-bold text-orange-600">:plan</span> بإضافة <span class="text-xl sm:text-2xl font-extrabold text-orange-600">:count</span> مطعم/مطاعم',
+    'customize_receipt' => 'تخصيص قالب الإيصال',
+    'edit_restaurant_details' => 'تعديل تفاصيل المطعم',
+    'plan' => 'الخطة',
 ];

@@ -70,7 +70,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <Input 
                             v-model="form.customer_birth_date"
-                            label="Birth Date (Optional)"
+                            :label="$t('staff.birth_date')"
                             type="date"
                             placeholder="YYYY-MM-DD"
                             :error="form.errors.customer_birth_date"
@@ -513,27 +513,27 @@
             <div class="space-y-4">
                 <div v-if="editingCartItem">
                     <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-600">Item:</p>
+                        <p class="text-sm text-gray-600">{{ $t('common.item') }}:</p>
                         <p class="font-semibold text-gray-900">{{ editingCartItem.name }} × {{ editingCartItem.qty }}</p>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Special Instructions</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('orders.special_instructions') }}</label>
                         <textarea 
                             v-model="tempNotes"
                             rows="4"
                             class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4"
-                            placeholder="e.g., No onions, extra spicy, well done..."
+                            :placeholder="$t('orders.instructions_placeholder')"
                             @keydown.enter.meta="saveNotes"
                             @keydown.enter.ctrl="saveNotes"
                         ></textarea>
-                        <p class="mt-1 text-xs text-gray-500">Press Cmd/Ctrl + Enter to save quickly</p>
+                        <p class="mt-1 text-xs text-gray-500">{{ $t('orders.save_shortcut') }}</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3 pt-4">
                     <Button type="button" variant="secondary" @click="closeNotesModal" class="flex-1">{{ $t('common.cancel') }}</Button>
-                    <Button type="button" @click="saveNotes" class="flex-1">Save Note</Button>
+                    <Button type="button" @click="saveNotes" class="flex-1">{{ $t('orders.save_note') }}</Button>
                 </div>
             </div>
         </Modal>
@@ -549,7 +549,7 @@
                         <!-- Ideally fetch child item names via relations in controller -->
                         <!-- For now, assuming bundle logic backend handles availability checks -->
                         <li v-for="(bundle, idx) in customizingItem.bundles" :key="idx">
-                             {{ bundle.quantity }}x Item #{{ bundle.child_menu_item_id }}
+                             {{ bundle.quantity }}x {{ bundle.childItem ? getLocaleName(bundle.childItem.name) : getItemNameById(bundle.child_menu_item_id) }}
                         </li>
                         <li v-if="!customizingItem.bundles?.length">{{ $t('menu.no_options') }}</li>
                     </ul>
@@ -637,7 +637,7 @@ interface CartItem {
     notes?: string;
     recipe?: { ingredient_id: string; quantity: number }[];
     type?: 'item' | 'meal';
-    extras?: { name: string; price: number; ingredient_id: number; quantity: number }[];
+    extras?: { id?: number; name: string; price: number; ingredient_id: number; quantity: number }[];
 }
 
 interface Customer {
@@ -677,6 +677,7 @@ const props = withDefaults(defineProps<{
     currency?: string;
     stockAvailability?: Record<number, { max_quantity: number; available: boolean; is_tracked?: boolean }>;
     ingredientStocks?: Record<string, { current_stock: number; name: string }>;
+    google_map_location?: string;
 }>(), {
     menuCategories: () => [],
     customers: () => [],
@@ -843,12 +844,23 @@ watch(phoneInput, (newVal) => {
 // Helpers
 const getLocaleName = (name: Record<string, string> | string): string => {
     if (typeof name === 'string') return name;
-        return name[locale.value] || Object.values(name)[0] || '';
+        if (typeof name === 'string') return name;
+    // Return both En/Ar if requested? For now stick to standard locale.
+    return name[locale.value] || Object.values(name)[0] || '';
+};
+
+const getItemNameById = (id: number): string => {
+    for (const cat of categoriesList.value) {
+        const item = cat.items.find((i: MenuItem) => i.id === id);
+        if (item) return getLocaleName(item.name);
+    }
+    return t('common.unknown_item') || 'Unknown Item';
 };
 
 const getQty = (itemId: number): number => {
-    const item = cart.value.find(i => i.id === itemId);
-    return item?.qty || 0;
+    return cart.value
+        .filter(i => i.id === itemId)
+        .reduce((sum, i) => sum + i.qty, 0);
 };
 
 const addItem = (item: MenuItem) => {
@@ -885,25 +897,42 @@ const addCustomizedItem = () => {
 
     const item = customizingItem.value;
     
-    // Calculate base price + extras
-    // Actually we store base price and extras separately in CartItem to display cleanly? 
-    // Or just store base price and calculate total on fly?
-    // Let's store extras array in cart item.
+    // Prepare extras with ID for comparison
+    const newExtras = selectedExtras.value.map(e => ({
+        id: e.id,
+        name: getLocaleName(e.name),
+        price: Number(e.price),
+        ingredient_id: e.ingredient_id,
+        quantity: e.quantity
+    }));
 
-    cart.value.push({
-        id: item.id,
-        name: getLocaleName(item.name),
-        price: item.price,
-        qty: 1,
-        recipe: item.recipe,
-        type: item.type || 'item',
-        extras: selectedExtras.value.map(e => ({
-            name: getLocaleName(e.name),
-            price: Number(e.price), // Ensure number
-            ingredient_id: e.ingredient_id,
-            quantity: e.quantity
-        }))
+    // Check for existing item with SAME extras
+    const existingIndex = cart.value.findIndex(cartItem => {
+        if (cartItem.id !== item.id) return false;
+        
+        const cartExtras = cartItem.extras || [];
+        if (cartExtras.length !== newExtras.length) return false;
+
+        // Sort and compare IDs to ensure match regardless of order
+        const cartIds = cartExtras.map(e => e.id).sort();
+        const newIds = newExtras.map(e => e.id).sort();
+
+        return cartIds.every((id, index) => id === newIds[index]);
     });
+
+    if (existingIndex !== -1) {
+        cart.value[existingIndex].qty++;
+    } else {
+        cart.value.push({
+            id: item.id,
+            name: getLocaleName(item.name),
+            price: item.price,
+            qty: 1,
+            recipe: item.recipe,
+            type: item.type || 'item',
+            extras: newExtras
+        });
+    }
 
     showCustomizeModal.value = false;
     customizingItem.value = null;
@@ -919,7 +948,7 @@ const toggleExtra = (extra: any) => {
         if (extra.ingredient_id && extra.quantity > 0) {
              const stock = props.ingredientStocks?.[extra.ingredient_id];
              if (stock && stock.current_stock < extra.quantity) {
-                 alert(`Insufficient stock for ${getLocaleName(extra.name)}. Required: ${extra.quantity}, Available: ${stock.current_stock}`);
+                 alert(t('common.insufficient_stock', { item: getLocaleName(extra.name), qty: extra.quantity, stock: stock.current_stock }));
                  return;
              }
         }
@@ -1097,30 +1126,37 @@ const toggleReward = (reward: Reward) => {
 };
 
 const getRewardTypeLabel = (reward: Reward): string => {
+    // If a description exists, use it as it's more descriptive (but check if it's localized)
+    // Actually description is often null, so we fallback to type label
+    if (reward.description) return reward.description;
+
+    const value = Math.round(reward.discount_value || 0);
+
     switch (reward.reward_type) {
         case 'discount_percentage':
-            return t('loyalty.discount_percentage_off', { value: reward.discount_value });
+            return t('loyalty.discount_percentage_off', { value });
         case 'discount_fixed':
-            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + reward.discount_value });
+            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + value });
         case 'free_item':
             return t('loyalty.free_item');
         case 'cashback':
-            return t('loyalty.cashback_back', { value: reward.discount_value });
+            return t('loyalty.cashback_back', { value: currencyCode.value + ' ' + value });
         default:
             return '';
     }
 };
 
 const getRewardValue = (reward: Reward): string => {
+    const value = Math.round(reward.discount_value || 0);
     switch (reward.reward_type) {
         case 'discount_percentage':
-            return t('loyalty.discount_percentage_off', { value: reward.discount_value });
+            return t('loyalty.discount_percentage_off', { value });
         case 'discount_fixed':
-            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + reward.discount_value });
+            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + value });
         case 'free_item':
-            return t('loyalty.free_item');
+            return t('loyalty.free');
         case 'cashback':
-            return t('loyalty.cashback_back', { value: reward.discount_value });
+            return t('loyalty.cashback_back', { value: currencyCode.value + ' ' + value });
         default:
             return '';
     }
@@ -1199,7 +1235,7 @@ const createOrder = () => {
     // Check for Reward OTP requirement
     if (selectedReward.value) {
         if (!otpVerified.value) {
-            alert('Please verify the Loyalty Reward OTP before satisfying the order.');
+            alert(t('loyalty.verify_otp_required'));
             // Scroll to OTP section?
             return;
         }
@@ -1225,7 +1261,18 @@ const submitOrder = () => {
     }
 
     form.post(route('orders.store'), {
-        onSuccess: () => {
+        onSuccess: async () => {
+             // Retrieve the newly created order from the response (assuming it's passed as flash or prop)
+             // Since Inertia reload might clear props, we rely on the server returning the order object via flash session or redirect props.
+             // If the server redirects back, we can access the latest order if we modify the controller to pass it.
+             // HOWEVER, simpler approach: The server likely redirects to 'back' with a success message.
+             // Can we get the Order ID? 
+             // Ideally we should print the receipt. 
+             // Let's check props.orders? No, that's a list.
+             // Modify Controller to return the Order? 
+             // For now, let's just clear the cart. Printing usually happens on the order listing or via a separate action.
+             // BUT, if the user WANTS it...
+             // Let's assume the user might want a print dialog.
             cart.value = [];
             selectedReward.value = null;
             selectedCustomer.value = null;

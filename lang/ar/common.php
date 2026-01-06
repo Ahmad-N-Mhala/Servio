@@ -56,4 +56,13 @@ return [
     'code' => 'الرمز',
     'please_correct' => 'يرجى تصحيح الأخطاء أدناه',
     'welcome' => 'أهلاً بك',
+    'insufficient_stock' => 'مخزون غير كافٍ لـ {item}. المطلوب: {qty}، المتوفر: {stock}',
+    'live_updates' => 'تحديثات مباشرة',
+    'unknown_item' => 'عنصر غير معروف',
+    'no_table' => 'بدون طاولة',
+    'saving' => 'جاري الحفظ...',
+    'save_changes' => 'حفظ التغييرات',
+    'processing' => 'جاري المعالجة...',
+    'download_png' => 'تنزيل PNG',
+    'regenerate' => 'إعادة توليد',
 ];

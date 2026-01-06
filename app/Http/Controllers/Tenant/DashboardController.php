@@ -426,7 +426,7 @@ class DashboardController extends Controller
 
         // -- Average Dining Time --
         $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
-            return $order->completed_at->diffInMinutes($order->created_at);
+            return $order->created_at->diffInMinutes($order->completed_at);
         }) ?? 0;
 
         // -- Status Distribution --
@@ -625,7 +625,7 @@ class DashboardController extends Controller
             $avgMinutes = $dayOrders->avg(function ($order) {
                 $start = Carbon::parse($order->created_at);
                 $from = Carbon::parse($order->completed_at);
-                return $from->diffInMinutes($start);
+                return $from->diffInMinutes($start, true);
             });
 
             return [

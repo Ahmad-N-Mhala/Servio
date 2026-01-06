@@ -29,4 +29,5 @@ return [
     'keep_order' => 'Keep Order',
     'confirm_cancellation' => 'Confirm Cancellation',
     'min' => 'min',
+    'ready' => 'READY',
 ];

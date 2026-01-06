@@ -336,6 +336,7 @@ class OrderController extends Controller
             'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
             'stockAvailability' => $menuItemStockInfo,
             'ingredientStocks' => $ingredientStocks,
+            'google_map_location' => $restaurant->google_map_location,
         ]);
     }
 
@@ -497,7 +498,7 @@ class OrderController extends Controller
 
             if ($reward && $reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'reward_id' => ["Minimum order value of {$reward->min_order_value} required for this reward."]
+                    'reward_id' => ["Minimum order value of " . (float) $reward->min_order_value . " required for this reward."]
                 ]);
             }
 
@@ -627,6 +628,7 @@ class OrderController extends Controller
             'template' => $settings,
             'logo' => $restaurant->logo,
             'restaurantName' => $restaurant->name,
+            'google_map_location' => $restaurant->google_map_location,
         ]);
     }
 

@@ -10,26 +10,26 @@
                 </Link>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">{{ customer.name || 'Unknown Customer' }}</h1>
-                    <p class="text-sm text-gray-500">Customer Details & Logs</p>
+                    <p class="text-sm text-gray-500">{{ $t('customers.details_and_logs') }}</p>
                 </div>
             </div>
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500">Loyalty Points</p>
+                    <p class="text-sm font-medium text-gray-500">{{ $t('customers.loyalty_points_label') }}</p>
                     <p class="text-2xl font-bold text-primary mt-1">{{ customer.loyalty_points?.balance || 0 }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500">{{ $t('common.total') }} Spent</p>
+                    <p class="text-sm font-medium text-gray-500">{{ $t('customers.total_spent') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ customer.total_spent }} {{ currency }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500">{{ $t('common.total') }} Orders</p>
+                    <p class="text-sm font-medium text-gray-500">{{ $t('customers.total_orders') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ customer.total_orders }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500">Current Tier</p>
+                    <p class="text-sm font-medium text-gray-500">{{ $t('customers.current_tier') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1 capitalize">{{ customer.loyalty_tier || 'Bronze' }}</p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                 <!-- Point Transactions Log -->
                 <div class="space-y-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-gray-900">Points Log</h2>
+                        <h2 class="text-xl font-bold text-gray-900">{{ $t('customers.points_log') }}</h2>
                     </div>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="overflow-x-auto">
@@ -47,7 +47,7 @@
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.description') }}</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Points</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('customers.points') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
@@ -64,7 +64,7 @@
                                         </td>
                                     </tr>
                                     <tr v-if="transactions.length === 0">
-                                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">No point history found</td>
+                                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">{{ $t('customers.no_history') }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -75,14 +75,14 @@
                 <!-- Order History -->
                 <div class="space-y-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold text-gray-900">Order History</h2>
+                        <h2 class="text-xl font-bold text-gray-900">{{ $t('customers.order_history') }}</h2>
                     </div>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('customers.order_number') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.status') }}</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('common.total') }}</th>
@@ -111,13 +111,14 @@
                                         </td>
                                     </tr>
                                     <tr v-if="orders.data.length === 0">
-                                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">No orders found</td>
+                                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">{{ $t('customers.no_orders') }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </MainLayout>

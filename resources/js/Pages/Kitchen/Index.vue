@@ -111,7 +111,7 @@
                                 :disabled="processingId === order.id"
                                 class="w-full py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2 mt-2"
                             >
-                                Cancel Order
+                                {{ $t('orders.cancel_order') }}
                             </button>
                         </div>
                     </transition-group>
@@ -140,12 +140,12 @@
                                 </div>
                                 <div class="text-right">
                                     <div class="flex flex-col items-end">
-                                        <span class="text-sm font-medium text-gray-900">{{ order.customer_name || 'Guest' }}</span>
-                                        <span class="text-xs text-gray-500 mb-1">{{ order.items.length }} Items</span>
+                                        <span class="text-sm font-medium text-gray-900">{{ order.customer_name || $t('common.guest') }}</span>
+                                        <span class="text-xs text-gray-500 mb-1">{{ order.items.length }} {{ $t('common.items') }}</span>
                                         <div class="flex gap-1">
                                             <span :class="['px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider', 
                                                 order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700']">
-                                                {{ order.type === 'dine_in' ? 'Dine In' : 'Takeaway' }}
+                                                {{ order.type === 'dine_in' ? $t('kitchen.dine_in') : $t('kitchen.takeaway') }}
                                             </span>
                                             <span v-if="order.table" class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700">
                                                 {{ order.table.name }}
@@ -162,7 +162,7 @@
                                             <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                                                 {{ item.quantity }}x
                                             </span>
-                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || $t('common.unknown_item') }}</span>
                                         </div>
                                     </div>
                                     <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
@@ -216,10 +216,10 @@
                                 </div>
                                 <div class="text-right">
                                     <span v-if="order.status === 'ready'" class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-yellow-100 text-yellow-700 animate-pulse">
-                                        Ready for Pickup
+                                        {{ $t('kitchen.ready_for_pickup') }}
                                     </span>
                                     <span v-else class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">
-                                        Served
+                                        {{ $t('kitchen.served') }}
                                     </span>
                                 </div>
                             </div>

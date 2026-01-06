@@ -14,4 +14,12 @@ return [
     'recent_orders' => 'Recent Orders',
     'low_stock' => 'Low Stock Items',
     'quick_actions' => 'Quick Actions',
+    'subtitle' => 'Here is what is happening with your restaurant today.',
+    'revenue' => 'Revenue',
+    'total_revenue_subtitle' => 'Total revenue from completed orders',
+    'net_profit' => 'Net Profit',
+    'net_profit_subtitle' => 'Revenue - (Expenses + Waste)',
+    'avg_dining_time' => 'Average Dining Time',
+    'avg_dining_time_subtitle' => 'Average time from order to completion',
+    'details' => 'Details',
 ];

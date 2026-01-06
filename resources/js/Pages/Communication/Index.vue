@@ -29,7 +29,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                 </svg>
                             </div>
-                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">SMS</span>
+                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">{{ $t('communication.sms') }}</span>
                         </div>
                         <h3 class="text-4xl font-bold mb-1">{{ balances.sms }}</h3>
                         <p class="text-sm font-medium text-blue-100 opacity-90">{{ $t('communication.sms_credits') }}</p>
@@ -46,7 +46,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                             </div>
-                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">Email</span>
+                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">{{ $t('communication.email') }}</span>
                         </div>
                         <h3 class="text-4xl font-bold mb-1">{{ balances.email }}</h3>
                         <p class="text-sm font-medium text-purple-100 opacity-90">{{ $t('communication.email_credits') }}</p>
@@ -62,7 +62,6 @@
                         'px-4 py-2 text-sm font-medium rounded-lg transition-all',
                         activeTab === 'templates' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'
                     ]"
-                >
                 >
                     {{ $t('communication.automation_rules') }}
                 </button>
@@ -88,7 +87,7 @@
 
             <!-- Active Filter Indicator -->
             <div v-if="params.template_id" class="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 animate-fade-in">
-                 <span class="text-sm font-medium">{{ $t('common.filter') }}ing by rule logs</span>
+                 <span class="text-sm font-medium">{{ $t('communication.filter_by_rule_logs') }}</span>
                  <button @click="clearTemplateFilter" class="hover:text-blue-900">
                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -108,9 +107,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Feedback Feature Locked</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $t('communication.feedback_locked') }}</h3>
                         <p class="text-gray-600 mb-6 text-sm">
-                            This feature is not included in your current subscription plan. Upgrade to unlock automated feedback requests and Google review redirection.
+                            {{ $t('communication.feedback_locked_msg') }}
                         </p>
                         <button 
                             @click="$inertia.visit(route('dashboard'))"
@@ -119,7 +118,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            Upgrade Plan
+                            {{ $t('communication.upgrade_plan') }}
                         </button>
                     </div>
                 </div>
@@ -129,14 +128,14 @@
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363 1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
-                        Automated Feedback Requests
+                        {{ $t('communication.automated_feedback_requests') }}
                     </h3>
                     <p class="text-sm text-gray-600 mt-1">
-                        Automatically send a feedback request via SMS when an order is completed.
+                        {{ $t('communication.automated_feedback_desc') }}
                     </p>
                     <div class="mt-2 text-right lg:text-left">
                         <Link :href="route('feedback.index')" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
-                            View Received Feedback
+                            {{ $t('communication.view_received_feedback') }}
                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </Link>
                     </div>
@@ -148,26 +147,25 @@
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" v-model="feedbackForm.is_active" class="sr-only peer" :disabled="!hasFeature('feedback')">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            <span class="ml-3 text-sm font-medium text-gray-900">Enable Feedback Requests</span>
+                            <span class="ml-3 text-sm font-medium text-gray-900">{{ $t('communication.enable_feedback') }}</span>
                         </label>
                      </div>
 
                      <!-- Message Editor -->
                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Message Content</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('communication.message_content') }}</label>
                         <div class="relative">
                             <textarea 
                                 v-model="feedbackForm.message_body" 
                                 rows="4"
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-sans"
-                                placeholder="Hi {{customer_name}}, Thanks for your order! Rate us: {{feedback_link}}"
+                                :placeholder="$t('communication.message_placeholder')"
                             ></textarea>
                             
                             <!-- Validation / Help Text -->
                             <div class="mt-2 flex justify-between items-start text-xs text-gray-500">
                                 <p>
-                                    Variables <span class="font-mono bg-gray-100 px-1 rounded">{{ '{' + '{' }} customer_name {{ '}' + '}' }}</span> and 
-                                    <span class="font-mono bg-gray-100 px-1 rounded">{{ '{' + '{' }} feedback_link {{ '}' + '}' }}</span> are required.
+                                    {{ $t('communication.variables_help') }}
                                 </p>
                                 <span :class="feedbackForm.message_body.length > 160 ? 'text-red-600 font-bold' : ''">
                                     {{ feedbackForm.message_body.length }}/160
@@ -179,7 +177,7 @@
                      <!-- Google Maps Review Link -->
                      <div>
                         <div class="flex items-center gap-2 mb-2">
-                            <label class="block text-sm font-medium text-gray-700">Google Maps Review Link</label>
+                            <label class="block text-sm font-medium text-gray-700">{{ $t('communication.google_review_link') }}</label>
                             <div class="relative group">
                                 <svg class="w-4 h-4 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -214,28 +212,28 @@
                             placeholder="https://maps.app.goo.gl/... or https://www.google.com/maps/place/..."
                         >
                         <p class="mt-2 text-xs text-gray-500">
-                            Customers with 4-5 star ratings will be redirected to leave a Google review
+                            {{ $t('communication.google_review_help') }}
                         </p>
                      </div>
 
                      <!-- Timing and Delay -->
                      <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-6 transition-all duration-300">
-                        <label class="block text-sm font-medium text-blue-900 mb-3">When should the message be sent?</label>
+                        <label class="block text-sm font-medium text-blue-900 mb-3">{{ $t('communication.timing_settings') }}</label>
                         <div class="space-y-4">
                             <!-- Option 1: Immediately -->
                             <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-colors" :class="{'bg-white shadow-sm ring-1 ring-blue-200': feedbackForm.timing_mode === 'immediately'}">
                                 <input type="radio" v-model="feedbackForm.timing_mode" value="immediately" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                <span class="text-gray-900 font-medium">Immediately after payment</span>
+                                <span class="text-gray-900 font-medium">{{ $t('communication.immediately') }}</span>
                             </label>
 
                             <!-- Option 2: Custom Delay -->
                             <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-colors" :class="{'bg-white shadow-sm ring-1 ring-blue-200': feedbackForm.timing_mode === 'delay'}">
                                 <input type="radio" v-model="feedbackForm.timing_mode" value="delay" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 mt-3">
                                 <div class="flex-1">
-                                    <span class="block text-gray-900 font-medium mb-2 mt-2">Delay Sending</span>
+                                    <span class="block text-gray-900 font-medium mb-2 mt-2">{{ $t('communication.delay_sending') }}</span>
                                     
                                     <div class="flex flex-wrap items-center gap-2" :class="{'opacity-50 pointer-events-none': feedbackForm.timing_mode !== 'delay'}">
-                                        <span class="text-sm text-gray-600">Wait for</span>
+                                        <span class="text-sm text-gray-600">{{ $t('communication.wait_for') }}</span>
                                         <div class="w-24">
                                             <input 
                                                 v-model="feedbackForm.timing_val" 
@@ -249,12 +247,12 @@
                                                 v-model="feedbackForm.timing_unit"
                                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                                             >
-                                                <option value="minutes">Minutes</option>
-                                                <option value="hours">Hours</option>
-                                                <option value="days">Days</option>
+                                                <option value="minutes">{{ $t('communication.minutes') }}</option>
+                                                <option value="hours">{{ $t('communication.hours') }}</option>
+                                                <option value="days">{{ $t('communication.days') }}</option>
                                             </select>
                                         </div>
-                                        <span class="text-sm text-gray-600">after payment</span>
+                                        <span class="text-sm text-gray-600">{{ $t('communication.after_payment') }}</span>
                                     </div>
                                 </div>
                             </label>
@@ -263,8 +261,8 @@
 
                      <!-- Rewards Section -->
                      <div class="mb-6 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                        <label class="block text-sm font-medium text-yellow-900 mb-2">Loyalty Reward</label>
-                        <p class="text-xs text-yellow-700 mb-3">Reward customers who provide feedback with loyalty points.</p>
+                        <label class="block text-sm font-medium text-yellow-900 mb-2">{{ $t('communication.loyalty_reward') }}</label>
+                        <p class="text-xs text-yellow-700 mb-3">{{ $t('communication.loyalty_reward_desc') }}</p>
                         <div class="flex items-center gap-3">
                             <div class="w-32">
                                 <Input 
@@ -274,7 +272,7 @@
                                     min="0"
                                 />
                             </div>
-                            <span class="text-sm font-medium text-yellow-800">Points</span>
+                            <span class="text-sm font-medium text-yellow-800">{{ $t('communication.points') }}</span>
                         </div>
                      </div>
 
@@ -282,24 +280,24 @@
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                          <Input 
                             v-model="feedbackForm.min_order_amount"
-                            label="Minimum Order Amount"
+                            :label="$t('communication.min_order_amount')"
                             type="number"
                             placeholder="0"
-                            hint="Only send for orders above this amount"
+                            :hint="$t('communication.min_order_hint')"
                          />
                          <Input 
                             v-model="feedbackForm.min_orders_count"
-                            label="Minimum Past Orders"
+                            :label="$t('communication.min_past_orders')"
                             type="number"
                             placeholder="0"
-                            hint="Only send to repeat customers (e.g., 2+ orders)"
+                            :hint="$t('communication.min_past_orders_hint')"
                          />
                      </div>
 
                     <!-- Submit -->
                     <div class="flex justify-end pt-4 border-t border-gray-100">
                         <Button :loading="feedbackForm.processing" class="px-8">
-                            Save Changes
+                            {{ $t('communication.save_changes') }}
                         </Button>
                     </div>
                 </form>
@@ -363,7 +361,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
-                                <span class="underline">{{ $t('common.sent') }}: {{ template.logs_count || 0 }}</span>
+                                <span class="underline">{{ $t('communication.sent') }}: {{ template.logs_count || 0 }}</span>
                             </button>
                             <div class="flex gap-2">
                                 <button @click="openTemplateModal(template)" class="text-blue-600 hover:text-blue-800 font-medium">{{ $t('common.edit') }}</button>
@@ -467,14 +465,14 @@
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Rule Information
+                        {{ $t('communication.rule_info') }}
                     </h3>
                     
                     <!-- Name -->
                     <Input 
                         v-model="templateForm.name"
-                        label="Rule Name"
-                        placeholder="e.g. Welcome Message, Order Confirmation, Birthday Greetings"
+                        :label="$t('communication.rule_name')"
+                        :placeholder="$t('communication.rule_name_placeholder')"
                         required
                         :error="templateForm.errors.name"
                     />
@@ -483,28 +481,28 @@
                         <!-- Trigger Event -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Trigger Event <span class="text-red-500">*</span>
+                                {{ $t('communication.trigger_event') }} <span class="text-red-500">*</span>
                             </label>
                             <select 
                                 v-model="templateForm.trigger_event"
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
                                 required
                             >
-                                <option value="registration">📝 New Customer Registration</option>
-                                <option value="order_created">🛒 Order Placed</option>
-                                <option value="order_completed">✅ Order Completed</option>
-                                <option value="order_cancelled">❌ Order Cancelled</option>
-                                <option value="birthday">🎂 Customer Birthday</option>
-                                <option value="churn_risk">⚠️ Churn Risk (Inactive)</option>
-                                <option value="feedback_received">⭐ Feedback Received</option>
+                                <option value="registration">📝 {{ $t('communication.trigger_registration') }}</option>
+                                <option value="order_created">🛒 {{ $t('communication.trigger_order_created') }}</option>
+                                <option value="order_completed">✅ {{ $t('communication.trigger_order_completed') }}</option>
+                                <option value="order_cancelled">❌ {{ $t('communication.trigger_order_cancelled') }}</option>
+                                <option value="birthday">🎂 {{ $t('communication.trigger_birthday') }}</option>
+                                <option value="churn_risk">⚠️ {{ $t('communication.trigger_churn_risk') }}</option>
+                                <option value="feedback_received">⭐ {{ $t('communication.trigger_feedback_received') }}</option>
                             </select>
-                            <p class="mt-1 text-xs text-gray-500">When should this message be sent?</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ $t('communication.trigger_when_hint') }}</p>
                         </div>
 
                         <!-- Channels (Checkbox Group) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Channels <span class="text-red-500">*</span>
+                                {{ $t('communication.channels') }} <span class="text-red-500">*</span>
                             </label>
                             <div class="flex gap-4 p-3 bg-white rounded-lg border border-gray-200">
                                 <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors">
@@ -512,17 +510,17 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                     </svg>
-                                    <span class="text-sm font-medium">SMS</span>
+                                    <span class="text-sm font-medium">{{ $t('communication.sms') }}</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer hover:text-purple-600 transition-colors">
                                     <input type="checkbox" v-model="templateForm.channels" value="email" class="text-purple-600 focus:ring-purple-500 rounded">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    <span class="text-sm font-medium">Email</span>
+                                    <span class="text-sm font-medium">{{ $t('communication.email') }}</span>
                                 </label>
                             </div>
-                            <p v-if="templateForm.channels.length === 0" class="text-xs text-red-500 mt-1">Select at least one channel.</p>
+                            <p v-if="templateForm.channels.length === 0" class="text-xs text-red-500 mt-1">{{ $t('communication.select_channel_required') }}</p>
                         </div>
                     </div>
                 </div>
@@ -533,32 +531,32 @@
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                         </svg>
-                        SMS Settings
+                        {{ $t('communication.sms_settings') }}
                     </h3>
 
                     <div class="space-y-4">
                         <Input 
                             v-model="templateForm.sms_sender_name"
-                            label="Sender Name (Optional)"
-                            placeholder="e.g. Servio, YourBrand"
+                            :label="$t('communication.sender_name')"
+                            :placeholder="$t('communication.sender_name_placeholder')"
                             :error="templateForm.errors.sms_sender_name"
-                            hint="Custom sender name (if supported by your SMS provider)"
+                            :hint="$t('communication.sender_name_hint')"
                         />
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                SMS Message <span class="text-red-500">*</span>
+                                {{ $t('communication.sms_message') }} <span class="text-red-500">*</span>
                             </label>
                             <textarea 
                                 v-model="templateForm.sms_content"
                                 rows="3"
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
-                                placeholder="Enter your SMS message here..."
+                                :placeholder="$t('communication.sms_message_placeholder')"
                                 :required="templateForm.channels.includes('sms')"
                                 maxlength="160"
                             ></textarea>
                             <div class="flex justify-between mt-1">
-                                <p class="text-xs text-gray-500">Keep it short and clear (160 characters max)</p>
+                                <p class="text-xs text-gray-500">{{ $t('communication.sms_length_hint') }}</p>
                                 <p class="text-xs font-medium" :class="(templateForm.sms_content?.length || 0) > 160 ? 'text-red-600' : 'text-gray-600'">
                                     {{ templateForm.sms_content?.length || 0 }}/160
                                 </p>
@@ -573,15 +571,15 @@
                         <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        Email Settings
+                        {{ $t('communication.email_settings') }}
                     </h3>
 
                     <div class="space-y-4">
                         <!-- Email Subject -->
                         <Input 
                             v-model="templateForm.subject"
-                            label="Email Subject"
-                            placeholder="e.g. Welcome to Servio! 🎉"
+                            :label="$t('communication.email_subject')"
+                            :placeholder="$t('communication.email_subject_placeholder')"
                             :required="templateForm.channels.includes('email')"
                             :error="templateForm.errors.subject"
                         />
@@ -589,34 +587,34 @@
                         <!-- Email Header -->
                         <Input 
                             v-model="templateForm.email_header"
-                            label="Email Header (Optional)"
-                            placeholder="e.g. Welcome!, Thank You, Important Update"
+                            :label="$t('communication.email_header')"
+                            :placeholder="$t('communication.email_header_placeholder')"
                             :error="templateForm.errors.email_header"
-                            hint="Large heading at the top of the email"
+                            :hint="$t('communication.email_header_hint')"
                         />
 
                         <!-- Email Content -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Email Body <span class="text-red-500">*</span>
+                                {{ $t('communication.email_body') }} <span class="text-red-500">*</span>
                             </label>
                             <textarea 
                                 v-model="templateForm.content"
                                 rows="6"
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                                placeholder="Enter your email message here...&#10;&#10;You can write multiple paragraphs.&#10;Use clear, friendly language."
+                                :placeholder="$t('communication.email_body_placeholder')"
                                 :required="templateForm.channels.includes('email')"
                             ></textarea>
-                            <p class="mt-1 text-xs text-gray-500">Main content of your email. Keep it clear and concise.</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ $t('communication.email_body_hint') }}</p>
                         </div>
 
                         <!-- Email Footer -->
                         <Input 
                             v-model="templateForm.email_footer"
-                            label="Email Footer (Optional)"
-                            placeholder="e.g. Best regards, The Servio Team"
+                            :label="$t('communication.email_footer')"
+                            :placeholder="$t('communication.email_footer_placeholder')"
                             :error="templateForm.errors.email_footer"
-                            hint="Signature or closing message"
+                            :hint="$t('communication.email_footer_hint')"
                         />
                     </div>
                 </div>
@@ -627,25 +625,25 @@
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Timing Setup
+                        {{ $t('communication.timing_setup') }}
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">When?</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('communication.when') }}</label>
                             <select 
                                 v-model="templateForm.timing_type"
                                 class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
                             >
-                                <option value="immediately">⚡ Immediately</option>
-                                <option value="before">⏪ Before Event</option>
-                                <option value="after">⏩ After Event</option>
+                                <option value="immediately">⚡ {{ $t('communication.immediately') }}</option>
+                                <option value="before">⏪ {{ $t('communication.before_event') }}</option>
+                                <option value="after">⏩ {{ $t('communication.after_event') }}</option>
                             </select>
                         </div>
                         <div v-if="templateForm.timing_type !== 'immediately'">
                             <Input 
                                 v-model="templateForm.timing_days"
-                                label="Days"
+                                :label="$t('communication.days')"
                                 type="number"
                                 min="0"
                                 placeholder="1"
@@ -654,7 +652,7 @@
                         <div v-if="templateForm.timing_type !== 'immediately'">
                             <Input 
                                 v-model="templateForm.timing_time"
-                                label="At Time"
+                                :label="$t('communication.at_time')"
                                 type="time"
                             />
                         </div>
@@ -665,10 +663,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span v-if="templateForm.timing_type === 'immediately'">
-                                <strong>Instant delivery:</strong> Message will be sent immediately when the event occurs.
+                                <strong>{{ $t('communication.instant_delivery') }}</strong> {{ $t('communication.instant_desc') }}
                             </span>
                             <span v-else>
-                                <strong>Scheduled:</strong> Message will be sent {{ templateForm.timing_days }} day(s) {{ templateForm.timing_type }} the event at {{ templateForm.timing_time }}.
+                                <strong>{{ $t('communication.scheduled') }}</strong> {{ $t('communication.scheduled_desc', { days: templateForm.timing_days, type: templateForm.timing_type, time: templateForm.timing_time }) }}
                             </span>
                         </p>
                     </div>
@@ -680,53 +678,53 @@
                         <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
-                        Conditions (Optional)
+                        {{ $t('communication.conditions') }}
                     </h3>
-                    <p class="text-xs text-gray-600 mb-4">Only send if these conditions are met</p>
+                    <p class="text-xs text-gray-600 mb-4">{{ $t('communication.conditions_desc') }}</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                          <template v-if="templateForm.trigger_event === 'feedback_received'">
                             <Input 
                                 v-model="templateForm.conditions.min_rating"
-                                label="Min Rating"
+                                :label="$t('communication.min_rating')"
                                 type="number"
                                 min="1"
                                 max="5"
                                 placeholder="1"
-                                hint="Send if rating >= this"
+                                :hint="$t('communication.min_rating_hint')"
                             />
                             <Input 
                                 v-model="templateForm.conditions.max_rating"
-                                label="Max Rating"
+                                :label="$t('communication.max_rating')"
                                 type="number"
                                 min="1"
                                 max="5"
                                 placeholder="5"
-                                hint="Send if rating <= this"
+                                :hint="$t('communication.max_rating_hint')"
                             />
                          </template>
                          <template v-else>
                              <Input 
                                 v-model="templateForm.conditions.min_order_amount"
-                                label="Min Order Amount"
+                                :label="$t('communication.min_order_amount')"
                                 type="number"
                                 placeholder="0"
-                                hint="Minimum order value required"
+                                :hint="$t('communication.min_order_hint')"
                              />
                              <Input 
                                 v-model="templateForm.conditions.min_orders_count"
-                                label="Min Orders Count"
+                                :label="$t('communication.min_past_orders')"
                                 type="number"
                                 placeholder="0"
-                                hint="Minimum past orders required"
+                                :hint="$t('communication.min_past_orders_hint')"
                              />
                              <Input 
                                 v-if="templateForm.trigger_event === 'churn_risk'"
                                 v-model="templateForm.conditions.days_since_last_order"
-                                label="Days Since Last Order"
+                                :label="$t('communication.days_since_last_order')"
                                 type="number"
                                 placeholder="30"
-                                hint="Days of inactivity"
+                                :hint="$t('communication.days_inactivity_hint')"
                              />
                         </template>
                     </div>
@@ -744,7 +742,7 @@
                         <svg class="w-5 h-5" :class="templateForm.is_active ? 'text-green-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Activate this rule immediately
+                        {{ $t('communication.activate_rule') }}
                     </label>
                 </div>
 
@@ -763,9 +761,12 @@
     </MainLayout>
 </template>
 
+
+
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { router, useForm, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
@@ -777,6 +778,7 @@ import Input from '@/Components/Input.vue';
 import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasFeature } = useFeatures();
+const { t } = useI18n();
 
 interface TemplateCondition {
     min_order_amount?: number | null;
@@ -882,7 +884,7 @@ watch(activeTab, (val) => {
 
 // --- Bundles ---
 const purchase = (bundle: Bundle) => {
-    if (confirm(`Are you sure you want to purchase ${bundle.name} for ${bundle.currency} ${bundle.price}?`)) {
+    if (confirm(t('communication.confirm_purchase_bundle', { name: bundle.name, currency: bundle.currency, price: bundle.price }))) {
         router.post(route('communication.bundles.purchase', bundle.id));
     }
 };
@@ -936,7 +938,7 @@ watch(() => props.templates, (newTemplates) => {
     if (existing) {
         feedbackTemplateId.value = existing.id;
         feedbackForm.is_active = !!existing.is_active;
-        feedbackForm.message_body = existing.sms_content || 'Hi {{customer_name}}, Thanks for your order! Rate us: {{feedback_link}}';
+        feedbackForm.message_body = existing.sms_content || t('communication.message_placeholder');
         
         feedbackForm.min_order_amount = existing.conditions?.min_order_amount || null;
         feedbackForm.min_orders_count = existing.conditions?.min_orders_count || null;
@@ -946,7 +948,7 @@ watch(() => props.templates, (newTemplates) => {
         // Load Timing
         if (existing.timing_type === 'custom_delay' && existing.conditions?.delay_unit) {
             feedbackForm.timing_mode = 'delay';
-            feedbackForm.timing_val = existing.conditions.delay_val || 1;
+            feedbackForm.timing_val = existing.conditions?.delay_val || 1;
             feedbackForm.timing_unit = existing.conditions.delay_unit;
         } else if (existing.timing_type === 'delay_1_hour') {
             feedbackForm.timing_mode = 'delay';
@@ -963,7 +965,7 @@ watch(() => props.templates, (newTemplates) => {
         }
 
     } else {
-        feedbackForm.message_body = 'Hi {{customer_name}}, Thanks for your order! Rate us: {{feedback_link}}';
+        feedbackForm.message_body = t('communication.message_placeholder');
         feedbackForm.timing_mode = 'immediately';
         feedbackForm.feedback_points = null;
     }
@@ -971,12 +973,12 @@ watch(() => props.templates, (newTemplates) => {
 
 const saveFeedbackSettings = () => {
     if (!feedbackForm.message_body.includes('{{customer_name}}') || !feedbackForm.message_body.includes('{{feedback_link}}')) {
-        alert('Message must contain {{customer_name}} and {{feedback_link}} variables.');
+        alert(t('communication.alert_message_variables'));
         return;
     }
 
     const payload = {
-        name: 'Automated Feedback Request',
+        name: t('communication.automated_feedback_requests'),
         trigger_event: 'order_completed_feedback',
         channels: ['sms'],
         sms_content: feedbackForm.message_body,
@@ -1060,7 +1062,7 @@ const closeTemplateModal = () => {
 
 const submitTemplate = () => {
     if (templateForm.channels.length === 0) {
-        alert('Please select at least one channel.');
+        alert(t('communication.select_one_channel'));
         return;
     }
     if (editingTemplate.value) {
@@ -1075,7 +1077,7 @@ const submitTemplate = () => {
 };
 
 const deleteTemplate = (template: Template) => {
-    if (confirm('Are you sure you want to delete this rule?')) {
+    if (confirm(t('communication.delete_rule_confirm'))) {
         router.delete(route('communication.templates.destroy', template.id));
     }
 };

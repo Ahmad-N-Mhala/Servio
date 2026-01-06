@@ -258,11 +258,12 @@
                     <div class="glass-card rounded-2xl p-6 border border-gray-200">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('receipt.preview') }}</h3>
                         
-                        <div id="receipt-preview-container" class="bg-white border-2 border-gray-300 rounded-lg p-6 shadow-inner" :style="{ width: form.paper_width === '58' ? '220px' : '300px', margin: '0 auto' }">
+                        <div id="receipt-preview-container" class="bg-white border-2 border-gray-300 rounded-lg p-6 shadow-inner mx-auto" :style="{ width: 'fit-content', minWidth: form.paper_width === '58' ? '280px' : '380px' }">
                             <ReceiptPreview 
                                 :template="form" 
                                 :logo="restaurant_logo"
                                 :restaurant-name="restaurant_name"
+                                :google-map-location="google_map_location"
                             />
                         </div>
 
@@ -298,6 +299,7 @@ const props = defineProps<{
     restaurant_logo?: string | null;
     restaurant_name?: string;
     next_order_number?: number | null;
+    google_map_location?: string | null;
 }>();
 
 const form = useForm({

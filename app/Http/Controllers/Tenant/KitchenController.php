@@ -15,7 +15,8 @@ use Inertia\Response;
 class KitchenController extends Controller
 {
     public function __construct(
-        protected LoyaltyService $loyaltyService
+        protected LoyaltyService $loyaltyService,
+        protected \App\Services\InventoryService $inventoryService
     ) {
     }
 
@@ -64,113 +65,15 @@ class KitchenController extends Controller
             $status = 'completed';
         }
 
-        // ====== INVENTORY DEDUCTION LOGIC (Duplicated from OrderController to ensure consistency) ======
+        // ====== INVENTORY DEDUCTION LOGIC (Consistent with OrderController) ======
         // Deduct Inventory when status moves from 'pending' to any active cooking/served state
         if ($oldStatus === 'pending' && in_array($status, ['processing', 'completed', 'served', 'ready'])) {
-            $order->load(['items.menuItem.ingredients']);
+            $order->load(['items.menuItem.ingredients', 'items.menuItem.bundles.childItem', 'items.menuItem.extras']);
 
-            foreach ($order->items as $item) {
-                $menuItem = $item->menuItem;
-                if ($menuItem) {
-                    $recipe = $menuItem->recipe ?? [];
-                    $hasRecipe = !empty($recipe);
-
-                    if ($hasRecipe) {
-                        // NEW LOGIC: Use embedded recipe
-                        foreach ($recipe as $component) {
-                            $ingId = $component['ingredient_id'] ?? null;
-                            $qtyNeeded = (float) ($component['quantity'] ?? 0);
-                            if ($ingId && $qtyNeeded > 0) {
-                                $ingredient = \App\Models\Ingredient::find($ingId);
-                                if ($ingredient) {
-                                    $totalNeeded = $qtyNeeded * $item->quantity;
-
-                                    $remainingQty = $totalNeeded;
-                                    $batches = \App\Models\IngredientBatch::where('ingredient_id', (string) $ingredient->id)
-                                        ->where('quantity_remaining', '>', 0)
-                                        ->orderBy('created_at', 'asc')->get();
-
-                                    $batchesUsed = [];
-                                    foreach ($batches as $batch) {
-                                        if ($remainingQty <= 0)
-                                            break;
-
-                                        $deduct = min($remainingQty, (float) $batch->quantity_remaining);
-                                        $batch->quantity_remaining = (float) $batch->quantity_remaining - $deduct;
-                                        $batch->save();
-
-                                        $remainingQty -= $deduct;
-                                        $batchesUsed[] = "{$batch->batch_number} ({$deduct})";
-                                    }
-
-                                    $ingredient->updateCostFromFIFO();
-                                    $ingredient = $ingredient->fresh();
-                                    $ingredient->current_stock = (float) $ingredient->current_stock - $totalNeeded;
-                                    $ingredient->save();
-
-                                    \App\Models\InventoryLog::create([
-                                        'restaurant_id' => $order->restaurant_id,
-                                        'ingredient_id' => $ingredient->id,
-                                        'user_id' => auth()->id(),
-                                        'action' => 'used_in_menu',
-                                        'quantity_change' => -$totalNeeded,
-                                        'new_stock_level' => $ingredient->current_stock,
-                                        'notes' => 'Kitchen Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
-                                    ]);
-                                }
-                            }
-                        }
-                    } elseif ($menuItem->ingredients->isNotEmpty()) {
-                        foreach ($menuItem->ingredients as $ingredient) {
-                            $pivotQty = 0;
-                            if ($ingredient->pivot && isset($ingredient->pivot->quantity)) {
-                                $pivotQty = $ingredient->pivot->quantity;
-                            } else {
-                                $pivotRecord = \App\Models\MenuItemIngredient::where('menu_item_id', $menuItem->id)
-                                    ->where('ingredient_id', $ingredient->id)->first();
-                                if ($pivotRecord)
-                                    $pivotQty = $pivotRecord->quantity;
-                            }
-
-                            if ($pivotQty <= 0)
-                                continue;
-
-                            $neededQty = $pivotQty * $item->quantity;
-                            $remainingQty = $neededQty;
-
-                            $batches = \App\Models\IngredientBatch::where('ingredient_id', (string) $ingredient->id)
-                                ->where('quantity_remaining', '>', 0)
-                                ->orderBy('created_at', 'asc')->get();
-
-                            $batchesUsed = [];
-                            foreach ($batches as $batch) {
-                                if ($remainingQty <= 0)
-                                    break;
-
-                                $deduct = min($remainingQty, (float) $batch->quantity_remaining);
-                                $batch->quantity_remaining = (float) $batch->quantity_remaining - $deduct;
-                                $batch->save();
-
-                                $remainingQty -= $deduct;
-                                $batchesUsed[] = "{$batch->batch_number} ({$deduct})";
-                            }
-
-                            $ingredient->updateCostFromFIFO();
-                            $ingredient = $ingredient->fresh();
-                            $ingredient->current_stock = (float) $ingredient->current_stock - $neededQty;
-                            $ingredient->save();
-
-                            \App\Models\InventoryLog::create([
-                                'restaurant_id' => $order->restaurant_id,
-                                'ingredient_id' => $ingredient->id,
-                                'user_id' => auth()->id(),
-                                'action' => 'used_in_menu',
-                                'quantity_change' => -$neededQty,
-                                'new_stock_level' => $ingredient->current_stock,
-                                'notes' => 'Kitchen Order #' . $order->order_number . ' | Batches: ' . implode(', ', $batchesUsed),
-                            ]);
-                        }
-                    }
+            foreach ($order->items as $orderItem) {
+                if ($orderItem->menuItem) {
+                    // Deduct Main Item and potential Bundles
+                    $this->processInventoryForMenuItem($orderItem->menuItem, $orderItem->quantity, $order);
                 }
             }
         }
@@ -194,5 +97,68 @@ class KitchenController extends Controller
         broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'status_changed'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.status_updated'));
+    }
+
+    /**
+     * Helper to process inventory deduction recursively via Service
+     * (Duplicated from OrderController to allow independent processing if needed, but ensures consistency)
+     */
+    private function processInventoryForMenuItem($menuItem, $qty, $order)
+    {
+        if (!$menuItem)
+            return;
+
+        $itemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
+
+        // A. If Meal, process bundles
+        if (($menuItem->type ?? 'item') === 'meal') {
+            if (!$menuItem->relationLoaded('bundles')) {
+                $menuItem->load(['bundles.childItem']);
+            }
+
+            foreach ($menuItem->bundles as $bundle) {
+                if ($bundle->childItem) {
+                    $this->processInventoryForMenuItem(
+                        $bundle->childItem,
+                        $qty * ($bundle->quantity ?? 1),
+                        $order
+                    );
+                }
+            }
+        }
+
+        // B. Process Recipe (Standard or Legacy)
+        $recipe = $menuItem->recipe ?? [];
+        if (!empty($recipe)) {
+            foreach ($recipe as $component) {
+                $ingId = $component['ingredient_id'] ?? null;
+                $needed = (float) ($component['quantity'] ?? 0);
+
+                if ($ingId && $needed > 0) {
+                    $ingredient = \App\Models\Ingredient::find($ingId);
+                    if ($ingredient) {
+                        $this->inventoryService->deductStock(
+                            $ingredient,
+                            $needed * $qty,
+                            "Item '{$itemName}' Kitchen Order #{$order->order_number}",
+                            auth()->id()
+                        );
+                    }
+                }
+            }
+        } elseif ($menuItem->relationLoaded('ingredients') && $menuItem->ingredients->isNotEmpty()) {
+            // Fallback to legacy Pivot
+            foreach ($menuItem->ingredients as $ingredient) {
+                $pivotQty = $ingredient->pivot->quantity ?? 0;
+                if ($pivotQty > 0) {
+                    $this->inventoryService->deductStock(
+                        $ingredient,
+                        $pivotQty * $qty,
+                        "Item '{$itemName}' Kitchen Order #{$order->order_number}",
+                        auth()->id()
+                    );
+                }
+            }
+        }
     }
 }

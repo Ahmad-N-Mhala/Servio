@@ -26,10 +26,13 @@ class PublicMenuController extends Controller
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
-            ->with(['items' => function ($query) {
-                $query->where('is_available', true)
-                    ->orderBy('sort_order');
-            }])
+            ->with([
+                'items' => function ($query) {
+                    $query->where('is_available', true)
+                        ->with('extras')
+                        ->orderBy('sort_order');
+                }
+            ])
             ->orderBy('sort_order')
             ->get()
             ->map(function ($category) use ($locale) {
@@ -46,6 +49,7 @@ class PublicMenuController extends Controller
                             'currency' => $item->currency,
                             'image' => $item->image,
                             'allergens' => $item->allergens,
+                            'extras' => $item->extras,
                         ];
                     }),
                 ];
@@ -65,7 +69,7 @@ class PublicMenuController extends Controller
     protected function getTranslatedName(array $name, ?string $locale = null): string
     {
         $locale = $locale ?? app()->getLocale();
-        
+
         if (isset($name[$locale])) {
             return $name[$locale];
         }

@@ -63,96 +63,16 @@ class CustomerCommunicationService
         }
 
         $content = self::replaceVariables($template->sms_content, $data);
-        $driver = config('services.sms.driver', 'log');
 
         try {
-            switch ($driver) {
-                case 'twilio':
-                    self::sendViaTwilio($customer->phone, $content);
-                    break;
-                case 'unifonic':
-                    self::sendViaUnifonic($customer->phone, $content);
-                    break;
-                case 'sms_ae':
-                    self::sendViaSmsAe($customer->phone, $content);
-                    break;
-                default:
-                    Log::info("SMS (Log Driver) to {$customer->phone}: {$content}");
-                    break;
-            }
+            // Use Centralized SmsService
+            app(\App\Services\SmsService::class)->send($customer->phone, $content);
 
             $restaurant->decrement('sms_balance');
             self::log($template, $customer, 'sms', 'sent', $content);
         } catch (\Exception $e) {
-            Log::error("SMS failed via {$driver}: " . $e->getMessage());
+            Log::error("SMS failed: " . $e->getMessage());
             self::log($template, $customer, 'sms', 'failed', $e->getMessage());
-        }
-    }
-
-    private static function sendViaTwilio($to, $message)
-    {
-        $sid = config('services.twilio.sid');
-        $token = config('services.twilio.token');
-        $from = config('services.twilio.from');
-
-        if (!$sid || !$token || !$from) {
-            throw new \Exception("Twilio credentials missing");
-        }
-
-        $response = \Illuminate\Support\Facades\Http::asForm()
-            ->withBasicAuth($sid, $token)
-            ->post("https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json", [
-                'To' => $to,
-                'From' => $from,
-                'Body' => $message,
-            ]);
-
-        if (!$response->successful()) {
-            throw new \Exception("Twilio Error: " . $response->body());
-        }
-    }
-
-    private static function sendViaUnifonic($to, $message)
-    {
-        $apiKey = config('services.unifonic.api_key');
-        $senderId = config('services.unifonic.sender_id');
-
-        if (!$apiKey) {
-            throw new \Exception("Unifonic API Key missing");
-        }
-
-        $response = \Illuminate\Support\Facades\Http::post("https://el.cloud.unifonic.com/rest/SMS/Messages", [
-            'AppSid' => $apiKey,
-            'SenderID' => $senderId,
-            'Recipient' => $to,
-            'Body' => $message,
-        ]);
-
-        if (!$response->successful()) {
-            throw new \Exception("Unifonic Error: " . $response->body());
-        }
-    }
-
-    private static function sendViaSmsAe($to, $message)
-    {
-        $user = config('services.sms_ae.username');
-        $pass = config('services.sms_ae.password');
-        $sender = config('services.sms_ae.sender_id');
-
-        if (!$user || !$pass) {
-            throw new \Exception("SMS.ae credentials missing");
-        }
-
-        $response = \Illuminate\Support\Facades\Http::get("https://www.sms.ae/api/http/send.aspx", [
-            'username' => $user,
-            'password' => $pass,
-            'recipient' => $to,
-            'sender' => $sender,
-            'message' => $message,
-        ]);
-
-        if (!$response->successful()) {
-            throw new \Exception("SMS.ae Error: " . $response->body());
         }
     }
 
