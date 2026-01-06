@@ -196,18 +196,20 @@ class OrderController extends Controller
 
         // Get menu categories with items for order creation
         $menuCategories = \App\Models\MenuCategory::where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
             ->with([
                 'items' => function ($query) {
-                    $query->where('is_available', true)
-                        ->with(['ingredients', 'extras', 'bundles.childItem']);
+                    $query->with(['ingredients', 'extras', 'bundles.childItem']);
                 }
             ])
             ->orderBy('sort_order')
             ->get()
+            ->filter(function ($category) {
+                return (bool) $category->is_active;
+            })
+            ->values()
             ->map(function ($category) {
                 // Sort items by name in PHP (handle JSON translations)
-                $sortedItems = $category->items->sortBy(function ($item) {
+                $sortedItems = $category->items->filter(fn($item) => (bool) $item->is_available)->sortBy(function ($item) {
                     $name = $item->name;
                     if (is_array($name)) {
                         return $name['en'] ?? $name['ar'] ?? '';

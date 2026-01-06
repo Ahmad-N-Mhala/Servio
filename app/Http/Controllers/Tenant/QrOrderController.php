@@ -30,22 +30,24 @@ class QrOrderController extends Controller
         }
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
             ->with([
                 'items' => function ($query) {
-                    $query->where('is_available', true)
-                        ->with('extras')
+                    $query->with('extras')
                         ->orderBy('sort_order');
                 }
             ])
             ->orderBy('sort_order')
             ->get()
+            ->filter(function ($category) {
+                return (bool) $category->is_active;
+            })
+            ->values()
             ->map(function ($category) {
                 return [
                     'id' => $category->id,
                     'name' => $category->name,
                     'description' => $category->description,
-                    'items' => $category->items->map(function ($item) {
+                    'items' => $category->items->filter(fn($item) => (bool) $item->is_available)->map(function ($item) {
                         // Fix image URL - prepend /storage/ if image exists
                         $imageUrl = null;
                         if ($item->image) {
@@ -68,7 +70,7 @@ class QrOrderController extends Controller
                             'currency' => $item->currency ?? 'AED',
                             'extras' => $item->extras,
                         ];
-                    })->toArray(),
+                    })->values()->toArray(),
                 ];
             })
             ->toArray();
@@ -125,11 +127,21 @@ class QrOrderController extends Controller
             ];
         }
 
+        // Generate Sequential Order Number
+        $nextNumber = $restaurant->next_order_number ?? 1;
+        try {
+            // Atomically increment the order number to prevent race conditions
+            $restaurant->increment('next_order_number');
+        } catch (\Exception $e) {
+            // Handle legacy cases where next_order_number might be stored as string
+            $restaurant->update(['next_order_number' => (int) $nextNumber + 1]);
+        }
+
         // Create order
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
             'table_id' => $table->id,
-            'order_number' => 'QR-' . strtoupper(substr(md5(uniqid()), 0, 8)),
+            'order_number' => $nextNumber . 'QR',
             'type' => 'dine_in',
             'status' => 'pending',
             'subtotal' => $subtotal,

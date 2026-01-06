@@ -25,22 +25,24 @@ class PublicMenuController extends Controller
         }
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
             ->with([
                 'items' => function ($query) {
-                    $query->where('is_available', true)
-                        ->with('extras')
+                    $query->with('extras')
                         ->orderBy('sort_order');
                 }
             ])
             ->orderBy('sort_order')
             ->get()
+            ->filter(function ($category) {
+                return (bool) $category->is_active;
+            })
+            ->values()
             ->map(function ($category) use ($locale) {
                 return [
                     'id' => $category->id,
                     'name' => $this->getTranslatedName($category->name, $locale),
                     'description' => $category->description,
-                    'items' => $category->items->map(function ($item) use ($locale) {
+                    'items' => $category->items->filter(fn($item) => (bool) $item->is_available)->map(function ($item) use ($locale) {
                         return [
                             'id' => $item->id,
                             'name' => $this->getTranslatedName($item->name, $locale),
@@ -51,7 +53,7 @@ class PublicMenuController extends Controller
                             'allergens' => $item->allergens,
                             'extras' => $item->extras,
                         ];
-                    }),
+                    })->values(),
                 ];
             });
 

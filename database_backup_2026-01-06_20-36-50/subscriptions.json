@@ -1,0 +1,57 @@
+[
+    {
+        "_id": {
+            "$oid": "69503a8eeaf319e8830776f2"
+        },
+        "status": "active",
+        "billing_cycle": "monthly",
+        "starts_at": {
+            "$date": {
+                "$numberLong": "1766865550115"
+            }
+        },
+        "ends_at": {
+            "$date": {
+                "$numberLong": "1769543950115"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865550115"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865550115"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503e50eaf319e883077718"
+        },
+        "status": "active",
+        "billing_cycle": "monthly",
+        "starts_at": {
+            "$date": {
+                "$numberLong": "1766866512780"
+            }
+        },
+        "ends_at": {
+            "$date": {
+                "$numberLong": "1769544912780"
+            }
+        },
+        "stripe_subscription_id": "sub_free_QmK0DHf868u0HMET",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866512780"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866512780"
+            }
+        }
+    }
+]

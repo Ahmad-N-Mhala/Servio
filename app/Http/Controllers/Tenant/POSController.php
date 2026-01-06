@@ -39,10 +39,11 @@ class POSController extends Controller
 
         // Get menu items for order updates
         $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
-            ->where('is_available', true)
             ->with(['category', 'extras'])
             ->orderBy('name->en')
-            ->get();
+            ->get()
+            ->filter(fn($item) => (bool) $item->is_available)
+            ->values();
 
         // Get current open cash register for this user
         $currentRegister = \App\Models\CashRegister::where('restaurant_id', $restaurant->id)

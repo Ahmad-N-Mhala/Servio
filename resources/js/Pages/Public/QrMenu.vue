@@ -345,7 +345,7 @@
             </div>
         </div>
     </div>
-        </div>
+
 
         <!-- Customize Item Modal -->
         <Modal :show="showCustomizeModal" @close="showCustomizeModal = false" :title="customizingItem ? getTranslatedName(customizingItem.name) : 'Customize'" size="md">
@@ -391,7 +391,7 @@
             </div>
         </Modal>
 
-    </div>
+
 </template>
 
 <script setup lang="ts">
