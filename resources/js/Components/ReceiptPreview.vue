@@ -1,5 +1,5 @@
 <template>
-    <div :class="['receipt-preview', `font-${template.font_size}`]" :style="{ width: template.paper_width + 'mm' }">
+    <div :class="['receipt-preview', `font-${template.font_size}`]" :style="{ width: template.paper_width + 'mm' }" :dir="template.receipt_language === 'ar' ? 'rtl' : 'ltr'">
         <!-- Header -->
         <div :class="`text-${template.header_alignment}`" class="mb-4">
             <div v-if="template.show_logo" class="mb-2 flex justify-center">
@@ -174,13 +174,15 @@ const displayOrder = computed(() => {
             server: props.order.waiter?.name || '-',
             items: props.order.items.map((item: any) => {
                 let name = item.menuItem?.name || item.menu_item?.name || 'Unknown Item';
+                const lang = props.template?.receipt_language || 'en';
+
                 if (typeof name === 'string' && name.startsWith('{')) {
                     try {
                         const parsed = JSON.parse(name);
-                        name = parsed.en || parsed.ar || name;
+                        name = parsed[lang] || parsed['en'] || name;
                     } catch (e) {}
                 } else if (typeof name === 'object') {
-                    name = name.en || name.ar || 'Unknown';
+                    name = name[lang] || name['en'] || 'Unknown';
                 }
                 
                 return {

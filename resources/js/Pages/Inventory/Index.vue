@@ -101,8 +101,13 @@
                     {{ isEditing ? $t('inventory.edit_item') : $t('inventory.add_item') }}
                 </h3>
                 <form @submit.prevent="submitCreate">
-                    <div class="mb-4">
-                        <Input id="name" type="text" v-model="form.name" :label="$t('common.name')" required :error="form.errors.name" />
+                    <div class="mb-4 grid grid-cols-2 gap-4">
+                        <div>
+                            <Input id="name_en" type="text" v-model="form.name_en" :label="$t('common.name') + ' (EN)'" required :error="form.errors['name.en']" />
+                        </div>
+                        <div>
+                            <Input id="name_ar" type="text" v-model="form.name_ar" :label="$t('common.name') + ' (AR)'" required :error="form.errors['name.ar']" />
+                        </div>
                     </div>
                     <div class="mb-4 grid grid-cols-2 gap-4">
                         <div>
@@ -116,26 +121,9 @@
                                 :label="$t('inventory_page.unit')"
                                 required
                                 :error="form.errors.unit"
-                            >
-                                <option value="" disabled>{{ $t('inventory.select_unit') }}</option>
-                                <optgroup :label="$t('inventory.mass')">
-                                    <option value="kg">Kilogram (kg)</option>
-                                    <option value="g">Gram (g)</option>
-                                    <option value="mg">Milligram (mg)</option>
-                                </optgroup>
-                                <optgroup :label="$t('inventory.volume')">
-                                    <option value="l">Liter (l)</option>
-                                    <option value="ml">Milliliter (ml)</option>
-                                </optgroup>
-                                <optgroup :label="$t('inventory.count')">
-                                    <option value="pcs">Pieces (pcs)</option>
-                                    <option value="box">Box</option>
-                                    <option value="pack">Pack</option>
-                                    <option value="can">Can</option>
-                                    <option value="bottle">Bottle</option>
-                                    <option value="dozen">Dozen</option>
-                                </optgroup>
-                            </Select>
+                                :options="unitOptions"
+                                :placeholder="$t('inventory.select_unit')"
+                            />
                         </div>
                     </div>
                     <div class="mb-4 grid grid-cols-2 gap-4">
@@ -147,8 +135,36 @@
                         </div>
                     </div>
                     <div class="mb-4">
+                        <Select
+                            id="notification_recipient"
+                            v-model="form.reminder_user_id"
+                            :label="$t('inventory.recipient_label', 'Alert Recipient (Expiry & Low Stock)')"
+                            :options="recipientOptions"
+                            :placeholder="$t('common.select_user')"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">This user will receive emails for expiry warnings and low stock alerts.</p>
+                    </div>
+
+                    <div class="mb-4">
                         <Input id="expiry" type="date" v-model="form.expiration_date" :label="$t('inventory.expiry_date') + ' (' + $t('common.optional') + ')'" />
                     </div>
+
+                    <div v-if="form.expiration_date" class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <h4 class="text-sm font-bold text-gray-700 mb-3">{{ $t('inventory.expiry_reminder') }}</h4>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <Input 
+                                    id="reminder_days" 
+                                    type="number" 
+                                    min="1" 
+                                    v-model="form.reminder_days" 
+                                    :label="$t('inventory.days_before_expiry')" 
+                                    placeholder="e.g. 7" 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('inventory.notes_optional') }}</label>
                         <textarea
@@ -211,6 +227,33 @@
                     <div class="mb-4">
                         <Input id="stock_expiry" type="date" v-model="stockForm.expiration_date" :label="$t('inventory.batch_expiry')" />
                     </div>
+
+                    <div v-if="stockForm.expiration_date" class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <h4 class="text-sm font-bold text-gray-700 mb-3">{{ $t('inventory.expiry_reminder') }}</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <Input 
+                                    id="stock_reminder_days" 
+                                    type="number" 
+                                    min="1" 
+                                    v-model="stockForm.reminder_days" 
+                                    :label="$t('inventory.days_before_expiry')" 
+                                    placeholder="e.g. 7" 
+                                />
+                            </div>
+                            <div>
+                                <Select
+                                    id="stock_reminder_user"
+                                    v-model="stockForm.reminder_user_id"
+                                    :label="$t('inventory.recipient')"
+                                    :options="recipientOptions"
+                                    :placeholder="$t('common.select_user')"
+                                />
+                                <p class="text-[10px] text-gray-500 mt-1">Updates the primary recipient for this ingredient.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('inventory.notes_optional') }}</label>
                         <textarea
@@ -419,6 +462,8 @@ const page = usePage();
 
 const props = defineProps<{
     ingredients: any[];
+    users: any[];
+    defaultOwnerId: string | null;
 }>();
 
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
@@ -442,9 +487,29 @@ const selectedItem = ref<any>(null);
 const historyLogs = ref<any[]>([]);
 const selectedIngredientBatches = ref<any[]>([]);
 
+const unitOptions = computed(() => [
+    { label: `${t('inventory.mass')} - ${t('inventory.kg')}`, value: 'kg' },
+    { label: `${t('inventory.mass')} - ${t('inventory.g')}`, value: 'g' },
+    { label: `${t('inventory.mass')} - ${t('inventory.mg')}`, value: 'mg' },
+    { label: `${t('inventory.volume')} - ${t('inventory.l')}`, value: 'l' },
+    { label: `${t('inventory.volume')} - ${t('inventory.ml')}`, value: 'ml' },
+    { label: `${t('inventory.count')} - ${t('inventory.pcs')}`, value: 'pcs' },
+    { label: `${t('inventory.count')} - ${t('inventory.box')}`, value: 'box' },
+    { label: `${t('inventory.count')} - ${t('inventory.pack')}`, value: 'pack' },
+    { label: `${t('inventory.count')} - ${t('inventory.can')}`, value: 'can' },
+    { label: `${t('inventory.count')} - ${t('inventory.bottle')}`, value: 'bottle' },
+    { label: `${t('inventory.count')} - ${t('inventory.dozen')}`, value: 'dozen' },
+]);
+
+const recipientOptions = computed(() => [
+    { label: t('inventory.no_alert_recipient', 'No notifications needed'), value: null },
+    ...props.users.map((u: any) => ({ label: u.name, value: u.id }))
+]);
+
 const form = useForm<any>({
     id: null,
-    name: '',
+    name_en: '',
+    name_ar: '',
     current_stock: 0,
     unit: '',
     cost: 0,
@@ -452,6 +517,8 @@ const form = useForm<any>({
     expiration_date: null,
     bill: null,
     notes: '',
+    reminder_days: 7,
+    reminder_user_id: null,
 });
 
 const stockForm = useForm<any>({
@@ -461,6 +528,8 @@ const stockForm = useForm<any>({
     expiration_date: null,
     bill: null,
     notes: '',
+    reminder_days: 7,
+    reminder_user_id: null,
 });
 
 const exportForm = ref({
@@ -508,6 +577,10 @@ const openCreateModal = () => {
     form.clearErrors();
     form.bill = null;
     form.notes = '';
+    form.name_en = '';
+    form.name_ar = '';
+    form.reminder_days = 7;
+    form.reminder_user_id = props.defaultOwnerId;
     showCreateModal.value = true;
 };
 
@@ -538,27 +611,46 @@ const openEditModal = (item: any) => {
     selectedItem.value = item;
     form.clearErrors();
     form.id = item.id;
-    form.name = getLocaleName(item.name); 
+    if (typeof item.name === 'object' && item.name !== null) {
+        form.name_en = item.name.en || '';
+        form.name_ar = item.name.ar || '';
+    } else {
+        form.name_en = item.name;
+        form.name_ar = item.name;
+    }
     form.current_stock = item.current_stock;
     form.unit = item.unit;
     form.cost = item.cost;
     form.reorder_level = item.reorder_level;
     form.bill = null;
     form.notes = '';
+    form.reminder_user_id = item.notification_user_id || props.defaultOwnerId;
     showCreateModal.value = true;
 };
 
 const submitCreate = () => {
+    const payload = {
+        ...form,
+        name: {
+            en: form.name_en,
+            ar: form.name_ar
+        }
+    };
+    
     if (isEditing.value) {
         form.transform((data: any) => ({
             ...data,
+            name: { en: form.name_en, ar: form.name_ar },
             _method: 'PUT',
         })).post(route('inventory.update', form.id), {
             preserveScroll: true,
             onSuccess: () => closeCreateModal(),
         });
     } else {
-        form.post(route('inventory.store'), {
+        form.transform((data: any) => ({
+            ...data,
+            name: { en: form.name_en, ar: form.name_ar }
+        })).post(route('inventory.store'), {
             preserveScroll: true,
             onSuccess: () => closeCreateModal(),
         });
@@ -581,6 +673,9 @@ const openAddStockModal = (item: any) => {
     stockForm.added_cost = item.cost;
     stockForm.bill = null; 
     stockForm.notes = '';
+    stockForm.reminder_days = 7;
+    // Pre-fill with existing notification user or default owner
+    stockForm.reminder_user_id = item.notification_user_id || props.defaultOwnerId;
     showStockModal.value = true;
 };
 

@@ -57,4 +57,5 @@ return [
     'processing' => 'Processing...',
     'download_png' => 'Download PNG',
     'regenerate' => 'Regenerate',
+    'minutes' => 'minutes',
 ];

@@ -65,4 +65,5 @@ return [
     'processing' => 'جاري المعالجة...',
     'download_png' => 'تنزيل PNG',
     'regenerate' => 'إعادة توليد',
+    'minutes' => 'دقيقة',
 ];

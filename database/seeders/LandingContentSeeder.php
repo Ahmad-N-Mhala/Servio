@@ -39,8 +39,8 @@ class LandingContentSeeder extends Seeder
                 'icon' => '🖥️',
                 'title' => ['en' => 'Point of Sale (POS)', 'ar' => 'نقطة البيع'],
                 'description' => [
-                    'en' => 'Fast, intuitive, and reliable POS interface designed for high-volume environments.',
-                    'ar' => 'واجهة نقطة بيع سريعة وسهلة الاستخدام وموثوقة مصممة للبيئات عالية الدوران.'
+                    'en' => 'Fast, intuitive POS with **fully customizable receipts** designed for high-volume environments.',
+                    'ar' => 'واجهة نقطة بيع سريعة وسهلة مع **إيصالات قابلة للتخصيص بالكامل** مصممة للبيئات عالية الدوران.'
                 ],
                 'sort_order' => 1,
                 'is_active' => true
@@ -59,8 +59,8 @@ class LandingContentSeeder extends Seeder
                 'icon' => '📦',
                 'title' => ['en' => 'Inventory Management', 'ar' => 'إدارة المخزون'],
                 'description' => [
-                    'en' => 'Track stock levels, manage recipes, and reduce waste with precision inventory tracking.',
-                    'ar' => 'تتبع مستويات المخزون، وإدارة الوصفات، وتقليل الهدر من خلال تتبع المخزون بدقة.'
+                    'en' => 'Track stock, manage recipes, and obtain **smart low-stock and expiry reminders** to reduce waste.',
+                    'ar' => 'تتبع المخزون، وإدارة الوصفات، والحصول على **تذكيرات ذكية بانخفاض المخزون وانتهاء الصلاحية** لتقليل الهدر.'
                 ],
                 'sort_order' => 3,
                 'is_active' => true
@@ -69,8 +69,8 @@ class LandingContentSeeder extends Seeder
                 'icon' => '🎁',
                 'title' => ['en' => 'Loyalty Program', 'ar' => 'برنامج الولاء'],
                 'description' => [
-                    'en' => 'Retain customers with a built-in points and rewards system tailored to your brand.',
-                    'ar' => 'احتفظ بالعملاء مع نظام النقاط والمكافآت المدمج المصمم خصيصاً لعلامتك التجارية.'
+                    'en' => 'Retain customers with a **customizable loyalty program** tailored to your brand.',
+                    'ar' => 'احتفظ بالعملاء مع **برنامج ولاء قابل للتخصيص** مصمم خصيصاً لعلامتك التجارية.'
                 ],
                 'sort_order' => 4,
                 'is_active' => true
@@ -119,8 +119,8 @@ class LandingContentSeeder extends Seeder
                 'icon' => '⭐',
                 'title' => ['en' => 'Customer Feedback', 'ar' => 'آراء العملاء'],
                 'description' => [
-                    'en' => 'Collect valuable feedback to improve your service and customer satisfaction.',
-                    'ar' => 'اجمع آراءً قيمة لتحسين خدمتك ورضا العملاء.'
+                    'en' => 'Collect valuable insights with **fully customizable feedback forms** to improve satisfaction.',
+                    'ar' => 'اجمع رؤى قيمة باستخدام **نماذج ملاحظات قابلة للتخصيص بالكامل** لتحسين الرضا.'
                 ],
                 'sort_order' => 9,
                 'is_active' => true

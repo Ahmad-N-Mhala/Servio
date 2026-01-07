@@ -206,6 +206,20 @@
                         
                         <div class="space-y-4">
                             <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.language') || 'Receipt Language' }}</label>
+                                <div class="flex items-center gap-4">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" v-model="form.receipt_language" value="en" class="w-4 h-4 text-primary focus:ring-primary border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">English</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" v-model="form.receipt_language" value="ar" class="w-4 h-4 text-primary focus:ring-primary border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">Arabic (العربية)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
                                 <Input 
                                     v-model="form.next_order_number"
                                     :label="$t('orders.order_no') + ' ' + $t('common.start_from')"
@@ -304,6 +318,7 @@ const props = defineProps<{
 
 const form = useForm({
     // Transaction
+    receipt_language: props.template?.receipt_language ?? 'en',
     next_order_number: props.next_order_number ?? '',
 
     // Header

@@ -44,9 +44,16 @@ class InventoryController extends Controller
             ->orderBy('name.en', 'asc')
             ->get();
 
+        $users = $restaurant->users()->get(['id', 'name', 'email']);
+
+        // Identify owner for default selection if needed
+        $owner = $restaurant->owner()->first();
+
         return Inertia::render('Inventory/Index', [
             'ingredients' => $ingredients,
             'filters' => $request->only(['search']),
+            'users' => $users,
+            'defaultOwnerId' => $owner ? $owner->id : null,
         ]);
     }
 
@@ -72,13 +79,28 @@ class InventoryController extends Controller
             'expiration_date' => 'nullable|date',
             'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
             'notes' => 'nullable|string|max:1000',
+            'reminder_days' => 'nullable|integer|min:1',
+            'reminder_user_id' => 'nullable|exists:users,id',
         ]);
 
         $validated['restaurant_id'] = $restaurant->id;
 
-        // Ensure name is array for translation
-        if (is_string($validated['name'])) {
-            $validated['name'] = ['en' => $validated['name'], 'ar' => $validated['name']];
+        // Ensure name is array with both keys populated
+        $nameVal = $validated['name'] ?? null;
+        if ($nameVal) {
+            if (is_string($nameVal)) {
+                $validated['name'] = ['en' => $nameVal, 'ar' => $nameVal];
+            } elseif (is_array($nameVal)) {
+                $en = $nameVal['en'] ?? null;
+                $ar = $nameVal['ar'] ?? null;
+                // Fallback if one is empty
+                if (empty($en) && !empty($ar))
+                    $en = $ar;
+                if (empty($ar) && !empty($en))
+                    $ar = $en;
+
+                $validated['name'] = ['en' => $en, 'ar' => $ar];
+            }
         }
 
         // Ensure reorder_level is not null for decimal casting
@@ -109,7 +131,15 @@ class InventoryController extends Controller
             'cost_per_unit' => $validated['cost'],
             'received_at' => now(),
             'expiration_date' => $validated['expiration_date'] ?? null,
+            'reminder_days_before' => $validated['reminder_days'] ?? null,
+            'reminder_user_id' => $validated['reminder_user_id'] ?? null,
         ]);
+
+        // Set notification user on ingredient level too
+        if (isset($validated['reminder_user_id'])) {
+            $ingredient->notification_user_id = $validated['reminder_user_id'];
+            $ingredient->save();
+        }
 
         // Handle Bill Upload
         $billPath = null;
@@ -175,10 +205,25 @@ class InventoryController extends Controller
             'expiration_date' => 'nullable|date',
             'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB max
             'notes' => 'nullable|string|max:1000',
+            'reminder_days' => 'nullable|integer|min:1',
+            'reminder_user_id' => 'nullable|exists:users,id',
         ]);
 
-        if (is_string($request->name)) {
-            $validated['name'] = ['en' => $request->name, 'ar' => $request->name];
+        if (isset($validated['name'])) {
+            $nameVal = $validated['name'];
+            if (is_string($nameVal)) {
+                $validated['name'] = ['en' => $nameVal, 'ar' => $nameVal];
+            } elseif (is_array($nameVal)) {
+                $en = $nameVal['en'] ?? null;
+                $ar = $nameVal['ar'] ?? null;
+                // Fallback if one is empty
+                if (empty($en) && !empty($ar))
+                    $en = $ar;
+                if (empty($ar) && !empty($en))
+                    $ar = $en;
+
+                $validated['name'] = ['en' => $en, 'ar' => $ar];
+            }
         }
 
         // Ensure reorder_level is not null for decimal casting
@@ -222,6 +267,8 @@ class InventoryController extends Controller
                 'quantity_remaining' => $addedQty,
                 'cost_per_unit' => $incomingCost,
                 'expiration_date' => $validated['expiration_date'] ?? null,
+                'reminder_days_before' => $validated['reminder_days'] ?? null,
+                'reminder_user_id' => $validated['reminder_user_id'] ?? null,
             ]);
 
             // Update Total Stock (Sum of all batches essentially, but we store it for performance)

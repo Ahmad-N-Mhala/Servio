@@ -35,7 +35,7 @@ return [
     ],
     'inventory' => [
         'label' => 'Inventory & Stock',
-        'permissions' => ['view_inventory', 'add_stock', 'deduct_stock', 'delete_inventory']
+        'permissions' => ['view_inventory', 'view_inventory_reminders', 'add_stock', 'deduct_stock', 'delete_inventory']
     ],
     'waste' => [
         'label' => 'Waste Management',

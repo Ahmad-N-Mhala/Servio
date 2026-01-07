@@ -6,61 +6,23 @@
         </label>
 
         <div class="relative">
-            <!-- Icon (Left) -->
-            <div v-if="$slots.icon || icon" class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <slot name="icon">
-                    <svg v-if="icon === 'search'" class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <svg v-else-if="icon === 'dropdown'" class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </slot>
-            </div>
-
-            <!-- Select Element -->
-            <select
-                :id="id"
-                :value="modelValue"
-                @change="handleChange"
+            <v-select
+                :modelValue="modelValue"
+                @update:modelValue="handleChange"
+                :options="formattedOptions"
+                :reduce="(opt: any) => opt.value"
+                :label="'label'"
+                :placeholder="placeholder"
                 :disabled="disabled"
-                :required="required"
-                :class="[
-                    'w-full rounded-xl border appearance-none transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/10',
-                    error 
-                        ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10' 
-                        : 'border-slate-200 dark:border-slate-700 focus:border-primary',
-                    disabled ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm',
-                    $slots.icon || icon ? 'pl-10 pr-10 py-3' : 'px-4 py-3',
-                    sizeClass
-                ]"
+                :searchable="true"
+                :clearable="!required"
+                class="style-chooser"
+                :class="{'has-error': error}"
             >
-                <!-- Placeholder Option -->
-                <option v-if="placeholder" value="" disabled :selected="!modelValue">
-                    {{ placeholder }}
-                </option>
-
-                <!-- Options via Slot -->
-                <slot></slot>
-
-                <!-- Options via Props -->
-                <option 
-                    v-for="option in options" 
-                    :key="getOptionValue(option)" 
-                    :value="getOptionValue(option)"
-                    :disabled="option.disabled"
-                    class="dark:bg-slate-800"
-                >
-                    {{ getOptionLabel(option) }}
-                </option>
-            </select>
-
-            <!-- Dropdown Arrow -->
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
+                <template #option="option">
+                    <span :class="{'text-gray-400': option.disabled}">{{ option.label }}</span>
+                </template>
+            </v-select>
         </div>
 
         <!-- Error Message -->
@@ -80,9 +42,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import vSelect from 'vue-select';
+import 'vue-select/dist/vue-select.css';
 
 interface SelectOption {
-    value: string | number;
+    value: string | number | null;
     label: string;
     disabled?: boolean;
 }
@@ -92,7 +56,7 @@ const props = withDefaults(defineProps<{
     label?: string;
     id?: string;
     placeholder?: string;
-    options?: SelectOption[] | string[] | number[];
+    options?: any[]; // Allow flexibility as options are formatted
     error?: string;
     hint?: string;
     disabled?: boolean;
@@ -101,40 +65,81 @@ const props = withDefaults(defineProps<{
     icon?: 'search' | 'dropdown' | null;
 }>(), {
     size: 'md',
-    icon: null
+    icon: null,
+    options: () => []
 });
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: string | number): void;
+    (e: 'update:modelValue', value: string | number | null): void;
 }>();
 
-const sizeClass = computed(() => {
-    switch (props.size) {
-        case 'sm':
-            return 'text-sm';
-        case 'lg':
-            return 'text-base py-3';
-        default:
-            return 'text-sm';
-    }
+const handleChange = (value: any) => {
+    emit('update:modelValue', value);
+};
+
+// Format options to standard {label, value} format for v-select
+const formattedOptions = computed(() => {
+    if (!props.options) return [];
+    
+    // Check if it's already a clean array of objects
+    return props.options.map((opt: any) => {
+        if (typeof opt === 'object' && opt !== null) {
+            // If it's a Vue (v-for) iteration that passed objects directly
+            return {
+                label: opt.label || opt.name || String(opt.value),
+                value: opt.value !== undefined ? opt.value : opt.id,
+                disabled: opt.disabled
+            };
+        }
+        // Primitives
+        return {
+            label: String(opt),
+            value: opt
+        };
+    });
 });
-
-const handleChange = (event: Event) => {
-    const target = event.target as HTMLSelectElement;
-    emit('update:modelValue', target.value);
-};
-
-const getOptionValue = (option: any): string | number => {
-    if (typeof option === 'object' && option !== null) {
-        return option.value;
-    }
-    return option;
-};
-
-const getOptionLabel = (option: any): string => {
-    if (typeof option === 'object' && option !== null) {
-        return option.label;
-    }
-    return String(option);
-};
 </script>
+
+<style>
+/* Custom Styling for Vue Select to match App Theme */
+.style-chooser {
+  --vs-controls-color: #64748b;
+  --vs-border-color: #e2e8f0;
+  --vs-border-width: 1px;
+  --vs-border-style: solid;
+  --vs-border-radius: 0.75rem; /* rounded-xl */
+  --vs-font-size: 0.875rem;
+  --vs-line-height: 1.25rem;
+  --vs-state-disabled-bg: #f1f5f9;
+  --vs-state-disabled-color: #94a3b8;
+  --vs-state-disabled-controls-color: #cbd5e1;
+  --vs-state-disabled-cursor: not-allowed;
+}
+
+.dark .style-chooser {
+  --vs-controls-color: #94a3b8;
+  --vs-border-color: #334155;
+  --vs-bg: rgba(30, 41, 59, 0.5);
+  --vs-selected-color: #e2e8f0;
+  --vs-dropdown-bg: #1e293b;
+  --vs-dropdown-color: #e2e8f0;
+  --vs-dropdown-option-color: #e2e8f0;
+  --vs-dropdown-option--active-bg: #475569;
+  --vs-dropdown-option--active-color: #f8fafc;
+}
+
+.style-chooser .vs__dropdown-toggle {
+  background: var(--vs-bg, rgba(255, 255, 255, 0.5));
+  backdrop-filter: blur(4px);
+  padding: 0.5rem 0.25rem; /* Match py-3 roughly */
+}
+
+.style-chooser.has-error .vs__dropdown-toggle {
+  border-color: #fca5a5;
+  color: #e11d48;
+}
+
+.vs__search::placeholder {
+    color: #94a3b8;
+}
+</style>

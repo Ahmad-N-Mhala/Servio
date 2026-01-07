@@ -1,0 +1,59 @@
+[
+    {
+        "_id": {
+            "$oid": "69564aacaeff1b1ae101c53b"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "plan_id": "6945793119aaa592e0054aa4",
+        "starts_at": {
+            "$date": {
+                "$numberLong": "1767211200000"
+            }
+        },
+        "ends_at": {
+            "$date": {
+                "$numberLong": "1769889600000"
+            }
+        },
+        "status": "active",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767555363343"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767262892146"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b8389bb2bb5d33600619a"
+        },
+        "restaurant_id": "695b8388bb2bb5d336006196",
+        "plan_id": "6945793119aaa592e0054aa4",
+        "status": "active",
+        "billing_cycle": null,
+        "starts_at": {
+            "$date": {
+                "$numberLong": "1767605129015"
+            }
+        },
+        "ends_at": {
+            "$date": {
+                "$numberLong": "1770283529015"
+            }
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767605129016"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767605129016"
+            }
+        }
+    }
+]

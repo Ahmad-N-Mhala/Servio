@@ -94,12 +94,9 @@
                     @update:modelValue="addForm.ingredient_batch_id = ''"
                     :label="$t('waste.select_ingredient')"
                     :placeholder="$t('waste.select_ingredient')"
+                    :options="ingredientOptions"
                     required
-                >
-                    <option v-for="item in ingredients" :key="item.id" :value="item.id">
-                        {{ getLocaleName(item.name) }} ({{ $t('waste.total_stock') }}: {{ item.current_stock }} {{ item.unit }})
-                    </option>
-                </Select>
+                />
                 <p v-if="ingredients.length === 0" class="mt-2 text-sm text-red-600">
                     <i18n-t keypath="waste.no_ingredients_link">
                         <template #link>
@@ -113,12 +110,9 @@
                         v-model="addForm.ingredient_batch_id"
                         :label="$t('waste.select_batch')"
                         :placeholder="$t('waste.select_batch') + ' (FIFO)'"
+                        :options="batchOptions"
                         required
-                    >
-                        <option v-for="batch in availableBatches" :key="batch.id" :value="batch.id">
-                            {{ batch.batch_number }} — Qty: {{ Number(batch.quantity_remaining) }} — Cost: {{ formatCurrency(batch.cost_per_unit) }}
-                        </option>
-                    </Select>
+                    />
                     <p v-if="availableBatches.length === 0" class="text-xs text-red-500 mt-1">No active batches available for this ingredient.</p>
                 </div>
 
@@ -254,6 +248,20 @@ const availableBatches = computed(() => {
     const selectedId = String(addForm.ingredient_id);
     const ingredient = props.ingredients.find((i: any) => String(i.id) === selectedId);
     return ingredient?.batches || [];
+});
+
+const ingredientOptions = computed(() => {
+    return props.ingredients.map((item: any) => ({
+        label: `${getLocaleName(item.name)} (${t('waste.total_stock')}: ${item.current_stock} ${item.unit})`,
+        value: item.id
+    }));
+});
+
+const batchOptions = computed(() => {
+    return availableBatches.value.map((batch: any) => ({
+        label: `${batch.batch_number} — Qty: ${Number(batch.quantity_remaining)} — Cost: ${formatCurrency(batch.cost_per_unit)}`,
+        value: batch.id
+    }));
 });
 
 const openAddModal = () => {

@@ -1,0 +1,86 @@
+[
+    {
+        "_id": {
+            "$oid": "69457ebf2d33b6a8db028a86"
+        },
+        "name": "Starter SMS Pack",
+        "type": "sms",
+        "quantity": 100,
+        "price": {
+            "$numberDecimal": "50.00"
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766162111196"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766162111196"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69457ebf2d33b6a8db028a87"
+        },
+        "name": "Pro SMS Pack",
+        "type": "sms",
+        "quantity": 500,
+        "price": {
+            "$numberDecimal": "200.00"
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766162111196"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766162111196"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69457ebf2d33b6a8db028a88"
+        },
+        "name": "Starter Email Pack",
+        "type": "email",
+        "quantity": 1000,
+        "price": {
+            "$numberDecimal": "100.00"
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766162111197"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766162111197"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69457ebf2d33b6a8db028a89"
+        },
+        "name": "Pro Email Pack",
+        "type": "email",
+        "quantity": 5000,
+        "price": {
+            "$numberDecimal": "400.00"
+        },
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766162111197"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766162111197"
+            }
+        }
+    }
+]

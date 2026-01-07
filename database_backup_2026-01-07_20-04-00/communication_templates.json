@@ -1,0 +1,28 @@
+[
+    {
+        "_id": {
+            "$oid": "695abc4750b9f0867608de0a"
+        },
+        "restaurant_id": null,
+        "name": "once the user,",
+        "channels": "[\"email\"]",
+        "trigger_event": "subscription_created",
+        "subject": "dsds",
+        "content": "ds",
+        "conditions": "[]",
+        "is_active": true,
+        "timing_type": "immediately",
+        "timing_days": 0,
+        "timing_time": "09:00",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767554119677"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767554119677"
+            }
+        }
+    }
+]

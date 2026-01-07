@@ -61,6 +61,13 @@ class CommunicationService
             '{{ owner_password }}' => $data['owner_password'] ?? '********',
             '{{ expiry_date }}' => $data['expiry_date'] ?? '',
             '{{ plan_name }}' => $data['plan_name'] ?? '',
+            '{{ batch_number }}' => $data['batch_number'] ?? '',
+            '{{ ingredient_name_en }}' => $data['ingredient_name_en'] ?? '',
+            '{{ ingredient_name_ar }}' => $data['ingredient_name_ar'] ?? '',
+            '{{ quantity_remaining }}' => $data['quantity_remaining'] ?? '',
+            '{{ days_remaining }}' => $data['days_remaining'] ?? '',
+            '{{ current_stock }}' => $data['current_stock'] ?? '',
+            '{{ reorder_level }}' => $data['reorder_level'] ?? '',
         ];
 
         return str_replace(array_keys($vars), array_values($vars), $text);

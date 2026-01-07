@@ -68,13 +68,7 @@
             <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-primary/10 to-transparent blur-3xl opacity-50 -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
             
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-6">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                    </span>
-                    {{ $t('landing.features') }}
-                </div>
+
                 
                 <h1 class="text-5xl md:text-7xl font-black text-gray-900 leading-tight mb-6">
                     {{ $t('landing.hero_title') }}
@@ -162,20 +156,7 @@
                             </p>
                         </div>
                         
-                        <div v-if="statsVisible" class="mt-8 pt-8 border-t border-gray-100 grid grid-cols-3 gap-8">
-                            <div>
-                                <h3 class="text-3xl font-black text-primary">{{ landingSettings?.stats_restaurants || '500+' }}</h3>
-                                <p class="text-sm font-medium text-gray-500">{{ $t('landing.stats_restaurants') }}</p>
-                            </div>
-                            <div>
-                                <h3 class="text-3xl font-black text-primary">{{ landingSettings?.stats_orders || '1M+' }}</h3>
-                                <p class="text-sm font-medium text-gray-500">{{ $t('landing.stats_orders') }}</p>
-                            </div>
-                             <div>
-                                <h3 class="text-3xl font-black text-primary">{{ landingSettings?.stats_uptime || '99.9%' }}</h3>
-                                <p class="text-sm font-medium text-gray-500">{{ $t('landing.stats_uptime') }}</p>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -423,10 +404,6 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const route = (window as any).route;
-
-const statsVisible = computed(() => {
-    return props.landingSettings?.stats_visible !== undefined ? Boolean(props.landingSettings.stats_visible) : true;
-});
 
 const mobileMenuOpen = ref(false);
 const billingCycle = ref<'monthly' | 'yearly'>('monthly');

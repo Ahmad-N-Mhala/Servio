@@ -66,9 +66,12 @@
                                                 order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700']">
                                                 {{ order.type === 'dine_in' ? $t('kitchen.dine_in') : $t('kitchen.takeaway') }}
                                             </span>
-                                            <span v-if="order.table" class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700">
-                                                {{ order.table.name }}
-                                            </span>
+                                            <div v-if="order.table" class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-700">{{ order.table.name }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -81,7 +84,10 @@
                                             <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                                                 {{ item.quantity }}x
                                             </span>
-                                            <span class="text-sm font-medium text-gray-900">{{ getLocaleName(item.menu_item?.name) || $t('common.unknown') }}</span>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-bold text-gray-900">{{ getLocalizedName(item.menu_item?.name, 'en') || 'Item' }}</span>
+                                                <span class="text-xs text-gray-500 font-arabic" v-if="getLocalizedName(item.menu_item?.name, 'ar')">{{ getLocalizedName(item.menu_item?.name, 'ar') }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
@@ -147,9 +153,12 @@
                                                 order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700']">
                                                 {{ order.type === 'dine_in' ? $t('kitchen.dine_in') : $t('kitchen.takeaway') }}
                                             </span>
-                                            <span v-if="order.table" class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700">
-                                                {{ order.table.name }}
-                                            </span>
+                                            <div v-if="order.table" class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-700">{{ order.table.name }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -162,7 +171,10 @@
                                             <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                                                 {{ item.quantity }}x
                                             </span>
-                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || $t('common.unknown_item') }}</span>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-bold text-gray-900">{{ getLocalizedName(item.menu_item?.name, 'en') || 'Item' }}</span>
+                                                <span class="text-xs text-gray-500 font-arabic" v-if="getLocalizedName(item.menu_item?.name, 'ar')">{{ getLocalizedName(item.menu_item?.name, 'ar') }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
@@ -231,7 +243,10 @@
                                             <span class="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                                                 {{ item.quantity }}x
                                             </span>
-                                            <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || 'Unknown Item' }}</span>
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-bold text-gray-900">{{ getLocalizedName(item.menu_item?.name, 'en') || 'Item' }}</span>
+                                                <span class="text-xs text-gray-500 font-arabic" v-if="getLocalizedName(item.menu_item?.name, 'ar')">{{ getLocalizedName(item.menu_item?.name, 'ar') }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div v-if="item.notes" class="mt-1 ml-9 text-xs text-amber-700 italic bg-amber-50 px-2 py-1 rounded">
@@ -317,6 +332,12 @@ const getLocaleName = (name: any) => {
         return name[locale.value] || Object.values(name)[0] || '';
     }
     return name;
+};
+
+const getLocalizedName = (name: any, lang: 'en' | 'ar') => {
+    if (!name) return '';
+    if (typeof name === 'string') return lang === 'en' ? name : '';
+    return name[lang] || '';
 };
 
 const filterOrders = (orders: any[]) => {

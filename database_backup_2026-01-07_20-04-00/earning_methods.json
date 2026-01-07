@@ -1,0 +1,201 @@
+[
+    {
+        "_id": {
+            "$oid": "69503a8eeaf319e8830776f1"
+        },
+        "restaurant_id": "69503a8eeaf319e8830776ee",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865550113"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865550113"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503b2deaf319e8830776f9"
+        },
+        "restaurant_id": "69503b2deaf319e8830776f6",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865709389"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865709389"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503b69eaf319e8830776ff"
+        },
+        "restaurant_id": "69503b69eaf319e8830776fc",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865769367"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865769367"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503b7feaf319e883077705"
+        },
+        "restaurant_id": "69503b7feaf319e883077702",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766865791272"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766865791272"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503d88eaf319e88307770b"
+        },
+        "restaurant_id": "69503d88eaf319e883077708",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866312578"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866312578"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503dc8eaf319e883077711"
+        },
+        "restaurant_id": "69503dc8eaf319e88307770e",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766866376065"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866376065"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69503e50eaf319e883077717"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set during onboarding.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766941904220"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766866512780"
+            }
+        },
+        "max_points": null,
+        "min_spent": null
+    },
+    {
+        "_id": {
+            "$oid": "695176742f954f9a240de5bd"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "name": "{\"en\":\"Points per Spend\"}",
+        "type": "order_total",
+        "points": "1",
+        "is_active": true,
+        "currency_amount": "1",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766946420857"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766946420857"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695b8389bb2bb5d336006199"
+        },
+        "restaurant_id": "695b8388bb2bb5d336006196",
+        "name": "{\"en\":\"Standard Loyalty\",\"ar\":\"\u0646\u0642\u0627\u0637 \u0627\u0644\u0648\u0644\u0627\u0621\"}",
+        "description": "Default earning method set.",
+        "type": "order_total",
+        "points": 1,
+        "currency_amount": 1,
+        "is_active": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767605129014"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767605129014"
+            }
+        }
+    }
+]

@@ -16,6 +16,8 @@ class IngredientBatch extends Model
         'quantity_remaining',
         'cost_per_unit',
         'expiration_date',
+        'reminder_days_before',
+        'reminder_user_id',
     ];
 
     protected $casts = [

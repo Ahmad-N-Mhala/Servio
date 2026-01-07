@@ -46,6 +46,7 @@ class ReceiptTemplateController extends Controller
 
         $validated = $request->validate([
             // Header
+            'receipt_language' => ['sometimes', 'string', 'in:en,ar'],
             'show_logo' => ['required', 'boolean'],
             'show_restaurant_name' => ['required', 'boolean'],
             'header_text' => ['nullable', 'string', 'max:255'],
@@ -99,6 +100,7 @@ class ReceiptTemplateController extends Controller
     {
         return [
             // Header
+            'receipt_language' => 'en',
             'show_logo' => true,
             'show_restaurant_name' => true,
             'header_text' => '',

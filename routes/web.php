@@ -278,6 +278,8 @@ Route::group([
 
                 Route::get('inventory/export', [\App\Http\Controllers\Tenant\InventoryController::class, 'export'])->name('inventory.export')
                     ->middleware('permission:view_inventory');
+                Route::get('inventory/reminders', [\App\Http\Controllers\Tenant\InventoryReminderController::class, 'index'])->name('inventory.reminders')
+                    ->middleware('permission:view_inventory_reminders');
                 Route::get('inventory/{inventory}/history', [\App\Http\Controllers\Tenant\InventoryController::class, 'history'])->name('inventory.history')
                     ->middleware('permission:view_inventory');
                 Route::resource('inventory', \App\Http\Controllers\Tenant\InventoryController::class)

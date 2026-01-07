@@ -6,14 +6,11 @@ use MongoDB\Laravel\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Translatable\HasTranslations;
 use App\Traits\HasRestaurant;
 
 class Ingredient extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant;
-
-    public $translatable = ['name'];
+    use HasFactory, HasRestaurant;
 
     protected $fillable = [
         'restaurant_id',
@@ -23,6 +20,8 @@ class Ingredient extends Model
         'cost',
         'reorder_level',
         'is_active',
+        'notification_user_id',
+        'low_stock_notification_sent',
     ];
 
     protected $casts = [
@@ -31,6 +30,7 @@ class Ingredient extends Model
         'cost' => 'decimal:2',
         'reorder_level' => 'decimal:4',
         'is_active' => 'boolean',
+        'low_stock_notification_sent' => 'boolean',
     ];
 
     public function menuItems(): BelongsToMany
@@ -80,7 +80,7 @@ class Ingredient extends Model
         if ($this->current_stock < 0) {
             // Rollback by incrementing
             $this->increment('current_stock', $quantity);
-            throw new \Exception("Insufficient stock for ingredient '{$this->name}'. Available: " . ($this->current_stock + $quantity) . ", Required: {$quantity}");
+            throw new \Exception("Insufficient stock for ingredient '" . ($this->name['en'] ?? json_encode($this->name)) . "'. Available: " . ($this->current_stock + $quantity) . ", Required: {$quantity}");
         }
 
         return $result;

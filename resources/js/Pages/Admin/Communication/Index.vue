@@ -86,15 +86,8 @@
                         label="Trigger Event (System Key)"
                         v-model="form.trigger_event"
                         :error="form.errors.trigger_event"
-                    >
-                        <option value="user_registered">User Registered (Standard Welcome)</option>
-                        <option value="password_reset">Password Reset Request</option>
-                        <option value="subscription_created">Subscription Created</option>
-                        <option value="subscription_warning">Subscription Expiry Warning (Days Before)</option>
-                        <option value="subscription_expired">Subscription Expired (Immediately)</option>
-                        <option value="restaurant_created">Restaurant Created</option>
-                        <option value="custom">Custom (Type manually below)</option>
-                    </Select>
+                        :options="triggerOptions"
+                    />
                     
                     <Input 
                         v-if="form.trigger_event === 'custom'" 
@@ -142,11 +135,8 @@
                                 id="timing_type" 
                                 label="When to send?" 
                                 v-model="form.timing_type"
-                            >
-                                <option value="immediately">Immediately</option>
-                                <option value="after">Delay After Event</option>
-                                <option value="before">Before Event (Scheduled)</option>
-                            </Select>
+                                :options="timingOptions"
+                            />
                         </div>
                         <div v-if="form.timing_type !== 'immediately'">
                              <Input 
@@ -204,6 +194,24 @@ const props = defineProps<{
 const showModal = ref(false);
 const isEditing = ref(false);
 const customTrigger = ref('');
+
+const triggerOptions = [
+    { label: 'User Registered (Standard Welcome)', value: 'user_registered' },
+    { label: 'Password Reset Request', value: 'password_reset' },
+    { label: 'Subscription Created', value: 'subscription_created' },
+    { label: 'Subscription Expiry Warning (Days Before)', value: 'subscription_warning' },
+    { label: 'Subscription Expired (Immediately)', value: 'subscription_expired' },
+    { label: 'Restaurant Created', value: 'restaurant_created' },
+    { label: 'Inventory Expiry Warning', value: 'inventory_expiry_warning' },
+    { label: 'Inventory Low Stock Warning', value: 'inventory_low_stock_warning' },
+    { label: 'Custom (Type manually below)', value: 'custom' },
+];
+
+const timingOptions = [
+    { label: 'Immediately', value: 'immediately' },
+    { label: 'Delay After Event', value: 'after' },
+    { label: 'Before Event (Scheduled)', value: 'before' },
+];
 
 const form = useForm({
     id: null,
