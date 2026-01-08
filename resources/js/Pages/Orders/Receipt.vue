@@ -26,7 +26,7 @@
                 :order="orderComputed" 
                 :logo="logo" 
                 :restaurant-name="restaurantName"
-                :google-map-location="google_map_location"
+                :google-map-location="props.google_map_location"
             />
         </div>
     </div>

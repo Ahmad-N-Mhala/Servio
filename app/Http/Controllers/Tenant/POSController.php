@@ -160,14 +160,23 @@ class POSController extends Controller
                 if (isset($itemData['menu_item_id'])) {
                     // New item - create it
                     $menuItem = \App\Models\MenuItem::find($itemData['menu_item_id']);
+
+                    $extrasCost = 0;
+                    if (!empty($itemData['extras']) && is_array($itemData['extras'])) {
+                        foreach ($itemData['extras'] as $extra) {
+                            $extrasCost += (float) ($extra['price'] ?? 0);
+                        }
+                    }
+
                     if ($menuItem) {
                         \App\Models\OrderItem::create([
                             'order_id' => $order->id,
                             'menu_item_id' => $menuItem->id,
                             'quantity' => $itemData['quantity'],
                             'unit_price' => $itemData['unit_price'] ?? $menuItem->price,
-                            'total_price' => $itemData['quantity'] * ($itemData['unit_price'] ?? $menuItem->price),
+                            'total_price' => $itemData['quantity'] * (($itemData['unit_price'] ?? $menuItem->price) + $extrasCost),
                             'notes' => $itemData['notes'] ?? '',
+                            'extras' => $itemData['extras'] ?? null,
                         ]);
                     }
                 } elseif (isset($itemData['id'])) {
@@ -183,9 +192,17 @@ class POSController extends Controller
                                 $orderItem->unit_price = $price;
                             }
 
+                            // storage format of extras in Mongo might be array of objects
+                            $existingExtrasCost = 0;
+                            if (!empty($orderItem->extras) && is_array($orderItem->extras)) {
+                                foreach ($orderItem->extras as $ex) {
+                                    $existingExtrasCost += (float) ($ex['price'] ?? 0);
+                                }
+                            }
+
                             $orderItem->update([
                                 'quantity' => $itemData['quantity'],
-                                'total_price' => $itemData['quantity'] * $price,
+                                'total_price' => $itemData['quantity'] * ($price + $existingExtrasCost),
                                 'unit_price' => $price
                             ]);
                         }

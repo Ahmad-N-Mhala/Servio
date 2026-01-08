@@ -83,6 +83,15 @@ class OrderController extends Controller
         ]);
     }
 
+    public function show(Order $order)
+    {
+        // Load all necessary relationships for printing
+        $order->load(['customer', 'table', 'items.menuItem', 'restaurant', 'waiter']);
+
+        // Return as JSON
+        return response()->json($order);
+    }
+
     public function export(Request $request)
     {
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -484,15 +493,31 @@ class OrderController extends Controller
 
         // Create order items
         foreach ($validated['items'] as $item) {
+            $menuItem = \App\Models\MenuItem::find($item['menu_item_id']);
+            if (!$menuItem)
+                continue; // Should be handled by validation, but safe check
+
+            $extrasCost = 0;
+            if (!empty($item['extras']) && is_array($item['extras'])) {
+                foreach ($item['extras'] as $extra) {
+                    // Assuming extra price is per unit of the main item
+                    $extrasCost += (float) ($extra['price'] ?? 0);
+                }
+            }
+
+            $itemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
+
             $order->items()->create([
                 'menu_item_id' => $item['menu_item_id'],
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['unit_price'],
-                'total_price' => $item['quantity'] * $item['unit_price'],
+                'total_price' => $item['quantity'] * ($item['unit_price'] + $extrasCost),
+                'name' => $itemName,
                 'notes' => $item['notes'] ?? null,
                 'extras' => $item['extras'] ?? null,
             ]);
         }
+
 
         // Handle Reward Redemption
         if (!empty($validated['reward_id']) && $customer) {

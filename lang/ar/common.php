@@ -66,4 +66,7 @@ return [
     'download_png' => 'تنزيل PNG',
     'regenerate' => 'إعادة توليد',
     'minutes' => 'دقيقة',
+    'thank_you' => 'شكراً لك!',
+    'come_again' => 'نرجو زيارتنا مرة أخرى',
+    'search_orders' => 'بحث في الطلبات...',
 ];

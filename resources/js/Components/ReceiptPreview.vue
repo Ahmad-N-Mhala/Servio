@@ -51,24 +51,32 @@
 
         <!-- Items -->
         <div class="mb-3">
-            <div class="text-xs font-bold mb-2 flex">
-                <span :style="{ width: template.item_name_width + '%' }">{{ $t('common.items') || 'ITEM' }}</span>
-                <span class="flex-1 text-center">{{ $t('common.quantity') || 'QTY' }}</span>
-                <span class="flex-1 text-right">{{ $t('common.price') || 'PRICE' }}</span>
-            </div>
-            
-            <div class="space-y-2 text-sm">
-                <div v-for="(item, index) in displayOrder.items" :key="index">
-                    <div class="flex">
-                        <span :style="{ width: template.item_name_width + '%' }" class="font-medium pr-2">{{ item.name }}</span>
-                        <span class="flex-1 text-center">{{ item.quantity }}</span>
-                        <span class="flex-1 text-right">{{ formatPrice(item.price) }}</span>
-                    </div>
-                    <div v-if="template.show_item_notes && item.notes" class="text-xs text-gray-600 italic ml-2">
-                        {{ item.notes }}
-                    </div>
-                </div>
-            </div>
+            <table class="w-full text-xs" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr class="border-b-2 border-dashed border-gray-400">
+                        <th class="text-left py-1" style="width: 40%;">{{ $t('common.items') || 'ITEM' }}</th>
+                        <th class="text-center py-1" style="width: 15%;">{{ $t('common.quantity') || 'QTY' }}</th>
+                        <th class="text-right py-1" style="width: 20%;">{{ $t('common.price') || 'PRICE' }}</th>
+                        <th class="text-right py-1" style="width: 25%;">{{ $t('common.total') || 'TOTAL' }}</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    <tr v-for="(item, index) in displayOrder.items" :key="index">
+                        <td class="py-1 pr-2" style="vertical-align: top;">
+                             <div class="font-medium">{{ item.name }}</div>
+                             <div v-if="template.show_item_notes && item.notes" class="text-xs text-gray-600 italic">{{ item.notes }}</div>
+                             <div v-if="item.extras && item.extras.length" class="text-[10px] text-gray-500">
+                                <template v-for="(extra, i) in item.extras" :key="i">
+                                    <div>+ {{ extra.name || (extra.split ? extra : 'Extra') }}</div>
+                                </template>
+                             </div>
+                        </td>
+                        <td class="text-center py-1" style="vertical-align: top;">{{ item.quantity }}</td>
+                        <td class="text-right py-1" style="vertical-align: top;">{{ formatPrice(item.unit_price) }}</td>
+                        <td class="text-right py-1 font-bold" style="vertical-align: top;">{{ formatPrice(item.price) }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <div class="border-t-2 border-dashed border-gray-400 my-3"></div>
@@ -104,7 +112,7 @@
             <p v-if="template.footer_text" class="mb-2 whitespace-pre-wrap">{{ template.footer_text }}</p>
             <p v-if="template.contact_info" class="text-xs text-gray-600 whitespace-pre-wrap">{{ template.contact_info }}</p>
             
-            <div v-if="template.show_qr_code" class="mt-3 flex justify-center">
+            <div v-if="template.show_qr_code && (qrCodeDataUrl || googleMapLocation)" class="mt-3 flex justify-center">
                 <!-- Placeholder QR Code or Real one if we implement generation -->
                 <div class="w-20 h-20 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
                     <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" class="w-full h-full object-cover">
@@ -114,6 +122,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
 </template>
 
@@ -137,13 +146,21 @@ const generateQrCode = async () => {
     if (props.googleMapLocation) {
         try {
             // @ts-ignore
-            const QRCode = (await import('qrcode')).default;
-            qrCodeDataUrl.value = await QRCode.toDataURL(props.googleMapLocation, { margin: 1, width: 100 });
+            const qrcodeModule = await import('qrcode');
+            const toDataURL = qrcodeModule.default?.toDataURL || qrcodeModule.toDataURL;
+            if (toDataURL) {
+                console.log('Generating QR code for:', props.googleMapLocation);
+                qrCodeDataUrl.value = await toDataURL(props.googleMapLocation, { margin: 1, width: 100 });
+                console.log('QR Code generated successfully');
+            } else {
+                console.error('QR Code library missing toDataURL method');
+            }
         } catch (e) {
             console.error('QR Gen Error', e);
         }
     } else {
-        qrCodeDataUrl.value = null;
+        console.warn('QR Code Generation Skipped: No googleMapLocation provided in props', props);
+        qrCodeDataUrl.value = null; 
     }
 };
 
@@ -188,8 +205,10 @@ const displayOrder = computed(() => {
                 return {
                     name: name,
                     quantity: item.quantity,
+                    unit_price: item.unit_price, // Added unit_price
                     price: item.total_price || (item.quantity * item.unit_price), 
-                    notes: item.notes
+                    notes: item.notes,
+                    extras: item.extras // Added extras
                 };
             }),
             subtotal: props.order.subtotal,

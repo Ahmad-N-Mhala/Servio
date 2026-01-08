@@ -199,10 +199,10 @@
                                         <!-- Show extras if any -->
                                         <div v-if="item.extras && item.extras.length > 0" class="text-xs text-blue-600 mb-1">
                                              <span v-for="(ex, i) in item.extras" :key="i">
-                                                 + {{ ex.name }} ({{ restaurant.currency }} {{ Number(ex.price).toFixed(2) }})<span v-if="i < item.extras.length - 1">, </span>
+                                                 + {{ ex.name }} ({{ restaurant.currency }} {{ Number(ex.price).toFixed(2) }})<span v-if="i < (item.extras.length - 1)">, </span>
                                              </span>
                                         </div>
-                                        <p class="text-primary font-bold">{{ restaurant.currency }} {{ ((item.price + (item.extras?.reduce((s:number,e:any)=>s+Number(e.price),0)||0)) * item.quantity).toFixed(2) }}</p>
+                                        <p class="text-primary font-bold">{{ restaurant.currency }} {{ ((Number(item.price) + (item.extras || []).reduce((s: number, e: any) => s + Number(e.price), 0)) * item.quantity).toFixed(2) }}</p>
                                     </div>
                                 </div>
                                 <button 
@@ -429,7 +429,16 @@ const cartItemCount = computed(() => {
 });
 
 const subtotal = computed(() => {
-    return cart.value.reduce((sum, item) => sum + ((item.price + (item.extras?.reduce((s:number,e:any)=>s+Number(e.price),0)||0)) * item.quantity), 0);
+    return cart.value.reduce((sum, item) => {
+        const itemPrice = Number(item.price);
+        const quantity = item.quantity;
+        const extrasTotal = (item.extras || []).reduce((acc: number, extra: any) => acc + Number(extra.price), 0);
+        
+        // Total for this line item = (Base Price + Extras Total) * Quantity
+        const lineTotal = (itemPrice + extrasTotal) * quantity;
+        
+        return sum + lineTotal;
+    }, 0);
 });
 
 const tax = computed(() => {

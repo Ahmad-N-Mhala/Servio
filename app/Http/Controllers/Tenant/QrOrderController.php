@@ -114,16 +114,81 @@ class QrOrderController extends Controller
         foreach ($validated['items'] as $item) {
             $menuItem = MenuItem::findOrFail($item['id']);
 
-            $itemTotal = $menuItem->price * $item['quantity'];
-            $subtotal += $itemTotal;
+            $itemExtrasPrice = 0;
+            $itemsExtrasData = [];
+
+            if (isset($item['extras']) && is_array($item['extras'])) {
+                foreach ($item['extras'] as $extraItem) {
+                    $extraId = $extraItem['id'];
+                    $extraQty = $extraItem['quantity'] ?? 1;
+
+                    // Verify extra belongs to item and get price
+                    $extraModel = \App\Models\MenuItemExtra::where('id', $extraId)
+                        ->where('menu_item_id', $menuItem->id)
+                        ->first();
+
+                    if ($extraModel) {
+                        $extraTotal = $extraModel->price * $extraQty; // Typically extras are qty 1 per item unit, but if array supports qty
+                        $itemExtrasPrice += $extraTotal;
+                        $itemsExtrasData[] = [
+                            'id' => $extraModel->id,
+                            'name' => $extraModel->name,
+                            'price' => $extraModel->price,
+                            'quantity' => $extraQty
+                        ];
+                    }
+                }
+            }
+
+            $unitPrice = $menuItem->price + $itemExtrasPrice; // Base price + extras price (per unit)
+            // Wait, logic check: usually extra price is per unit of item. 
+            // If I order 2 Burgers, and 1 extra Cheese. Does Cheese apply to both?
+            // In QrMenu.vue: "extras: item.extras ? item.extras.map((e:any) => ({ id: e.id, quantity: e.quantity || 1 })) : []"
+            // The cart item has a quantity (e.g. 2 Burgers).
+            // The extra has a quantity (e.g. 1 Cheese). 
+            // Usually in this UI, 1 "Burger + Cheese" Item means (Burger Price + Cheese Price) * Quantity.
+            // Let's check QrMenu.vue addToCart.
+            // "addToCart(customizingItem.value, extrasToAdd);"
+            // It creates a single cart item. If I increase quantity of that cart item, I increase quantity of burgers AND cheese.
+            // So: Total Price = (Base Price + Sum(Extra Price * Extra Qty)) * Item Quantity.
+
+            // Re-calculating correctly:
+            $singleItemTotalExtras = 0;
+            if (isset($item['extras']) && is_array($item['extras'])) {
+                foreach ($item['extras'] as $extraItem) {
+                    $extraId = $extraItem['id'];
+                    // In the current UI, e.quantity seems to be 1 usually, but let's support passed quantity
+                    $extraQty = $extraItem['quantity'] ?? 1;
+
+                    $extraModel = \App\Models\MenuItemExtra::where('id', $extraId)
+                        ->where('menu_item_id', $menuItem->id)
+                        ->first();
+
+                    if ($extraModel) {
+                        $singleItemTotalExtras += ($extraModel->price * $extraQty);
+                        // Store normalized structure
+                        $itemsExtrasData[] = [
+                            'id' => $extraModel->id,
+                            'name' => $extraModel->getTranslation('name', 'en') ?: $extraModel->name,
+                            'price' => $extraModel->price
+                        ];
+                    }
+                }
+            }
+
+            $lineUnitTotal = $menuItem->price + $singleItemTotalExtras;
+            $lineTotal = $lineUnitTotal * $item['quantity'];
+
+            $subtotal += $lineTotal;
 
             $orderItems[] = [
                 'menu_item_id' => $menuItem->id,
                 'name' => $menuItem->name,
                 'quantity' => $item['quantity'],
-                'price' => $menuItem->price,
-                'subtotal' => $itemTotal,
+                'unit_price' => $menuItem->price, // Base unit price
+                'total_price' => $lineTotal,
                 'notes' => $item['notes'] ?? null,
+                'extras' => $itemsExtrasData // Store extras
             ];
         }
 
@@ -157,14 +222,18 @@ class QrOrderController extends Controller
 
         // Create order items
         foreach ($orderItems as $itemData) {
-            OrderItem::create([
+            $orderItem = new OrderItem([
                 'order_id' => $order->id,
                 'menu_item_id' => $itemData['menu_item_id'],
                 'quantity' => $itemData['quantity'],
-                'unit_price' => $itemData['price'],
-                'total_price' => $itemData['subtotal'],
+                'unit_price' => $itemData['unit_price'],
+                'total_price' => $itemData['total_price'],
                 'notes' => $itemData['notes'],
+                'name' => $itemData['name'],
+                'extras' => $itemData['extras'],
             ]);
+
+            $orderItem->save();
         }
 
         // Update table status

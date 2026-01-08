@@ -116,6 +116,8 @@ Route::group([
                     ->middleware('permission:print_bill');
                 Route::get('/{order}/receipt', [\App\Http\Controllers\Tenant\OrderController::class, 'receipt'])->name('receipt')
                     ->middleware('permission:print_bill');
+                Route::get('/{order}', [\App\Http\Controllers\Tenant\OrderController::class, 'show'])->name('show')
+                    ->middleware('permission:view_orders');
 
                 // Status Screen
                 // Status Screen (Public View)

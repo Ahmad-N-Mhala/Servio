@@ -58,4 +58,8 @@ return [
     'download_png' => 'Download PNG',
     'regenerate' => 'Regenerate',
     'minutes' => 'minutes',
+    'price' => 'Price',
+    'thank_you' => 'Thank you!',
+    'come_again' => 'Please come again',
+    'search_orders' => 'Search orders...',
 ];

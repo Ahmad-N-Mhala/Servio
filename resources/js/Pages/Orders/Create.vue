@@ -1176,7 +1176,10 @@ const freeItems = computed(() => {
 });
 
 const subtotal = computed(() => 
-    cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0)
+    cart.value.reduce((sum, item) => {
+        const itemTotal = (Number(item.price) + (item.extras?.reduce((s, e) => s + Number(e.price), 0) || 0)) * item.qty;
+        return sum + itemTotal;
+    }, 0)
 );
 
 const discountAmount = computed(() => {
@@ -1187,7 +1190,10 @@ const discountAmount = computed(() => {
             if (selectedReward.value.menu_item_ids?.length) {
                 const eligibleTotal = cart.value
                     .filter(i => selectedReward.value!.menu_item_ids!.includes(i.id))
-                    .reduce((sum, i) => sum + (i.price * i.qty), 0);
+                    .reduce((sum, i) => {
+                         const itemTotal = (Number(i.price) + (i.extras?.reduce((s, e) => s + Number(e.price), 0) || 0)) * i.qty;
+                         return sum + itemTotal;
+                    }, 0);
                 return eligibleTotal * ((selectedReward.value.discount_value || 0) / 100);
             }
             return subtotal.value * ((selectedReward.value.discount_value || 0) / 100);
@@ -1249,7 +1255,8 @@ const submitOrder = () => {
         menu_item_id: item.id,
         quantity: item.qty,
         unit_price: item.price,
-        notes: item.notes
+        notes: item.notes,
+        extras: item.extras // Include extras in submission
     }));
     form.subtotal = subtotal.value;
     form.discount_amount = discountAmount.value;

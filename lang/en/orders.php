@@ -51,5 +51,6 @@ return [
     'items' => 'Order Items',
     'save_note' => 'Save Note',
     'save_shortcut' => 'Press Cmd/Ctrl + Enter to save quickly',
+    'order_no' => 'Order #',
 ];
 

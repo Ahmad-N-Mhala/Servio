@@ -1,0 +1,213 @@
+[
+    {
+        "_id": {
+            "$oid": "694fcb2a7b83a4bfd50194ff"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694abaf65adaff86060a6d1e",
+        "name": "{\"en\":\"ds\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "20.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": "1",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767638714184"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766837034823"
+            }
+        },
+        "type": "item",
+        "sku": null
+    },
+    {
+        "_id": {
+            "$oid": "69504248eaf319e88307771a"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "menu_category_id": "695041f9eaf319e883077719",
+        "name": "{\"en\":\"ds\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "2.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766867528072"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766867528072"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "69563bc8aeff1b1ae101c526"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694fcb2e7b83a4bfd5019500",
+        "name": "{\"en\":\"Burger\",\"ar\":\"\u0628\u064a\u0628\u0628\"}",
+        "description": "dsadasd dsadasdads,",
+        "price": {
+            "$numberDecimal": "60.00"
+        },
+        "currency": "AED",
+        "images": "[\"menu-items\\\/xBiRyCsB2EuP3sWNJidzgAC38epXbEHmL0wBmDB6.jpg\",\"menu-items\\\/izybwqMUNiw86c5Iwd6BuBXoncGFbJHlMEoWkFoT.jpg\"]",
+        "image": "menu-items\/xBiRyCsB2EuP3sWNJidzgAC38epXbEHmL0wBmDB6.jpg",
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": true,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767617730916"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767259080190"
+            }
+        },
+        "recipe": "[{\"ingredient_id\":\"69563aceaeff1b1ae101c522\",\"quantity\":0.05,\"usage_quantity\":0.05,\"usage_unit\":null}]",
+        "type": "item",
+        "sku": null
+    },
+    {
+        "_id": {
+            "$oid": "695d1ac79ee9d56b960c2253"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "695d1a3f9ee9d56b960c2252",
+        "type": "item",
+        "name": "{\"en\":\"Test Clean Item\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "10.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": "1",
+        "sku": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767710686744"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767709383882"
+            }
+        },
+        "recipe": "[{\"ingredient_id\":\"695d1ee49ee9d56b960c2254\",\"quantity\":100,\"usage_quantity\":100,\"usage_unit\":\"g\"}]"
+    },
+    {
+        "_id": {
+            "$oid": "695d256a9ee9d56b960c225a"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "694fcb2e7b83a4bfd5019500",
+        "type": "item",
+        "name": "{\"en\":\"Test Item 2\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "20.00"
+        },
+        "currency": "AED",
+        "images": "[\"menu-items\\\/bzQ8eRuEAN3lcCtipevj7d6t6WkQCENfxKtWfcBp.jpg\"]",
+        "image": "menu-items\/bzQ8eRuEAN3lcCtipevj7d6t6WkQCENfxKtWfcBp.jpg",
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": "1",
+        "sku": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767713370136"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767712106475"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695d6d289ee9d56b960c2267"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "695d1a3f9ee9d56b960c2252",
+        "type": "item",
+        "name": "{\"en\":\"dsd\",\"ar\":\"33\"}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "44.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "0",
+        "allergens": null,
+        "is_available": "1",
+        "sku": "dsds",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767731628527"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767730472431"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "695d6ed19ee9d56b960c2269"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "menu_category_id": "695d6e9b9ee9d56b960c2268",
+        "type": "item",
+        "name": "{\"en\":\"for delete\",\"ar\":null}",
+        "description": null,
+        "price": {
+            "$numberDecimal": "44.00"
+        },
+        "currency": "AED",
+        "images": "[]",
+        "image": null,
+        "sort_order": "1",
+        "allergens": null,
+        "is_available": "1",
+        "sku": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767731315222"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1767730897927"
+            }
+        },
+        "recipe": "[{\"ingredient_id\":\"69563aceaeff1b1ae101c522\",\"quantity\":2,\"usage_quantity\":2,\"usage_unit\":\"kg\"}]"
+    }
+]

@@ -1,0 +1,65 @@
+[
+    {
+        "_id": {
+            "$oid": "69457e2c2d33b6a8db028a80"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "name": "uu",
+        "capacity": 4,
+        "status": "available",
+        "location": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767891325032"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766161964209"
+            }
+        },
+        "qr_code_token": "7gwFol2KWogAfPu55HFSm3tiXbVf3gwx"
+    },
+    {
+        "_id": {
+            "$oid": "694ec9374c7837e511064b9f"
+        },
+        "restaurant_id": "694579e833231912b007b6c3",
+        "name": "T-4",
+        "capacity": 4,
+        "status": "available",
+        "location": null,
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1767891509705"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766770999042"
+            }
+        },
+        "qr_code_token": "AKD3ttaQdq7WjA5TSb9i1mIHmJuhahA1"
+    },
+    {
+        "_id": {
+            "$oid": "6950471feaf319e883077721"
+        },
+        "restaurant_id": "69503e50eaf319e883077714",
+        "name": "sd",
+        "capacity": 4,
+        "status": "occupied",
+        "location": null,
+        "qr_code_token": "P5EWkfugroaLzcR3KcFbyfQsZrw0Gkkd",
+        "updated_at": {
+            "$date": {
+                "$numberLong": "1766916143752"
+            }
+        },
+        "created_at": {
+            "$date": {
+                "$numberLong": "1766868767006"
+            }
+        }
+    }
+]

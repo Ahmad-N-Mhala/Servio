@@ -103,11 +103,8 @@ class DashboardController extends Controller
                     if (!isset($categorySales[$catName])) {
                         $categorySales[$catName] = 0;
                     }
-                    // Assuming item total is not stored directly on item level in this specific snippet, 
-                    // we might approximate or if OrderItem has 'price' * 'quantity'. 
-                    // Using simple quantity or price if available. 
-                    // Ideally OrderItem has 'total' or 'price'. fallback to 0.
-                    $itemTotal = (float) ($item->price ?? 0) * (float) ($item->quantity ?? 1);
+                    // Use stored total_price which effectively includes extras
+                    $itemTotal = (float) ($item->total_price ?? 0);
                     $categorySales[$catName] += $itemTotal;
                 }
             }
@@ -526,7 +523,7 @@ class DashboardController extends Controller
                     if (!isset($categorySales[$catName])) {
                         $categorySales[$catName] = 0;
                     }
-                    $itemTotal = (float) ($item->price ?? 0) * (float) ($item->quantity ?? 1);
+                    $itemTotal = (float) ($item->total_price ?? 0);
                     $categorySales[$catName] += $itemTotal;
                 }
             }
