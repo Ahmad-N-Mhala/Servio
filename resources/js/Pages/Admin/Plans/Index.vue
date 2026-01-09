@@ -44,7 +44,7 @@
                         <ul v-if="planFeatures(plan).length > 0" class="text-sm text-gray-500 space-y-1">
                             <li v-for="(feature, idx) in planFeatures(plan).slice(0, 4)" :key="idx" class="flex items-center gap-2">
                                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                {{ feature }}
+                                {{ $t(feature) }}
                             </li>
                              <li v-if="planFeatures(plan).length > 4">
                                 <button 
@@ -100,7 +100,7 @@
                                 <div class="flex-shrink-0 mt-0.5">
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="text-sm text-gray-700 font-medium">{{ feature }}</span>
+                                <span class="text-sm text-gray-700 font-medium">{{ $t(feature) }}</span>
                             </div>
                         </div>
                     </div>

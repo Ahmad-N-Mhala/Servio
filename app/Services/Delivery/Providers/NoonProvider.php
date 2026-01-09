@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class NoonProvider implements DeliveryProviderInterface
 {
-    // Base URL for Noon Food Partner API (Hypothetical/Researched Standard)
-    protected $baseUrl = 'https://api.noon.partners/food/v1';
+    // Base URL for Noon Food Partner API
+    // Verified Production URL: https://fbpi-api.noon.partners/
+    protected $baseUrl = 'https://fbpi-api.noon.partners/food/v1';
 
     public function parseOrderPayload(array $payload): array
     {

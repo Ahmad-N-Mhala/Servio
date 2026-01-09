@@ -23,7 +23,12 @@ class OrderDeliveryController extends Controller
             abort(404);
         }
 
-        $readyOrders = Order::with(['items.menuItem', 'table'])
+        $readyOrders = Order::with([
+            'items.menuItem' => function ($query) {
+                $query->withTrashed();
+            },
+            'table'
+        ])
             ->where('restaurant_id', $restaurant->id)
             ->where('status', 'ready')
             ->orderBy('updated_at', 'asc') // Oldest ready first

@@ -34,7 +34,7 @@ class CustomerController extends Controller
 
         // Calculate order count manually for the current page to avoid MongoDB withCount limitations
         $customers->getCollection()->transform(function ($customer) {
-            $customer->orders_count = $customer->orders()->count();
+            $customer->orders_count = $customer->orders()->where('payment_status', 'paid')->count();
             return $customer;
         });
 

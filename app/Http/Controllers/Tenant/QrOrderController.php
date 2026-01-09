@@ -240,7 +240,13 @@ class QrOrderController extends Controller
         $table->update(['status' => 'occupied']);
 
         // Broadcast order created event to POS
-        broadcast(new \App\Events\OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
+        broadcast(new \App\Events\OrderUpdated($order->load([
+            'items.menuItem' => function ($q) {
+                $q->withTrashed();
+            },
+            'customer',
+            'table'
+        ]), 'created'))->toOthers();
 
         return response()->json([
             'success' => true,

@@ -1,0 +1,150 @@
+[
+    {
+        "slug": "demo-resto",
+        "name": "Demo Resto",
+        "description": "A demo restaurant for testing.",
+        "currency": "AED",
+        "locale": "en",
+        "updated_at": "2026-01-09T21:23:05.559000Z",
+        "created_at": "2025-12-19T16:14:32.002000Z",
+        "email": "admin@demo.com",
+        "settings": {
+            "loyalty_program_name": "Restaurant Rewardss",
+            "loyalty_card_title": "Loyalty Memberss",
+            "loyalty_card_description": "Get exclusive perks and cashback.",
+            "loyalty_theme_color": "#2d22c3",
+            "loyalty_text_color": "#d33636",
+            "loyalty_terms": "*Points expire after 1 year. Cannot be combined with other offers.",
+            "loyalty_logo": "\/storage\/loyalty\/logos\/BItwrQSkDgAs2ocH7aX0SFTvomOjDe4yaYRDLR3H.jpg",
+            "loyalty_banner": "\/storage\/loyalty\/banners\/z8hqNrFviAobLD3fXLB4T5aVyaiwcNjKzXkOcUrx.jpg",
+            "loyalty_qr_link": null,
+            "feedback_design": {
+                "page_title": "We Value Your Feedback",
+                "welcome_message": "Please let us know how your experience was.",
+                "theme_color": "#dfe0e1",
+                "text_color": "#c69f9f",
+                "background_image": "\/storage\/feedback\/backgrounds\/fzFkeJQLvq4GUoTY5RgK9yn6xPOMF5zMNQvy8e7R.png"
+            }
+        },
+        "address": "dsadas",
+        "city": "dsdsds",
+        "country": "United Arab Emirates",
+        "google_map_location": "https:\/\/maps.app.goo.gl\/cknLhdpPTexsYkSB9",
+        "logo": null,
+        "phone": null,
+        "state": "ds",
+        "zip_code": null,
+        "receipt_template": {
+            "show_logo": false,
+            "show_restaurant_name": false,
+            "header_text": null,
+            "header_alignment": "center",
+            "show_order_number": true,
+            "show_date_time": true,
+            "show_table_number": true,
+            "show_customer_name": true,
+            "show_server_name": false,
+            "show_item_notes": true,
+            "item_name_width": "60",
+            "show_subtotal": true,
+            "show_tax": true,
+            "show_discount": true,
+            "show_payment_method": true,
+            "footer_text": "Thank you for your visit!",
+            "contact_info": null,
+            "show_qr_code": true,
+            "footer_alignment": "center",
+            "paper_width": "80",
+            "font_size": "medium"
+        },
+        "next_order_number": 64,
+        "deleted_at": null,
+        "deleted_by": "superadmin@restofy.com",
+        "deleted_by_name": "Super Admin",
+        "status": "active",
+        "service_type": "both",
+        "id": {
+            "$oid": "694579e833231912b007b6c3"
+        }
+    },
+    {
+        "name": "Ahmad Doha",
+        "slug": "ahmad-doha-TB6LeA",
+        "currency": "AED",
+        "locale": "en",
+        "country": "Qatar",
+        "state": "Doha",
+        "city": "Doha",
+        "address": "asd",
+        "zip_code": null,
+        "google_map_location": null,
+        "updated_at": "2026-01-02T09:06:19.832000Z",
+        "created_at": "2025-12-27T20:11:52.577000Z",
+        "deleted_at": "2026-01-02T09:06:19.830000Z",
+        "deleted_by": "superadmin@restofy.com",
+        "deleted_by_name": "Super Admin",
+        "status": "inactive",
+        "id": {
+            "$oid": "69503d88eaf319e883077708"
+        }
+    },
+    {
+        "name": "Mhala",
+        "slug": "mhala-ccEvAQ",
+        "currency": "AED",
+        "locale": "en",
+        "country": "Qatar",
+        "state": "Doha",
+        "city": "ewew",
+        "address": "weq",
+        "zip_code": null,
+        "google_map_location": null,
+        "updated_at": "2025-12-28T09:37:29.524000Z",
+        "created_at": "2025-12-27T20:12:56.064000Z",
+        "deleted_at": null,
+        "status": "active",
+        "id": {
+            "$oid": "69503dc8eaf319e88307770e"
+        }
+    },
+    {
+        "name": "ahmad",
+        "slug": "ahmad-VKXdGr",
+        "currency": "QAR",
+        "locale": "en",
+        "country": "United Arab Emirates",
+        "state": "Doha",
+        "city": "ads",
+        "address": "das",
+        "zip_code": null,
+        "google_map_location": "https:\/\/www.google.com\/maps",
+        "updated_at": "2025-12-28T17:11:44.217000Z",
+        "created_at": "2025-12-27T20:15:12.779000Z",
+        "email": "ahmad.n.mhala@gmail.com",
+        "status": "active",
+        "id": {
+            "$oid": "69503e50eaf319e883077714"
+        }
+    },
+    {
+        "name": "dasd",
+        "slug": "dasd-atlW3Z",
+        "currency": "AED",
+        "locale": "en",
+        "country": "United Arab Emirates",
+        "state": "dsa",
+        "city": "dsa",
+        "address": "das",
+        "zip_code": null,
+        "logo": null,
+        "email": "ds@gmail.com",
+        "phone": "ds",
+        "service_type": "both",
+        "google_map_location": null,
+        "updated_at": "2026-01-05T09:25:28.999000Z",
+        "created_at": "2026-01-05T09:25:28.999000Z",
+        "id": {
+            "$oid": "695b8388bb2bb5d336006196"
+        }
+    }
+]

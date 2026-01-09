@@ -77,6 +77,12 @@ class OrderObserver
                 }
             }
         }
+
+        // Check if status changed to cancelled/deleted
+        if ($order->isDirty('status') && in_array($order->status, ['cancelled', 'deleted'])) {
+            // Revert stats if applicable
+            app(\App\Services\LoyaltyService::class)->revertOrderPoints($order);
+        }
     }
 
     private function checkConditions($rule, $order): bool

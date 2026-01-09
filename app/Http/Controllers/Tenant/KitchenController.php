@@ -30,14 +30,26 @@ class KitchenController extends Controller
         // Ordered by FIFO (First In, First Out)
         $orders = Order::where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'processing', 'ready', 'served'])
-            ->with(['items.menuItem', 'customer', 'table'])
+            ->with([
+                'items.menuItem' => function ($query) {
+                    $query->withTrashed();
+                },
+                'customer',
+                'table'
+            ])
             ->orderBy('created_at', 'asc')
             ->get();
 
         // Also fetch recently completed orders (last 10)
         $completedOrders = Order::where('restaurant_id', $restaurant->id)
             ->where('status', 'completed')
-            ->with(['items.menuItem', 'customer', 'table'])
+            ->with([
+                'items.menuItem' => function ($query) {
+                    $query->withTrashed();
+                },
+                'customer',
+                'table'
+            ])
             ->orderBy('completed_at', 'desc')
             ->limit(10)
             ->get();
@@ -94,7 +106,14 @@ class KitchenController extends Controller
         // when status changes to 'completed'
 
         // Broadcast order status changed event for real-time updates
-        broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'status_changed'))->toOthers();
+        // Broadcast order status changed event for real-time updates
+        broadcast(new OrderUpdated($order->load([
+            'items.menuItem' => function ($q) {
+                $q->withTrashed();
+            },
+            'customer',
+            'table'
+        ]), 'status_changed'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.status_updated'));
     }

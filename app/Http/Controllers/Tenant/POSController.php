@@ -22,7 +22,13 @@ class POSController extends Controller
 
         \Log::info('POS Index - Restaurant ID: ' . $restaurant->id);
 
-        $orders = Order::with(['items.menuItem', 'customer', 'table'])
+        $orders = Order::with([
+            'items.menuItem' => function ($query) {
+                $query->withTrashed();
+            },
+            'customer',
+            'table'
+        ])
             ->where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'pending_approval', 'completed', 'processing', 'ready', 'served'])
             ->where(function ($query) {

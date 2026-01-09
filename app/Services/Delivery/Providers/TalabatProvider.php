@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class TalabatProvider implements DeliveryProviderInterface
 {
-    // Talabat integration usually goes via middleware, but assuming direct API:
+    // Talabat API requires onboarding via Delivery Hero.
+    // Direct Access via Partner Portal: https://portal.talabat.com/
+    // This URL is a placeholder as Talabat uses specific region-based endpoints + PGP auth often.
     protected $baseUrl = 'https://api.talabat.com/integration/v1';
 
     public function parseOrderPayload(array $payload): array

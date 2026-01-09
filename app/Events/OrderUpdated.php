@@ -43,7 +43,13 @@ class OrderUpdated implements ShouldBroadcast
     public function broadcastWith(): array
     {
         // Load relationships for broadcasting
-        $this->order->load(['items.menuItem', 'customer', 'table']);
+        $this->order->load([
+            'items.menuItem' => function ($q) {
+                $q->withTrashed();
+            },
+            'customer',
+            'table'
+        ]);
 
         return [
             'order' => $this->order->toArray(),

@@ -245,24 +245,20 @@ const formatDateTime = (value: any): string => {
 const getBadgeClass = (value: string): string => {
     const baseClasses = 'px-3 py-1 rounded-full text-xs font-bold inline-block';
     
-    switch (value?.toLowerCase()) {
-        case 'active':
-        case 'completed':
-        case 'paid':
-        case 'success':
-            return `${baseClasses} bg-green-100 text-green-800`;
-        case 'pending':
-        case 'processing':
-            return `${baseClasses} bg-yellow-100 text-yellow-800`;
-        case 'cancelled':
-        case 'failed':
-        case 'inactive':
-            return `${baseClasses} bg-red-100 text-red-800`;
-        case 'preparing':
-        case 'ready':
-            return `${baseClasses} bg-blue-100 text-blue-800`;
-        default:
-            return `${baseClasses} bg-gray-100 text-gray-800`;
+    const normalized = typeof value === 'string' ? value.toLowerCase() : '';
+    
+    if (normalized.includes('completed') || normalized.includes('paid') || normalized.includes('success') || normalized === 'active') {
+        return `${baseClasses} bg-green-100 text-green-800`;
     }
+    if (normalized.includes('pending') || normalized.includes('processing')) {
+        return `${baseClasses} bg-yellow-100 text-yellow-800`;
+    }
+    if (normalized.includes('cancelled') || normalized.includes('failed') || normalized.includes('deleted') || normalized.includes('inactive')) {
+        return `${baseClasses} bg-red-100 text-red-800`;
+    }
+    if (normalized.includes('preparing') || normalized.includes('ready')) {
+        return `${baseClasses} bg-blue-100 text-blue-800`;
+    }
+    return `${baseClasses} bg-gray-100 text-gray-800`;
 };
 </script>

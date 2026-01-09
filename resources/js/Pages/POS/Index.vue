@@ -165,7 +165,10 @@
                                     <span class="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-600 text-xs font-bold rounded-full border border-gray-200 shadow-sm">{{ item.quantity }}</span>
                                 </div>
                                 <div class="flex-1 px-2">
-                                    <p class="font-medium text-gray-900">{{ item.menu_item?.name?.en || item.menu_item?.name || item.name || $t('common.item') }}</p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ item.menu_item?.name?.en || item.menu_item?.name || item.name || $t('common.item') }}
+                                        <span v-if="item.menu_item?.deleted_at" class="text-red-500 text-xs">({{ $t('common.deleted') }})</span>
+                                    </p>
                                     <p v-if="item.notes" class="text-xs text-amber-600 mt-0.5 italic flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                         {{ item.notes }}
@@ -616,7 +619,10 @@
                             <div v-for="(item, index) in editableItems" :key="item.id" class="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-primary/30 transition-all">
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-gray-900">{{ item.menu_item?.name?.en || item.menu_item?.name || item.name || 'Item' }}</span>
+                                        <span class="text-sm font-medium text-gray-900">
+                                            {{ item.menu_item?.name?.en || item.menu_item?.name || item.name || 'Item' }}
+                                            <span v-if="item.menu_item?.deleted_at" class="text-red-500 text-xs">({{ $t('common.deleted') }})</span>
+                                        </span>
                                         <div v-if="item.extras && item.extras.length > 0" class="text-xs text-blue-600 flex flex-wrap gap-1">
                                             <span v-for="(extra, i) in item.extras" :key="i">
                                                 + {{ extra.name?.en || extra.name }} <span v-if="Number(i) < (item.extras.length - 1)">,</span>

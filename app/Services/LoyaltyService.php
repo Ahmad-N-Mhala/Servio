@@ -108,6 +108,52 @@ class LoyaltyService
         $customer->updateTier();
     }
 
+    public function recalculateCustomerStats(Customer $customer): void
+    {
+        $stats = $customer->orders()
+            ->where('payment_status', 'paid')
+            ->whereNotIn('status', ['cancelled', 'deleted'])
+            ->get()
+            ->reduce(function ($carry, $order) {
+                $carry['total_orders']++;
+                $carry['total_spent'] += $order->total;
+                return $carry;
+            }, ['total_orders' => 0, 'total_spent' => 0.0]);
+
+        $customer->update([
+            'total_orders' => $stats['total_orders'],
+            'total_spent' => (float) $stats['total_spent'],
+        ]);
+
+        $customer->updateTier();
+    }
+
+    public function revertOrderPoints(Order $order): void
+    {
+        if (!$order->customer_id)
+            return;
+
+        $customer = $order->customer;
+        if (!$customer)
+            return;
+
+        // Revert Loyalty Points if any
+        if ($order->points_earned > 0) {
+            $lp = $customer->loyaltyPoints;
+            if ($lp) {
+                // Manually revert to correct Earned totals
+                $lp->decrement('balance', $order->points_earned);
+                $lp->decrement('total_earned', $order->points_earned);
+                // Remove transaction log
+                $customer->pointTransactions()->where('order_id', $order->id)->delete();
+            }
+            $order->update(['points_earned' => 0]);
+        }
+
+        // Recalculate stats to be 100% accurate
+        $this->recalculateCustomerStats($customer);
+    }
+
     public function redeemReward(Customer $customer, string $rewardId): RewardRedemption
     {
         $reward = \App\Models\Reward::findOrFail($rewardId);

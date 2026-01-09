@@ -33,6 +33,113 @@ class DashboardController extends Controller
         if (is_string($endDate))
             $endDate = Carbon::parse($endDate)->endOfDay();
 
+        // Specific Export for Item Sales
+        if ($request->input('tab') === 'item_sales' && $format === 'excel') {
+            $headers = [
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=item_sales_report.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            ];
+
+            $callback = function () use ($restaurant, $startDate, $endDate) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, ['Item Sales Report']);
+                fputcsv($file, ['Restaurant', $restaurant->name]);
+                fputcsv($file, ['Date Range', $startDate->format('Y-m-d') . ' to ' . $endDate->format('Y-m-d')]);
+                fputcsv($file, []);
+
+                fputcsv($file, ['Item Name', 'Category', 'Quantity Sold', 'Revenue']);
+
+                $orders = Order::where('restaurant_id', $restaurant->id)
+                    ->where('status', '!=', 'deleted')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('payment_status', 'paid') // Only paid items
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->with([
+                        'items.menuItem' => function ($query) {
+                            $query->withTrashed()->with([
+                                'category' => function ($q) {
+                                    $q->withTrashed();
+                                }
+                            ]);
+                        }
+                    ])
+                    ->get();
+
+                $itemStats = [];
+
+                foreach ($orders as $order) {
+                    if ($order->items) {
+                        foreach ($order->items as $item) {
+                            $id = $item->menu_item_id;
+                            $quantity = $item->quantity;
+                            $total = (float) ($item->total_price ?? 0);
+
+                            if (!isset($itemStats[$id])) {
+                                // Priority 1: Fetch from the Menu Items table (Source of Truth)
+                                if ($item->menuItem) {
+                                    $name = $item->menuItem->name;
+                                } else {
+                                    // Priority 2: Fallback to snapshot if the item was permanently deleted from DB
+                                    $name = $item->name;
+                                }
+                                // Localize name
+                                if (is_string($name) && str_starts_with($name, '{')) {
+                                    $decoded = json_decode($name, true);
+                                    $locale = app()->getLocale();
+                                    $fallback = config('app.fallback_locale', 'en');
+                                    $name = $decoded[$locale] ?? $decoded[$fallback] ?? $decoded['en'] ?? 'Unknown';
+                                }
+
+                                if ($item->menuItem && $item->menuItem->trashed()) {
+                                    $name .= ' (Deleted - ' . $item->menuItem->deleted_at->format('d-m-Y') . ')';
+                                }
+
+                                // Category
+                                $categoryName = 'Uncategorized';
+                                if ($item->menuItem && $item->menuItem->category) {
+                                    $catName = $item->menuItem->category->name;
+                                    if (is_string($catName) && str_starts_with($catName, '{')) {
+                                        $decoded = json_decode($catName, true);
+                                        $locale = app()->getLocale();
+                                        $categoryName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
+                                    } else {
+                                        $categoryName = $catName;
+                                    }
+
+                                    if ($item->menuItem->category->trashed()) {
+                                        $categoryName .= ' (Deleted - ' . $item->menuItem->category->deleted_at->format('d-m-Y') . ')';
+                                    }
+                                }
+
+                                $itemStats[$id] = [
+                                    'name' => $name ?? 'Unknown',
+                                    'category' => $categoryName,
+                                    'quantity' => 0,
+                                    'revenue' => 0,
+                                ];
+                            }
+                            $itemStats[$id]['quantity'] += $quantity;
+                            $itemStats[$id]['revenue'] += $total;
+                        }
+                    }
+                }
+
+                // sort by quantity desc by default
+                usort($itemStats, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
+
+                foreach ($itemStats as $stat) {
+                    fputcsv($file, [$stat['name'], $stat['category'], $stat['quantity'], $stat['revenue']]);
+                }
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
         // Re-fetch stats for the report
         // Base Query
         $baseOrderQuery = Order::where('restaurant_id', $restaurant->id)
@@ -41,13 +148,16 @@ class DashboardController extends Controller
 
         // Stats
         $totalOrders = (clone $baseOrderQuery)->count();
-        $revenue = (clone $baseOrderQuery)->where('status', 'completed')->sum('total');
+        $revenue = (clone $baseOrderQuery)->where('payment_status', 'paid')->sum('total');
         $activeStaff = Staff::where('restaurant_id', $restaurant->id)->where('is_active', true)->count();
         $totalWaste = WasteLog::where('restaurant_id', $restaurant->id)->whereBetween('log_date', [$startDate, $endDate])->sum('total_loss');
-        $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)->whereBetween('created_at', [$startDate, $endDate])->sum('amount');
+        $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
+            ->where('payment_status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('amount');
         $netProfit = (float) (string) $revenue - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
 
-        $revenueOrders = (clone $baseOrderQuery)->where('status', 'completed')->with('items')->get();
+        $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->with('items')->get();
         $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
             return $order->completed_at->diffInMinutes($order->created_at);
         }) ?? 0;
@@ -333,9 +443,152 @@ class DashboardController extends Controller
         if (is_string($endDate))
             $endDate = Carbon::parse($endDate)->endOfDay();  // Include full end day
 
+        if ($request->input('tab') === 'item_sales') {
+            $query = $request->input('q');
+            $sortBy = $request->input('sort', 'quantity_desc'); // quantity_desc, quantity_asc, revenue_desc, revenue_asc, name_asc, name_desc
+            $perPage = 10;
+            $currentPage = $request->input('page', 1);
+
+            // Fetch all orders with items in date range
+            $orders = Order::where('restaurant_id', $restaurant->id)
+                ->where('status', '!=', 'deleted')
+                ->where('status', '!=', 'cancelled')
+                ->where('payment_status', 'paid') // Only paid items
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->with([
+                    'items.menuItem' => function ($query) {
+                        $query->withTrashed()->with([
+                            'category' => function ($q) {
+                                $q->withTrashed();
+                            }
+                        ]);
+                    }
+                ])
+                ->get();
+
+            $itemStats = [];
+
+            foreach ($orders as $order) {
+                if ($order->items) {
+                    foreach ($order->items as $item) {
+                        $id = $item->menu_item_id;
+                        $quantity = $item->quantity;
+                        $total = (float) ($item->total_price ?? 0);
+
+                        if (!isset($itemStats[$id])) {
+                            // Priority 1: Fetch from the Menu Items table (Source of Truth)
+                            if ($item->menuItem) {
+                                $name = $item->menuItem->name;
+                            } else {
+                                // Priority 2: Fallback to snapshot if the item was permanently deleted from DB
+                                $name = $item->name;
+                            }
+
+                            // Localize name
+                            if (is_string($name) && str_starts_with($name, '{')) {
+                                $decoded = json_decode($name, true);
+                                $locale = app()->getLocale();
+                                $fallback = config('app.fallback_locale', 'en');
+                                $name = $decoded[$locale] ?? $decoded[$fallback] ?? $decoded['en'] ?? 'Unknown';
+                            }
+
+                            // Check if deleted
+                            if ($item->menuItem && $item->menuItem->trashed()) {
+                                $name .= ' (Deleted - ' . $item->menuItem->deleted_at->format('d-m-Y') . ')';
+                            }
+
+                            // Calculate Category
+                            $categoryName = 'Uncategorized';
+                            if ($item->menuItem && $item->menuItem->category) {
+                                $catName = $item->menuItem->category->name;
+                                if (is_string($catName) && str_starts_with($catName, '{')) {
+                                    $decoded = json_decode($catName, true);
+                                    $locale = app()->getLocale();
+                                    $categoryName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
+                                } else {
+                                    $categoryName = $catName;
+                                }
+
+                                if ($item->menuItem->category->trashed()) {
+                                    $categoryName .= ' (Deleted - ' . $item->menuItem->category->deleted_at->format('d-m-Y') . ')';
+                                }
+                            }
+
+                            $itemStats[$id] = [
+                                'id' => $id,
+                                'name' => $name ?? 'Unknown',
+                                'category' => $categoryName,
+                                'quantity' => 0,
+                                'revenue' => 0,
+                            ];
+                        }
+
+                        $itemStats[$id]['quantity'] += $quantity;
+                        $itemStats[$id]['revenue'] += $total;
+                    }
+                }
+            }
+
+            // Convert to collection for filtering/sorting
+            $statsCollection = collect($itemStats)->values();
+
+            // Filter
+            if ($query) {
+                $statsCollection = $statsCollection->filter(function ($item) use ($query) {
+                    return stripos($item['name'], $query) !== false || stripos($item['category'], $query) !== false;
+                });
+            }
+
+            // Sort
+            $statsCollection = $statsCollection->sort(function ($a, $b) use ($sortBy) {
+                switch ($sortBy) {
+                    case 'quantity_asc':
+                        return $a['quantity'] <=> $b['quantity'];
+                    case 'quantity_desc':
+                        return $b['quantity'] <=> $a['quantity'];
+                    case 'revenue_asc':
+                        return $a['revenue'] <=> $b['revenue'];
+                    case 'revenue_desc':
+                        return $b['revenue'] <=> $a['revenue'];
+                    case 'name_asc':
+                        return strnatcasecmp($a['name'], $b['name']);
+                    case 'name_desc':
+                        return strnatcasecmp($b['name'], $a['name']);
+                    default:
+                        return $b['quantity'] <=> $a['quantity'];
+                }
+            });
+
+            // Paginate
+            $totalItems = $statsCollection->count();
+            $pagedData = $statsCollection->forPage($currentPage, $perPage)->values();
+
+            return Inertia::render('Dashboard/Home', [
+                'active_tab' => 'item_sales',
+                'item_sales_data' => [
+                    'data' => $pagedData,
+                    'current_page' => (int) $currentPage,
+                    'last_page' => ceil($totalItems / $perPage),
+                    'total' => $totalItems,
+                    'per_page' => $perPage,
+                    'from' => $totalItems > 0 ? (($currentPage - 1) * $perPage) + 1 : 0,
+                    'to' => min($currentPage * $perPage, $totalItems),
+                ],
+                'filters' => [
+                    'q' => $query,
+                    'sort' => $sortBy
+                ],
+                'date_range' => [
+                    'start_date' => $startDate->format('Y-m-d'),
+                    'end_date' => $endDate->format('Y-m-d'),
+                ],
+            ]);
+        }
+
         // -- Base Query --
         $baseOrderQuery = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
+            ->where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         // Stats
@@ -347,7 +600,7 @@ class DashboardController extends Controller
             ->count();
 
         $revenue = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->sum('total');
 
         $activeStaff = Staff::where('restaurant_id', $restaurant->id)
@@ -379,7 +632,7 @@ class DashboardController extends Controller
         // -- Recent Orders --
         // -- Customer Retention --
         $customerVisits = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->whereNotNull('customer_name')
             ->where('customer_name', '!=', 'Guest')
             ->get()
@@ -409,7 +662,7 @@ class DashboardController extends Controller
 
         // -- Revenue Chart --
         $revenueOrders = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->get(); // Get all to group in memory
 
         $revenueChart = $revenueOrders->groupBy(function ($order) {
@@ -451,7 +704,7 @@ class DashboardController extends Controller
 
         // -- Payment Method Distribution --
         $paymentDistribution = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->get()
             ->groupBy(function ($order) {
                 return $order->payment_method ?? 'unknown';
@@ -467,20 +720,41 @@ class DashboardController extends Controller
         // -- Top Menu Items --
         // Simplified top items logic
         $allItems = [];
-        $ordersWithItems = (clone $baseOrderQuery)->with('items')->get();
+        $ordersWithItems = (clone $baseOrderQuery)
+            ->where('payment_status', 'paid')
+            ->with([
+                'items.menuItem' => function ($query) {
+                    $query->withTrashed();
+                }
+            ])
+            ->get();
 
         foreach ($ordersWithItems as $order) {
             if ($order->items) {
                 foreach ($order->items as $item) {
                     $id = $item->menu_item_id; // Assumes OrderItem has this field
                     if (!isset($allItems[$id])) {
-                        $name = $item->name;
+                        // Priority 1: Fetch from Menu Items table
+                        if ($item->menuItem) {
+                            $name = $item->menuItem->name;
+                        } else {
+                            // Priority 2: Fallback to snapshot
+                            $name = $item->name;
+                        }
+
                         // Attempt JSON decode for name
                         if (is_string($name) && str_starts_with($name, '{')) {
                             $decoded = json_decode($name, true);
                             $locale = app()->getLocale();
                             $fallback = config('app.fallback_locale', 'en');
                             $name = $decoded[$locale] ?? $decoded[$fallback] ?? $decoded['en'] ?? 'Unknown';
+                        }
+
+                        // Check if deleted (Top Menu Items)
+                        // Need to check relationship which is loaded.
+                        // However, loop uses $order->items. $item here is OrderItem.
+                        if ($item->menuItem && $item->menuItem->trashed()) {
+                            $name .= ' (Deleted - ' . $item->menuItem->deleted_at->format('d-m-Y') . ')';
                         }
                         $allItems[$id] = ['name' => $name, 'quantity' => 0];
                     }
@@ -503,8 +777,13 @@ class DashboardController extends Controller
                     $allIds[] = $item->menu_item_id;
             }
         }
-        $menuItemsWithCategories = \App\Models\MenuItem::whereIn('id', array_unique($allIds))
-            ->with('category')
+        $menuItemsWithCategories = \App\Models\MenuItem::withTrashed()
+            ->whereIn('id', array_unique($allIds))
+            ->with([
+                'category' => function ($q) {
+                    $q->withTrashed();
+                }
+            ])
             ->get()
             ->keyBy('id');
 
@@ -518,6 +797,10 @@ class DashboardController extends Controller
                         $decoded = json_decode($catName, true);
                         $locale = app()->getLocale();
                         $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
+                    }
+
+                    if ($mItem && $mItem->category && $mItem->category->trashed()) {
+                        $catName .= ' (Deleted - ' . $mItem->category->deleted_at->format('d-m-Y') . ')';
                     }
 
                     if (!isset($categorySales[$catName])) {
@@ -540,7 +823,7 @@ class DashboardController extends Controller
 
         // -- Top Customers --
         $topCustomers = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->get()
             ->groupBy('customer_name')
             ->map(function ($orders, $name) {
@@ -571,6 +854,7 @@ class DashboardController extends Controller
 
         // -- Monthly Expenses (for the date range) --
         $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
+            ->where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('amount');
 
@@ -579,6 +863,9 @@ class DashboardController extends Controller
         $netProfit = (float) (string) $revenue - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
 
         return Inertia::render('Dashboard/Home', [
+            'active_tab' => 'overview',
+            'item_sales_data' => null, // Not needed for overview
+            'filters' => [], // Empty logic for now
             'stats' => [
                 'total_orders' => $totalOrders,
                 'today_orders' => $todayOrders,

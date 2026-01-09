@@ -1,0 +1,83 @@
+[
+    {
+        "slug": "basic",
+        "name": "Basic",
+        "price_monthly": {
+            "$numberDecimal": "99.00"
+        },
+        "price_yearly": {
+            "$numberDecimal": "990.00"
+        },
+        "currency": "AED",
+        "features": "[\"plan_features.one_restaurant\",\"plan_features.staff_limit_5\",\"plan_features.basic_menu\",\"plan_features.order_tracking\",\"plan_features.kds\",\"plan_features.email_support\"]",
+        "is_active": true,
+        "updated_at": "2026-01-05T13:31:24.802000Z",
+        "created_at": "2025-12-19T16:11:29.520000Z",
+        "enabled_features": [
+            "pos",
+            "kds"
+        ],
+        "id": {
+            "$oid": "6945793119aaa592e0054aa2"
+        }
+    },
+    {
+        "slug": "pro",
+        "name": "Pro",
+        "price_monthly": {
+            "$numberDecimal": "299.00"
+        },
+        "price_yearly": {
+            "$numberDecimal": "2990.00"
+        },
+        "currency": "AED",
+        "features": "[\"plan_features.three_restaurants\",\"plan_features.unlimited_staff\",\"plan_features.advanced_menu\",\"plan_features.realtime_tracking\",\"plan_features.kds\",\"plan_features.qr_ordering\",\"plan_features.analytics_reports\",\"plan_features.priority_support\"]",
+        "is_active": true,
+        "updated_at": "2026-01-05T13:31:24.804000Z",
+        "created_at": "2025-12-19T16:11:29.522000Z",
+        "enabled_features": [
+            "pos",
+            "inventory",
+            "loyalty",
+            "analytics",
+            "kds",
+            "qr_ordering"
+        ],
+        "id": {
+            "$oid": "6945793119aaa592e0054aa3"
+        }
+    },
+    {
+        "slug": "enterprise",
+        "name": "Enterprise",
+        "price_monthly": {
+            "$numberDecimal": "799.00"
+        },
+        "price_yearly": {
+            "$numberDecimal": "7990.00"
+        },
+        "currency": "AED",
+        "features": "[\"plan_features.unlimited_restaurants\",\"plan_features.unlimited_staff\",\"plan_features.advanced_menu\",\"plan_features.realtime_tracking\",\"plan_features.kds\",\"plan_features.qr_ordering\",\"plan_features.advanced_analytics\",\"plan_features.api_access\",\"plan_features.custom_integrations\",\"plan_features.dedicated_support\"]",
+        "is_active": true,
+        "updated_at": "2026-01-05T13:31:24.805000Z",
+        "created_at": "2025-12-19T16:11:29.522000Z",
+        "description": null,
+        "max_orders_per_month": 20000,
+        "max_restaurants": 3,
+        "max_users": 3,
+        "enabled_features": [
+            "pos",
+            "inventory",
+            "loyalty",
+            "analytics",
+            "marketing",
+            "feedback",
+            "delivery",
+            "kds",
+            "qr_ordering"
+        ],
+        "id": {
+            "$oid": "6945793119aaa592e0054aa4"
+        }
+    }
+]

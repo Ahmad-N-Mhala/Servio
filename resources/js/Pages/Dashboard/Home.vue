@@ -9,7 +9,7 @@
                 </div>
                 <div class="flex space-x-2">
                     <a 
-                        :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'excel' })"
+                        :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'excel', tab: currentTab })"
                         target="_blank"
                     >
                          <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
@@ -18,7 +18,7 @@
                             </svg>{{ $t('inventory.download_excel') }}</Button>
                     </a>
                     <a 
-                        :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf' })"
+                        :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf', tab: currentTab })"
                         target="_blank"
                     >
                         <Button variant="primary" class="bg-primary-600 text-white hover:bg-primary-700">
@@ -29,129 +29,183 @@
                 </div>
             </div>
 
-            <!-- Date Range Picker -->
+            <!-- Date Range Picker (Common for both tabs) -->
             <DateRangePicker
                 :initial-start-date="dateRange.start_date"
                 :initial-end-date="dateRange.end_date"
                 @update="onDateRangeUpdate"
+                class="mb-6"
             />
 
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatsCard
-                    :title="$t('dashboard.total_orders')"
-                    :value="stats.total_orders"
-                    icon="orders"
-                    color="blue"
-                    class="cursor-pointer"
-                    @click="fetchDetails('total_orders')"
-                />
-                
-                <StatsCard
-                    :title="$t('dashboard.revenue')"
-                    :value="formatCurrency(stats.revenue)"
-                    icon="revenue"
-                    color="yellow"
-                    :subtitle="$t('dashboard_page.total_revenue_subtitle')"
-                    class="cursor-pointer"
-                    @click="fetchDetails('revenue')"
-                />
-
-                <StatsCard
-                    :title="$t('dashboard_page.net_profit')"
-                    :value="formatCurrency(stats.net_profit)"
-                    icon="revenue"
-                    :color="stats.net_profit >= 0 ? 'green' : 'red'"
-                    :subtitle="$t('dashboard_page.net_profit_subtitle')"
-                />
-
-                <StatsCard
-                    :title="$t('dashboard_page.low_stock')"
-                    :value="stats.low_stock_count"
-                    icon="waste"
-                    color="red"
-                    :subtitle="$t('dashboard_page.low_stock')"
-                    class="cursor-pointer"
-                    @click="fetchDetails('low_stock')"
-                />
-
-                <StatsCard
-                    :title="$t('dashboard_page.avg_dining_time')"
-                    :value="stats.avg_dining_time + ' ' + $t('kitchen.min')"
-                    icon="time"
-                    color="purple"
-                    :subtitle="$t('dashboard_page.avg_dining_time_subtitle')"
-                />
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button
+                        @click="switchTab('overview')"
+                        :class="[
+                            currentTab === 'overview'
+                                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                        ]"
+                    >
+                        {{ $t('dashboard.overview') }}
+                    </button>
+                    <button
+                        @click="switchTab('item_sales')"
+                        :class="[
+                            currentTab === 'item_sales'
+                                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+                        ]"
+                    >
+                        {{ $t('dashboard.item_sales') }}
+                    </button>
+                </nav>
             </div>
 
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Revenue Trend Chart -->
-                <ChartCard :title="$t('charts.revenue_trend')" height="300px">
-                    <canvas ref="revenueChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Order Status Distribution -->
-                <ChartCard :title="$t('charts.order_status')" height="300px">
-                    <canvas ref="statusChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Payment Methods -->
-                <ChartCard :title="$t('charts.payment_methods')" height="300px">
-                    <canvas ref="paymentChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Top Menu Items -->
-                <ChartCard :title="$t('charts.top_menu_items')" height="300px">
-                    <canvas ref="topItemsChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Peak Hours -->
-                <ChartCard :title="$t('charts.peak_hours')" height="300px">
-                    <canvas ref="peakHoursChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Waste Trend -->
-                <ChartCard :title="$t('charts.waste_trend')" height="300px">
-                    <canvas ref="wasteChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Top Categories -->
-                <ChartCard :title="$t('charts.top_categories')" height="300px">
-                    <canvas ref="topCategoriesChartCanvas"></canvas>
-                </ChartCard>
-
-                <!-- Top Customers -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('charts.top_customers') }}</h3>
-                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.name') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('charts.orders') }}</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('common.total') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr v-for="(customer, idx) in topCustomers" :key="idx">
-                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ customer.name }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 text-right">{{ customer.count }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white text-right">{{ formatCurrency(customer.total) }}</td>
-                                </tr>
-                                <tr v-if="topCustomers.length === 0">
-                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">{{ $t('charts.no_data') }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                     </div>
+            <!-- Overview Tab -->
+            <div v-if="currentTab === 'overview'">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <StatsCard
+                        :title="$t('dashboard.total_orders')"
+                        :value="stats.total_orders"
+                        icon="orders"
+                        color="blue"
+                        class="cursor-pointer"
+                        @click="fetchDetails('total_orders')"
+                    />
+                    
+                    <StatsCard
+                        :title="$t('dashboard.revenue')"
+                        :value="formatCurrency(stats.revenue)"
+                        icon="revenue"
+                        color="yellow"
+                        :subtitle="$t('dashboard_page.total_revenue_subtitle')"
+                        class="cursor-pointer"
+                        @click="fetchDetails('revenue')"
+                    />
+    
+                    <StatsCard
+                        :title="$t('dashboard_page.net_profit')"
+                        :value="formatCurrency(stats.net_profit)"
+                        icon="revenue"
+                        :color="stats.net_profit >= 0 ? 'green' : 'red'"
+                        :subtitle="$t('dashboard_page.net_profit_subtitle')"
+                    />
+    
+                    <StatsCard
+                        :title="$t('dashboard_page.low_stock')"
+                        :value="stats.low_stock_count"
+                        icon="waste"
+                        color="red"
+                        :subtitle="$t('dashboard_page.low_stock')"
+                        class="cursor-pointer"
+                        @click="fetchDetails('low_stock')"
+                    />
+    
+                    <StatsCard
+                        :title="$t('dashboard_page.avg_dining_time')"
+                        :value="stats.avg_dining_time + ' ' + $t('kitchen.min')"
+                        icon="time"
+                        color="purple"
+                        :subtitle="$t('dashboard_page.avg_dining_time_subtitle')"
+                    />
                 </div>
-             <!-- Customer Retention -->
-             <div class="col-span-1 lg:col-span-2 mb-8">
-                <ChartCard :title="$t('charts.customer_retention')" height="300px">
-                    <canvas ref="retentionChartCanvas"></canvas>
-                </ChartCard>
-             </div>
+    
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Revenue Trend Chart -->
+                    <ChartCard :title="$t('charts.revenue_trend')" height="300px">
+                        <canvas ref="revenueChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Order Status Distribution -->
+                    <ChartCard :title="$t('charts.order_status')" height="300px">
+                        <canvas ref="statusChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Payment Methods -->
+                    <ChartCard :title="$t('charts.payment_methods')" height="300px">
+                        <canvas ref="paymentChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Top Menu Items -->
+                    <ChartCard :title="$t('charts.top_menu_items')" height="300px">
+                        <canvas ref="topItemsChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Peak Hours -->
+                    <ChartCard :title="$t('charts.peak_hours')" height="300px">
+                        <canvas ref="peakHoursChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Waste Trend -->
+                    <ChartCard :title="$t('charts.waste_trend')" height="300px">
+                        <canvas ref="wasteChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Top Categories -->
+                    <ChartCard :title="$t('charts.top_categories')" height="300px">
+                        <canvas ref="topCategoriesChartCanvas"></canvas>
+                    </ChartCard>
+    
+                    <!-- Top Customers -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('charts.top_customers') }}</h3>
+                         <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.name') }}</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('charts.orders') }}</th>
+                                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('common.total') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="(customer, idx) in topCustomers" :key="idx">
+                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ customer.name }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 text-right">{{ customer.count }}</td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white text-right">{{ formatCurrency(customer.total) }}</td>
+                                    </tr>
+                                    <tr v-if="topCustomers.length === 0">
+                                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">{{ $t('charts.no_data') }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                         </div>
+                    </div>
+                 <!-- Customer Retention -->
+                 <div class="col-span-1 lg:col-span-2 mb-8">
+                    <ChartCard :title="$t('charts.customer_retention')" height="300px">
+                        <canvas ref="retentionChartCanvas"></canvas>
+                    </ChartCard>
+                 </div>
+                </div>
+            </div>
+
+            <!-- Item Sales Tab -->
+            <div v-if="currentTab === 'item_sales'" class="space-y-6">
+                <!-- Table -->
+                <Table
+                    :columns="itemSalesColumns"
+                    :data="itemSalesList"
+                    :pagination="itemSalesPagination"
+                    v-model:search="searchQuery"
+                    :title="$t('dashboard.item_sales_report')"
+                    :empty-message="$t('common.no_results')"
+                    :server-side="true"
+                    @sort="handleTableSort"
+                >
+                    <template #cell-name="{ row }">
+                         <span class="font-medium text-gray-900 dark:text-white">{{ row.name }}</span>
+                    </template>
+                    <template #cell-revenue="{ row }">
+                        {{ formatCurrency(row.revenue) }}
+                    </template>
+                </Table>
             </div>
         </div>
 
@@ -214,7 +268,17 @@ import StatsCard from '@/Components/StatsCard.vue';
 import ChartCard from '@/Components/ChartCard.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
+import Table from '@/Components/Table.vue';
 import axios from 'axios';
+
+// Simple debounce implementation
+const debounce = (fn: Function, wait: number) => {
+    let timeout: any;
+    return (...args: any[]) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), wait);
+    };
+};
 
 const { t } = useI18n();
 
@@ -224,24 +288,53 @@ const page = usePage();
 const route = (window as any).route;
 
 const isRtl = computed(() => page.props.isRtl as boolean);
-const stats = computed(() => page.props.stats as any);
-const revenueChart = computed(() => page.props.revenue_chart as any[]);
-const statusDistribution = computed(() => page.props.status_distribution as any[]);
-const peakHours = computed(() => page.props.peak_hours as any[]);
-const topMenuItems = computed(() => page.props.top_menu_items as any[]);
-const paymentDistribution = computed(() => page.props.payment_distribution as any[]);
-const wasteChart = computed(() => page.props.waste_chart as any[]);
+const stats = computed(() => page.props.stats as any || {});
+const revenueChart = computed(() => page.props.revenue_chart as any[] || []);
+const statusDistribution = computed(() => page.props.status_distribution as any[] || []);
+const peakHours = computed(() => page.props.peak_hours as any[] || []);
+const topMenuItems = computed(() => page.props.top_menu_items as any[] || []);
+const paymentDistribution = computed(() => page.props.payment_distribution as any[] || []);
+const wasteChart = computed(() => page.props.waste_chart as any[] || []);
 const topCategories = computed(() => page.props.top_categories as any[] || []);
 const topCustomers = computed(() => page.props.top_customers as any[] || []);
 const dateRange = computed(() => page.props.date_range as any);
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 const retentionStats = computed(() => page.props.retention_stats as any[] || []);
 
+// New Props
+const currentTab = computed(() => (page.props.active_tab as string) || 'overview');
+const itemSalesData = computed(() => page.props.item_sales_data as any);
+const filters = computed(() => page.props.filters as any || {});
+
+const searchQuery = ref(filters.value.q || '');
+const currentSort = ref(filters.value.sort || 'quantity_desc');
+
 const showDetailsModal = ref(false);
 const loadingDetails = ref(false);
 const detailsTitle = ref('');
 const detailsColumns = ref<any[]>([]);
 const detailsData = ref<any[]>([]);
+
+const itemSalesColumns = computed(() => [
+    { key: 'name', label: t('common.item'), sortable: true },
+    { key: 'category', label: t('common.category'), sortable: false },
+    { key: 'quantity', label: t('dashboard.quantity_sold'), sortable: true, align: 'right' as const },
+    { key: 'revenue', label: t('common.revenue'), sortable: true, format: 'currency' as const, align: 'right' as const }
+]);
+
+const itemSalesList = computed(() => itemSalesData.value?.data || []);
+
+const itemSalesPagination = computed(() => itemSalesData.value || {});
+
+const handleTableSort = (key: string, direction: 'asc' | 'desc') => {
+    const sortValue = `${key}_${direction}`;
+    currentSort.value = sortValue;
+    updateParams({ sort: sortValue, page: 1 });
+};
+
+watch(searchQuery, debounce((val: string) => {
+    updateParams({ q: val, page: 1 });
+}, 500));
 
 const fetchDetails = async (type: string, params: any = {}) => {
     showDetailsModal.value = true;
@@ -305,16 +398,52 @@ const getStatusClass = (status: string) => {
     return classes[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
 };
 
-const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
+const updateParams = (params: any) => {
     router.get(window.location.pathname, {
-        start_date: range.startDate,
-        end_date: range.endDate,
+        start_date: dateRange.value.start_date,
+        end_date: dateRange.value.end_date,
+        tab: currentTab.value,
+        ...params
     }, {
         preserveState: true,
         preserveScroll: true,
     });
 };
 
+const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
+    // If we are in item_sales tab, we want to reset search/sort? No, keep them.
+    // If we are in overview, just dates.
+    const params: any = {
+        start_date: range.startDate,
+        end_date: range.endDate,
+        tab: currentTab.value,
+    };
+    
+    if (currentTab.value === 'item_sales') {
+        params.q = searchQuery.value;
+        params.sort = currentSort.value;
+    }
+
+    router.get(window.location.pathname, params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+const switchTab = (tab: string) => {
+    router.get(window.location.pathname, {
+        start_date: dateRange.value.start_date,
+        end_date: dateRange.value.end_date,
+        tab: tab
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+
+
+// ... Chart initialization functions ...
 const initRevenueChart = () => {
     if (!revenueChartCanvas.value) return;
     
@@ -530,7 +659,7 @@ const initPaymentChart = () => {
     paymentChartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: paymentDistribution.value.map((item: any) => t('orders.' + item.method)),
+            labels: paymentDistribution.value.map((item: any) => item.method),
             datasets: [{
                 data: paymentDistribution.value.map((item: any) => item.total),
                 backgroundColor: colors,
@@ -720,24 +849,28 @@ const initRetentionChart = () => {
 };
 
 onMounted(() => {
-    initRevenueChart();
-    initStatusChart();
-    initPeakHoursChart();
-    initTopItemsChart();
-    initPaymentChart();
-    initWasteChart();
-    initTopCategoriesChart();
-    initRetentionChart();
+    if (currentTab.value === 'overview') {
+        initRevenueChart();
+        initStatusChart();
+        initPeakHoursChart();
+        initTopItemsChart();
+        initPaymentChart();
+        initWasteChart();
+        initTopCategoriesChart();
+        initRetentionChart();
+    }
 });
 
 watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistribution, wasteChart, topCategories, retentionStats], () => {
-    initRevenueChart();
-    initStatusChart();
-    initPeakHoursChart();
-    initTopItemsChart();
-    initPaymentChart();
-    initWasteChart();
-    initTopCategoriesChart();
-    initRetentionChart();
+    if (currentTab.value === 'overview') {
+        initRevenueChart();
+        initStatusChart();
+        initPeakHoursChart();
+        initTopItemsChart();
+        initPaymentChart();
+        initWasteChart();
+        initTopCategoriesChart();
+        initRetentionChart();
+    }
 });
 </script>

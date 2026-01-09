@@ -28,6 +28,9 @@ class ReportController extends Controller
         // Daily Sales Chart Data - Process in PHP
         $orders = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'deleted')
             ->get();
 
         $dailySales = $orders->groupBy(function ($order) {
@@ -53,6 +56,8 @@ class ReportController extends Controller
         $statsOrders = Order::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'deleted')
             ->get(); // Need collection for grouping/summing
 
         $paymentStats = [
@@ -159,6 +164,9 @@ class ReportController extends Controller
 
                 $orders = Order::where('restaurant_id', $restaurantId)
                     ->whereBetween('created_at', [$startDate, $endDate])
+                    ->where('payment_status', 'paid')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('status', '!=', 'deleted')
                     ->get()
                     ->groupBy(function ($order) {
                         return $order->created_at->format('Y-m-d');
@@ -178,6 +186,8 @@ class ReportController extends Controller
                 Order::where('restaurant_id', $restaurantId)
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->where('payment_status', 'paid')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('status', '!=', 'deleted')
                     ->with(['waiter', 'table'])
                     ->orderBy('created_at', 'desc')
                     ->chunk(100, function ($orders) use ($file, $timezone) {

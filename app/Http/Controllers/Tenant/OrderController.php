@@ -32,7 +32,13 @@ class OrderController extends Controller
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
-            ->with(['customer', 'waiter']);
+            ->with([
+                'customer',
+                'waiter',
+                'items.menuItem' => function ($q) {
+                    $q->withTrashed();
+                }
+            ]);
 
         // Search
         if ($request->filled('search')) {
@@ -100,7 +106,12 @@ class OrderController extends Controller
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
-            ->with('waiter');
+            ->with([
+                'waiter',
+                'items.menuItem' => function ($q) {
+                    $q->withTrashed();
+                }
+            ]);
 
         // Search
         if ($request->filled('search')) {
@@ -549,7 +560,13 @@ class OrderController extends Controller
         }
 
         // Broadcast order created event for real-time updates
-        broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
+        broadcast(new OrderUpdated($order->load([
+            'items.menuItem' => function ($q) {
+                $q->withTrashed();
+            },
+            'customer',
+            'table'
+        ]), 'created'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.order_created'));
     }

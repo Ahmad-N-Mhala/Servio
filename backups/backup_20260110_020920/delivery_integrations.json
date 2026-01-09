@@ -1,0 +1,21 @@
+[
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "provider": "noon",
+        "api_key": null,
+        "api_secret": null,
+        "store_id": null,
+        "client_id": null,
+        "client_secret": null,
+        "username": null,
+        "password": null,
+        "webhook_secret": null,
+        "is_enabled": true,
+        "settings": "[]",
+        "updated_at": "2025-12-26T18:29:35.295000Z",
+        "created_at": "2025-12-26T18:29:35.295000Z",
+        "id": {
+            "$oid": "694ed40f4c7837e511064ba4"
+        }
+    }
+]

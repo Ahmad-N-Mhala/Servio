@@ -97,13 +97,17 @@
                                             {{ new Date(order.created_at).toLocaleDateString() }}
                                         </td>
                                         <td class="px-6 py-4 text-sm">
-                                            <span class="px-2 py-1 rounded-full text-xs font-semibold capitalize"
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold capitalize block w-fit"
                                                 :class="{
                                                     'bg-green-100 text-green-800': order.status === 'completed',
                                                     'bg-yellow-100 text-yellow-800': order.status === 'pending' || order.status === 'processing',
-                                                    'bg-red-100 text-red-800': order.status === 'cancelled'
+                                                    'bg-red-100 text-red-800': order.status === 'cancelled' || order.status === 'deleted',
+                                                    'bg-gray-100 text-gray-800': !['completed', 'pending', 'processing', 'cancelled', 'deleted'].includes(order.status)
                                                 }">
                                                 {{ order.status }}
+                                                <span v-if="['cancelled', 'deleted'].includes(order.status)" class="block text-[10px] opacity-80 font-normal">
+                                                    {{ new Date(order.updated_at).toLocaleDateString() }}
+                                                </span>
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900 text-right font-medium">

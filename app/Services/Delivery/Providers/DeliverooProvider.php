@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Log;
 
 class DeliverooProvider implements DeliveryProviderInterface
 {
-    protected $baseUrl = 'https://api.deliveroo.com/order/v1';
+    // Updated to Production URL based on research
+    protected $baseUrl = 'https://api.developers.deliveroo.com/order/v1';
 
     public function parseOrderPayload(array $payload): array
     {
@@ -47,28 +48,41 @@ class DeliverooProvider implements DeliveryProviderInterface
 
     public function verifyWebhookSignature(\Illuminate\Http\Request $request, DeliveryIntegration $integration): bool
     {
-        // Deliveroo uses HMAC SHA256 signature
-        // Header: X-Deliveroo-Signature
-        // But for initial implementation without live keys, we return true if secret checks passed in controller
-        // Real implementation:
-        // $signature = $request->header('X-Deliveroo-Signature');
-        // $computed = hash_hmac('sha256', $request->getContent(), $integration->webhook_secret);
-        // return hash_equals($signature, $computed);
+        // Deliveroo HMAC SHA256 Signature Verification
+        // Headers: X-Deliveroo-Sequence-Guid, X-Deliveroo-Hmac-Sha256
 
-        return true;
+        $signature = $request->header('X-Deliveroo-Hmac-Sha256');
+        if (!$signature) {
+            return false;
+        }
+
+        // According to docs, we might need to concat GUID + Body
+        // But simplified HMAC verification usually suffices on the body
+        // Docs say: signature = HMAC(SHA256, key=secret, msg=X-Deliveroo-Sequence-Guid + " " + raw_request_body)
+
+        $guid = $request->header('X-Deliveroo-Sequence-Guid');
+        $rawPayload = $request->getContent();
+
+        // Construct the expected message string (Guid + Space + Body)
+        // Note: For legacy Pos integration it might be different, but for new APIs it's space separated
+        $message = $guid ? ($guid . ' ' . $rawPayload) : $rawPayload;
+
+        $computed = hash_hmac('sha256', $message, $integration->webhook_secret);
+
+        return hash_equals($signature, $computed);
     }
 
     public function pushMenu(DeliveryIntegration $integration, array $menuData): bool
     {
         // Deliveroo API Endpoint for Menu Upload
-        // POST https://api.deliveroo.com/menu/v1/menus
+        // Production: https://api.developers.deliveroo.com/menu/v1/menus
 
         try {
             // Need to transform $menuData to Deliveroo Schema here
             // This is a placeholder for the transformation logic
 
             $response = Http::withBasicAuth($integration->api_key, $integration->api_secret)
-                ->post('https://api.deliveroo.com/menu/v1/menus', [
+                ->post('https://api.developers.deliveroo.com/menu/v1/menus', [
                     'menu' => $menuData
                 ]);
 

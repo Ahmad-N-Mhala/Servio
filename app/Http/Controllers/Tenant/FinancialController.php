@@ -72,6 +72,9 @@ class FinancialController extends Controller
 
         $orders = Order::where('restaurant_id', $restaurant->id)
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'deleted')
             ->get();
 
         $dailySales = $orders->groupBy(function ($order) {

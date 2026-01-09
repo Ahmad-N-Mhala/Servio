@@ -62,4 +62,12 @@ return [
     'thank_you' => 'Thank you!',
     'come_again' => 'Please come again',
     'search_orders' => 'Search orders...',
+    'item' => 'Item',
+    'revenue' => 'Revenue',
+    'showing' => 'Showing',
+    'to' => 'to',
+    'of' => 'of',
+    'results' => 'results',
+    'stock' => 'Stock',
+    'no_results' => 'No results found',
 ];

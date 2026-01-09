@@ -13,9 +13,11 @@ use Spatie\Translatable\HasTranslations;
 
 use App\Traits\HasRestaurant;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class MenuItem extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant;
+    use HasFactory, HasTranslations, HasRestaurant, SoftDeletes;
 
     public $translatable = ['name'];
 
@@ -52,7 +54,7 @@ class MenuItem extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(MenuCategory::class, 'menu_category_id');
+        return $this->belongsTo(MenuCategory::class, 'menu_category_id')->withTrashed();
     }
 
     public function orderItems(): HasMany

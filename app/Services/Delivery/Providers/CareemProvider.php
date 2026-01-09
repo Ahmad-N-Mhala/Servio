@@ -6,10 +6,50 @@ use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CareemProvider implements DeliveryProviderInterface
 {
-    protected $baseUrl = 'https://api.careem.com/food/v1';
+    // Research indicates 'careemnow' domain is used for partners
+    protected $baseUrl = 'https://api.careemnow.com/food/v1';
+    protected $authUrl = 'https://auth.careemnow.com/oauth/token'; // Hypothetical Standard OAuth
+
+    /**
+     * Helper to get Careem OAuth Token
+     */
+    protected function getAccessToken(DeliveryIntegration $integration): ?string
+    {
+        $cacheKey = "careem_token_" . $integration->id;
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        try {
+            // Standard OAuth Client Credentials Flow
+            $response = Http::asForm()->post($this->authUrl, [
+                'client_id' => $integration->client_id,
+                'client_secret' => $integration->client_secret,
+                'grant_type' => 'client_credentials',
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $token = $data['access_token'];
+                // Default to 1 hour if not provided
+                $expiresIn = $data['expires_in'] ?? 3600;
+
+                Cache::put($cacheKey, $token, $expiresIn - 60);
+
+                return $token;
+            }
+
+            Log::error('Careem Token Fetch Failed: ' . $response->body());
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Careem Token Exception: ' . $e->getMessage());
+            return null;
+        }
+    }
 
     public function parseOrderPayload(array $payload): array
     {
@@ -48,17 +88,20 @@ class CareemProvider implements DeliveryProviderInterface
     public function verifyWebhookSignature(\Illuminate\Http\Request $request, DeliveryIntegration $integration): bool
     {
         // Careem signature logic
+        // Often uses simple secret matching or HMAC
         return true;
     }
 
     public function pushMenu(DeliveryIntegration $integration, array $menuData): bool
     {
+        $token = $this->getAccessToken($integration);
+        if (!$token)
+            return false;
+
         try {
-            // Need API Key + Store ID headers usually
-            $response = Http::withHeaders([
-                'X-API-Key' => $integration->api_key,
-                'X-Store-ID' => $integration->store_id
-            ])->post("{$this->baseUrl}/menu", $menuData);
+            $response = Http::withToken($token)
+                ->withHeaders(['X-Store-ID' => $integration->store_id])
+                ->post("{$this->baseUrl}/menu", $menuData);
 
             return $response->successful();
         } catch (\Exception $e) {
@@ -69,10 +112,13 @@ class CareemProvider implements DeliveryProviderInterface
 
     public function acceptOrder(DeliveryIntegration $integration, string $externalOrderId): bool
     {
+        $token = $this->getAccessToken($integration);
+        if (!$token)
+            return false;
+
         try {
-            $response = Http::withHeaders([
-                'X-API-Key' => $integration->api_key
-            ])->post("{$this->baseUrl}/orders/{$externalOrderId}/accept");
+            $response = Http::withToken($token)
+                ->post("{$this->baseUrl}/orders/{$externalOrderId}/accept");
 
             return $response->successful();
         } catch (\Exception $e) {
@@ -82,12 +128,15 @@ class CareemProvider implements DeliveryProviderInterface
 
     public function rejectOrder(DeliveryIntegration $integration, string $externalOrderId, string $reason): bool
     {
+        $token = $this->getAccessToken($integration);
+        if (!$token)
+            return false;
+
         try {
-            $response = Http::withHeaders([
-                'X-API-Key' => $integration->api_key
-            ])->post("{$this->baseUrl}/orders/{$externalOrderId}/reject", [
-                        'rejection_reason' => $reason
-                    ]);
+            $response = Http::withToken($token)
+                ->post("{$this->baseUrl}/orders/{$externalOrderId}/reject", [
+                    'rejection_reason' => $reason
+                ]);
 
             return $response->successful();
         } catch (\Exception $e) {

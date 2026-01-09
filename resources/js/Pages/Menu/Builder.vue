@@ -256,7 +256,7 @@
     </Modal>
 
     <!-- Item Modal -->
-    <Modal :show="showItemModal" @close="closeItemModal" :title="editingItem ? $t('menu.edit_item') : $t('menu.add_item')" size="lg">
+    <Modal :show="showItemModal" @close="closeItemModal" :title="editingItem ? $t('menu.edit_item') : $t('menu.add_item')" size="2xl">
         <form @submit.prevent="submitItem" class="flex flex-col h-[70vh]">
             <!-- Tabs Header -->
             <div class="flex border-b border-gray-200 dark:border-gray-700 mb-0 overflow-x-auto bg-white dark:bg-gray-800 sticky top-0 z-10">
@@ -306,12 +306,13 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.categories') }}</label>
-                            <Select v-model="itemForm.menu_category_id" required class="w-full">
-                                <option :value="null" disabled>{{ $t('menu.select_category') }}</option>
-                                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                                    {{ getCategoryName(cat.name) }}
-                                </option>
-                            </Select>
+                            <Select 
+                                v-model="itemForm.menu_category_id" 
+                                :options="categories.map(cat => ({ value: cat.id, label: getCategoryName(cat.name) }))"
+                                :placeholder="$t('menu.select_category')"
+                                required 
+                                class="w-full"
+                            />
                         </div>
                         <Input v-model="itemForm.price" :label="$t('menu.selling_price')" type="number" step="0.01" required />
                     </div>
@@ -321,15 +322,18 @@
                          <!-- Images Section -->
                         <div class="space-y-1">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.images') }}</label>
-                            <div class="grid grid-cols-4 gap-2">
-                                <button type="button" @click="triggerFileInput" class="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors">
-                                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                    <span class="text-[10px]">{{ $t('menu.upload') }}</span>
+                            <div class="flex gap-2 mb-2">
+                                <button type="button" @click="triggerFileInput" class="flex-1 h-[42px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center gap-2 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    <span class="text-xs font-medium uppercase">{{ $t('menu.upload') }}</span>
                                 </button>
-                                <button type="button" @click="showUnsplashPicker = true" class="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors">
-                                    <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span class="text-[10px]">{{ $t('menu.stock_image') }}</span>
+                                <button type="button" @click="showUnsplashPicker = true" class="flex-1 h-[42px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center gap-2 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span class="text-xs font-medium uppercase">{{ $t('menu.stock_image') }}</span>
                                 </button>
+                            </div>
+                            <!-- Existing & New Images Grid -->
+                             <div v-if="itemForm.kept_images.length > 0 || previewUrls.length > 0" class="grid grid-cols-4 gap-2">
                                 <!-- Existing Images -->
                                 <div v-for="(img, idx) in itemForm.kept_images" :key="'kept-' + idx" class="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
                                     <img :src="img.startsWith('http') ? img : '/storage/' + img" class="w-full h-full object-cover" />
@@ -385,19 +389,21 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('menu.add_ingredient_recipe') }}</label>
                         <div class="flex flex-wrap gap-2">
                             <div class="flex-1 min-w-[200px]">
-                                <Select v-model="newIngredientId" :placeholder="$t('menu.select_ingredient_placeholder')">
-                                    <option v-for="ing in ingredients.filter(i => !itemForm.ingredients.find(existing => existing.id === i.id))" :key="ing.id" :value="ing.id">
-                                        {{ getCategoryName(ing.name) }} ({{ ing.cost }} / {{ ing.unit }})
-                                    </option>
-                                </Select>
+                                <Select 
+                                    v-model="newIngredientId" 
+                                    :options="ingredients.filter(i => !itemForm.ingredients.find(existing => existing.id === i.id)).map(ing => ({ value: ing.id, label: `${getCategoryName(ing.name)} (${ing.cost} / ${ing.unit})` }))"
+                                    :placeholder="$t('menu.select_ingredient_placeholder')"
+                                />
                             </div>
                             <div class="w-24">
                                 <Input v-model="newIngredientQty" type="number" step="0.0001" :placeholder="$t('menu.qty')" @keypress.enter.prevent="addIngredient" />
                             </div>
                              <div class="w-24">
-                                <Select v-model="newIngredientUnit" :placeholder="$t('menu.unit')">
-                                    <option v-for="unit in getAvailableUnits" :key="unit" :value="unit">{{ unit }}</option>
-                                </Select>
+                                <Select 
+                                    v-model="newIngredientUnit" 
+                                    :options="getAvailableUnits"
+                                    :placeholder="$t('menu.unit')"
+                                />
                             </div>
                             <Button type="button" @click="addIngredient" :disabled="!newIngredientId || !newIngredientUnit">{{ $t('common.add') }}</Button>
                         </div>
@@ -438,10 +444,11 @@
                         <div v-for="(bundle, idx) in itemForm.bundles" :key="idx" class="flex gap-3 items-start p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-700">
                             <div class="flex-1">
                                 <label class="text-xs text-gray-500 mb-1 block">{{ $t('menu.item_to_include') }}</label>
-                                <Select v-model="bundle.child_menu_item_id">
-                                    <option :value="null">{{ $t('menu.select_item') }}</option>
-                                    <option v-for="item in allItems" :key="item.id" :value="item.id">{{ getItemName(item.name) }}</option>
-                                </Select>
+                                <Select 
+                                    v-model="bundle.child_menu_item_id"
+                                    :options="allItems.map(item => ({ value: item.id, label: getItemName(item.name) }))"
+                                    :placeholder="$t('menu.select_item')"
+                                />
                             </div>
                             <div class="w-24">
                                 <label class="text-xs text-gray-500 mb-1 block">{{ $t('menu.qty') }}</label>
@@ -472,8 +479,8 @@
                             </button>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pr-8">
-                                <Input v-model="extra.name.en" :label="$t('common.name_en')" placeholder="e.g. Extra Cheese" />
-                                <Input v-model="extra.name.ar" :label="$t('common.name_ar')" placeholder="e.g. جبne إضافية" dir="rtl" class="text-right" />
+                                <Input v-model="extra.name.en" :label="$t('common.name_en')" placeholder="e.g. Extra Cheese" required />
+                                <Input v-model="extra.name.ar" :label="$t('common.name_ar')" placeholder="e.g. جبne إضافية" dir="rtl" class="text-right" required />
                             </div>
 
                             <div class="flex flex-col md:flex-row gap-4 items-end">
@@ -489,20 +496,21 @@
                                     </label>
                                     <div class="flex gap-2">
                                         <div class="flex-1">
-                                            <Select v-model="extra.ingredient_id" :placeholder="$t('menu.link_ingredient')">
-                                                <option :value="null">{{ $t('menu.no_deduction') }}</option>
-                                                <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
-                                                    {{ getCategoryName(ing.name) }} ({{ $t('common.stock') }}: {{ ing.unit }})
-                                                </option>
-                                            </Select>
+                                            <Select 
+                                                v-model="extra.ingredient_id" 
+                                                :options="[{value: null, label: $t('menu.no_deduction')}, ...ingredients.map(ing => ({ value: ing.id, label: `${getCategoryName(ing.name)} (${t('common.stock')}: ${ing.unit})` }))]"
+                                                :placeholder="$t('menu.link_ingredient')"
+                                            />
                                         </div>
                                         <div class="w-24" v-if="extra.ingredient_id">
                                             <Input v-model="extra.quantity" type="number" step="0.001" :placeholder="$t('menu.qty')" />
                                         </div>
                                          <div class="w-28" v-if="extra.ingredient_id">
-                                            <Select v-model="extra.unit" :placeholder="$t('menu.unit')">
-                                                 <option v-for="unit in getCompatibleUnits(extra.ingredient_id)" :key="unit" :value="unit">{{ unit }}</option>
-                                            </Select>
+                                            <Select 
+                                                v-model="extra.unit" 
+                                                :options="getCompatibleUnits(extra.ingredient_id)"
+                                                :placeholder="$t('menu.unit')"
+                                            />
                                         </div>
                                     </div>
                                 </div>

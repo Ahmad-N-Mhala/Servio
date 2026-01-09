@@ -6,10 +6,55 @@ use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class UberEatsProvider implements DeliveryProviderInterface
 {
+    // Verified Base URL
     protected $baseUrl = 'https://api.uber.com/v2/eats';
+
+    // Auth URL
+    protected $authUrl = 'https://auth.uber.com/oauth/v2/token';
+
+    /**
+     * Helper to get or refresh OAuth Access Token
+     */
+    protected function getAccessToken(DeliveryIntegration $integration): ?string
+    {
+        // Use cached token if available
+        $cacheKey = "uber_token_" . $integration->id;
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        // Request new token
+        try {
+            $response = Http::asForm()->post($this->authUrl, [
+                'client_id' => $integration->client_id,
+                'client_secret' => $integration->client_secret,
+                'grant_type' => 'client_credentials',
+                'scope' => 'eats.store eats.order' // Verified scopes
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $token = $data['access_token'];
+                $expiresIn = $data['expires_in'] ?? 3600;
+
+                // Cache it for slightly less than expiry time
+                Cache::put($cacheKey, $token, $expiresIn - 60);
+
+                return $token;
+            }
+
+            Log::error('Uber Token Fetch Failed: ' . $response->body());
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error('Uber Token Fetch Exception: ' . $e->getMessage());
+            return null;
+        }
+    }
 
     public function parseOrderPayload(array $payload): array
     {
@@ -59,15 +104,24 @@ class UberEatsProvider implements DeliveryProviderInterface
 
     public function verifyWebhookSignature(\Illuminate\Http\Request $request, DeliveryIntegration $integration): bool
     {
-        // Validation logic for Uber Eats (HMAC-SHA256 usually)
-        return true;
+        // Validation logic for Uber Eats (HMAC-SHA256)
+        // Header: X-Uber-Signature
+        $signature = $request->header('X-Uber-Signature');
+        if (!$signature)
+            return false;
+
+        $computed = hash_hmac('sha256', $request->getContent(), $integration->client_secret);
+        return hash_equals($signature, $computed);
     }
 
     public function pushMenu(DeliveryIntegration $integration, array $menuData): bool
     {
-        // Placeholder for Uber Eats Menu API
+        $token = $this->getAccessToken($integration);
+        if (!$token)
+            return false;
+
         try {
-            $response = Http::withToken($integration->api_key)
+            $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/stores/{$integration->store_id}/menus", [
                     'menus' => [$menuData]
                 ]);
@@ -81,8 +135,12 @@ class UberEatsProvider implements DeliveryProviderInterface
 
     public function acceptOrder(DeliveryIntegration $integration, string $externalOrderId): bool
     {
+        $token = $this->getAccessToken($integration);
+        if (!$token)
+            return false;
+
         try {
-            $response = Http::withToken($integration->api_key)
+            $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/accept", [
                     'reason' => 'PosConfirmed'
                 ]);
@@ -95,8 +153,12 @@ class UberEatsProvider implements DeliveryProviderInterface
 
     public function rejectOrder(DeliveryIntegration $integration, string $externalOrderId, string $reason): bool
     {
+        $token = $this->getAccessToken($integration);
+        if (!$token)
+            return false;
+
         try {
-            $response = Http::withToken($integration->api_key)
+            $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/deny", [
                     'reason' => [
                         'explanation' => $reason,

@@ -38,27 +38,29 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
-                'name' => 'Careem NOW',
+                'name' => 'Careem Food', // Updated Name
                 'slug' => 'careem',
-                'description' => 'Careem\'s food and grocery delivery service, part of Uber, operating across the Middle East and North Africa.',
+                'description' => 'Careem\'s food and grocery delivery service.',
                 'logo_url' => '/images/delivery-partners/careem.svg',
                 'api_documentation_url' => 'https://developers.careem.com',
-                'requires_api_key' => true,
-                'requires_api_secret' => true,
+                'requires_api_key' => false,
+                'requires_api_secret' => false,
+                'requires_client_id' => true,     // OAuth
+                'requires_client_secret' => true, // OAuth
                 'requires_store_id' => true,
-                'requires_webhook_secret' => true,
+                'requires_webhook_secret' => false, // Usually implicit or standard
                 'is_active' => true,
                 'sort_order' => 3,
             ],
             [
                 'name' => 'Deliveroo',
                 'slug' => 'deliveroo',
-                'description' => 'International food delivery company operating in UAE, Kuwait, and Qatar, known for premium restaurant partnerships.',
+                'description' => 'International food delivery company.',
                 'logo_url' => '/images/delivery-partners/deliveroo.svg',
                 'api_documentation_url' => 'https://developers.deliveroo.com',
-                'requires_api_key' => true,
-                'requires_api_secret' => true,
-                'requires_store_id' => true,
+                'requires_api_key' => true,    // Basic Auth User
+                'requires_api_secret' => true, // Basic Auth Pass
+                'requires_store_id' => true, // Not strictly needed for API auth, but good for ref
                 'requires_webhook_secret' => true,
                 'is_active' => true,
                 'sort_order' => 4,
@@ -66,13 +68,15 @@ class DeliveryProviderSeeder extends Seeder
             [
                 'name' => 'Uber Eats',
                 'slug' => 'ubereats',
-                'description' => 'Global food delivery platform by Uber, operating in major cities across the Middle East.',
+                'description' => 'Global food delivery platform by Uber.',
                 'logo_url' => '/images/delivery-partners/ubereats.svg',
                 'api_documentation_url' => 'https://developer.uber.com/docs/eats',
-                'requires_api_key' => true,
-                'requires_api_secret' => true,
+                'requires_api_key' => false,
+                'requires_api_secret' => false,
+                'requires_client_id' => true,     // OAuth
+                'requires_client_secret' => true, // OAuth
                 'requires_store_id' => true,
-                'requires_webhook_secret' => true,
+                'requires_webhook_secret' => true, // HMAC sig
                 'is_active' => true,
                 'sort_order' => 5,
             ],

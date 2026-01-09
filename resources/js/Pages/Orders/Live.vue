@@ -86,6 +86,9 @@
                      <div class="flex items-center gap-1">
                         <span :class="['px-3 py-1 rounded-full text-xs font-semibold', getStatusClass(row.status)]">
                             {{ getStatusLabel(row.status) }}
+                            <span v-if="['cancelled', 'deleted'].includes(row.status)" class="block text-[10px] font-normal opacity-80">
+                                {{ new Date(row.updated_at).toLocaleDateString() }}
+                            </span>
                         </span>
                         <div v-if="row.status === 'cancelled' && row.notes" class="group relative">
                             <svg class="w-4 h-4 text-red-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -573,8 +576,17 @@ const printReceipt = async (order: any) => {
                         ${(order.items || []).map((item: any) => `
                             <tr>
                                 <td class="item-name">
-                                    ${escapeHtml(item.menu_item?.name?.en || item.menu_item?.name || item.name || 'Item')}
-                                    ${(item.extras || []).map((extra: any) => `<div class="item-note" style="padding-left:0;">+ ${escapeHtml(extra.name)} (${Number(extra.price).toFixed(2)})</div>`).join('')}
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-medium text-gray-900">
+                                            ${escapeHtml(item.menu_item?.name?.en || item.menu_item?.name || item.name || 'Item')}
+                                            ${item.menu_item?.deleted_at ? `<span class="text-red-500 text-xs text-[10px]">(${t('common.deleted')})</span>` : ''}
+                                        </span>
+                                        ${(item.extras && item.extras.length > 0) ? `
+                                            <div class="text-xs text-blue-600 flex flex-wrap gap-1">
+                                                ${(item.extras || []).map((extra: any) => `<span class="item-note" style="padding-left:0;">+ ${escapeHtml(extra.name)} (${Number(extra.price).toFixed(2)})</span>`).join('')}
+                                            </div>
+                                        ` : ''}
+                                    </div>
                                 </td>
                                 <td class="center" style="vertical-align: top;">${item.quantity}</td>
                                 <td class="right" style="vertical-align: top;">${Number(item.unit_price).toFixed(2)}</td>

@@ -12,9 +12,11 @@ use Spatie\Translatable\HasTranslations;
 
 use App\Traits\HasRestaurant;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class MenuCategory extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant;
+    use HasFactory, HasTranslations, HasRestaurant, SoftDeletes;
 
     public $translatable = ['name'];
 
