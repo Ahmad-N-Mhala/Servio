@@ -206,7 +206,7 @@ class QrOrderController extends Controller
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
             'table_id' => $table->id,
-            'order_number' => $nextNumber . 'QR',
+            'order_number' => 'QR-' . $nextNumber,
             'type' => 'dine_in',
             'status' => 'pending',
             'subtotal' => $subtotal,

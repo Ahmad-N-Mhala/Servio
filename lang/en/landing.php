@@ -37,4 +37,13 @@ return [
     'hero_image_text' => "RESTAURANT\nMANAGEMENT\nREDEFINED",
     'plan_features' => 'Plan Features',
     'for_plan' => 'For :plan plan',
+    'month' => 'month',
+    'year' => 'year',
+    'upgrade' => 'Upgrade',
+    'downgrade' => 'Downgrade',
+    'choose_plan' => 'Choose Your Perfect Plan',
+    'choose_plan_desc' => 'Select the plan that best fits your restaurant\'s needs',
+    'custom_plan_title' => 'Need a Custom Plan?',
+    'custom_plan_desc' => 'Contact our sales team for enterprise solutions tailored to your needs',
+    'contact_sales' => 'Contact Sales',
 ];

@@ -143,6 +143,10 @@ Route::group([
                 Route::resource('/', \App\Http\Controllers\Tenant\TableController::class)
                     ->parameters(['' => 'table'])
                     ->middleware('permission:view_tables');
+                Route::post('/zones', [\App\Http\Controllers\Tenant\TableController::class, 'storeZone'])->name('zones.store')
+                    ->middleware('permission:create_table');
+                Route::delete('/zones/{zone}', [\App\Http\Controllers\Tenant\TableController::class, 'destroyZone'])->name('zones.destroy')
+                    ->middleware('permission:delete_table');
                 Route::get('/{table}/qr-code', [\App\Http\Controllers\Tenant\TableController::class, 'downloadQrCode'])->name('qr-code')
                     ->middleware('permission:view_tables');
                 Route::post('/{table}/regenerate-qr', [\App\Http\Controllers\Tenant\TableController::class, 'regenerateQrCode'])->name('regenerate-qr')

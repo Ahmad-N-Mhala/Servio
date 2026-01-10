@@ -27,7 +27,9 @@ class POSController extends Controller
                 $query->withTrashed();
             },
             'customer',
-            'table'
+            'customer',
+            'table',
+            'waiter'
         ])
             ->where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'pending_approval', 'completed', 'processing', 'ready', 'served'])
@@ -69,6 +71,7 @@ class POSController extends Controller
             'currentRegister' => $currentRegister,
             'currentBalance' => $currentRegister ? $currentRegister->getCurrentBalance() : 0,
             'google_map_location' => $restaurant->google_map_location,
+            'receipt_template' => $restaurant->receipt_template,
         ]);
     }
 

@@ -369,12 +369,12 @@ class CashRegisterController extends Controller
             fputs($file, "\xEF\xBB\xBF");
 
             // Title
-            fputcsv($file, ['CASH REGISTER REPORT']);
+            fputcsv($file, [__('reports.cash_register_report')]);
             fputcsv($file, []); // Spacer
 
             // 1. General Info Section - Horizontal Headers
-            fputcsv($file, ['GENERAL INFORMATION']);
-            fputcsv($file, ['Restaurant', 'Cashier', 'Status', 'Opened At', 'Closed At']);
+            fputcsv($file, [__('reports.general_information')]);
+            fputcsv($file, [__('reports.restaurant'), __('reports.cashier'), __('reports.status'), __('reports.opened_at'), __('reports.closed_at')]);
             fputcsv($file, [
                 $cashRegister->restaurant->name ?? 'N/A',
                 $cashRegister->user->name,
@@ -385,14 +385,14 @@ class CashRegisterController extends Controller
             fputcsv($file, []); // Spacer
 
             // 2. Financial Summary Section - Horizontal Headers
-            fputcsv($file, ['FINANCIAL SUMMARY']);
-            $financialHeaders = ['Opening Balance'];
+            fputcsv($file, [__('reports.financial_summary')]);
+            $financialHeaders = [__('reports.opening_balance')];
             $financialValues = [number_format((float) $cashRegister->opening_balance, 2)];
 
             if ($cashRegister->status === 'closed') {
-                $financialHeaders[] = 'Expected Balance';
-                $financialHeaders[] = 'Actual Closing Balance';
-                $financialHeaders[] = 'Difference';
+                $financialHeaders[] = __('reports.expected_balance');
+                $financialHeaders[] = __('reports.actual_closing_balance');
+                $financialHeaders[] = __('reports.difference');
 
                 $financialValues[] = number_format((float) $cashRegister->expected_balance, 2);
                 $financialValues[] = number_format((float) $cashRegister->closing_balance, 2);
@@ -405,18 +405,18 @@ class CashRegisterController extends Controller
 
             // 3. Notes Section
             if ($cashRegister->opening_notes || $cashRegister->closing_notes) {
-                fputcsv($file, ['NOTES']);
-                fputcsv($file, ['Type', 'Content']);
+                fputcsv($file, [strtoupper(__('reports.notes'))]);
+                fputcsv($file, [__('reports.type'), __('reports.content')]);
                 if ($cashRegister->opening_notes)
-                    fputcsv($file, ['Opening Notes', $cashRegister->opening_notes]);
+                    fputcsv($file, [__('reports.opening_notes'), $cashRegister->opening_notes]);
                 if ($cashRegister->closing_notes)
-                    fputcsv($file, ['Closing Notes', $cashRegister->closing_notes]);
+                    fputcsv($file, [__('reports.closing_notes'), $cashRegister->closing_notes]);
                 fputcsv($file, []); // Spacer
             }
 
             // 4. Transactions Section
-            fputcsv($file, ['TRANSACTION HISTORY']);
-            fputcsv($file, ['Time', 'Type', 'Amount', 'Balance After', 'Notes']);
+            fputcsv($file, [__('reports.transaction_history_cash')]);
+            fputcsv($file, [__('reports.time'), __('reports.type'), __('reports.amount'), __('reports.balance_after'), __('reports.notes')]);
 
             // Transactions Data
             foreach ($cashRegister->transactions as $transaction) {

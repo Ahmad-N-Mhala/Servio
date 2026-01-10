@@ -66,6 +66,12 @@ class HandleInertiaRequests extends Middleware
                             'slug' => $restaurant->slug,
                             'logo' => $restaurant->logo,
                             'settings' => $restaurant->settings,
+                            'receipt_template' => $restaurant->receipt_template,
+                            'currency' => $restaurant->currency,
+                            'google_map_location' => $restaurant->google_map_location,
+                            'phone' => $restaurant->phone,
+                            'email' => $restaurant->email,
+                            'address' => $restaurant->address,
                         ];
                     }
                 }

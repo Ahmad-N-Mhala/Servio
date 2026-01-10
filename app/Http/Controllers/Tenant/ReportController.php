@@ -160,7 +160,11 @@ class ReportController extends Controller
 
             if ($type === 'sales') {
                 // Daily Sales Report
-                fputcsv($file, ['Date', 'Total Orders', 'Total Revenue']);
+                fputcsv($file, [
+                    __('reports.date'),
+                    __('reports.total_orders'),
+                    __('reports.total_revenue')
+                ]);
 
                 $orders = Order::where('restaurant_id', $restaurantId)
                     ->whereBetween('created_at', [$startDate, $endDate])
@@ -181,7 +185,15 @@ class ReportController extends Controller
                 }
             } else {
                 // Payment History Report
-                fputcsv($file, ['Date/Time', 'Order #', 'Table', 'Customer', 'Waiter', 'Payment Method', 'Amount']);
+                fputcsv($file, [
+                    __('reports.date_time'),
+                    __('reports.order') . ' #',
+                    __('pos.table'),
+                    __('orders.customer'),
+                    __('reports.waiter'),
+                    __('reports.payment_methods'),
+                    __('reports.amount')
+                ]);
 
                 Order::where('restaurant_id', $restaurantId)
                     ->whereBetween('created_at', [$startDate, $endDate])
@@ -195,10 +207,10 @@ class ReportController extends Controller
                             fputcsv($file, [
                                 $order->created_at->setTimezone($timezone)->format('Y-m-d H:i:s'),
                                 $order->order_number,
-                                $order->table ? $order->table->name : 'Takeaway',
-                                $order->customer_name ?: 'Guest',
+                                $order->table ? $order->table->name : __('reports.takeaway'),
+                                $order->customer_name ?: __('reports.guest'),
                                 $order->waiter ? $order->waiter->name : '-',
-                                ucfirst($order->payment_method),
+                                __('reports.' . strtolower($order->payment_method ?? 'unknown')) ?: ucfirst($order->payment_method),
                                 $order->total
                             ]);
                         }

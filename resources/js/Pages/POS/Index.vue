@@ -737,15 +737,29 @@
                 </div>
             </div>
         </div>
+        <Teleport to="body">
+            <div id="pos-receipt-preview" class="print-overlay">
+                <ReceiptPreview 
+                    v-if="receiptPreviewOrder"
+                    :template="currentRestaurant?.receipt_template || {}" 
+                    :order="receiptPreviewOrder" 
+                    :logo="currentRestaurant?.logo" 
+                    :restaurant-name="currentRestaurant?.name"
+                    :google-map-location="currentRestaurant?.google_map_location"
+                />
+            </div>
+        </Teleport>
     </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { usePermissions } from '@/Composables/usePermissions';
+import ReceiptPreview from '@/Components/ReceiptPreview.vue';
+import { printReceiptPreview } from '@/Utils/printReceipt';
 
 const { t } = useI18n();
 
@@ -761,6 +775,8 @@ const props = defineProps<{
     currentRegister: any;
     currentBalance: number;
     google_map_location?: string;
+    receipt_template?: any;
+    restaurant_logo?: string;
 }>();
 
 // Cash Register Modals
@@ -1236,472 +1252,30 @@ const settleBill = () => {
 
 // Enhanced Thermal Printer Receipt Function
 // Supports multiple printer types: 80mm, 58mm thermal printers, and standard A4 printers
+const receiptPreviewOrder = ref<any>(null);
+
+// Enhanced Receipt Function using Component
 const printReceipt = async (order: any) => {
-    // --- Generate QR Code if enabled and location exists ---
-    let qrCodeDataUrl = '';
-    // Use optional chaining carefully, assuming currentRestautant has the data we need
-    const restaurantData = currentRestaurant.value || {};
-    const templateSettings = restaurantData.receipt_template || {};
-    
-    // Check if we have restaurant location.
-    const mapLocation = restaurantData.google_map_location || '';
-    
-    // Check if qr code is enabled in template settings
-    const showQrCode = templateSettings.show_qr_code;
-    
-    if (mapLocation && showQrCode) {
-         try {
-            // @ts-ignore
-            const qrcodeModule = await import('qrcode');
-            const toDataURL = qrcodeModule.default?.toDataURL || qrcodeModule.toDataURL;
-            if (toDataURL) {
-                 qrCodeDataUrl = await toDataURL(mapLocation, { margin: 1, width: 100 });
-            }
-        } catch (e) {
-            console.error('POS Receipt QR Gen Error:', e);
-        }
-    }
-    // -------------------------------------------------------
-
     try {
-        // Create a hidden iframe for printing
-        const printFrame = document.createElement('iframe');
-        printFrame.style.position = 'absolute';
-        printFrame.style.width = '0';
-        printFrame.style.height = '0';
-        printFrame.style.border = 'none';
-        printFrame.style.left = '-9999px';
-        printFrame.setAttribute('id', 'receipt-print-frame');
-        document.body.appendChild(printFrame);
+        receiptPreviewOrder.value = order;
+        await nextTick();
+        
+        // Allow time for QR code generation (async in component)
+        const template = currentRestaurant.value?.receipt_template || {};
+        const paperWidth = template.paper_width || '80';
 
-        const doc = printFrame.contentWindow?.document;
-        if (!doc) {
-            console.error('Failed to access iframe document');
-            alert('Print failed: Unable to create print document. Please try again.');
-            document.body.removeChild(printFrame);
-            return;
-        }
-
-        // Escape HTML to prevent XSS
-        const escapeHtml = (text: string) => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        };
-
-        // Generate receipt HTML with multi-printer support
-        // This format works with:
-        // - 80mm thermal printers (Epson TM-T88, Star TSP100, etc.)
-        // - 58mm thermal printers (smaller POS printers)
-        if (printFrame.contentDocument) {
-            printFrame.contentDocument.body.innerHTML = '';
-        }
-
-        // Generate QR Code if location is available
-        let qrCodeDataUrl = '';
-        if (props.google_map_location) {
-            try {
-                // @ts-ignore
-                const QRCode = (await import('qrcode')).default;
-                qrCodeDataUrl = await QRCode.toDataURL(props.google_map_location, { margin: 1, width: 100 });
-            } catch (e) {
-                console.error('QR Gen Error', e);
-            }
-        }
-
-        const receiptHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Receipt #${escapeHtml(order.order_number)}</title>
-                <style>
-                    /* Print-specific styles for thermal printers */
-                    @media print {
-                        /* Support for 80mm thermal printers (most common) */
-                        @page {
-                            size: 80mm auto;
-                            margin: 0;
-                        }
-                        
-                        /* Alternative: 58mm thermal printers */
-                        @page :first {
-                            size: 58mm auto;
-                            margin: 0;
-                        }
-                        
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            -webkit-print-color-adjust: exact;
-                            print-color-adjust: exact;
-                        }
-                        
-                        /* Hide browser print headers/footers */
-                        @page {
-                            margin: 0;
-                        }
-                        
-                        /* Prevent page breaks within items */
-                        .item-row, .row, tr {
-                            page-break-inside: avoid;
-                            break-inside: avoid;
-                        }
-                    }
-                    
-                    /* Base styles - works for all printer types */
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
-
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        table-layout: fixed; /* Ensures columns respect widths */
-                    }
-                    
-                    td {
-                        vertical-align: top;
-                        padding: 2px 0;
-                    }
-                    
-                    thead td {
-                        border-bottom: 2px dashed #000;
-                        padding-bottom: 4px;
-                        margin-bottom: 4px;
-                    }
-                    
-                    /* Divider line via border */
-                    .divider {
-                        border-bottom: 1px dashed #000;
-                        margin: 5px 0;
-                        height: 1px;
-                        width: 100%;
-                    }
-                    
-                    body {
-                        font-family: 'Courier New', Courier, 'Lucida Console', monospace;
-                        font-size: 12px;
-                        line-height: 1.2; /* Tighter line height for receipts */
-                        color: #000;
-                        background: #fff;
-                        width: 100%;
-                        max-width: 80mm;
-                        margin: 0 auto;
-                        padding: 0; /* Let page margins handle padding if needed, or minimal padding */
-                        overflow-wrap: break-word;
-                        word-break: break-word; /* Ensure long words wrap */
-                    }
-                    
-                    /* Responsive for different paper widths */
-                    @media (max-width: 58mm) {
-                        body {
-                            max-width: 58mm;
-                            font-size: 11px;
-                            padding: 2mm 3mm;
-                        }
-                        .logo {
-                            max-width: 45mm !important;
-                            max-height: 20mm !important;
-                        }
-                    }
-                    
-                    .center {
-                        text-align: center;
-                        display: block;
-                        width: 100%;
-                    }
-                    
-                    .bold {
-                        font-weight: bold;
-                    }
-                    
-                    .large {
-                        font-size: 14px;
-                        line-height: 1.3;
-                    }
-                    
-                    .xlarge {
-                        font-size: 16px;
-                    }
-                    
-                    /* Dividers - works well on thermal printers */
-                    .divider {
-                        border-top: 1px dashed #000;
-                        margin: 3px 0;
-                        width: 100%;
-                    }
-                    
-                    .double-divider {
-                        border-top: 2px solid #000;
-                        margin: 4px 0;
-                        width: 100%;
-                    }
-                    
-                    .row {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        margin: 2px 0;
-                        width: 100%;
-                    }
-                    
-                    .row span {
-                        display: inline-block;
-                    }
-                    
-                    .row .left {
-                        text-align: left;
-                        flex: 1;
-                    }
-                    
-                    .row .right {
-                        text-align: right;
-                        white-space: nowrap;
-                    }
-                    
-                    .right {
-                        text-align: right;
-                    }
-                    
-                    /* Logo handling - prevents breaking on thermal printers */
-                    .logo {
-                        max-width: 60mm;
-                        max-height: 25mm;
-                        height: auto;
-                        width: auto;
-                        margin: 0 auto 3mm;
-                        display: block;
-                        object-fit: contain;
-                    }
-                    
-                    /* Table styles optimized for thermal printing */
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 2px 0;
-                    }
-                    
-                    td {
-                        padding: 2px 1px;
-                        vertical-align: top;
-                    }
-                    
-                    thead td {
-                        border-bottom: 1px solid #000;
-                        padding-bottom: 2px;
-                    }
-                    
-                    .item-name {
-                        max-width: 35mm;
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                    }
-                    
-                    .item-note {
-                        font-size: 10px;
-                        font-style: italic;
-                        padding-left: 5px;
-                        color: #333;
-                    }
-                    
-                    /* Spacing */
-                    .spacer {
-                        height: 3mm;
-                    }
-                    
-                    .spacer-large {
-                        height: 10mm;
-                    }
-                    
-                    /* Footer spacing for paper cut */
-                    .cut-line {
-                        margin-top: 10mm;
-                        text-align: center;
-                        font-size: 10px;
-                        color: #666;
-                    }
-                </style>
-            </head>
-            <body>
-                ${currentRestaurant.value?.logo ? `<img src="${currentRestaurant.value.logo}" class="logo" alt="Logo" onerror="this.style.display='none'">` : ''}
-                
-                <div class="center bold large">${escapeHtml(currentRestaurant.value?.name || 'Restaurant')}</div>
-                ${currentRestaurant.value?.address ? `<div class="center">${escapeHtml(currentRestaurant.value.address)}</div>` : ''}
-                ${currentRestaurant.value?.phone ? `<div class="center">Tel: ${escapeHtml(currentRestaurant.value.phone)}</div>` : ''}
-                ${currentRestaurant.value?.email ? `<div class="center">${escapeHtml(currentRestaurant.value.email)}</div>` : ''}
-                
-                <div class="double-divider"></div>
-                
-                <div class="center bold">${t('receipt.title').toUpperCase()}</div>
-                <div class="spacer"></div>
-                
-                <div class="row">
-                    <span class="left">${t('orders.order_no')}:</span>
-                    <span class="right bold">${escapeHtml(order.order_number)}</span>
-                </div>
-                <div class="row">
-                    <span class="left">${t('common.date')}:</span>
-                    <span class="right">${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
-                </div>
-                ${order.table ? `<div class="row"><span class="left">Table:</span><span class="right">${escapeHtml(order.table.name)}</span></div>` : ''}
-                ${order.customer_name ? `<div class="row"><span class="left">Customer:</span><span class="right">${escapeHtml(order.customer_name)}</span></div>` : ''}
-                <div class="row">
-                    <span class="left">Type:</span>
-                    <span class="right">${order.type === 'dine_in' ? 'Dine In' : 'Takeaway'}</span>
-                </div>
-                <div class="row">
-                    <span class="left">Payment:</span>
-                    <span class="right bold">${paymentMethod.value.toUpperCase()}</span>
-                </div>
-                
-                <div class="divider"></div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <td class="bold">Item</td>
-                            <td class="bold center" style="width: 15mm;">Qty</td>
-                            <td class="bold right" style="width: 15mm;">${t('common.price')}</td>
-                            <td class="bold right" style="width: 18mm;">${t('common.total')}</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${(order.items || []).map((item: any) => `
-                            <tr>
-                                <td class="item-name">
-                                    ${escapeHtml(item.menu_item?.name?.en || item.menu_item?.name || item.name || 'Item')}
-                                    ${(item.extras || []).map((extra: any) => 
-                                        `<div class="item-note" style="padding-left:0; font-size: 0.9em; color:#444;">+ ${escapeHtml(extra.name?.en || extra.name || 'Extra')} (${Number(extra.price).toFixed(2)})</div>`
-                                    ).join('')}
-                                </td>
-                                <td class="center" style="vertical-align: top;">${item.quantity}</td>
-                                <td class="right" style="vertical-align: top;">${Number(item.unit_price).toFixed(2)}</td>
-                                <td class="right" style="vertical-align: top;">${((Number(item.unit_price) + (item.extras || []).reduce((acc: number, extra: any) => acc + Number(extra.price), 0)) * item.quantity).toFixed(2)}</td>
-                            </tr>
-                            ${item.notes ? `<tr><td colspan="4" class="item-note">Note: ${escapeHtml(item.notes)}</td></tr>` : ''}
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="divider"></div>
-                <div class="spacer"></div>
-                
-                <div class="row">
-                    <span class="left">Subtotal:</span>
-                    <span class="right">${order.currency || currentCurrency.value} ${Number(order.subtotal || (order.total - order.tax_amount + (order.discount_amount || 0))).toFixed(2)}</span>
-                </div>
-                <div class="row">
-                    <span class="left">Tax (5%):</span>
-                    <span class="right">${order.currency || currentCurrency.value} ${Number(order.tax_amount || (order.total * 0.05)).toFixed(2)}</span>
-                </div>
-                ${order.discount_amount > 0 ? `
-                    <div class="row">
-                        <span class="left">Discount:</span>
-                        <span class="right">-${order.currency || currentCurrency.value} ${Number(order.discount_amount).toFixed(2)}</span>
-                    </div>
-                ` : ''}
-                ${order.additional_charge > 0 ? `
-                    <div class="row">
-                        <span class="left">Extra Charge:</span>
-                        <span class="right">+${order.currency || currentCurrency.value} ${Number(order.additional_charge).toFixed(2)}</span>
-                    </div>
-                ` : ''}
-                
-                <div class="double-divider"></div>
-                
-                <div class="row bold xlarge">
-                    <span class="left">${t('common.total').toUpperCase()}:</span>
-                    <span class="right">${order.currency || currentCurrency.value} ${Number(order.total).toFixed(2)}</span>
-                </div>
-                
-                <div class="double-divider"></div>
-                <div class="spacer"></div>
-                
-                <div class="center bold">${t('common.thank_you')}</div>
-                <div class="center">${t('common.come_again')}</div>
-                
-                ${qrCodeDataUrl ? `
-                <div class="spacer"></div>
-                <div class="center">
-                    <img src="${qrCodeDataUrl}" style="width: 100px; height: 100px;" />
-                </div>
-                ` : ''}
-
-                <div class="spacer-large"></div>
-                <div class="cut-line">- - - - - - - - - - - - - - - -</div>
-            </body>
-            </html>
-        `;
-
-        // Write content to iframe
-        doc.open();
-        doc.write(receiptHTML);
-        doc.close();
-
-        // Enhanced print handling with error recovery
-        const executePrint = () => {
-            try {
-                const printWindow = printFrame.contentWindow;
-                if (!printWindow) {
-                    throw new Error('Print window not available');
-                }
-
-                // Focus the print frame
-                printWindow.focus();
-
-                // Trigger print
-                printWindow.print();
-
-                console.log('Print command sent successfully');
-
-                // Cleanup after print dialog is handled
-                // Extended timeout to ensure print job is queued
-                setTimeout(() => {
-                    try {
-                        document.body.removeChild(printFrame);
-                    } catch (cleanupErr) {
-                       // ignore
-                    }
-                }, 5000);
-
-            } catch (err) {
-                console.error('Execute print error:', err);
-                alert('Print execution failed. Please check printer connection.');
-                 try {
-                    document.body.removeChild(printFrame);
-                } catch (e) {}
-            }
-        };
-
-        // If we have images (logo or QR), wait for them to load
-        const images = printFrame.contentDocument ? printFrame.contentDocument.getElementsByTagName('img') : [];
-        if (images.length > 0) {
-            let loaded = 0;
-            const checkLoaded = () => {
-                loaded++;
-                if (loaded >= images.length) {
-                    setTimeout(executePrint, 250); // Small delay to ensure render
-                }
-            };
-
-            for (let i = 0; i < images.length; i++) {
-                if (images[i].complete) {
-                    checkLoaded();
-                } else {
-                    images[i].onload = checkLoaded;
-                    images[i].onerror = checkLoaded; // Proceed even if image fails
-                }
-            }
+        if (template.show_qr_code && currentRestaurant.value?.google_map_location) {
+             await new Promise(resolve => setTimeout(resolve, 800)); // Wait for QR generation
         } else {
-            // No images, print immediately
-            setTimeout(executePrint, 250);
+             await new Promise(resolve => setTimeout(resolve, 200)); // Wait for render
         }
+
+        // Use the snapshot printing method
+        printReceiptPreview('pos-receipt-preview', paperWidth);
+        
     } catch (error) {
-        alert('Failed to print receipt. Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        console.error('Print Error:', error);
+        alert('Failed to print receipt.');
     }
 };
 
@@ -1875,3 +1449,37 @@ onUnmounted(() => {
     }
 });
 </script>
+
+<style>
+@media screen {
+    .print-overlay {
+        display: none;
+    }
+}
+
+@media print {
+    /* Hide everything in body except the print overlay */
+    body > *:not(.print-overlay) {
+        display: none !important;
+    }
+    
+    /* Ensure print overlay is visible */
+    .print-overlay {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white;
+        z-index: 9999;
+    }
+
+    /* Reset page margins */
+    @page {
+        margin: 0;
+        size: auto;
+    }
+}
+</style>

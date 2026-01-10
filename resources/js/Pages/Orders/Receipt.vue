@@ -20,7 +20,7 @@
         </div>
 
         <!-- Receipt Content -->
-        <div class="receipt-wrapper bg-white print:w-full print:absolute print:top-0 print:left-0">
+        <div id="full-page-receipt" class="receipt-wrapper bg-white">
             <ReceiptPreview 
                 :template="template" 
                 :order="orderComputed" 
@@ -36,6 +36,7 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ReceiptPreview from '@/Components/ReceiptPreview.vue';
+import { printReceiptPreview } from '@/Utils/printReceipt';
 
 useI18n();
 
@@ -47,19 +48,13 @@ const props = defineProps<{
     google_map_location?: string;
 }>();
 
-// Ensure order items are mapped correctly if structure differs
 const orderComputed = computed(() => {
-    // If order items structure needs mapping for ReceiptPreview, do it here.
-    // ReceiptPreview expects order to have: customer_name, order_number, total, subtotal, discount, tax, currency, items: [{quantity, name, price}]
-    // The backend provides exactly this structure (items relation has menuItem). 
-    // Wait, backend Order model `items` has `menu_item_id`. But we loaded `items.menuItem`.
-    // ReceiptPreview expects `item.name`. But `Order` -> `items` -> `menuItem`.
-    // Let's verify ReceiptPreview logic.
     return props.order;
 });
 
 const print = () => {
-    window.print();
+    const width = props.template?.paper_width || '80';
+    printReceiptPreview('full-page-receipt', width);
 };
 
 const close = () => {
@@ -68,40 +63,13 @@ const close = () => {
 
 onMounted(() => {
     // Optional: Auto print if opened in popup
-    // setTimeout(() => window.print(), 500);
+    // setTimeout(() => print(), 500);
 });
 </script>
 
 <style>
-@media print {
-    @page {
-        margin: 0;
-        size: auto;
-    }
-    body {
-        background-color: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    .no-print {
-        display: none !important;
-    }
-    /* Ensure receipt wrapper takes priority */
-    .receipt-wrapper {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        border: none !important;
-        overflow: visible !important;
-    }
-    
-    /* Hide everything else */
-    body > :not(.receipt-wrapper) {
-        display: none !important;
-    }
+/* Page layout styles (screen only, for centering the receipt) */
+.receipt-wrapper {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 </style>

@@ -69,8 +69,8 @@
                                 </div>
                             </div>
                         </th>
-                        <th v-if="$slots.actions" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
+                        <th v-if="$slots.actions" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{ $t('common.actions') || 'Actions' }}
                         </th>
                     </tr>
                 </thead>
@@ -132,9 +132,9 @@
                         </td>
 
                         <!-- Actions Column -->
-                        <td v-if="$slots.actions" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td v-if="$slots.actions" class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                             <div class="flex items-center justify-end gap-3">
-                                <slot name="actions" :row="row"></slot>
+                                <slot name="actions" :row="row" :index="index"></slot>
                             </div>
                         </td>
                     </tr>

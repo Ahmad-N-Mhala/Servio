@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"fc7e1fe291024a808f9cd5c8a051c0ed","collectionName":"communication_logs","type":"collection"}

@@ -91,5 +91,31 @@
         "id": {
             "$oid": "69564a57aeff1b1ae101c539"
         }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "user_id": "694579e733231912b007b6c2",
+        "opening_balance": {
+            "$numberDecimal": "100.00"
+        },
+        "opened_at": "2026-01-06T14:46:27.223000Z",
+        "status": "closed",
+        "opening_notes": null,
+        "updated_at": "2026-01-08T20:09:02.648000Z",
+        "created_at": "2026-01-06T14:46:27.224000Z",
+        "closed_at": "2026-01-08T20:09:02.648000Z",
+        "closing_balance": {
+            "$numberDecimal": "2233.00"
+        },
+        "closing_notes": null,
+        "difference": {
+            "$numberDecimal": "994.80"
+        },
+        "expected_balance": {
+            "$numberDecimal": "1238.20"
+        },
+        "id": {
+            "$oid": "695d20439ee9d56b960c2258"
+        }
     }
 ]

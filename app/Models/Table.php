@@ -15,6 +15,7 @@ class Table extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'zone_id',
         'name',
         'capacity',
         'status',
@@ -24,6 +25,11 @@ class Table extends Model
 
     protected $casts = [
         'capacity' => 'integer',
+        'zone_id' => 'string', // Ensure it casts correctly for MongoDB
+    ];
+
+    protected $appends = [
+        'qr_code_url',
     ];
 
     protected static function boot()
@@ -40,6 +46,11 @@ class Table extends Model
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
     }
 
     /**

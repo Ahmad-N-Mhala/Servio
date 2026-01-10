@@ -73,9 +73,23 @@ class DeliveryWebhookController extends Controller
 
         $restaurant = $integration->restaurant;
 
+        // Generate Sequential Transaction Number
+        $transactionNumber = $restaurant->next_order_number ?? 1;
+        try {
+            $restaurant->increment('next_order_number');
+        } catch (\Exception $e) {
+            $restaurant->next_order_number = (int) ($restaurant->next_order_number ?? 1);
+            $restaurant->save();
+            $restaurant->increment('next_order_number');
+        }
+
+        $orderNumber = ucfirst($provider) . '-' . $transactionNumber;
+
         // 4. Create Order
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
+            'order_number' => $orderNumber,
+            'transaction_number' => $transactionNumber,
             'delivery_provider' => $provider,
             'delivery_order_id' => $orderData['external_id'],
             'status' => 'pending_approval',

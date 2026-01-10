@@ -45,12 +45,12 @@ class DashboardController extends Controller
 
             $callback = function () use ($restaurant, $startDate, $endDate) {
                 $file = fopen('php://output', 'w');
-                fputcsv($file, ['Item Sales Report']);
-                fputcsv($file, ['Restaurant', $restaurant->name]);
-                fputcsv($file, ['Date Range', $startDate->format('Y-m-d') . ' to ' . $endDate->format('Y-m-d')]);
+                fputcsv($file, [__('reports.item_sales_report')]);
+                fputcsv($file, [__('reports.restaurant'), $restaurant->name]);
+                fputcsv($file, [__('reports.date_range'), $startDate->format('Y-m-d') . ' ' . __('reports.to') . ' ' . $endDate->format('Y-m-d')]);
                 fputcsv($file, []);
 
-                fputcsv($file, ['Item Name', 'Category', 'Quantity Sold', 'Revenue']);
+                fputcsv($file, [__('reports.item_name'), __('reports.category'), __('reports.quantity_sold'), __('reports.revenue')]);
 
                 $orders = Order::where('restaurant_id', $restaurant->id)
                     ->where('status', '!=', 'deleted')
@@ -382,39 +382,40 @@ class DashboardController extends Controller
             $callback = function () use ($data) {
                 $file = fopen('php://output', 'w');
                 // Header
-                fputcsv($file, ['Dashboard Report']);
-                fputcsv($file, ['Restaurant', $data['restaurant']->name]);
-                fputcsv($file, ['Date Range', $data['startDate']->format('Y-m-d') . ' to ' . $data['endDate']->format('Y-m-d')]);
+                // Header
+                fputcsv($file, [__('reports.dashboard_report')]);
+                fputcsv($file, [__('reports.restaurant'), $data['restaurant']->name]);
+                fputcsv($file, [__('reports.date_range'), $data['startDate']->format('Y-m-d') . ' ' . __('reports.to') . ' ' . $data['endDate']->format('Y-m-d')]);
                 fputcsv($file, []);
 
                 // Stats
-                fputcsv($file, ['Key Metrics']);
-                fputcsv($file, ['Total Orders', $data['stats']['total_orders']]);
-                fputcsv($file, ['Revenue', $data['stats']['revenue']]);
-                fputcsv($file, ['Net Profit', $data['stats']['net_profit']]);
-                fputcsv($file, ['Total Waste', $data['stats']['total_waste']]);
-                fputcsv($file, ['Inventory Value', $data['stats']['inventory_value']]);
+                fputcsv($file, [__('reports.key_metrics')]);
+                fputcsv($file, [__('reports.total_orders'), $data['stats']['total_orders']]);
+                fputcsv($file, [__('reports.revenue'), $data['stats']['revenue']]);
+                fputcsv($file, [__('reports.net_profit'), $data['stats']['net_profit']]);
+                fputcsv($file, [__('reports.total_waste'), $data['stats']['total_waste']]);
+                fputcsv($file, [__('reports.inventory_value'), $data['stats']['inventory_value']]);
                 fputcsv($file, []);
 
                 // Top Items
-                fputcsv($file, ['Top Menu Items']);
-                fputcsv($file, ['Item Name', 'Quantity Sold']);
+                fputcsv($file, [__('reports.top_menu_items')]);
+                fputcsv($file, [__('reports.item_name'), __('reports.quantity_sold')]);
                 foreach ($data['topMenuItems'] as $item) {
                     fputcsv($file, [$item['name'], $item['quantity']]);
                 }
                 fputcsv($file, []);
 
                 // Top Categories
-                fputcsv($file, ['Top Categories']);
-                fputcsv($file, ['Category', 'Sales Value']);
+                fputcsv($file, [__('reports.top_categories')]);
+                fputcsv($file, [__('reports.category'), __('reports.sales_value')]);
                 foreach ($data['topCategories'] as $cat) {
                     fputcsv($file, [$cat['name'], $cat['value']]);
                 }
                 fputcsv($file, []);
 
                 // Customer Retention
-                fputcsv($file, ['Customer Retention (Visit Funnel)']);
-                fputcsv($file, ['Milestone', 'Count', 'Percentage']);
+                fputcsv($file, [__('reports.customer_retention')]);
+                fputcsv($file, [__('reports.milestone'), __('reports.count'), __('reports.percentage')]);
                 foreach ($data['retentionStats'] as $stat) {
                     fputcsv($file, [$stat['label'], $stat['count'], $stat['percentage'] . '%']);
                 }

@@ -544,5 +544,26 @@
         "id": {
             "$oid": "695bc35dfc285d20cc04cb22"
         }
+    },
+    {
+        "migration": "2026_01_10_013831_add_deleted_at_to_menu_items_and_categories_table",
+        "batch": 21,
+        "id": {
+            "$oid": "6961f364379e6fb3b2055ea2"
+        }
+    },
+    {
+        "migration": "2026_01_10_103541_create_zones_table",
+        "batch": 21,
+        "id": {
+            "$oid": "6961f364379e6fb3b2055ea3"
+        }
+    },
+    {
+        "migration": "2026_01_10_104000_add_zone_id_to_tables",
+        "batch": 21,
+        "id": {
+            "$oid": "6961f364379e6fb3b2055ea4"
+        }
     }
 ]

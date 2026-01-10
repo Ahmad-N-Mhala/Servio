@@ -384,7 +384,15 @@ class InventoryController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['Date', 'Ingredient', 'Action', 'Quantity Change', 'New Stock Level', 'User', 'Notes'];
+        $columns = [
+            __('reports.date'),
+            __('reports.ingredient'),
+            __('reports.action'),
+            __('reports.quantity_change'),
+            __('reports.new_stock_level'),
+            __('reports.user'),
+            __('reports.notes')
+        ];
 
         $callback = function () use ($logs, $columns, $timezone) {
             $file = fopen('php://output', 'w');

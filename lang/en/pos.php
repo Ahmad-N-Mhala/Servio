@@ -42,4 +42,7 @@ return [
     'settle' => 'Settle',
     'no_order_selected' => 'No Order Selected',
     'select_order_hint' => 'Select an active order from the list to view bill details and process payment.',
+    'unpaid' => 'Unpaid',
+    'pending' => 'Pending',
+    'paid' => 'Paid',
 ];

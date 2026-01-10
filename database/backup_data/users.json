@@ -1,10 +1,10 @@
 [
     {
-        "email": "superadmin@restofy.com",
+        "email": "superadmin@servio.com",
         "name": "Super Admin",
         "password": "$2y$12$WsgS9m9vyqSxQeRipm6bJOZv1227\/d\/FiFQDtbe0cqO0GAO8d0MtC",
         "is_super_admin": true,
-        "updated_at": "2025-12-19T16:11:29.712000Z",
+        "updated_at": "2026-01-10T06:24:50.534000Z",
         "created_at": "2025-12-19T16:11:29.712000Z",
         "id": {
             "$oid": "6945793119aaa592e0054aa5"
@@ -31,7 +31,7 @@
         "permission_id": [
             "69457dbe2d33b6a8db028a45"
         ],
-        "remember_token": "KKNV86PQurA2ygdNChNxcwQQBLmSpekKHDKi0AGNP9j3xIXQn73LhA8FfefI",
+        "remember_token": "Sm58AqkXI9qj5SnM5pYQgM3NRTgy7xRIdmqFhtwLXwIzg5uHaozzKXqoybgn",
         "id": {
             "$oid": "694579e733231912b007b6c2"
         }

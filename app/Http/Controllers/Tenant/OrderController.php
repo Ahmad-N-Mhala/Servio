@@ -158,19 +158,36 @@ class OrderController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['Order Number', 'Customer Name', 'Phone', 'Waiter', 'Status', 'Total', 'Currency', 'Delivery Provider', 'Created At'];
+        $columns = [
+            __('reports.order_number'),
+            __('reports.customer_name'),
+            __('reports.phone'),
+            __('reports.waiter'),
+            __('reports.status'),
+            __('orders.total'),
+            __('reports.currency'),
+            __('reports.delivery_provider'),
+            __('reports.created_at')
+        ];
 
         $callback = function () use ($orders, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
             foreach ($orders as $order) {
+                $statusKey = 'orders.' . strtolower($order->status);
+                $statusTranslated = __($statusKey);
+                // If translation equals key (missing), fallback to ucfirst
+                if ($statusTranslated === $statusKey) {
+                    $statusTranslated = ucfirst($order->status);
+                }
+
                 $row = [
                     $order->order_number,
                     $order->customer_name,
                     $order->customer_phone,
                     $order->waiter->name ?? '-',
-                    ucfirst($order->status),
+                    $statusTranslated,
                     $order->total,
                     $order->currency,
                     ucfirst($order->delivery_provider ?? ''),
@@ -480,7 +497,7 @@ class OrderController extends Controller
 
         // Generate Order Number
         // We use the sequential transaction number (per-restaurant) as the order number
-        $orderNumber = (string) $transactionNumber;
+        $orderNumber = 'ORD-' . $transactionNumber;
 
         // Create order
         $order = Order::create([

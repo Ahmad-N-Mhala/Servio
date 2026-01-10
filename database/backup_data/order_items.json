@@ -1290,5 +1290,442 @@
         "id": {
             "$oid": "695b7751bb2bb5d33600618d"
         }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695d63b39ee9d56b960c225d",
+        "updated_at": "2026-01-06T19:34:11.659000Z",
+        "created_at": "2026-01-06T19:34:11.659000Z",
+        "id": {
+            "$oid": "695d63b39ee9d56b960c225e"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695d63b39ee9d56b960c225d",
+        "updated_at": "2026-01-06T19:34:11.663000Z",
+        "created_at": "2026-01-06T19:34:11.663000Z",
+        "id": {
+            "$oid": "695d63b39ee9d56b960c225f"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "120.00"
+        },
+        "notes": null,
+        "order_id": "695d65c29ee9d56b960c2261",
+        "updated_at": "2026-01-06T19:42:58.071000Z",
+        "created_at": "2026-01-06T19:42:58.071000Z",
+        "id": {
+            "$oid": "695d65c29ee9d56b960c2262"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695d65c29ee9d56b960c2261",
+        "updated_at": "2026-01-06T19:42:58.072000Z",
+        "created_at": "2026-01-06T19:42:58.072000Z",
+        "id": {
+            "$oid": "695d65c29ee9d56b960c2263"
+        }
+    },
+    {
+        "order_id": "695d71d29ee9d56b960c2272",
+        "menu_item_id": "695d6d289ee9d56b960c2267",
+        "quantity": 4,
+        "unit_price": {
+            "$numberDecimal": "44.00"
+        },
+        "total_price": {
+            "$numberDecimal": "176.00"
+        },
+        "notes": null,
+        "updated_at": "2026-01-06T20:34:26.276000Z",
+        "created_at": "2026-01-06T20:34:26.276000Z",
+        "id": {
+            "$oid": "695d71d29ee9d56b960c2273"
+        }
+    },
+    {
+        "order_id": "695d71d29ee9d56b960c2272",
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "120.00"
+        },
+        "notes": null,
+        "updated_at": "2026-01-06T20:34:26.276000Z",
+        "created_at": "2026-01-06T20:34:26.276000Z",
+        "id": {
+            "$oid": "695d71d29ee9d56b960c2274"
+        }
+    },
+    {
+        "order_id": "695d71d29ee9d56b960c2272",
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "updated_at": "2026-01-06T20:34:26.276000Z",
+        "created_at": "2026-01-06T20:34:26.276000Z",
+        "id": {
+            "$oid": "695d71d29ee9d56b960c2275"
+        }
+    },
+    {
+        "order_id": "695d72429ee9d56b960c2276",
+        "menu_item_id": "695d6d289ee9d56b960c2267",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "44.00"
+        },
+        "total_price": {
+            "$numberDecimal": "88.00"
+        },
+        "notes": null,
+        "updated_at": "2026-01-06T20:36:18.112000Z",
+        "created_at": "2026-01-06T20:36:18.112000Z",
+        "id": {
+            "$oid": "695d72429ee9d56b960c2277"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe22e97c5b7113e0f0df4",
+        "updated_at": "2026-01-08T16:58:22.565000Z",
+        "created_at": "2026-01-08T16:58:22.565000Z",
+        "id": {
+            "$oid": "695fe22e97c5b7113e0f0df5"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe22e97c5b7113e0f0df4",
+        "updated_at": "2026-01-08T16:58:22.567000Z",
+        "created_at": "2026-01-08T16:58:22.567000Z",
+        "id": {
+            "$oid": "695fe22e97c5b7113e0f0df6"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe25497c5b7113e0f0df8",
+        "updated_at": "2026-01-08T16:59:00.443000Z",
+        "created_at": "2026-01-08T16:59:00.443000Z",
+        "id": {
+            "$oid": "695fe25497c5b7113e0f0df9"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe25497c5b7113e0f0df8",
+        "updated_at": "2026-01-08T16:59:00.443000Z",
+        "created_at": "2026-01-08T16:59:00.443000Z",
+        "id": {
+            "$oid": "695fe25497c5b7113e0f0dfa"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe83897c5b7113e0f0dfb",
+        "updated_at": "2026-01-08T17:24:39.155000Z",
+        "created_at": "2026-01-08T17:24:08.371000Z",
+        "id": {
+            "$oid": "695fe83897c5b7113e0f0dfc"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe83897c5b7113e0f0dfb",
+        "updated_at": "2026-01-08T17:24:08.372000Z",
+        "created_at": "2026-01-08T17:24:08.372000Z",
+        "id": {
+            "$oid": "695fe83897c5b7113e0f0dfd"
+        }
+    },
+    {
+        "menu_item_id": "695d256a9ee9d56b960c225a",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695fe8e897c5b7113e0f0dfe",
+        "updated_at": "2026-01-08T17:27:04.865000Z",
+        "created_at": "2026-01-08T17:27:04.865000Z",
+        "id": {
+            "$oid": "695fe8e897c5b7113e0f0dff"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fe8e897c5b7113e0f0dfe",
+        "updated_at": "2026-01-08T19:48:28.751000Z",
+        "created_at": "2026-01-08T17:27:04.865000Z",
+        "id": {
+            "$oid": "695fe8e897c5b7113e0f0e00"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "64.00"
+        },
+        "notes": null,
+        "order_id": "695fea5f97c5b7113e0f0e01",
+        "updated_at": "2026-01-08T17:33:19.397000Z",
+        "created_at": "2026-01-08T17:33:19.397000Z",
+        "id": {
+            "$oid": "695fea5f97c5b7113e0f0e02"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "order_id": "695fea5f97c5b7113e0f0e01",
+        "updated_at": "2026-01-08T17:33:19.398000Z",
+        "created_at": "2026-01-08T17:33:19.398000Z",
+        "id": {
+            "$oid": "695fea5f97c5b7113e0f0e03"
+        }
+    },
+    {
+        "menu_item_id": "695d256a9ee9d56b960c225a",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "order_id": "695fea5f97c5b7113e0f0e01",
+        "updated_at": "2026-01-08T17:33:19.398000Z",
+        "created_at": "2026-01-08T17:33:19.398000Z",
+        "id": {
+            "$oid": "695fea5f97c5b7113e0f0e04"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 2,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "128.00"
+        },
+        "name": "Burger",
+        "notes": null,
+        "extras": "[{\"id\":\"695bb4c29d00e5cc10061ae3\",\"name\":\"tomatto\",\"price\":4,\"ingredient_id\":\"69563aceaeff1b1ae101c522\",\"quantity\":\"1.0000\"}]",
+        "order_id": "695fee1e97c5b7113e0f0e05",
+        "updated_at": "2026-01-08T17:49:18.273000Z",
+        "created_at": "2026-01-08T17:49:18.273000Z",
+        "id": {
+            "$oid": "695fee1e97c5b7113e0f0e06"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "name": "Burger",
+        "notes": null,
+        "extras": "[]",
+        "order_id": "695fee1e97c5b7113e0f0e05",
+        "updated_at": "2026-01-08T17:49:18.274000Z",
+        "created_at": "2026-01-08T17:49:18.274000Z",
+        "id": {
+            "$oid": "695fee1e97c5b7113e0f0e07"
+        }
+    },
+    {
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "64.00"
+        },
+        "name": "Burger",
+        "notes": null,
+        "extras": "[{\"id\":\"695bb4c29d00e5cc10061ae3\",\"name\":\"tomatto\",\"price\":4,\"ingredient_id\":\"69563aceaeff1b1ae101c522\",\"quantity\":\"1.0000\"}]",
+        "order_id": "69600b3197c5b7113e0f0e08",
+        "updated_at": "2026-01-08T19:53:21.226000Z",
+        "created_at": "2026-01-08T19:53:21.226000Z",
+        "id": {
+            "$oid": "69600b3197c5b7113e0f0e09"
+        }
+    },
+    {
+        "menu_item_id": "695d1ac79ee9d56b960c2253",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "10.00"
+        },
+        "total_price": {
+            "$numberDecimal": "10.00"
+        },
+        "name": "Test Clean Item",
+        "notes": null,
+        "extras": "[]",
+        "order_id": "69600b3197c5b7113e0f0e08",
+        "updated_at": "2026-01-08T19:53:21.227000Z",
+        "created_at": "2026-01-08T19:53:21.227000Z",
+        "id": {
+            "$oid": "69600b3197c5b7113e0f0e0a"
+        }
+    },
+    {
+        "order_id": "6961f64aa8f748a64301f9d6",
+        "menu_item_id": "694fcb2a7b83a4bfd50194ff",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "20.00"
+        },
+        "total_price": {
+            "$numberDecimal": "20.00"
+        },
+        "notes": null,
+        "name": "ds",
+        "extras": "[]",
+        "updated_at": "2026-01-10T06:48:42.747000Z",
+        "created_at": "2026-01-10T06:48:42.747000Z",
+        "id": {
+            "$oid": "6961f64aa8f748a64301f9d7"
+        }
+    },
+    {
+        "order_id": "6961f64aa8f748a64301f9d6",
+        "menu_item_id": "69563bc8aeff1b1ae101c526",
+        "quantity": 1,
+        "unit_price": {
+            "$numberDecimal": "60.00"
+        },
+        "total_price": {
+            "$numberDecimal": "60.00"
+        },
+        "notes": null,
+        "name": "Burger",
+        "extras": "[]",
+        "updated_at": "2026-01-10T06:48:42.747000Z",
+        "created_at": "2026-01-10T06:48:42.747000Z",
+        "id": {
+            "$oid": "6961f64aa8f748a64301f9d8"
+        }
     }
 ]

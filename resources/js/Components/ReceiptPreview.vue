@@ -20,29 +20,25 @@
         <!-- Order Info -->
         <div class="text-sm space-y-1 mb-3">
             <div v-if="template.show_order_number">
-                <div class="flex justify-between text-xs text-gray-500 pb-1">
-                    <span class="font-semibold">{{ $t('orders.order_number') || 'Order #:' }}</span>
-                    <span class="uppercase">{{ displayOrder.number }}</span>
-                </div>
-                <div class="flex justify-between font-bold text-base border-t border-dashed border-gray-300 pt-1">
-                    <span class="font-semibold">{{ template.show_order_number_label || 'Transaction #:' }}</span>
-                    <span>{{ displayOrder.transaction_number }}</span>
+                <div class="flex justify-between font-bold text-base border-b border-dashed border-gray-300 pb-1">
+                    <span class="font-semibold">{{ template.show_order_number_label || 'Order #:' }}</span>
+                    <span>{{ displayOrder.number }}</span>
                 </div>
             </div>
             <div v-if="template.show_date_time" class="flex justify-between">
-                <span class="font-semibold">{{ $t('common.date') || 'Date:' }}</span>
+                <span class="font-semibold">{{ rt('common.date', 'Date') }}:</span>
                 <span>{{ displayOrder.date }}</span>
             </div>
             <div v-if="template.show_table_number && displayOrder.table" class="flex justify-between">
-                <span class="font-semibold">{{ $t('nav.tables') || 'Table:' }}</span>
+                <span class="font-semibold">{{ rt('nav.tables', 'Table') }}:</span>
                 <span>{{ displayOrder.table }}</span>
             </div>
             <div v-if="template.show_customer_name" class="flex justify-between">
-                <span class="font-semibold">{{ $t('orders.customer') || 'Customer:' }}</span>
+                <span class="font-semibold">{{ rt('orders.customer', 'Customer') }}:</span>
                 <span>{{ displayOrder.customer }}</span>
             </div>
             <div v-if="template.show_server_name" class="flex justify-between">
-                <span class="font-semibold">{{ $t('reports.waiter') || 'Server:' }}</span>
+                <span class="font-semibold">{{ rt('reports.waiter', 'Server') }}:</span>
                 <span>{{ displayOrder.server }}</span>
             </div>
         </div>
@@ -51,29 +47,29 @@
 
         <!-- Items -->
         <div class="mb-3">
-            <table class="w-full text-xs" style="width: 100%; border-collapse: collapse;">
+            <table class="w-full text-xs" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                 <thead>
                     <tr class="border-b-2 border-dashed border-gray-400">
-                        <th class="text-left py-1" style="width: 40%;">{{ $t('common.items') || 'ITEM' }}</th>
-                        <th class="text-center py-1" style="width: 15%;">{{ $t('common.quantity') || 'QTY' }}</th>
-                        <th class="text-right py-1" style="width: 20%;">{{ $t('common.price') || 'PRICE' }}</th>
-                        <th class="text-right py-1" style="width: 25%;">{{ $t('common.total') || 'TOTAL' }}</th>
+                        <th class="text-left py-1" :style="{ width: colWidths.item }">{{ rt('common.items', 'ITEM') }}</th>
+                        <th class="text-center py-1" :style="{ width: colWidths.qty }">{{ rt('common.qty', 'Qty') }}</th>
+                        <th class="text-right py-1" :style="{ width: colWidths.price }">{{ rt('common.price', 'PRICE') }}</th>
+                        <th class="text-right py-1" :style="{ width: colWidths.total }">{{ rt('common.total', 'TOTAL') }}</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm">
                     <tr v-for="(item, index) in displayOrder.items" :key="index">
-                        <td class="py-1 pr-2" style="vertical-align: top;">
-                             <div class="font-medium">{{ item.name }}</div>
-                             <div v-if="template.show_item_notes && item.notes" class="text-xs text-gray-600 italic">{{ item.notes }}</div>
-                             <div v-if="item.extras && item.extras.length" class="text-[10px] text-gray-500">
+                        <td class="py-1 pr-1 break-words whitespace-normal" style="vertical-align: top;">
+                             <div class="font-medium leading-tight">{{ item.name }}</div>
+                             <div v-if="template.show_item_notes && item.notes" class="text-xs text-gray-600 italic mt-0.5">{{ item.notes }}</div>
+                             <div v-if="item.extras && item.extras.length" class="text-[10px] text-gray-500 mt-0.5">
                                 <template v-for="(extra, i) in item.extras" :key="i">
                                     <div>+ {{ extra.name || (extra.split ? extra : 'Extra') }}</div>
                                 </template>
                              </div>
                         </td>
-                        <td class="text-center py-1" style="vertical-align: top;">{{ item.quantity }}</td>
-                        <td class="text-right py-1" style="vertical-align: top;">{{ formatPrice(item.unit_price) }}</td>
-                        <td class="text-right py-1 font-bold" style="vertical-align: top;">{{ formatPrice(item.price) }}</td>
+                        <td class="text-center py-1 whitespace-nowrap" style="vertical-align: top;">{{ item.quantity }}</td>
+                        <td class="text-right py-1 whitespace-nowrap" style="vertical-align: top;">{{ formatPrice(item.unit_price) }}</td>
+                        <td class="text-right py-1 font-bold whitespace-nowrap" style="vertical-align: top;">{{ formatPrice(item.price) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -84,24 +80,24 @@
         <!-- Totals -->
         <div class="text-sm space-y-1 mb-3">
             <div v-if="template.show_subtotal" class="flex justify-between">
-                <span>{{ $t('common.subtotal') || 'Subtotal:' }}</span>
+                <span>{{ rt('common.subtotal', 'Subtotal') }}:</span>
                 <span>{{ formatPrice(displayOrder.subtotal) }}</span>
             </div>
             <div v-if="template.show_tax && Number(displayOrder.tax) > 0" class="flex justify-between">
-                <span>{{ $t('pos.tax') || 'Tax:' }}</span>
+                <span>{{ rt('pos.tax', 'Tax') }}:</span>
                 <span>{{ formatPrice(displayOrder.tax) }}</span>
             </div>
             <div v-if="template.show_discount && Number(displayOrder.discount) > 0" class="flex justify-between text-red-600">
-                <span>{{ $t('pos.discount') || 'Discount:' }}</span>
+                <span>{{ rt('pos.discount', 'Discount') }}:</span>
                 <span>-{{ formatPrice(displayOrder.discount) }}</span>
             </div>
             <div class="flex justify-between font-bold text-base pt-2 border-t border-gray-400">
-                <span>{{ $t('common.total') || 'TOTAL:' }}</span>
+                <span>{{ rt('common.total', 'TOTAL') }}:</span>
                 <span>{{ formatPrice(displayOrder.total) }} {{ displayOrder.currency }}</span>
             </div>
             <div v-if="template.show_payment_method" class="flex justify-between text-xs pt-1">
-                <span>{{ $t('pos.payment_method') || 'Payment:' }}</span>
-                <span class="font-semibold uppercase">{{ displayOrder.payment_method ? $t('pos.' + displayOrder.payment_method.toLowerCase()) : $t('pos.pending') }}</span>
+                <span>{{ rt('pos.payment_method', 'Payment') }}:</span>
+                <span class="font-semibold uppercase">{{ displayOrder.payment_method ? rt('pos.' + displayOrder.payment_method.toLowerCase(), displayOrder.payment_method) : rt('pos.pending', 'Pending') }}</span>
             </div>
         </div>
 
@@ -129,8 +125,9 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { get } from 'lodash';
 
-const { t, locale } = useI18n();
+const { messages } = useI18n();
 
 const props = defineProps<{
     template: any;
@@ -139,6 +136,27 @@ const props = defineProps<{
     order?: any;
     googleMapLocation?: string | null;
 }>();
+
+const receiptLocale = computed(() => {
+    return props.template?.receipt_language || 'en';
+});
+
+// Custom translation helper for receipt language
+const rt = (key: string, fallback?: string) => {
+    const lang = receiptLocale.value;
+    
+    // 1. Try exact match in receipt language
+    // We use lodash get to access nested keys like 'common.date'
+    const translated = get(messages.value[lang], key);
+    
+    // 2. Fallback to English if missing
+    if (!translated) {
+        const enTranslated = get(messages.value['en'], key);
+        return enTranslated || fallback || key;
+    }
+    
+    return translated;
+};
 
 const qrCodeDataUrl = ref<string | null>(null);
 
@@ -179,19 +197,50 @@ const formatPrice = (val: any) => {
     return Number(val || 0).toFixed(2);
 };
 
+
+// ... existing computed properties ...
+
+const colWidths = computed(() => {
+    // Hard constraints to prevent breaking the layout
+    const MIN_QTY_WIDTH = 13;   // %
+    const MIN_PRICE_WIDTH = 20; // %
+    const MIN_TOTAL_WIDTH = 25; // %
+    const RESERVED_SPACE = MIN_QTY_WIDTH + MIN_PRICE_WIDTH + MIN_TOTAL_WIDTH; // 58%
+    
+    // Get user preference, default to 40%
+    let itemWidth = Number(props.template?.item_name_width || 40);
+    
+    // Cap item width so it doesn't starve the data columns
+    // If the user sets it too high, we silently enforce the limit to keep the receipt readable
+    if (itemWidth > (100 - RESERVED_SPACE)) {
+        itemWidth = 100 - RESERVED_SPACE;
+    }
+    
+    const remaining = 100 - itemWidth;
+    const weightTotal = RESERVED_SPACE;
+
+    return {
+        item: `${itemWidth}%`,
+        qty: `${(MIN_QTY_WIDTH / weightTotal) * remaining}%`,
+        price: `${(MIN_PRICE_WIDTH / weightTotal) * remaining}%`,
+        total: `${(MIN_TOTAL_WIDTH / weightTotal) * remaining}%`
+    };
+});
+
 const displayOrder = computed(() => {
     if (props.order) {
         return {
             id: props.order.id,
             number: props.order.order_number,
             transaction_number: props.order.transaction_number || '-',
-            date: new Date(props.order.created_at).toLocaleString(locale.value === 'ar' ? 'ar-AE' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+            // Update date formatting to use receiptLocale
+            date: new Date(props.order.created_at).toLocaleString(receiptLocale.value === 'ar' ? 'ar-AE' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }),
             table: props.order.table?.name || null,
-            customer: props.order.customer_name || t('common.guest'),
+            customer: props.order.customer_name || rt('common.guest', 'Guest'),
             server: props.order.waiter?.name || '-',
             items: props.order.items.map((item: any) => {
                 let name = item.menuItem?.name || item.menu_item?.name || 'Unknown Item';
-                const lang = props.template?.receipt_language || 'en';
+                const lang = receiptLocale.value; // Use receipt language for item names too
 
                 if (typeof name === 'string' && name.startsWith('{')) {
                     try {
@@ -205,10 +254,10 @@ const displayOrder = computed(() => {
                 return {
                     name: name,
                     quantity: item.quantity,
-                    unit_price: item.unit_price, // Added unit_price
+                    unit_price: item.unit_price, 
                     price: item.total_price || (item.quantity * item.unit_price), 
                     notes: item.notes,
-                    extras: item.extras // Added extras
+                    extras: item.extras 
                 };
             }),
             subtotal: props.order.subtotal,
@@ -217,7 +266,7 @@ const displayOrder = computed(() => {
             total: props.order.total,
             payment_method: props.order.payment_method,
             currency: props.order.currency || 'AED',
-            qr_code_url: null // Can be added if needed
+            qr_code_url: null 
         };
     } else {
         // Dummy Data for Preview
@@ -225,14 +274,14 @@ const displayOrder = computed(() => {
             id: '64f7a8b29c', // Dummy ID
             number: 'ORD-12345',
             transaction_number: props.template.show_order_number ? '1001' : '---',
-            date: new Date().toLocaleString(),
+            date: new Date().toLocaleString(receiptLocale.value === 'ar' ? 'ar-AE' : 'en-US'),
             table: 'T-5',
             customer: 'John Doe',
             server: 'Jane Smith',
             items: [
-                { name: 'Burger', quantity: 2, price: 50.00, notes: 'No onions' },
-                { name: 'Fries', quantity: 1, price: 15.00, notes: '' },
-                { name: 'Coca Cola', quantity: 2, price: 10.00, notes: '' },
+                { name: 'Double Cheese Burger Special', quantity: 2, unit_price: 25.00, price: 50.00, notes: 'No onions' },
+                { name: 'Fries', quantity: 1, unit_price: 15.00, price: 15.00, notes: '' },
+                { name: 'Coca Cola', quantity: 2, unit_price: 5.00, price: 10.00, notes: '' },
             ],
             subtotal: 75.00,
             tax: 3.75,
@@ -246,7 +295,7 @@ const displayOrder = computed(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .receipt-preview {
     font-family: 'Courier New', monospace;
     color: #000;
@@ -273,7 +322,6 @@ const displayOrder = computed(() => {
 @media print {
     .receipt-preview {
         width: 100% !important;
-        padding: 0 !important;
         margin: 0 !important;
         overflow-wrap: break-word;
         word-break: break-all;

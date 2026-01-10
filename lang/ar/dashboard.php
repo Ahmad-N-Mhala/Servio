@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'welcome' => 'مرحباً بك في RestoFy',
+    'welcome' => 'مرحباً بك في Servio',
     'subtitle' => 'إدارة عمليات مطعمك',
     'total_orders' => 'إجمالي الطلبات',
     'today_orders' => 'طلبات اليوم',

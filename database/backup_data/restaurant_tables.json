@@ -1,31 +1,5 @@
 [
     {
-        "restaurant_id": "694579e833231912b007b6c3",
-        "name": "uu",
-        "capacity": 4,
-        "status": "available",
-        "location": null,
-        "updated_at": "2026-01-01T16:41:25.735000Z",
-        "created_at": "2025-12-19T16:32:44.209000Z",
-        "qr_code_token": "7gwFol2KWogAfPu55HFSm3tiXbVf3gwx",
-        "id": {
-            "$oid": "69457e2c2d33b6a8db028a80"
-        }
-    },
-    {
-        "restaurant_id": "694579e833231912b007b6c3",
-        "name": "T-4",
-        "capacity": 4,
-        "status": "available",
-        "location": null,
-        "updated_at": "2026-01-02T09:15:17.223000Z",
-        "created_at": "2025-12-26T17:43:19.042000Z",
-        "qr_code_token": "AKD3ttaQdq7WjA5TSb9i1mIHmJuhahA1",
-        "id": {
-            "$oid": "694ec9374c7837e511064b9f"
-        }
-    },
-    {
         "restaurant_id": "69503e50eaf319e883077714",
         "name": "sd",
         "capacity": 4,
@@ -36,6 +10,20 @@
         "created_at": "2025-12-27T20:52:47.006000Z",
         "id": {
             "$oid": "6950471feaf319e883077721"
+        }
+    },
+    {
+        "restaurant_id": "694579e833231912b007b6c3",
+        "zone_id": "6961f465a8f748a64301f9d2",
+        "name": "3",
+        "capacity": 4,
+        "status": "occupied",
+        "location": null,
+        "qr_code_token": "nsWST2O967TiBJcBAZE5sXTqWx3mfdwN",
+        "updated_at": "2026-01-10T06:48:42.747000Z",
+        "created_at": "2026-01-10T06:44:36.145000Z",
+        "id": {
+            "$oid": "6961f554a8f748a64301f9d5"
         }
     }
 ]

@@ -30,6 +30,11 @@ class KitchenController extends Controller
         // Ordered by FIFO (First In, First Out)
         $orders = Order::where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'processing', 'ready', 'served'])
+            ->where(function ($query) {
+                // Show order if source is NOT 'qr' OR if source is 'qr' AND payment_status is 'paid'
+                $query->where('source', '!=', 'qr')
+                    ->orWhere('payment_status', 'paid');
+            })
             ->with([
                 'items.menuItem' => function ($query) {
                     $query->withTrashed();
