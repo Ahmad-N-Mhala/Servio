@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"key":{"$numberInt":"1"}},"name":"key_1","unique":true}],"uuid":"d44e61a0260c431fb7b83220f97d008a","collectionName":"landing_settings","type":"collection"}

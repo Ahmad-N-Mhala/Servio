@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"restaurant_id":{"$numberInt":"1"},"is_active":{"$numberInt":"1"},"sort_order":{"$numberInt":"1"}},"name":"restaurant_active_sort_idx"}],"uuid":"cdee086d9b51411e922454b8259e0e70","collectionName":"menu_categories","type":"collection"}

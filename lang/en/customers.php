@@ -19,4 +19,5 @@ return [
     'order_number' => 'Order #',
     'no_orders' => 'No orders found',
     'details' => 'Customer Details',
+    'all_customers' => 'All Customers',
 ];

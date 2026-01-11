@@ -19,4 +19,5 @@ return [
     'order_number' => 'رقم الطلب',
     'no_orders' => 'لا توجد طلبات',
     'details' => 'تفاصيل العميل',
+    'all_customers' => 'جميع العملاء',
 ];

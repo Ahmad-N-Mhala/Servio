@@ -1,352 +1,314 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Bill #{{ $order->order_number }}</title>
     <style>
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            color: #333;
-            font-size: 14px;
-            line-height: 1.5;
+        @page {
             margin: 0;
-            padding: 0;
-            background: #fff;
+            size: 80mm auto;
+            /* Thermal paper width */
         }
 
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 40px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 30px;
-        }
-
-        .restaurant-name {
-            font-size: 32px;
-            font-weight: 800;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .restaurant-info {
-            font-size: 13px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .bill-details {
-            display: table;
-            width: 100%;
-            margin-bottom: 40px;
-        }
-
-        .col-left,
-        .col-right {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-        }
-
-        .col-right {
-            text-align: right;
-        }
-
-        .label {
-            font-weight: 700;
-            color: #888;
+        body {
+            font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
             font-size: 11px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-
-        .value {
-            margin-bottom: 15px;
-            font-size: 15px;
-            color: #222;
-        }
-
-        .value strong {
-            font-weight: 600;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-
-        th {
-            text-align: left;
-            background-color: #f8f9fa;
-            color: #555;
-            font-weight: 700;
-            padding: 15px 12px;
-            border-bottom: 2px solid #eee;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            padding: 15px 12px;
-            border-bottom: 1px solid #f5f5f5;
-            color: #333;
-        }
-
-        .text-right {
-            text-align: right;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 5mm;
         }
 
         .text-center {
             text-align: center;
         }
 
-        .totals-section {
-            width: 100%;
-            display: table;
-            margin-top: 20px;
-        }
-
-        .totals-left {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-            padding-right: 20px;
-        }
-
-        .totals-right {
-            display: table-cell;
-            width: 50%;
+        .text-right {
             text-align: right;
         }
 
-        .total-row {
-            margin-bottom: 8px;
-            font-size: 14px;
+        .text-left {
+            text-align: left;
         }
 
-        .total-row span {
-            display: inline-block;
-            min-width: 100px;
-        }
-
-        .grand-total {
-            font-size: 22px;
-            font-weight: 800;
-            color: #000;
-            border-top: 2px solid #000;
-            padding-top: 15px;
-            margin-top: 15px;
-        }
-
-        .footer {
-            margin-top: 60px;
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            border-top: 1px solid #f0f0f0;
-            padding-top: 20px;
-        }
-
-        .status-badge {
-            background: #eee;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            text-transform: uppercase;
+        .bold {
             font-weight: bold;
         }
 
-        .notes-box {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            font-size: 12px;
-            color: #666;
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .header {
+            margin-bottom: 5mm;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 40mm;
+            max-height: 20mm;
+            margin: 0 auto 2mm auto;
+            display: block;
+        }
+
+        .restaurant-name {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .restaurant-info {
+            font-size: 10px;
+            color: #444;
+        }
+
+        .divider {
+            border-bottom: 1px dashed #000;
+            margin: 3mm 0;
+            width: 100%;
+        }
+
+        .order-info {
+            margin-bottom: 4mm;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1px;
+        }
+
+        /* Table simulation for PDF compatibility */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1mm;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+
+        .item-row td {
+            padding-top: 1mm;
+        }
+
+        .item-name {
+            font-weight: 600;
+        }
+
+        .extras {
+            font-size: 9px;
+            color: #555;
+            padding-left: 2mm;
+        }
+
+        .totals-section {
+            margin-top: 3mm;
+            border-top: 1px dashed #000;
+            padding-top: 2mm;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
+        .grand-total {
+            font-size: 14px;
+            font-weight: 800;
+            border-top: 2px solid #000;
+            margin-top: 2mm;
+            padding-top: 2mm;
+        }
+
+        .footer {
+            margin-top: 8mm;
+            text-align: center;
+            font-size: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            @if($order->restaurant->logo)
-                @php
-                    $logoPath = storage_path('app/public/' . $order->restaurant->logo);
-                    $logoData = null;
+    @php
+        // Helper specifically for this view
+        $getLocalized = function ($input) {
+            if (!is_string($input))
+                return $input;
+            if (str_starts_with($input, '{')) {
+                $decoded = json_decode($input, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $locale = app()->getLocale();
+                    return $decoded[$locale] ?? $decoded['en'] ?? $input;
+                }
+            }
+            return $input;
+        };
 
-                    if (file_exists($logoPath)) {
-                        $type = pathinfo($logoPath, PATHINFO_EXTENSION);
-                        $data = file_get_contents($logoPath);
-                        $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                    } elseif (file_exists(public_path('storage/' . $order->restaurant->logo))) {
-                        // Fallback to public path if symbolic link is used but storage_path mapping is different
-                        $logoPath = public_path('storage/' . $order->restaurant->logo);
-                        $type = pathinfo($logoPath, PATHINFO_EXTENSION);
-                        $data = file_get_contents($logoPath);
-                        $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        // Logo Logic
+        $logoData = null;
+        if ($order->restaurant->logo) {
+            $logoPath = storage_path('app/public/' . $order->restaurant->logo);
+            if (!file_exists($logoPath)) {
+                $logoPath = public_path('storage/' . $order->restaurant->logo);
+            }
+            if (file_exists($logoPath)) {
+                $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                $data = file_get_contents($logoPath);
+                $logoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+        }
+    @endphp
+
+    <div class="header">
+        @if($logoData)
+            <img src="{{ $logoData }}" class="logo" alt="Logo">
+        @endif
+        <div class="restaurant-name">{{ $order->restaurant->name ?? 'Restaurant' }}</div>
+        <div class="restaurant-info">
+            {{ $order->restaurant->address ?? '' }}<br>
+            {{ $order->restaurant->phone ?? '' }}
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="order-info">
+        <table style="width: 100%">
+            <tr>
+                <td><strong>Order #:</strong> {{ $order->order_number }}</td>
+                <td class="text-right">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Type:</strong> {{ ucfirst($order->type) }}</td>
+                <td class="text-right">
+                    @if($order->table) Table: {{ $order->table->name ?? $order->table->table_number }} @endif
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <strong>Customer:</strong> {{ $order->customer_name ?: 'Guest' }}
+                    @if($order->customer_phone) <br>{{ $order->customer_phone }} @endif
+                </td>
+            </tr>
+            @if($order->delivery_provider)
+                <tr>
+                    <td colspan="2"><strong>Delivery:</strong> {{ ucfirst($order->delivery_provider) }}</td>
+                </tr>
+            @endif
+        </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th width="10%">Qty</th>
+                <th width="60%">Item</th>
+                <th width="30%" class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($order->items as $item)
+                @php
+                    // Determine name (Source of truth: Current Snapshot Name)
+                    $name = $getLocalized($item->name);
+
+                    // Extras string logic
+                    $extrasOutput = [];
+                    if (!empty($item->extras) && is_array($item->extras)) {
+                        foreach ($item->extras as $extra) {
+                            $exName = $getLocalized($extra['name'] ?? 'Extra');
+                            $exPrice = (float) ($extra['price'] ?? 0);
+                            $exStr = $exName;
+                            if ($exPrice > 0) {
+                                $exStr .= ' (' . number_format($exPrice, 2) . ')';
+                            }
+                            $extrasOutput[] = $exStr;
+                        }
                     }
                 @endphp
-
-                @if($logoData)
-                    <div style="margin-bottom: 15px;">
-                        <img src="{{ $logoData }}" alt="Logo" style="max-height: 100px; max-width: 150px; object-fit: contain;">
-                    </div>
-                @endif
-            @endif
-            <div class="restaurant-name">{{ $order->restaurant->name ?? $tenant->name ?? 'Servio' }}</div>
-            <div class="restaurant-info">
-                @if($order->restaurant->address) {{ $order->restaurant->address }} @endif
-                @if($order->restaurant->city) , {{ $order->restaurant->city }} @endif
-                @if($order->restaurant->country) , {{ $order->restaurant->country }} @endif
-                @if($order->restaurant->phone) <br> Tel: {{ $order->restaurant->phone }} @endif
-                @if($order->restaurant->email) <br>
-                    {{ is_array($order->restaurant->email) ? (current($order->restaurant->email)) : $order->restaurant->email }}
-                @endif
-            </div>
-        </div>
-
-        <div class="bill-details">
-            <div class="col-left">
-                <div class="label">Bill To</div>
-                <div class="value">
-                    @if($order->customer)
-                        <strong>{{ $order->customer->name }}</strong><br>
-                        {{ $order->customer->phone }}
-                    @else
-                        Guest
-                    @endif
-                </div>
-
-                @if($order->table)
-                    <div class="label">Table</div>
-                    <div class="value">#{{ $order->table->table_number }} <span
-                            style="color:#888; font-size:12px">({{ $order->table->location ?? 'Main' }})</span></div>
-                @endif
-            </div>
-            <div class="col-right">
-                <div class="label">Order Details</div>
-                <div class="value">
-                    Transaction #: <strong>{{ $order->order_number }}</strong><br>
-                    Date: {{ $order->created_at->format('M d, Y h:i A') }}<br>
-                </div>
-            </div>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th width="50%">Item</th>
-                    <th width="15%" class="text-center">Qty</th>
-                    <th width="15%" class="text-right">Price</th>
-                    <th width="20%" class="text-right">Total</th>
+                <tr class="item-row">
+                    <td class="text-center" style="vertical-align: top;">{{ $item->quantity }}</td>
+                    <td>
+                        <div class="item-name">{{ $name }}</div>
+                        @if(!empty($extrasOutput))
+                            <div class="extras">+ {{ implode(', ', $extrasOutput) }}</div>
+                        @endif
+                        @if(!empty($item->notes))
+                            <div class="extras" style="font-style: italic;">Note: {{ $item->notes }}</div>
+                        @endif
+                    </td>
+                    <td class="text-right">{{ number_format($item->total_price, 2) }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach($order->items as $item)
-                    <tr>
-                        <td>
-                            <strong style="font-weight:600; color:#333;">{{ $item->menuItem->name ?? 'Item' }}</strong>
-                            @if(isset($item->notes))
-                                <br><small
-                                    style="color: #999; font-size: 11px; margin-top:2px; display:block;">{{ $item->notes }}</small>
-                            @endif
-                        </td>
-                        <td class="text-center">{{ $item->quantity }}</td>
-                        <td class="text-right">{{ $order->restaurant->currency ?? 'AED' }}
-                            {{ number_format($item->unit_price > 0 ? $item->unit_price : ($item->menuItem->price ?? 0), 2) }}
-                        </td>
-                        <td class="text-right">{{ $order->restaurant->currency ?? 'AED' }}
-                            {{ number_format($item->total_price > 0 ? $item->total_price : ($item->quantity * ($item->menuItem->price ?? 0)), 2) }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="totals-section">
+        <table style="width: 100%">
+            <tr>
+                <td class="text-right" width="60%">Subtotal</td>
+                <td class="text-right" width="40%">{{ number_format($order->subtotal, 2) }}</td>
+            </tr>
+            @if($order->tax > 0)
+                <tr>
+                    <td class="text-right">Tax</td>
+                    <td class="text-right">{{ number_format($order->tax, 2) }}</td>
+                </tr>
+            @endif
+            @if($order->discount_amount > 0)
+                <tr>
+                    <td class="text-right">Discount</td>
+                    <td class="text-right">-{{ number_format($order->discount_amount, 2) }}</td>
+                </tr>
+            @endif
+            @if($order->additional_charge > 0)
+                <tr>
+                    <td class="text-right">Service Charge</td>
+                    <td class="text-right">{{ number_format($order->additional_charge, 2) }}</td>
+                </tr>
+            @endif
         </table>
 
-        <div class="totals-section">
-            <div class="totals-left">
-                @if($order->notes)
-                    <div class="notes-box">
-                        <strong>Note:</strong><br>
-                        {{ $order->notes }}
-                    </div>
-                @endif
-
-                @if($order->points_earned > 0)
-                    <div style="margin-top: 15px; color: #4f46e5; font-size: 13px;">
-                        You earned <strong>{{ $order->points_earned }}</strong> loyalty points with this order!
-                    </div>
-                @endif
-            </div>
-            <div class="totals-right">
-                <table style="width: 100%; margin-bottom: 0;">
-                    <tr>
-                        <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Subtotal</td>
-                        <td style="text-align: right; padding: 5px 0; border: none; width: 120px;">
-                            {{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->subtotal, 2) }}
-                        </td>
-                    </tr>
-                    @if($order->tax > 0)
-                        <tr>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #666;">Tax
-                                ({{ $order->subtotal > 0 ? round(($order->tax / $order->subtotal) * 100) : 0 }}%)</td>
-                            <td style="text-align: right; padding: 5px 0; border: none;">
-                                {{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->tax, 2) }}
-                            </td>
-                        </tr>
-                    @endif
-                    @if($order->discount_amount > 0)
-                        <tr>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">
-                                Discount
-                                @if($order->discount_type === 'percent')
-                                    ({{ (float) $order->discount_value }}%)
-                                @endif
-                            </td>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #e53e3e;">
-                                -{{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->discount_amount, 2) }}
-                            </td>
-                        </tr>
-                    @endif
-                    @if($order->additional_charge > 0)
-                        <tr>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #4f46e5;">
-                                Extra Charge
-                                @if($order->additional_charge_type === 'percent')
-                                    ({{ (float) $order->additional_charge_value }}%)
-                                @endif
-                            </td>
-                            <td style="text-align: right; padding: 5px 0; border: none; color: #4f46e5;">
-                                +{{ $order->restaurant->currency ?? 'AED' }}
-                                {{ number_format($order->additional_charge, 2) }}
-                            </td>
-                        </tr>
-                    @endif
-                </table>
-                <div class="grand-total" style="text-align: right;">
-                    <span style="font-size: 14px; font-weight: normal; color: #666; margin-right: 15px;">Total</span>
-                    {{ $order->restaurant->currency ?? 'AED' }} {{ number_format($order->total, 2) }}
-                </div>
-            </div>
+        <div class="grand-total">
+            <table style="width: 100%">
+                <tr>
+                    <td class="text-left" style="font-size: 11px;">TOTAL ({{ $order->restaurant->currency ?? 'AED' }})
+                    </td>
+                    <td class="text-right">{{ number_format($order->total, 2) }}</td>
+                </tr>
+            </table>
         </div>
+    </div>
 
-        <div class="footer">
-            Thank you for dining with
-            <strong>{{ $order->restaurant->name ?? $tenant->name ?? 'Servio' }}</strong>!<br>
-            <span style="opacity: 0.6; font-size: 10px;">Powered by Servio</span>
+    @if($order->points_earned > 0)
+        <div style="margin-top: 3mm; text-align: center; border: 1px dashed #444; padding: 2mm;">
+            <div style="font-size: 10px; font-weight: bold;">Loyalty Points Earned: {{ $order->points_earned }}</div>
+            <div style="font-size: 9px;">Balance: {{ optional($order->customer)->loyalty_points ?? 0 }}</div>
         </div>
+    @endif
+
+    <div class="footer">
+        <div>Thank you for your visit!</div>
+        @if($order->restaurant->website)
+            <div>{{ $order->restaurant->website }}</div>
+        @endif
+        <div style="margin-top: 2mm; font-size: 8px; color: #888;">Powered by RestoFy</div>
     </div>
 </body>
 

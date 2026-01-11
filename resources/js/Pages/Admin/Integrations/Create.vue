@@ -10,32 +10,80 @@
             <div class="max-w-3xl mx-auto">
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <form @submit.prevent="submit">
+                        <!-- Restaurant Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Restaurant *</label>
+                            <select v-model="form.restaurant_id" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <option :value="null">Select a Restaurant</option>
+                                <option v-for="restaurant in restaurants" :key="restaurant.id" :value="restaurant.id">
+                                    {{ restaurant.name }}
+                                </option>
+                            </select>
+                            <div v-if="form.errors.restaurant_id" class="text-red-600 text-sm mt-1">{{ form.errors.restaurant_id }}</div>
+                        </div>
+
                         <!-- Provider -->
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Provider Name *</label>
-                            <input v-model="form.provider" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="e.g., Noon, Kareem, UberEats, Deliveroo">
+                            <select v-model="form.provider" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <option value="">Select Provider</option>
+                                <option value="uber-eats">Uber Eats</option>
+                                <option value="deliveroo">Deliveroo</option>
+                                <option value="talabat">Talabat</option>
+                                <option value="careem">Careem</option>
+                                <option value="noon">Noon Food</option>
+                            </select>
                             <div v-if="form.errors.provider" class="text-red-600 text-sm mt-1">{{ form.errors.provider }}</div>
                         </div>
 
-                        <!-- API Key -->
+                        <!-- Store ID (Common) -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
-                            <input v-model="form.api_key" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <div v-if="form.errors.api_key" class="text-red-600 text-sm mt-1">{{ form.errors.api_key }}</div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Store ID (External ID) *</label>
+                            <input v-model="form.store_id" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="e.g. 12345 or X-999">
+                            <div v-if="form.errors.store_id" class="text-red-600 text-sm mt-1">{{ form.errors.store_id }}</div>
                         </div>
 
-                        <!-- API Secret -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">API Secret</label>
-                            <input v-model="form.api_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <div v-if="form.errors.api_secret" class="text-red-600 text-sm mt-1">{{ form.errors.api_secret }}</div>
+                        <!-- Uber Eats Specifics -->
+                        <template v-if="form.provider === 'uber-eats'">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
+                                <input v-model="form.client_id" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
+                                <input v-model="form.client_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                        </template>
+
+                        <!-- Standard API Key/Secret (Deliveroo, Talabat, etc) -->
+                         <template v-if="form.provider !== 'uber-eats'">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">API Key / Token</label>
+                                <input v-model="form.api_key" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <div v-if="form.errors.api_key" class="text-red-600 text-sm mt-1">{{ form.errors.api_key }}</div>
+                            </div>
+
+                            <div class="mb-4" v-if="form.provider === 'deliveroo' || form.provider === 'noon'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">API Secret</label>
+                                <input v-model="form.api_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            </div>
+                        </template>
+
+                        <!-- Webhook Secrets -->
+                         <div class="mb-4" v-if="form.provider === 'deliveroo'">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook Secret</label>
+                            <input v-model="form.webhook_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                             <p class="text-xs text-gray-500 mt-1">Used to verify incoming webhook signatures.</p>
                         </div>
 
-                        <!-- Webhook URL -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
-                            <input v-model="form.webhook_url" type="url" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <div v-if="form.errors.webhook_url" class="text-red-600 text-sm mt-1">{{ form.errors.webhook_url }}</div>
+                        <!-- Webhook URL Display (Read Only) -->
+                         <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200" v-if="form.provider">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Your Webhook URL</label>
+                            <div class="flex items-center gap-2">
+                                <code class="text-sm text-primary flex-1 break-all">{{ route('api.webhook.delivery', form.provider) }}</code>
+                                <button type="button" @click="copyWebhook" class="text-gray-400 hover:text-gray-600 text-xs">Copy</button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Paste this URL into your {{ form.provider }} developer portal settings.</p>
                         </div>
 
                         <!-- Active Status -->
@@ -64,17 +112,34 @@
 import { useForm, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
+
+const props = defineProps<{
+    restaurants: Array<any>;
+}>();
+
 const route = (window as any).route;
 
 const form = useForm({
+    restaurant_id: null,
     provider: '',
+    store_id: '',
     api_key: '',
     api_secret: '',
+    client_id: '',
+    client_secret: '',
+    webhook_secret: '',
     webhook_url: '',
     is_enabled: true,
 });
 
 const submit = () => {
     form.post(route('admin.integrations.store'));
+};
+
+const copyWebhook = () => {
+    if (!form.provider) return;
+    const url = route('api.webhook.delivery', form.provider);
+    navigator.clipboard.writeText(url);
+    alert('Webhook URL copied to clipboard!');
 };
 </script>

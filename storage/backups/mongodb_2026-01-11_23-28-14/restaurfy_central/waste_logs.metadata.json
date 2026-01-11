@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"f5ffcce667684b41b934945b5da1b2c3","collectionName":"waste_logs","type":"collection"}

@@ -15,7 +15,7 @@
                 :data="customers.data"
                 :pagination="customers"
                 v-model:search="search"
-                title="All Customers"
+                :title="$t('customers.all_customers')"
             >
                 <!-- Customer Column -->
                 <template #cell-name="{ row }">

@@ -52,8 +52,12 @@ class IntegrationController extends Controller
         $validated = $request->validate([
             'restaurant_id' => 'required|exists:restaurants,id',
             'provider' => 'required|string|max:255',
+            'store_id' => 'required|string|max:255',
             'api_key' => 'nullable|string',
             'api_secret' => 'nullable|string',
+            'client_id' => 'nullable|string',
+            'client_secret' => 'nullable|string',
+            'webhook_secret' => 'nullable|string',
             'webhook_url' => 'nullable|url',
             'is_enabled' => 'boolean',
         ]);
@@ -77,10 +81,13 @@ class IntegrationController extends Controller
     public function update(Request $request, DeliveryIntegration $integration)
     {
         $validated = $request->validate([
-            'restaurant_id' => 'required|exists:restaurants,id',
             'provider' => 'required|string|max:255',
+            'store_id' => 'required|string|max:255',
             'api_key' => 'nullable|string',
             'api_secret' => 'nullable|string',
+            'client_id' => 'nullable|string',
+            'client_secret' => 'nullable|string',
+            'webhook_secret' => 'nullable|string',
             'webhook_url' => 'nullable|url',
             'is_enabled' => 'boolean',
         ]);
