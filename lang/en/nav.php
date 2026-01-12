@@ -7,6 +7,7 @@ return [
     'orders' => 'Orders',
     'all_orders' => 'All Orders',
     'new_order' => 'New Order',
+    'delivery_order' => 'Delivery Order',
     'kitchen_view' => 'Kitchen View',
     'inventory' => 'Inventory',
     'waste_management' => 'Waste',

@@ -188,7 +188,7 @@ class User extends Authenticatable
     public function getLandingRoute()
     {
         if ($this->is_super_admin) {
-            return route('admin.dashboard');
+            return \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL(null, route('admin.dashboard'));
         }
 
         $perms = $this->getPermissionsForCurrentRestaurant();
@@ -216,14 +216,14 @@ class User extends Authenticatable
             if ($perms->contains($perm)) {
                 // Ensure the route exists before returning
                 try {
-                    return route($routeName);
+                    return \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL(null, route($routeName));
                 } catch (\Exception $e) {
                     continue;
                 }
             }
         }
 
-        return route('profile.edit'); // Ultimate fallback
+        return \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL(null, route('profile.edit')); // Ultimate fallback
     }
 
     /**

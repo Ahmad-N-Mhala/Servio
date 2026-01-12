@@ -175,10 +175,11 @@ const submit = () => {
 
     // Get the current URL path to extract locale
     const currentPath = window.location.pathname;
-    // Extract locale from path (e.g., /en/login -> en)
+    // Extract locale from path (e.g., /en/servio/login -> en)
     const match = currentPath.match(/^\/([a-z]{2})\//);
     const locale = match ? match[1] : 'en';
-    const loginUrl = `/${locale}/login`;
+    // FIX: Include /servio prefix in the login URL
+    const loginUrl = `/${locale}/servio/login`;
     
     form.post(loginUrl, {
         preserveScroll: true,

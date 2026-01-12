@@ -387,7 +387,7 @@ class OrderController extends Controller
             'customer_phone' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
             'customer_birth_date' => ['nullable', 'date'],
-            'type' => ['required', 'in:dine_in,takeaway'],
+            'type' => ['required', 'in:dine_in,takeaway,delivery'],
             'table_id' => ['nullable', 'exists:restaurant_tables,id'], // Made optional for all order types
             'items' => ['required', 'array', 'min:1'],
             'items.*.menu_item_id' => ['required', 'exists:menu_items,id'],
@@ -402,6 +402,7 @@ class OrderController extends Controller
             'notes' => ['nullable', 'string'],
             'reward_id' => ['nullable', 'exists:rewards,id'],
             'otp' => ['nullable', 'string', 'size:6'],
+            'delivery_provider' => ['nullable', 'string', 'required_if:type,delivery'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -517,6 +518,9 @@ class OrderController extends Controller
             'customer_phone' => $validated['customer_phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'waiter_id' => auth()->id(),
+            'delivery_provider' => $validated['delivery_provider'] ?? null,
+            'payment_method' => $validated['type'] === 'delivery' ? 'online' : null,
+            'payment_status' => $validated['type'] === 'delivery' ? 'paid' : 'pending',
         ]);
 
         // Create order items

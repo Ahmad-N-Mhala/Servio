@@ -179,7 +179,7 @@
                 </div>
 
                 <div class="pt-2 text-sm text-gray-500" v-if="!editingId">
-                    <p>* A temporary password will be generated and shown after creation.</p>
+                    <p class="text-sm text-gray-500 mt-2">{{ $t('staff.password_setup_instruction') }}</p>
                 </div>
             </form>
 

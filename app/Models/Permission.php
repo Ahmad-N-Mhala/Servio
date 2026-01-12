@@ -56,4 +56,12 @@ class Permission extends Model implements PermissionContract
 
         return $permission;
     }
+
+    /**
+     * A permission can be applied to roles.
+     */
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, null, 'permission_ids', 'role_ids');
+    }
 }

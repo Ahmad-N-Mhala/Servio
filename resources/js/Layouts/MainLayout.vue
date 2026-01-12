@@ -141,6 +141,17 @@
                                     </svg>
                                     {{ $t('nav.new_order') }}
                                 </Link>
+                                <Link 
+                                    v-if="hasPermission('manage_delivery_orders')"
+                                    :href="route('delivery-orders.create')"
+                                    class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/delivery-orders')}"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    {{ $t('nav.delivery_order') }}
+                                </Link>
                                  <Link 
                                     v-if="hasPermission('view_kitchen') && hasFeature('kds')"
                                     :href="route('kitchen.index')"

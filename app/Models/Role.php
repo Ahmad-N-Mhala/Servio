@@ -63,4 +63,12 @@ class Role extends Model implements RoleContract
     {
         return $this->belongsToMany(User::class, 'model_has_roles', 'role_id', 'model_id');
     }
+
+    /**
+     * A role has many permissions.
+     */
+    public function permissions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, null, 'role_ids', 'permission_ids');
+    }
 }

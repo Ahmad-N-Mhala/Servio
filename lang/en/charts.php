@@ -17,4 +17,10 @@ return [
     'sales' => 'Sales',
     'retention' => 'Retention %',
     'no_data' => 'No data available',
+    'delivery_providers' => 'Delivery Providers',
+    'visit_1' => '1st Visit',
+    'visit_2' => '2nd Visit',
+    'visit_3' => '3rd Visit',
+    'visit_4' => '4th Visit',
+    'visit_5_plus' => '5th+ Visit',
 ];

@@ -70,4 +70,9 @@ return [
     'results' => 'results',
     'stock' => 'Stock',
     'no_results' => 'No results found',
+    'delivery' => 'Delivery',
+    'category' => 'Category',
+    'no_items' => 'No items to display',
+    'previous' => 'Previous',
+    'next' => 'Next',
 ];

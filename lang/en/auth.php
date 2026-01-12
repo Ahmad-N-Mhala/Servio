@@ -14,7 +14,7 @@ return [
     'sign_in_button' => 'Sign In',
     'no_account' => "Don't have an account?",
     'get_started' => 'Get started',
-    'email_placeholder' => 'you@example.com',
+    'email_placeholder' => 'you{\'@\'}example.com',
     'password_placeholder' => '••••••••',
     'email_required' => 'Email address is required.',
     'email_invalid' => 'Please enter a valid email address.',

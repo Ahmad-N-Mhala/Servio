@@ -16,12 +16,12 @@ class LandingContentSeeder extends Seeder
         // Settings
         LandingSetting::set('contact_email', 'admin@demo.com');
         LandingSetting::set('about_us_title', [
-            'en' => 'Empowering Restaurants Everywhere',
-            'ar' => 'تمكين المطاعم في كل مكان'
+            'en' => 'Elevating Every Aspect of Your Restaurant',
+            'ar' => 'الارتقاء بكل جانب من جوانب مطعمك'
         ]);
         LandingSetting::set('about_us_description', [
-            'en' => "Servio is an all-in-one restaurant management platform designed to streamline operations, boost efficiency, and enhance customer experience.\n\nFrom a powerful Point of Sale (POS) system to advanced Kitchen Display Systems (KDS), Inventory Management, and Customer Loyalty programs, we provide everything you need to run a successful restaurant business.",
-            'ar' => "Servio هي منصة شاملة لإدارة المطاعم مصممة لتبسيط العمليات وزيادة الكفاءة وتعزيز تجربة العملاء.\n\nمن نظام نقاط البيع القوي (POS) إلى أنظمة عرض المطبخ المتقدمة (KDS)، وإدارة المخزون، وبرامج ولاء العملاء، نوفر كل ما تحتاجه لإدارة مشروع مطعم ناجح."
+            'en' => "Servio is a state-of-the-art restaurant management ecosystem designed to empower modern food businesses. Our platform goes beyond simple transactions, offering a seamless integration of Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management.\n\nWe specialize in enhancing customer engagement through our advanced Loyalty Program, integrated Feedback Forms, and customizable Receipt Templates. With smart Inventory Management and automated reminders, we help you reduce waste and focus on what matters most: delivering exceptional dining experiences.",
+            'ar' => "سيرفيو هو نظام بيئي متكامل لإدارة المطاعم مصمم لتمكين الشركات الغذائية الحديثة. تتجاوز منصتنا مجرد المعاملات البسيطة، حيث تقدم تكاملاً سلساً لنقاط البيع (POS)، وأنظمة عرض المطبخ (KDS)، وإدارة التوصيل عبر قنوات متعددة.\n\nنحن متخصصون في تعزيز مشاركة العملاء من خلال برنامج الولاء المتقدم، ونماذج الملاحظات المتكاملة، وقوالب الإيصالات القابلة للتخصيص. بفضل إدارة المخزون الذكية والتذكيرات الآلية، نساعدك على تقليل الهدر والتركيز على الأهم: تقديم تجارب طعام استثنائية."
         ]);
         // Default Stats
         LandingSetting::set('stats_restaurants', '500+');

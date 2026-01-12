@@ -47,7 +47,7 @@ return [
     ],
     'delivery' => [
         'label' => 'Delivery Integrations',
-        'permissions' => ['view_delivery_settings', 'toggle_providers']
+        'permissions' => ['view_delivery_settings', 'toggle_providers', 'manage_delivery_orders']
     ],
     'communication' => [
         'label' => 'Communication & Marketing',

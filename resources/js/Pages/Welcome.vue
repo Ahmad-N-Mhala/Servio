@@ -261,19 +261,7 @@
             </div>
         </section>
 
-        <!-- Delivery Providers -->
-        <section class="py-20 bg-gray-50 border-t border-gray-100 overflow-hidden">
-             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                 <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-10">{{ $t('landing.delivery_partners') }}</p>
-                 
-                 <div class="flex flex-wrap justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                     <div v-for="provider in deliveryProviders" :key="provider.id" class="cursor-pointer hover:scale-110 transition-transform">
-                         <img v-if="provider.logo_url" :src="provider.logo_url" :alt="provider.name" class="h-12 w-auto object-contain">
-                         <span v-else class="text-xl font-bold text-gray-400">{{ provider.name }}</span>
-                     </div>
-                 </div>
-             </div>
-        </section>
+
 
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-100 py-12">
@@ -299,14 +287,14 @@
         <Modal :show="showRegisterModal" @close="showRegisterModal = false">
              <div class="p-8">
                 <div class="text-center mb-8">
-                    <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mx-auto mb-6 shadow-sm border border-emerald-100">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                     </div>
-                     <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('landing.register_interest') }}</h3>
-                     <p class="text-gray-500">
-                        {{ $t('landing.for_plan', { plan: selectedPlan?.slug ? ($t('plans.' + selectedPlan.slug) !== 'plans.' + selectedPlan.slug ? $t('plans.' + selectedPlan.slug) : selectedPlan.name) : selectedPlan?.name }) }}
+                     <h3 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $t('landing.register_interest') }}</h3>
+                     <p class="text-gray-500 font-medium text-lg">
+                        {{ $t('landing.for_plan', { plan: getPlanDisplayName(selectedPlan) }) }}
                      </p>
                 </div>
 
@@ -386,7 +374,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
@@ -452,14 +440,14 @@ const toggleLanguage = () => {
     // Quick URL patch for LaravelLocalization
     const currentPath = window.location.pathname; 
     const segments = currentPath.split('/'); 
+    // Format: /en/servio/...
+    // segments[0] is empty, [1] is locale, [2] is servio
     if (segments[1] && (segments[1] === 'en' || segments[1] === 'ar')) {
         segments[1] = newLocale;
         window.location.href = segments.join('/');
     } else {
-         // If no locale in URL (default), append or redirect
-         // This depends on prefix strategy. Assuming prefix always exists for non-default or configured so.
-         // If default is /en hidden, then /ar works.
-         window.location.href = `/${newLocale}`;
+         // Fallback if structure is weird, force proper structure
+         window.location.href = `/${newLocale}/servio`;
     }
 };
 
@@ -467,6 +455,17 @@ const getLocaleText = (obj: any) => {
     if (!obj) return '';
     if (typeof obj === 'string') return obj;
     return obj[locale.value] || obj['en'] || '';
+};
+
+const getPlanDisplayName = (plan: any) => {
+    if (!plan) return '';
+    if (plan.slug) {
+        const localized = t('plans.' + plan.slug);
+        if (localized && localized !== 'plans.' + plan.slug) {
+            return localized;
+        }
+    }
+    return plan.name || '';
 };
 
 const openRegisterModal = (plan: any) => {

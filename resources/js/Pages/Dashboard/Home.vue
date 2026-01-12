@@ -131,6 +131,11 @@
                     <ChartCard :title="$t('charts.payment_methods')" height="300px">
                         <canvas ref="paymentChartCanvas"></canvas>
                     </ChartCard>
+
+                    <!-- Delivery Providers -->
+                    <ChartCard v-if="deliveryProviderStats.length > 0" :title="$t('charts.delivery_providers')" height="300px">
+                        <canvas ref="deliveryChartCanvas"></canvas>
+                    </ChartCard>
     
                     <!-- Top Menu Items -->
                     <ChartCard :title="$t('charts.top_menu_items')" height="300px">
@@ -300,6 +305,7 @@ const topCustomers = computed(() => page.props.top_customers as any[] || []);
 const dateRange = computed(() => page.props.date_range as any);
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 const retentionStats = computed(() => page.props.retention_stats as any[] || []);
+const deliveryProviderStats = computed(() => page.props.delivery_provider_stats as any[] || []);
 
 // New Props
 const currentTab = computed(() => (page.props.active_tab as string) || 'overview');
@@ -369,6 +375,7 @@ const topItemsChartCanvas = ref<HTMLCanvasElement | null>(null);
 const paymentChartCanvas = ref<HTMLCanvasElement | null>(null);
 const wasteChartCanvas = ref<HTMLCanvasElement | null>(null);
 const topCategoriesChartCanvas = ref<HTMLCanvasElement | null>(null);
+const deliveryChartCanvas = ref<HTMLCanvasElement | null>(null);
 const retentionChartCanvas = ref<HTMLCanvasElement | null>(null);
 
 let revenueChartInstance: Chart | null = null;
@@ -378,6 +385,7 @@ let topItemsChartInstance: Chart | null = null;
 let paymentChartInstance: Chart | null = null;
 let wasteChartInstance: Chart | null = null;
 let topCategoriesChartInstance: Chart | null = null;
+let deliveryChartInstance: Chart | null = null;
 let retentionChartInstance: Chart | null = null;
 
 const formatCurrency = (amount: number) => {
@@ -848,6 +856,53 @@ const initRetentionChart = () => {
     });
 };
 
+const initDeliveryChart = () => {
+    if (!deliveryChartCanvas.value) return;
+    
+    if (deliveryChartInstance) {
+        deliveryChartInstance.destroy();
+    }
+
+    const ctx = deliveryChartCanvas.value.getContext('2d');
+    if (!ctx) return;
+
+    if (deliveryProviderStats.value.length === 0) return;
+
+    // Distinct colors
+    const colors = [
+        '#00C853', '#2962FF', '#FF6D00', '#AA00FF', '#FFD600', '#00E5FF', '#D50000', '#304FFE'
+    ];
+
+    deliveryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: deliveryProviderStats.value.map((item: any) => t('orders.providers.' + item.provider)),
+            datasets: [{
+                data: deliveryProviderStats.value.map((item: any) => item.count),
+                backgroundColor: colors.slice(0, deliveryProviderStats.value.length),
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                     callbacks: {
+                        label: (context) => {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${value} orders`;
+                        }
+                    }
+                }
+            },
+        },
+    });
+};
+
 onMounted(() => {
     if (currentTab.value === 'overview') {
         initRevenueChart();
@@ -857,11 +912,12 @@ onMounted(() => {
         initPaymentChart();
         initWasteChart();
         initTopCategoriesChart();
+        initDeliveryChart();
         initRetentionChart();
     }
 });
 
-watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistribution, wasteChart, topCategories, retentionStats], () => {
+watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistribution, wasteChart, topCategories, retentionStats, deliveryProviderStats], () => {
     if (currentTab.value === 'overview') {
         initRevenueChart();
         initStatusChart();
@@ -870,6 +926,7 @@ watch([revenueChart, statusDistribution, peakHours, topMenuItems, paymentDistrib
         initPaymentChart();
         initWasteChart();
         initTopCategoriesChart();
+        initDeliveryChart();
         initRetentionChart();
     }
 });

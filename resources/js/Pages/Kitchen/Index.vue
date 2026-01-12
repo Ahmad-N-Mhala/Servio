@@ -61,10 +61,20 @@
                                     <div class="flex flex-col items-end">
                                         <span class="text-sm font-medium text-gray-900">{{ order.customer_name || $t('common.guest') }}</span>
                                         <span class="text-xs text-gray-500 mb-1">{{ order.items.length }} {{ $t('common.items') }}</span>
-                                        <div class="flex gap-1">
+                                        <div class="flex gap-1 flex-wrap justify-end">
                                             <span :class="['px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider', 
-                                                order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700']">
-                                                {{ order.type === 'dine_in' ? $t('kitchen.dine_in') : $t('kitchen.takeaway') }}
+                                                order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 
+                                                order.type === 'delivery' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-orange-100 text-orange-700']">
+                                                {{ 
+                                                    order.type === 'dine_in' ? $t('kitchen.dine_in') : 
+                                                    order.type === 'delivery' ? $t('common.delivery') :
+                                                    $t('kitchen.takeaway') 
+                                                }}
+                                            </span>
+                                            <span v-if="order.type === 'delivery' && order.delivery_provider" 
+                                                  class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700">
+                                                {{ $t('orders.providers.' + order.delivery_provider) }}
                                             </span>
                                             <div v-if="order.table" class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
@@ -148,10 +158,20 @@
                                     <div class="flex flex-col items-end">
                                         <span class="text-sm font-medium text-gray-900">{{ order.customer_name || $t('common.guest') }}</span>
                                         <span class="text-xs text-gray-500 mb-1">{{ order.items.length }} {{ $t('common.items') }}</span>
-                                        <div class="flex gap-1">
+                                        <div class="flex gap-1 flex-wrap justify-end">
                                             <span :class="['px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider', 
-                                                order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700']">
-                                                {{ order.type === 'dine_in' ? $t('kitchen.dine_in') : $t('kitchen.takeaway') }}
+                                                order.type === 'dine_in' ? 'bg-purple-100 text-purple-700' : 
+                                                order.type === 'delivery' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-orange-100 text-orange-700']">
+                                                {{ 
+                                                    order.type === 'dine_in' ? $t('kitchen.dine_in') : 
+                                                    order.type === 'delivery' ? $t('common.delivery') :
+                                                    $t('kitchen.takeaway') 
+                                                }}
+                                            </span>
+                                            <span v-if="order.type === 'delivery' && order.delivery_provider" 
+                                                  class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700">
+                                                {{ $t('orders.providers.' + order.delivery_provider) }}
                                             </span>
                                             <div v-if="order.table" class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-500" viewBox="0 0 20 20" fill="currentColor">

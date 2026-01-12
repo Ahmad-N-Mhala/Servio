@@ -16,4 +16,5 @@ return [
     'inactive' => 'Inactive',
     'delete_confirm' => 'Are you sure you want to delete this staff member?',
     'birth_date' => 'Birth Date',
+    'password_setup_instruction' => '* An email will be sent to the staff member with instructions to set their password.',
 ];

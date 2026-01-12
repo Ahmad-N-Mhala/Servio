@@ -107,42 +107,25 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                         </div>
-                        {{ $t('orders.type') || 'Order Type' }}
+                        {{ $t('orders.delivery_provider') || 'Delivery Provider' }}
                     </h3>
-                    <div class="flex gap-4 mb-6">
-                        <label class="flex-1 cursor-pointer group">
-                            <input type="radio" v-model="form.type" value="dine_in" class="peer sr-only" />
-                            <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
-                                <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.704 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-                                </svg>
-                                <span class="font-semibold text-gray-700 peer-checked:text-primary">{{ $t('kitchen.dine_in') }}</span>
-                            </div>
-                        </label>
-                        <label class="flex-1 cursor-pointer group">
-                            <input type="radio" v-model="form.type" value="takeaway" class="peer sr-only" />
-                            <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
-                                <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
-                                <span class="font-semibold text-gray-700 peer-checked:text-primary">{{ $t('kitchen.takeaway') }}</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div v-if="form.type === 'dine_in'" class="animate-fade-in-up">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.select') }} {{ $t('nav.tables') }} ({{ $t('common.optional') }})</label>
-                        <select 
-                            v-model="form.table_id" 
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition-colors"
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                        <button 
+                            type="button"
+                            v-for="provider in ['uber-eats', 'deliveroo', 'talabat', 'careem', 'noon', 'keeta', 'other']" 
+                            :key="provider"
+                            @click="form.delivery_provider = provider"
+                            :class="[
+                                'p-4 rounded-xl border-2 transition-all text-center flex flex-col items-center justify-center gap-2',
+                                form.delivery_provider === provider 
+                                    ? 'border-primary bg-primary/5 text-primary' 
+                                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                            ]"
                         >
-                            <option :value="null">{{ $t('orders.no_table_assigned') }}</option>
-                            <option v-for="table in tablesList" :key="table.id" :value="table.id" :disabled="!table.is_available">
-                                {{ table.name }} ({{ table.capacity }} {{ $t('common.guest') }}) - {{ table.location || 'Main' }}{{ !table.is_available ? ' [' + $t('common.sold_out') + ']' : '' }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.table_id" class="mt-1 text-sm text-red-600">{{ form.errors.table_id }}</p>
+                            <span class="font-bold capitalize">{{ $t('orders.providers.' + provider) }}</span>
+                        </button>
                     </div>
+                    <p v-if="form.errors.delivery_provider" class="text-sm text-red-600 mt-1">{{ form.errors.delivery_provider }}</p>
 
 
                 </div>
@@ -404,9 +387,26 @@
                             <span>{{ $t('pos.tax') }} (5%)</span>
                             <span>{{ currencyCode }} {{ tax.toFixed(2) }}</span>
                         </div>
-                        <div class="flex justify-between text-xl font-bold text-primary pt-2">
                             <span>{{ $t('common.total') }}</span>
                             <span>{{ currencyCode }} {{ total.toFixed(2) }}</span>
+                        </div>
+                        
+                        <!-- Manual Price Override -->
+                        <div class="pt-4 border-t border-gray-100 mt-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">
+                                {{ $t('orders.paid_price') || 'Actual Paid Price (from App)' }}
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-gray-500 font-bold">{{ currencyCode }}</span>
+                                <input 
+                                    v-model="overrideTotal"
+                                    type="number" 
+                                    step="0.01"
+                                    :placeholder="total.toFixed(2)"
+                                    class="w-full pl-12 pr-4 py-2.5 border-2 border-primary/30 rounded-xl focus:ring-primary focus:border-primary font-bold text-lg text-primary"
+                                />
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ $t('orders.paid_price_hint') || 'Leave empty to use calculated total' }}</p>
                         </div>
                         
 
@@ -699,7 +699,7 @@ const categoriesList = computed(() => props.menuCategories || []);
 const currencyCode = computed(() => (page.props.current_restaurant as any)?.currency || props.currency || 'AED');
 const phoneCode = computed(() => (page.props.current_restaurant as any)?.phone_code || '+971');
 const availableRewards = computed(() => props.rewards || []);
-const tablesList = computed(() => props.tables || []);
+
 
 // State
 const cart = ref<CartItem[]>([]);
@@ -714,13 +714,16 @@ const customizingItem = ref<MenuItem | null>(null);
 const selectedExtras = ref<any[]>([]); // Track selected extras IDs/Objects
 
 
+// Custom total override
+const overrideTotal = ref<number | null>(null);
+
 // Form
 const form = useForm({
     customer_phone: '',
     customer_name: '',
     customer_birth_date: '',
     customer_id: null as number | null,
-    type: 'dine_in',
+    type: 'delivery',
     table_id: null as number | null,
     items: [] as { menu_item_id: number; quantity: number; unit_price: number; notes?: string; extras?: any[] }[],
     subtotal: 0,
@@ -1264,13 +1267,11 @@ const submitOrder = () => {
     form.subtotal = subtotal.value;
     form.discount_amount = discountAmount.value;
     form.tax = tax.value;
-    form.total = total.value;
+    form.total = overrideTotal.value !== null ? Number(overrideTotal.value) : total.value;
     form.reward_id = selectedReward.value?.id || null;
-    if (form.type === 'takeaway' || form.type === 'delivery') {
-        form.table_id = null;
-    }
+    form.table_id = null;
 
-    form.post(route('orders.store'), {
+    form.post(route('delivery-orders.store'), {
         onSuccess: async () => {
              // Retrieve the newly created order from the response (assuming it's passed as flash or prop)
              // Since Inertia reload might clear props, we rely on the server returning the order object via flash session or redirect props.

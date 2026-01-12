@@ -135,26 +135,34 @@ class PermissionController extends Controller
             $role = \App\Models\Role::findByName($roleName, 'web');
             \Log::info("Role found: " . $role->id . " Name: " . $role->name);
 
-            // Force clear permissions to handle MongoDB mix of embedded/pivot
-            // For older spatie versions on Mongo, sometimes permissions are embedded in 'permission_ids' or similar
-            $role->unset('permission_ids');
-            $role->unset('permissions');
-            $role->save();
-
-            DB::connection('mongodb')->table('role_has_permissions')->where('role_id', $role->id)->delete();
-            try {
-                DB::connection('mongodb')->table('role_has_permissions')->where('role_id', new \MongoDB\BSON\ObjectId($role->id))->delete();
-            } catch (\Exception $e) {
-            }
-
-            // Ensure all permissions exist in DB first
+            // Ensure all permissions exist in DB first (just in case)
+            $permissionModels = [];
             foreach ($permissions as $permissionName) {
-                \App\Models\Permission::findOrCreate($permissionName, 'web');
+                $permissionModels[] = \App\Models\Permission::findOrCreate($permissionName, 'web');
             }
 
-            // Sync permissions directly
-            $role->syncPermissions($permissions);
-            \Log::info("syncPermissions called for role: {$roleName}");
+            // For MongoDB + Spatie, we want to ensure any existing permissions are cleared
+            // We use syncPermissions with the array of permission names
+            try {
+                // Clear all first
+                $role->permissions()->detach();
+                $role->unset('permission_id'); // Handle the singular variant seen in DB
+                $role->unset('permission_ids'); // Handle the plural variant
+                $role->save();
+
+                // Now sync the new ones
+                if (!empty($permissions)) {
+                    $role->syncPermissions($permissions);
+                }
+
+                \Log::info("Permissions synced successfully for role: {$roleName}");
+            } catch (\Exception $e) {
+                // Fallback for MongoDB: Manually set the permission_ids array if syncPermissions fails
+                $ids = array_map(fn($p) => $p->id, $permissionModels);
+                $role->permission_ids = $ids;
+                $role->save();
+                \Log::info("Permissions manually assigned for role: {$roleName} via fallback");
+            }
 
             // Clear cache to apply changes immediately
             app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();

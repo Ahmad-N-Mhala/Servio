@@ -77,4 +77,9 @@ return [
     'results' => 'نتائج',
     'stock' => 'المخزون',
     'no_results' => 'لا توجد نتائج',
+    'delivery' => 'توصيل',
+    'category' => 'فئة',
+    'no_items' => 'لا توجد عناصر لعرضها',
+    'previous' => 'السابق',
+    'next' => 'التالي',
 ];

@@ -10,14 +10,19 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 // Redirect /login to default locale login
 Route::get('/login', function () {
-    return redirect()->route('login');
+    return redirect('servio/login');
+});
+
+// Also Redirect root to Servio Landing
+Route::get('/', function () {
+    return redirect('servio');
 });
 
 require base_path('routes/tenant_api.php');
 
 // Main App Routes (Authenticated & Localized)
 Route::group([
-    'prefix' => LaravelLocalization::setLocale(),
+    'prefix' => LaravelLocalization::setLocale() . '/servio', // Added /servio
     'middleware' => [
         'web',
         'localeSessionRedirect',
@@ -48,6 +53,7 @@ Route::group([
     Route::post('/onboard', [OnboardingController::class, 'store'])->name('onboard.store');
 
     // QR Code Ordering (Public Routes)
+    // Note: Prefix is inside the group above: {locale}/servio
     Route::prefix('qr')->name('qr.')->group(function () {
         Route::get('/menu/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'showMenu'])->name('menu');
         Route::post('/order/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'placeOrder'])->name('order');
@@ -131,6 +137,14 @@ Route::group([
                     ->middleware('permission:manage_order_status_screen');
                 Route::post('/status/update-state', [\App\Http\Controllers\Tenant\OrderStatusScreenController::class, 'updateState'])->name('status-screen.update-state')
                     ->middleware('permission:update_item_status');
+            });
+
+            // Delivery Orders (Dedicated)
+            Route::prefix('delivery-orders')->name('delivery-orders.')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Tenant\DeliveryOrderController::class, 'create'])->name('create')
+                    ->middleware('permission:manage_delivery_orders');
+                Route::post('/', [\App\Http\Controllers\Tenant\DeliveryOrderController::class, 'store'])->name('store')
+                    ->middleware('permission:manage_delivery_orders');
             });
 
             // Customers

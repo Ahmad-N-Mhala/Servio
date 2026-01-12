@@ -14,7 +14,7 @@ return [
     'sign_in_button' => 'تسجيل الدخول',
     'no_account' => 'ليس لديك حساب؟',
     'get_started' => 'ابدأ الآن',
-    'email_placeholder' => 'name@example.com',
+    'email_placeholder' => 'name{\'@\'}example.com',
     'password_placeholder' => '••••••••',
     'email_required' => 'البريد الإلكتروني مطلوب.',
     'email_invalid' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',

@@ -7,6 +7,7 @@ return [
     'orders' => 'الطلبات',
     'all_orders' => 'كل الطلبات',
     'new_order' => 'طلب جديد',
+    'delivery_order' => 'طلب توصيل',
     'kitchen_view' => 'شاشة المطبخ',
     'inventory' => 'المخزون',
     'waste_management' => 'إدارة الهدر',

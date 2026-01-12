@@ -2,7 +2,7 @@
 
 return [
     'hero_title' => 'Revolutionize Your Restaurant Management',
-    'hero_subtitle' => 'The all-in-one solution for point of sale, kitchen display, delivery integration, and customer loyalty.',
+    'hero_subtitle' => 'The all-in-one solution for point of sale, kitchen display, delivery management, and customer loyalty.',
     'get_started' => 'Get Started',
     'view_pricing' => 'View Pricing',
     'about_us' => 'About Us',
@@ -12,7 +12,7 @@ return [
     'yearly' => 'Yearly',
     'select_plan' => 'Select Plan',
     'register_interest' => 'Register Your Interest',
-    'delivery_partners' => 'Delivery Partners',
+    'delivery_partners' => 'Compatible Delivery Platforms',
     'contact_us' => 'Contact Us',
     'full_name' => 'Full Name',
     'email_address' => 'Email Address',
@@ -36,7 +36,7 @@ return [
     'stats_uptime' => 'Uptime',
     'hero_image_text' => "RESTAURANT\nMANAGEMENT\nREDEFINED",
     'plan_features' => 'Plan Features',
-    'for_plan' => 'For :plan plan',
+    'for_plan' => 'For {plan} plan',
     'month' => 'month',
     'year' => 'year',
     'upgrade' => 'Upgrade',
@@ -46,4 +46,6 @@ return [
     'custom_plan_title' => 'Need a Custom Plan?',
     'custom_plan_desc' => 'Contact our sales team for enterprise solutions tailored to your needs',
     'contact_sales' => 'Contact Sales',
+    'about_title_default' => 'Elevating Every Aspect of Your Restaurant',
+    'about_us_description_default' => "Servio is a state-of-the-art restaurant management ecosystem designed to empower modern food businesses. Our platform goes beyond simple transactions, offering a seamless integration of Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management.\n\nWe specialize in enhancing customer engagement through our advanced Loyalty Program, integrated Feedback Forms, and customizable Receipt Templates. With smart Inventory Management and automated reminders, we help you reduce waste and focus on what matters most: delivering exceptional dining experiences.",
 ];

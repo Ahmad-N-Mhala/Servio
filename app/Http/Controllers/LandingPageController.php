@@ -60,13 +60,15 @@ class LandingPageController extends Controller
             return back()->withErrors($validator);
         }
 
-        $contactEmail = LandingSetting::get('contact_email', 'admin@demo.com'); // Default fallback
+        $contactEmail = LandingSetting::get('interest_notification_email')
+            ?? LandingSetting::get('contact_email', 'support@servio.com');
 
         // Send Email
         try {
             Mail::to($contactEmail)->send(new RegistrationInterest($request->all()));
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to send email. Please try again.');
+            \Log::error('Registration Interest Email Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send email. Please try again or contact us directly.');
         }
 
         return back()->with('success', 'thank_you_message');

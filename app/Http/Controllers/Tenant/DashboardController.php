@@ -600,6 +600,20 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])
             ->count();
 
+        // -- Delivery Provider Stats --
+        $deliveryProviderStats = (clone $baseOrderQuery)
+            ->where('type', 'delivery')
+            ->whereNotNull('delivery_provider')
+            ->where('delivery_provider', '!=', '')
+            ->get()
+            ->groupBy('delivery_provider')
+            ->map(function ($group, $provider) {
+                return [
+                    'provider' => $provider, // Will be localized in frontend
+                    'count' => $group->count(),
+                ];
+            })->values();
+
         $revenue = (clone $baseOrderQuery)
             ->where('payment_status', 'paid')
             ->sum('total');
@@ -644,7 +658,12 @@ class DashboardController extends Controller
         $retentionStats = [];
 
         for ($i = 1; $i <= 5; $i++) {
-            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i . match ($i) { 2 => 'nd', 3 => 'rd', default => 'th'} . ' Visit');
+            $labelKey = $i === 5 ? 'visit_5_plus' : "visit_{$i}";
+            // Use translation helper. Since this is an API/Inertia response, we should translate here 
+            // OR send keys to frontend. Sending keys is better for dynamic language switching without reload, 
+            // but the chart library likely needs ready strings or complex callback. 
+            // For now, let's translate here as requested, or assume page reload on lang change.
+            $label = __("charts.{$labelKey}");
 
             if ($totalCustomers === 0) {
                 $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
@@ -888,6 +907,7 @@ class DashboardController extends Controller
             'top_categories' => $topCategories,
             'top_customers' => $topCustomers,
             'payment_distribution' => $paymentDistribution,
+            'delivery_provider_stats' => $deliveryProviderStats,
             // 'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
             'date_range' => [
                 'start_date' => $startDate->format('Y-m-d'),

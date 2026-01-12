@@ -64,4 +64,6 @@ return [
     'days_left' => ':days days left',
     'quantity_remaining' => 'Quantity Remaining',
     'record_waste' => 'Record Waste',
+    'edit_item' => 'Edit Item',
+    'alert_recipient_desc' => 'This user will receive emails for expiry warnings and low stock alerts.',
 ];

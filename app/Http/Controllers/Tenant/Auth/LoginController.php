@@ -35,7 +35,7 @@ class LoginController extends Controller
 
             // 1. Check for Super Admin
             if ($user->is_super_admin) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->to(\Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL(null, route('admin.dashboard')));
             }
 
             // Fetch available restaurants for this user
@@ -61,7 +61,13 @@ class LoginController extends Controller
             // Users can switch restaurants using the header dropdown
             $restaurant = $restaurants->first();
             session(['active_restaurant_id' => $restaurant->id]);
-            return redirect()->intended($user->getLandingRoute());
+
+            // Ensure the redirect URL is localized
+            $targetUrl = $user->getLandingRoute();
+
+            // getLandingRoute() now returns a fully localized URL (e.g. /en/servio/dashboard),
+            // so we don't need to wrap it again.
+            return redirect()->intended($targetUrl);
         }
 
         return back()->withErrors([

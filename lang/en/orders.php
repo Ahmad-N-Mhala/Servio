@@ -41,6 +41,9 @@ return [
     'cash' => 'Cash',
     'card' => 'Card',
     'online' => 'Online',
+    'delivery_provider' => 'Delivery Provider',
+    'paid_price' => 'Actual Paid Price (from App)',
+    'paid_price_hint' => 'Leave empty to use calculated total',
     'update_order' => 'Update Order',
     'modify_details' => 'Modify customer details, order type, table, and items',
     'no_items' => 'No items in order.',
@@ -52,5 +55,16 @@ return [
     'save_note' => 'Save Note',
     'save_shortcut' => 'Press Cmd/Ctrl + Enter to save quickly',
     'order_no' => 'Order #',
+    'select_provider' => 'Select Provider',
+    'providers' => [
+        'uber-eats' => 'Uber Eats',
+        'deliveroo' => 'Deliveroo',
+        'talabat' => 'Talabat',
+        'careem' => 'Careem',
+        'noon' => 'Noon Food',
+        'keeta' => 'Keeta',
+        'other' => 'Other',
+    ],
+    'click_to_advance' => 'Click to Advance',
 ];
 
