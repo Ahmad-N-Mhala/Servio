@@ -23,20 +23,43 @@ class AppServiceProvider extends ServiceProvider
                 $overrides = [];
 
                 // Email
+                if ($configs->has('mail_host'))
+                    $overrides['mail.mailers.smtp.host'] = $configs['mail_host'];
+                if ($configs->has('mail_port'))
+                    $overrides['mail.mailers.smtp.port'] = $configs['mail_port'];
+                if ($configs->has('mail_username'))
+                    $overrides['mail.mailers.smtp.username'] = $configs['mail_username'];
+                if ($configs->has('mail_password'))
+                    $overrides['mail.mailers.smtp.password'] = $configs['mail_password'];
+                if ($configs->has('mail_encryption'))
+                    $overrides['mail.mailers.smtp.encryption'] = $configs['mail_encryption'];
+
                 if ($configs->has('mail_from_address'))
                     $overrides['mail.from.address'] = $configs['mail_from_address'];
                 if ($configs->has('mail_from_name'))
                     $overrides['mail.from.name'] = $configs['mail_from_name'];
 
-                // SMS (Assuming generic config keys or custom ones)
-                if ($configs->has('sms_provider'))
-                    $overrides['services.sms.provider'] = $configs['sms_provider'];
-                if ($configs->has('sms_sid'))
-                    $overrides['services.sms.sid'] = $configs['sms_sid'];
-                if ($configs->has('sms_token'))
-                    $overrides['services.sms.token'] = $configs['sms_token'];
-                if ($configs->has('sms_from'))
-                    $overrides['services.sms.from'] = $configs['sms_from'];
+                // SMS Mapping
+                if ($configs->has('sms_provider')) {
+                    $provider = $configs['sms_provider'];
+                    $overrides['services.sms.driver'] = $provider;
+
+                    if ($provider === 'twilio') {
+                        if ($configs->has('sms_sid'))
+                            $overrides['services.twilio.sid'] = $configs['sms_sid'];
+                        if ($configs->has('sms_token'))
+                            $overrides['services.twilio.token'] = $configs['sms_token'];
+                        if ($configs->has('sms_from'))
+                            $overrides['services.twilio.from'] = $configs['sms_from'];
+                    } elseif ($provider === 'nexmo') {
+                        if ($configs->has('sms_sid'))
+                            $overrides['services.nexmo.key'] = $configs['sms_sid'];
+                        if ($configs->has('sms_token'))
+                            $overrides['services.nexmo.secret'] = $configs['sms_token'];
+                        if ($configs->has('sms_from'))
+                            $overrides['services.nexmo.sms_from'] = $configs['sms_from'];
+                    }
+                }
 
                 if (!empty($overrides)) {
                     config($overrides);

@@ -23,6 +23,11 @@ class SystemConfigurationController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
+            'mail_host' => 'nullable|string',
+            'mail_port' => 'nullable|numeric',
+            'mail_username' => 'nullable|string',
+            'mail_password' => 'nullable|string',
+            'mail_encryption' => 'nullable|in:tls,ssl,null',
             'mail_from_address' => 'nullable|email',
             'mail_from_name' => 'nullable|string',
             'registration_email' => 'nullable|email',
@@ -66,6 +71,22 @@ class SystemConfigurationController extends Controller
         } catch (\Exception $e) {
             Log::error('Test Email Failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to send test email: ' . $e->getMessage());
+        }
+    }
+
+    public function testSms(Request $request)
+    {
+        $phone = $request->input('phone');
+        if (!$phone) {
+            return back()->with('error', 'Please provide a phone number for testing.');
+        }
+
+        try {
+            app(\App\Services\SmsService::class)->send($phone, "Servio SMS Integration Test Successful.");
+            return back()->with('success', 'Test SMS sent successfully to ' . $phone);
+        } catch (\Exception $e) {
+            Log::error('Test SMS Failed: ' . $e->getMessage());
+            return back()->with('error', 'Test SMS Failed: ' . $e->getMessage());
         }
     }
 }

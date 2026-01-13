@@ -23,6 +23,9 @@ class SmsService
             case 'twilio':
                 $this->sendViaTwilio($to, $message);
                 break;
+            case 'nexmo':
+                $this->sendViaNexmo($to, $message);
+                break;
             case 'unifonic':
                 $this->sendViaUnifonic($to, $message);
                 break;
@@ -100,6 +103,35 @@ class SmsService
 
         if (!$response->successful()) {
             throw new \Exception("SMS.ae Error: " . $response->body());
+        }
+    }
+
+    private function sendViaNexmo($to, $message)
+    {
+        $key = config('services.nexmo.key');
+        $secret = config('services.nexmo.secret');
+        $from = config('services.nexmo.sms_from') ?? 'SERVIO';
+
+        if (!$key || !$secret) {
+            throw new \Exception("Nexmo credentials missing (Key/Secret).");
+        }
+
+        // Nexmo API
+        $response = Http::asForm()->post("https://rest.nexmo.com/sms/json", [
+            'api_key' => $key,
+            'api_secret' => $secret,
+            'to' => $to,
+            'from' => $from,
+            'text' => $message,
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception("Nexmo HTTP Error: " . $response->body());
+        }
+
+        $json = $response->json();
+        if (isset($json['messages'][0]['status']) && $json['messages'][0]['status'] != '0') {
+            throw new \Exception("Nexmo API Error: " . ($json['messages'][0]['error-text'] ?? 'Unknown error'));
         }
     }
 }

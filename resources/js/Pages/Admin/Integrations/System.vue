@@ -33,6 +33,43 @@
                 </div>
                 <!-- Main Email Form -->
                 <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <!-- SMTP Settings -->
+                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Input 
+                            v-model="form.mail_host" 
+                            label="SMTP Host" 
+                            placeholder="smtp.example.com" 
+                            :error="form.errors.mail_host"
+                        />
+                        <Input 
+                            v-model="form.mail_port" 
+                            label="SMTP Port" 
+                            placeholder="587" 
+                            :error="form.errors.mail_port"
+                        />
+                        <Select 
+                            v-model="form.mail_encryption" 
+                            label="Encryption" 
+                            :options="[{label: 'TLS', value: 'tls'}, {label: 'SSL', value: 'ssl'}, {label: 'None', value: null}]"
+                            :error="form.errors.mail_encryption"
+                        />
+                     </div>
+                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Input 
+                            v-model="form.mail_username" 
+                            label="SMTP Username" 
+                            :error="form.errors.mail_username"
+                        />
+                        <Input 
+                            v-model="form.mail_password" 
+                            label="SMTP Password" 
+                            type="password"
+                            :error="form.errors.mail_password"
+                        />
+                     </div>
+
+                     <div class="md:col-span-2 h-px bg-gray-100"></div>
+
                      <Input 
                         v-model="form.mail_from_address" 
                         label="Mail From Address" 
@@ -122,6 +159,29 @@
                         :error="form.errors.sms_token"
                      />
                 </div>
+
+                <!-- Test SMS Section -->
+                <div class="bg-emerald-50/50 p-8 border-t border-emerald-100/50">
+                    <div class="flex flex-col md:flex-row gap-6 items-end">
+                        <div class="flex-grow w-full">
+                            <Input 
+                                v-model="testPhone" 
+                                label="Validate SMS Configuration" 
+                                placeholder="Enter phone number (e.g., +1234567890)" 
+                                icon="phone"
+                            />
+                        </div>
+                        <Button 
+                            @click="sendTestSms" 
+                            :loading="sendingTestSms" 
+                            variant="secondary"
+                            class="mb-0.5 whitespace-nowrap bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                            Send Test SMS
+                        </Button>
+                    </div>
+                </div>
             </div>
             
             <!-- Spacer for floating button -->
@@ -157,6 +217,11 @@ const props = defineProps({
 });
 
 const form = useForm({
+    mail_host: props.configurations.mail_host || '',
+    mail_port: props.configurations.mail_port || '',
+    mail_username: props.configurations.mail_username || '',
+    mail_password: props.configurations.mail_password || '',
+    mail_encryption: props.configurations.mail_encryption || 'tls',
     mail_from_address: props.configurations.mail_from_address || '',
     mail_from_name: props.configurations.mail_from_name || '',
     registration_email: props.configurations.registration_email || '',
@@ -183,6 +248,20 @@ const sendTestEmail = () => {
     }, {
         preserveScroll: true,
         onFinish: () => sendingTestEmail.value = false
+    });
+};
+
+const testPhone = ref('');
+const sendingTestSms = ref(false);
+
+const sendTestSms = () => {
+    if (!testPhone.value) return;
+    sendingTestSms.value = true;
+    router.post(route('admin.settings.system.test-sms'), {
+        phone: testPhone.value
+    }, {
+        preserveScroll: true,
+        onFinish: () => sendingTestSms.value = false
     });
 };
 </script>
