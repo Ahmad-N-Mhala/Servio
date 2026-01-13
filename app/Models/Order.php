@@ -73,7 +73,7 @@ class Order extends Model
             $isPaid = $order->payment_status === 'paid';
             $justBecameEligible = ($order->isDirty('status') || $order->isDirty('payment_status'));
 
-            if ($justBecameEligible && $isCompleted && $isPaid && !$order->points_earned) {
+            if ($justBecameEligible && $isCompleted && $isPaid && $order->points_earned === null) {
                 app(LoyaltyService::class)->processOrderPoints($order);
             }
         });

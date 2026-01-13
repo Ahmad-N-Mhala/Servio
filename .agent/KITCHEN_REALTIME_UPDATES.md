@@ -1,7 +1,7 @@
 # Real-Time Order Updates - Kitchen Display System
 
 ## Overview
-The RestoFy kitchen display system is configured to automatically reflect order changes across all views, including when the POS edits an order.
+The Servio kitchen display system is configured to automatically reflect order changes across all views, including when the POS edits an order.
 
 ## How It Works
 

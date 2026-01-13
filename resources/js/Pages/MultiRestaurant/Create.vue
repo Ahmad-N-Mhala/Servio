@@ -202,7 +202,7 @@
                         </div>
 
                         <!-- Loyalty Setup -->
-                        <div class="pt-6 sm:pt-8 border-t border-gray-100">
+                        <div v-if="hasLoyalty" class="pt-6 sm:pt-8 border-t border-gray-100">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 tracking-tight">Loyalty Program Setup</h3>
                             <div class="space-y-4">
                                 <label class="block text-sm font-medium text-gray-700">How should customers earn points?</label>
@@ -240,18 +240,33 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-4 bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
-                                    <Input
-                                        v-model="form.earning_points"
-                                        :label="form.earning_method_type === 'order_total' ? 'Points per 1 ' + currency + ' Spent' : 'Points per Visit'"
-                                        type="number"
-                                        min="1"
-                                        required
-                                        :error="(form.errors as any).earning_points"
-                                    />
-                                    <p class="text-xs text-gray-500 mt-2 font-medium">
-                                        {{ form.earning_method_type === 'order_total' ? 'Tip: Set to 1 for basic 1 point = 1 ' + currency + '.' : 'Tip: Set to 10 for standard visit reward.' }}
-                                    </p>
+                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
+                                        <Input
+                                            v-model="form.earning_points"
+                                            :label="form.earning_method_type === 'order_total' ? 'Points per 1 ' + currency + ' Spent' : 'Points per Visit'"
+                                            type="number"
+                                            min="1"
+                                            required
+                                            :error="(form.errors as any).earning_points"
+                                        />
+                                        <p class="text-xs text-gray-500 mt-2 font-medium">
+                                            {{ form.earning_method_type === 'order_total' ? 'Tip: Set to 1 for basic 1 point = 1 ' + currency + '.' : 'Tip: Set to 10 for standard visit reward.' }}
+                                        </p>
+                                    </div>
+                                     <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
+                                        <Input
+                                            v-model="form.min_spent"
+                                            label="Minimum Spend"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            :error="(form.errors as any).min_spent"
+                                        />
+                                        <p class="text-xs text-gray-500 mt-2 font-medium">
+                                            Minimum bill amount required to earn points.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -288,7 +303,12 @@ import Toast from '@/Components/Toast.vue';
 
 const props = defineProps<{
     defaultCountry?: string;
+    planFeatures?: string[];
 }>();
+
+const hasLoyalty = computed(() => {
+    return props.planFeatures ? props.planFeatures.includes('loyalty') : false;
+});
 
 const form = useForm({
     restaurant_name: '',
@@ -304,6 +324,7 @@ const form = useForm({
 
     earning_method_type: 'order_total',
     earning_points: 1,
+    min_spent: 0,
 
     // New Fields
     email: '',

@@ -308,7 +308,7 @@
         @if($order->restaurant->website)
             <div>{{ $order->restaurant->website }}</div>
         @endif
-        <div style="margin-top: 2mm; font-size: 8px; color: #888;">Powered by RestoFy</div>
+        <div style="margin-top: 2mm; font-size: 8px; color: #888;">Powered by Servio</div>
     </div>
 </body>
 

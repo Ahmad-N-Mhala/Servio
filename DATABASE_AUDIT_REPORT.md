@@ -1,7 +1,7 @@
-# Database Audit Report - RestoFy
+# Database Audit Report - Servio
 **Generated:** 2025-12-15  
 **Database:** PostgreSQL 14.20  
-**Connection:** restaurfy_central
+**Connection:** Servio_central
 
 ---
 
@@ -13,7 +13,7 @@ Your database structure is well-designed with proper relationships and foreign k
 
 ## 🗄️ Database Overview
 
-### **Central Database: `restaurfy_central`**
+### **Central Database: `Servio_central`**
 
 | Metric | Value |
 |--------|-------|
@@ -256,7 +256,7 @@ CREATE INDEX idx_customers_name_gin ON customers USING gin(to_tsvector('english'
 
 ```sql
 -- Add query logging for slow queries
-ALTER DATABASE restaurfy_central SET log_min_duration_statement = 1000;
+ALTER DATABASE Servio_central SET log_min_duration_statement = 1000;
 
 -- Monitor table sizes
 SELECT 

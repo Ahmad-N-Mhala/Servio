@@ -86,12 +86,14 @@ class Customer extends Model
         return 'bronze';
     }
 
-    public function updateTier(): void
+    public function updateTier(): bool
     {
         $newTier = $this->calculateTier();
         if ($newTier !== $this->loyalty_tier) {
             $this->update(['loyalty_tier' => $newTier]);
+            return true;
         }
+        return false;
     }
 }
 

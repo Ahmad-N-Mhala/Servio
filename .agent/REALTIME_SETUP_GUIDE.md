@@ -2,7 +2,7 @@
 
 ## ✅ What's Been Implemented
 
-Your RestoFy system now has **real-time order updates** using Laravel Broadcasting with Pusher! This means:
+Your Servio system now has **real-time order updates** using Laravel Broadcasting with Pusher! This means:
 
 - **Instant updates** when orders are created or modified
 - **< 1 second** delay instead of the previous 2-second polling

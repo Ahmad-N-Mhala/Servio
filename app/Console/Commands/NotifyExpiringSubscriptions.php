@@ -43,28 +43,41 @@ class NotifyExpiringSubscriptions extends Command
             $days = (int) $template->timing_days;
             $type = $template->timing_type;
 
-            // Check Time of Day (Ensures the hourly cron only sends once per day)
-            $targetHour = $template->timing_time ? Carbon::parse($template->timing_time)->format('H') : '00';
+            // Check Time of Day (Ensures the hourly cron only sends at the right hour)
+            $targetHour = $template->timing_time ? Carbon::parse($template->timing_time)->format('H') : '09';
             if (now()->format('H') !== $targetHour) {
-                continue; // Skip if not the right time
+                continue;
             }
+
             if ($type === 'before') {
                 // Subscription ends in X days
                 $targetDate = Carbon::today()->addDays($days);
                 $subscriptions = RestaurantSubscription::where('status', 'active')
                     ->whereDate('ends_at', $targetDate)
                     ->get();
-
-                foreach ($subscriptions as $sub) {
-                    $this->notifyOwner($sub, $template, $commService);
-                }
-            } elseif ($type === 'immediately') {
-                // Actually expired today
-                $subscriptions = RestaurantSubscription::where('status', 'active')
-                    ->whereDate('ends_at', Carbon::today())
+            } elseif ($type === 'after') {
+                // Subscription ended X days ago
+                $targetDate = Carbon::today()->subDays($days);
+                $subscriptions = RestaurantSubscription::whereIn('status', ['expired', 'cancelled'])
+                    ->whereDate('ends_at', $targetDate)
                     ->get();
+            } elseif ($type === 'immediately') {
+                // Actually ends today
+                $targetDate = Carbon::today();
+                $subscriptions = RestaurantSubscription::whereDate('ends_at', $targetDate)
+                    ->get();
+            } else {
+                continue;
+            }
 
-                foreach ($subscriptions as $sub) {
+            foreach ($subscriptions as $sub) {
+                // Check if already notified for THIS template today
+                $alreadyLogged = \App\Models\CommunicationLog::where('communication_template_id', (string) $template->id)
+                    ->where('restaurant_id', (string) $sub->restaurant_id)
+                    ->whereDate('sent_at', Carbon::today())
+                    ->exists();
+
+                if (!$alreadyLogged) {
                     $this->notifyOwner($sub, $template, $commService);
                 }
             }

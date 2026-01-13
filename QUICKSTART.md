@@ -1,6 +1,6 @@
-# 🚀 RestoFy Quickstart Guide
+# 🚀 Servio Quickstart Guide
 
-This guide provides the essential commands and credentials to run the **RestoFy** project.
+This guide provides the essential commands and credentials to run the **Servio** project.
 
 ## 🛠️ Running the Application
 

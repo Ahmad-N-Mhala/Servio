@@ -35,7 +35,12 @@ class LoyaltyService
 
     public function processOrderPoints(Order $order): void
     {
-        if (!$order->customer_id || $order->status !== 'completed') {
+        // Don't process if already earned points (except if 0 specifically handled)
+        if ($order->points_earned !== null && $order->points_earned > 0) {
+            return;
+        }
+
+        if (!$order->customer_id || $order->status !== 'completed' || $order->payment_status !== 'paid') {
             return;
         }
 
@@ -44,16 +49,16 @@ class LoyaltyService
             return;
         }
 
-        // Check if order has redeemed reward - if so, no points earned
-        $hasRedemption = \App\Models\RewardRedemption::where('order_id', $order->id)->exists();
-        if ($hasRedemption) {
+        // Check if order has redeemed reward
+        $redemption = \App\Models\RewardRedemption::where('order_id', $order->id)->with('reward')->first();
+        if ($redemption && $redemption->reward->reward_type !== 'cashback') {
+            // Standard rewards block points earning (choice of either points or discount)
             return;
         }
 
         // ===== NEW: Check if restaurant has active earning method =====
-        $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $order->restaurant_id)
+        $earningMethod = \App\Models\EarningMethod::where('restaurant_id', (string) $order->restaurant_id)
             ->where('is_active', true)
-            ->where('type', 'order_total') // Only order_total type awards points automatically
             ->first();
 
         // If no active earning method, don't award points
@@ -61,23 +66,38 @@ class LoyaltyService
             return;
         }
 
-        // Check minimum spend requirement
-        if ($earningMethod->min_spent && $order->total < $earningMethod->min_spent) {
-            return;
+        $pointsEarned = 0;
+
+        if ($earningMethod->type === 'order_total') {
+            // Check minimum spend requirement
+            if ($earningMethod->min_spent && $order->total < $earningMethod->min_spent) {
+                return;
+            }
+
+            $pointsPerCurrency = $earningMethod->points ?? $this->pointsPerCurrency;
+            $currencyAmount = (float) ($earningMethod->currency_amount ?? 1);
+
+            if ($currencyAmount <= 0) {
+                $currencyAmount = 1.0;
+            }
+
+            // Calculate points: (order total / currency amount) * points
+            $pointsEarned = (int) floor(($order->total / $currencyAmount) * $pointsPerCurrency);
+
+            // Apply max points cap if set
+            if ($earningMethod->max_points && $pointsEarned > $earningMethod->max_points) {
+                $pointsEarned = $earningMethod->max_points;
+            }
+        } elseif ($earningMethod->type === 'visit') {
+            // Award fixed points per visit (completed order)
+            $pointsEarned = (int) ($earningMethod->points ?? 1);
         }
-        // ===== END NEW =====
 
-        // Note: MongoDB transactions require replica sets, executing without transaction
-        // Use earning method configuration for points calculation
-        $pointsPerCurrency = $earningMethod->points ?? $this->pointsPerCurrency;
-        $currencyAmount = $earningMethod->currency_amount ?? 1;
-
-        // Calculate points: (order total / currency amount) * points
-        $pointsEarned = (int) floor(($order->total / $currencyAmount) * $pointsPerCurrency);
-
-        // Apply max points cap if set
-        if ($earningMethod->max_points && $pointsEarned > $earningMethod->max_points) {
-            $pointsEarned = $earningMethod->max_points;
+        // Add Cashback Points if applicable
+        if ($redemption && $redemption->reward->reward_type === 'cashback') {
+            $cashbackPercent = (float) ($redemption->reward->discount_value ?? 0);
+            $cashbackPoints = (int) floor(((float) $order->total * ($cashbackPercent / 100)));
+            $pointsEarned += $cashbackPoints;
         }
 
         if ($pointsEarned > 0) {
@@ -97,15 +117,57 @@ class LoyaltyService
                 $expiresAt
             );
 
-            $order->update(['points_earned' => $pointsEarned]);
         }
+
+        // Always set points_earned to signify it has been processed, even if 0
+        $order->update(['points_earned' => $pointsEarned]);
 
         // Update customer stats
         $customer->increment('total_orders');
         // Cast Decimal128 to float for MongoDB compatibility
         $customer->increment('total_spent', (float) (string) $order->total);
         $customer->update(['last_order_at' => now()]);
-        $customer->updateTier();
+
+        $tierChanged = $customer->updateTier();
+
+        // Send Loyalty Notifications
+        $this->sendLoyaltyNotifications($order, $customer, $pointsEarned, $tierChanged);
+    }
+
+    private function sendLoyaltyNotifications($order, $customer, $pointsEarned, $tierChanged)
+    {
+        $variables = [
+            'customer_name' => $customer->name,
+            'points_earned' => $pointsEarned,
+            'points_balance' => $customer->loyaltyPoints->balance ?? 0,
+            'loyalty_tier' => $customer->loyalty_tier,
+            'order_number' => $order->order_number,
+            'restaurant_name' => $order->restaurant->name ?? 'our restaurant',
+        ];
+
+        // 1. Points Earned notification
+        if ($pointsEarned > 0) {
+            $pointTemplate = \App\Models\CommunicationTemplate::where('restaurant_id', (string) $order->restaurant_id)
+                ->where('trigger_event', 'loyalty_points_earned')
+                ->where('is_active', true)
+                ->first();
+
+            if ($pointTemplate) {
+                \App\Jobs\SendCustomerCommunicationJob::dispatch($pointTemplate, $customer, $variables);
+            }
+        }
+
+        // 2. Tier Upgraded notification
+        if ($tierChanged) {
+            $tierTemplate = \App\Models\CommunicationTemplate::where('restaurant_id', (string) $order->restaurant_id)
+                ->where('trigger_event', 'loyalty_tier_upgraded')
+                ->where('is_active', true)
+                ->first();
+
+            if ($tierTemplate) {
+                \App\Jobs\SendCustomerCommunicationJob::dispatch($tierTemplate, $customer, $variables);
+            }
+        }
     }
 
     public function recalculateCustomerStats(Customer $customer): void
@@ -142,12 +204,36 @@ class LoyaltyService
             $lp = $customer->loyaltyPoints;
             if ($lp) {
                 // Manually revert to correct Earned totals
-                $lp->decrement('balance', $order->points_earned);
-                $lp->decrement('total_earned', $order->points_earned);
+                $lp->decrement('balance', (int) $order->points_earned);
+                $lp->decrement('total_earned', (int) $order->points_earned);
                 // Remove transaction log
                 $customer->pointTransactions()->where('order_id', $order->id)->delete();
             }
+
+            // Clear points earned on order to prevent double-reversion
             $order->update(['points_earned' => 0]);
+        }
+
+        // Revert Redemptions if any (give points back on cancel/delete)
+        $redemptions = \App\Models\RewardRedemption::where('order_id', $order->id)->get();
+        foreach ($redemptions as $redemption) {
+            $lp = $customer->loyaltyPoints;
+            if ($lp && $redemption->status === 'applied') {
+                $lp->increment('balance', (int) $redemption->points_used);
+                $lp->decrement('total_redeemed', (int) $redemption->points_used);
+
+                // Add a record of refund
+                \App\Models\PointTransaction::create([
+                    'customer_id' => $customer->id,
+                    'reward_redemption_id' => $redemption->id,
+                    'order_id' => $order->id,
+                    'type' => 'earned', // Refunded points count as income to balance
+                    'points' => (int) $redemption->points_used,
+                    'description' => "Points refunded from cancelled order #{$order->order_number}",
+                    'balance_after' => $lp->balance,
+                ]);
+            }
+            $redemption->update(['status' => 'cancelled']);
         }
 
         // Recalculate stats to be 100% accurate
@@ -157,6 +243,11 @@ class LoyaltyService
     public function redeemReward(Customer $customer, string $rewardId): RewardRedemption
     {
         $reward = \App\Models\Reward::findOrFail($rewardId);
+
+        // Security check: Ensure reward belongs to the same restaurant as the customer
+        if ((string) $reward->restaurant_id !== (string) $customer->restaurant_id) {
+            throw new \Exception('Invalid reward for this customer');
+        }
 
         if (!$reward->isAvailable()) {
             throw new \Exception('Reward is not available');
@@ -177,7 +268,7 @@ class LoyaltyService
         // Note: MongoDB transactions require replica sets, executing without transaction
         // Deduct points
         $rewardName = $reward->name[app()->getLocale()] ?? $reward->name['en'] ?? 'Unknown Reward';
-        $loyaltyPoints->redeemPoints(
+        $transaction = $loyaltyPoints->redeemPoints(
             $reward->points_required,
             "Redeemed reward: {$rewardName}",
             null
@@ -191,6 +282,9 @@ class LoyaltyService
             'status' => 'pending',
             'expires_at' => now()->addDays(30), // Redemption valid for 30 days
         ]);
+
+        // Link transaction to redemption
+        $transaction->update(['reward_redemption_id' => $redemption->id]);
 
         // Update reward redemption count
         $reward->increment('redemptions_count');

@@ -97,6 +97,9 @@ class RestaurantController extends Controller
             // Loyalty
             'earning_method_type' => 'nullable|string|in:order_total,visit',
             'earning_points' => 'nullable|numeric|min:1',
+            'earning_min_spent' => 'nullable|numeric|min:0',
+            'earning_max_points' => 'nullable|numeric|min:1',
+            'earning_currency_amount' => 'nullable|numeric|min:0.01',
 
             // Subscription
             'plan_id' => 'required|exists:plans,id',
@@ -156,15 +159,24 @@ class RestaurantController extends Controller
                 'role' => 'owner'
             ]);
 
-            // 4. Create Default Loyalty Setting
-            \App\Models\EarningMethod::create([
-                'restaurant_id' => $restaurant->id,
-                'name' => $request->earning_method_type === 'order_total' ? 'Points per Spend' : 'Points per Visit',
-                'type' => $request->earning_method_type ?? 'order_total',
-                'points' => $request->earning_points ?? 1,
-                'is_active' => true,
-                'currency_amount' => ($request->earning_method_type ?? 'order_total') === 'order_total' ? 1 : null,
-            ]);
+            // Check if plan has loyalty feature
+            $plan = \App\Models\Plan::find($request->plan_id);
+            $planFeatures = $plan ? ($plan->enabled_features ?? []) : [];
+            $hasLoyalty = in_array('loyalty', $planFeatures);
+
+            // 4. Create Default Loyalty Setting (Conditional)
+            if ($hasLoyalty && ($request->earning_method_type || $request->earning_points)) {
+                \App\Models\EarningMethod::create([
+                    'restaurant_id' => $restaurant->id,
+                    'name' => $request->earning_method_type === 'order_total' ? 'Points per Spend' : 'Points per Visit',
+                    'type' => $request->earning_method_type ?? 'order_total',
+                    'points' => $request->earning_points ?? 1,
+                    'is_active' => true,
+                    'currency_amount' => ($request->earning_method_type ?? 'order_total') === 'order_total' ? ($request->earning_currency_amount ?? 1) : null,
+                    'min_spent' => $request->earning_min_spent ?? 0,
+                    'max_points' => $request->earning_max_points,
+                ]);
+            }
 
             // 5. Create Subscription
             if ($request->has('plan_id')) {
@@ -375,6 +387,9 @@ class RestaurantController extends Controller
     /**
      * Restore a soft-deleted restaurant and reactivate its users
      */
+    /**
+     * Restore a soft-deleted restaurant and reactivate its users
+     */
     public function restore($id)
     {
         try {
@@ -400,6 +415,54 @@ class RestaurantController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('admin.restaurants.index')
                 ->with('error', 'Failed to restore restaurant: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Permanently delete a restaurant and all related data
+     */
+    public function forceDestroy($id)
+    {
+        try {
+            $restaurant = \App\Models\Restaurant::withTrashed()->findOrFail($id);
+
+            // \DB::beginTransaction();
+
+            // 1. Detach/Delete Users
+            // We only delete the association in the pivot table, not the actual User account 
+            // unless they are exclusively tied to this restaurant? 
+            // For safety in this multi-tenant setup, we'll just remove the access.
+            \Illuminate\Support\Facades\DB::table('restaurant_user')
+                ->where('restaurant_id', (string) $restaurant->id)
+                ->delete();
+
+            // 2. Delete Subscriptions
+            \App\Models\RestaurantSubscription::where('restaurant_id', $restaurant->id)->delete();
+
+            // 3. Delete Loyalty/Earning Methods
+            \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->delete();
+
+            // 4. Delete Staff
+            \App\Models\Staff::where('restaurant_id', $restaurant->id)->delete();
+
+            // 5. Delete Orders (and related items)
+            \App\Models\Order::where('restaurant_id', $restaurant->id)->delete();
+
+            // 6. Delete Menu Items/Categories
+            \App\Models\MenuCategory::where('restaurant_id', $restaurant->id)->delete();
+            \App\Models\MenuItem::where('restaurant_id', $restaurant->id)->delete();
+
+            // 7. Finally, Force Delete the Restaurant
+            $restaurant->forceDelete();
+
+            // \DB::commit();
+
+            return redirect()->route('admin.restaurants.index')
+                ->with('success', 'Restaurant and all related data have been permanently deleted.');
+        } catch (\Exception $e) {
+            // \DB::rollBack();
+            return redirect()->route('admin.restaurants.index')
+                ->with('error', 'Failed to permanently delete restaurant: ' . $e->getMessage());
         }
     }
 }

@@ -342,7 +342,7 @@ For each fixed page, verify:
 - Dark mode support
 - Professional appearance
 
-**The RestoFy application now has a fully consistent, component-based UI! 🎨**
+**The Servio application now has a fully consistent, component-based UI! 🎨**
 
 ---
 

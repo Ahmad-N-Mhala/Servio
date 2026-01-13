@@ -26,14 +26,50 @@ class FeedbackObserver
             })
             ->first(); // For simplicity, take the first matching rule, or loop them all
 
-        if ($topRule) {
-            // Dispatch job to send message
-            // Ideally: dispatch(new SendCommunicationJob($topRule, $feedback->customer));
-            // For now, let's assume direct sending or similar logic exist
-            // In a real app, we'd queue this.
-            if ($feedback->customer) {
-                // Placeholder for sending logic
-                // \App\Services\CommunicationService::send($topRule, $feedback->customer, ['feedback_link' => ...]);
+        if ($topRule && $feedback->customer) {
+            $variables = [
+                'customer_name' => $feedback->customer->name,
+                'restaurant_name' => $feedback->restaurant->name ?? 'our restaurant',
+                'rating' => $feedback->rating,
+                'comment' => $feedback->comment ?? '',
+            ];
+
+            // Determine Delay and Dispatch
+            if ($topRule->timing_type === 'after') {
+                $days = (int) ($topRule->timing_days ?? 0);
+                $time = $topRule->timing_time ?? '12:00';
+
+                $delay = now()->addDays($days);
+
+                $timeParts = explode(':', $time);
+                if (count($timeParts) === 2) {
+                    $delay->setTime((int) $timeParts[0], (int) $timeParts[1], 0);
+                }
+
+                if ($delay->isPast()) {
+                    $delay = now();
+                }
+
+                \App\Jobs\SendCustomerCommunicationJob::dispatch($topRule, $feedback->customer, $variables)->delay($delay);
+            } else {
+                // Sync/Immediate
+                \App\Jobs\SendCustomerCommunicationJob::dispatch($topRule, $feedback->customer, $variables);
+            }
+
+            // Award Feedback Points if configured in the rule
+            if (!empty($topRule->conditions['feedback_points'])) {
+                $points = (int) $topRule->conditions['feedback_points'];
+                if ($points > 0) {
+                    $lp = $feedback->customer->loyaltyPoints()->firstOrCreate([
+                        'customer_id' => $feedback->customer->id,
+                    ], [
+                        'balance' => 0,
+                        'total_earned' => 0,
+                        'total_redeemed' => 0,
+                    ]);
+
+                    $lp->addPoints($points, "Points earned for feedback on Order #{$feedback->order->order_number}", $feedback->order_id);
+                }
             }
         }
     }

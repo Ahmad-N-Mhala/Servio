@@ -48,7 +48,28 @@ class OrderObserver
                 ];
 
                 // Determine Delay and Dispatch
-                if ($rule->timing_type === 'custom_delay' && !empty($rule->conditions['delay_unit'])) {
+                if ($rule->timing_type === 'after') {
+                    $days = (int) ($rule->timing_days ?? 0);
+                    $time = $rule->timing_time ?? '12:00';
+
+                    $delay = now()->addDays($days);
+
+                    // Set specific time if provided
+                    $timeParts = explode(':', $time);
+                    if (count($timeParts) === 2) {
+                        $delay->setTime((int) $timeParts[0], (int) $timeParts[1], 0);
+                    }
+
+                    // If the calculated delay is in the past (e.g., today at 09:00 but it's already 14:00), 
+                    // we send it immediately or move to next possible slot?
+                    // Standard automation usually sends immediately if slot is missed.
+                    if ($delay->isPast()) {
+                        $delay = now();
+                    }
+
+                    \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
+
+                } elseif ($rule->timing_type === 'custom_delay' && !empty($rule->conditions['delay_unit'])) {
                     $delayVal = (int) ($rule->conditions['delay_val'] ?? 1);
                     $unit = $rule->conditions['delay_unit'];
                     $delay = now();
@@ -64,23 +85,21 @@ class OrderObserver
                     \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
 
                 } elseif ($rule->timing_type === 'delay_1_hour') {
-                    // Legacy support
                     $delay = now()->addHour();
                     \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
                 } elseif ($rule->timing_type === 'delay_24_hours') {
-                    // Legacy support
                     $delay = now()->addHours(24);
                     \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
                 } else {
-                    // Send Immediately (Sync or Async without delay)
+                    // Sync/Immediate
                     \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables);
                 }
             }
         }
 
-        // Check if status changed to cancelled/deleted
-        if ($order->isDirty('status') && in_array($order->status, ['cancelled', 'deleted'])) {
-            // Revert stats if applicable
+        // Revert loyalty points if order is no longer in "Completed & Paid" state
+        $isEligible = $order->status === 'completed' && $order->payment_status === 'paid';
+        if ($order->points_earned > 0 && !$isEligible) {
             app(\App\Services\LoyaltyService::class)->revertOrderPoints($order);
         }
     }
@@ -101,6 +120,12 @@ class OrderObserver
                 ->count();
 
             if ($count < $conditions['min_orders_count']) {
+                return false;
+            }
+        }
+
+        if (!empty($conditions['loyalty_tier'])) {
+            if ($order->customer->loyalty_tier !== $conditions['loyalty_tier']) {
                 return false;
             }
         }

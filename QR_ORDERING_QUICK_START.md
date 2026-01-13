@@ -55,7 +55,7 @@ foreach (\$tables as \$table) {
 
 ### 2. Test QR Code Download
 
-1. Login to RestoFy
+1. Login to Servio
 2. Go to **Tables Management**
 3. You should see QR code options for each table
 4. Click "Download QR Code"

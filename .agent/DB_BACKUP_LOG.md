@@ -6,7 +6,7 @@
 ## Actions
 1.  **Database Dump:**
     - Tool: `mongodump`
-    - Target: `restaurfy_central`
+    - Target: `Servio_central`
     - Output: `./db_backup/` containing BSON/JSON metadata for all collections.
     
 2.  **Git Sync:**
@@ -16,4 +16,4 @@
     - Pushed to `origin 26-12-25`.
 
 ## Notes
-- To restore this DB: `mongorestore --db restaurfy_central --drop db_backup/restaurfy_central`
+- To restore this DB: `mongorestore --db Servio_central --drop db_backup/Servio_central`

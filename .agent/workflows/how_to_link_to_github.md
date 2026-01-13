@@ -18,13 +18,13 @@ git commit -m "Initial commit"
 
 1.  Go to [GitHub.com](https://github.com) and log in.
 2.  Click the **+** icon in the top right and select **New repository**.
-3.  Name your repository (e.g., `restaurfy`).
+3.  Name your repository (e.g., `Servio`).
 4.  **Do not** initialize with README, .gitignore, or License (you already have these).
 5.  Click **Create repository**.
 
 ## 3. Link and Push
 
-Copy the URL of your new repository (e.g., `https://github.com/yourusername/restaurfy.git`) and run:
+Copy the URL of your new repository (e.g., `https://github.com/yourusername/Servio.git`) and run:
 
 ```bash
 # Replace <your-repo-url> with the actual URL

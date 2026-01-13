@@ -111,8 +111,12 @@ class CommunicationController extends Controller
             'channels' => 'required|array',
             'channels.*' => 'in:sms,email',
             'trigger_event' => 'required|string',
-            'subject' => 'nullable|string|max:255',
-            'content' => 'required|string',
+            'subject_en' => 'nullable|string|max:255',
+            'subject_ar' => 'nullable|string|max:255',
+            'content_en' => 'nullable|string',
+            'content_ar' => 'nullable|string',
+            'sms_content_en' => 'nullable|string|max:160',
+            'sms_content_ar' => 'nullable|string|max:160',
             'conditions' => 'nullable|array',
             'is_active' => 'boolean',
             'timing_type' => 'required|in:immediately,before,after',
@@ -127,7 +131,7 @@ class CommunicationController extends Controller
         CommunicationTemplate::create(array_merge($validated, [
             'restaurant_id' => $restaurant->id,
             'conditions' => $validated['conditions'] ?? [],
-            'timing_days' => $validated['timing_days'] ?? 0, // default if not present (e.g. immediately)
+            'timing_days' => $validated['timing_days'] ?? 0,
         ]));
 
         return redirect()->back()->with('message', 'Communication rule created successfully.');
@@ -140,14 +144,17 @@ class CommunicationController extends Controller
             'channels' => 'required|array',
             'channels.*' => 'in:sms,email',
             'trigger_event' => 'required|string',
-            'subject' => 'nullable|string|max:255',
-            'content' => 'required|string',
+            'subject_en' => 'nullable|string|max:255',
+            'subject_ar' => 'nullable|string|max:255',
+            'content_en' => 'nullable|string',
+            'content_ar' => 'nullable|string',
+            'sms_content_en' => 'nullable|string|max:160',
+            'sms_content_ar' => 'nullable|string|max:160',
             'conditions' => 'nullable|array',
             'is_active' => 'boolean',
             'timing_type' => 'required|in:immediately,before,after',
             'timing_days' => 'required_if:timing_type,before,after|integer|min:0',
             'timing_time' => 'required|date_format:H:i',
-            // Optional: You can validate that content contains {{feedback_link}} if trigger is feedback_received
         ]);
 
         $template->update(array_merge($validated, [

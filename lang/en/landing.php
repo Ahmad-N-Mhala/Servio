@@ -48,4 +48,7 @@ return [
     'contact_sales' => 'Contact Sales',
     'about_title_default' => 'Elevating Every Aspect of Your Restaurant',
     'about_us_description_default' => "Servio is a state-of-the-art restaurant management ecosystem designed to empower modern food businesses. Our platform goes beyond simple transactions, offering a seamless integration of Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management.\n\nWe specialize in enhancing customer engagement through our advanced Loyalty Program, integrated Feedback Forms, and customizable Receipt Templates. With smart Inventory Management and automated reminders, we help you reduce waste and focus on what matters most: delivering exceptional dining experiences.",
+    'owned_by' => 'Owned by KENILDOCK FOR DEVELOPMENT AND INNOVATION IN COMPUTER SYSTEMS AND SOFTWARE',
+    'connect_via_email' => 'support@kenildock.com',
+    'connect_via_phone' => '+9715049460976',
 ];

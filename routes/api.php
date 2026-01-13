@@ -10,8 +10,6 @@ Route::get('/user', function (Request $request) {
 Route::group([
     'middleware' => [
         'api',
-        \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
-        \App\Http\Middleware\InitializeTenancyByDomainOrFail::class,
     ],
 ], function () {
     Route::get('/menu', [\App\Http\Controllers\Tenant\PublicMenuController::class, 'show'])->name('api.menu');

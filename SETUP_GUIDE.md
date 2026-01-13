@@ -18,7 +18,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 git clone <your-repository-url>
-cd RestoFy-main
+cd Servio-main
 ```
 
 ---
@@ -55,7 +55,7 @@ Edit the `.env` file and set your MongoDB credentials:
 DB_CONNECTION=mongodb
 DB_HOST=127.0.0.1
 DB_PORT=27017
-DB_DATABASE=restaurfy_central
+DB_DATABASE=Servio_central
 ```
 
 ### Generate Application Key
@@ -245,7 +245,7 @@ mongodump --uri="mongodb://127.0.0.1:27017" --gzip --archive=database/backups/fu
 ## Project Structure
 
 ```
-RestoFy-main/
+Servio-main/
 ├── app/                    # Application logic
 ├── database/
 │   ├── backups/           # Database backups

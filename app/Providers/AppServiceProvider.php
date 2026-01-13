@@ -16,6 +16,36 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        try {
+            if (Schema::hasTable('system_configurations')) {
+                $configs = \App\Models\SystemConfiguration::all()->pluck('value', 'key');
+
+                $overrides = [];
+
+                // Email
+                if ($configs->has('mail_from_address'))
+                    $overrides['mail.from.address'] = $configs['mail_from_address'];
+                if ($configs->has('mail_from_name'))
+                    $overrides['mail.from.name'] = $configs['mail_from_name'];
+
+                // SMS (Assuming generic config keys or custom ones)
+                if ($configs->has('sms_provider'))
+                    $overrides['services.sms.provider'] = $configs['sms_provider'];
+                if ($configs->has('sms_sid'))
+                    $overrides['services.sms.sid'] = $configs['sms_sid'];
+                if ($configs->has('sms_token'))
+                    $overrides['services.sms.token'] = $configs['sms_token'];
+                if ($configs->has('sms_from'))
+                    $overrides['services.sms.from'] = $configs['sms_from'];
+
+                if (!empty($overrides)) {
+                    config($overrides);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Suppress errors during migration/setup or if DB not ready
+        }
+
         Schema::defaultStringLength(191);
 
         // Intercept Gate checks to handle Multi-Tenant Role Permissions

@@ -2,8 +2,8 @@
 
 ## ✅ Configuration Complete!
 
-Your RestoFy email system has been configured with:
-- **Email**: restaurfydaoudmhala@gmail.com
+Your Servio email system has been configured with:
+- **Email**: Serviodaoudmhala@gmail.com
 - **SMTP**: Gmail (smtp.gmail.com:587)
 
 ---
@@ -18,7 +18,7 @@ Your RestoFy email system has been configured with:
 2. **Enable 2-Step Verification** (if not already enabled)
 3. **Generate App Password**:
    - App: Mail
-   - Device: Other (RestoFy)
+   - Device: Other (Servio)
 4. **Copy the 16-character password**
 5. **Update `.env` file**:
    - Find: `MAIL_PASSWORD="ADMhala@@7@@"`

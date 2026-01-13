@@ -1,7 +1,7 @@
-# RestoFy Design System - UI Components
+# Servio Design System - UI Components
 
 ## Overview
-This document describes all reusable UI components in the RestoFy application. Each component follows consistent design patterns, theming, and styling to ensure a premium, cohesive user experience across the entire platform.
+This document describes all reusable UI components in the Servio application. Each component follows consistent design patterns, theming, and styling to ensure a premium, cohesive user experience across the entire platform.
 
 ---
 

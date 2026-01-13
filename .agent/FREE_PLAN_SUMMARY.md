@@ -2,7 +2,7 @@
 
 ## ✅ Implementation Complete!
 
-The RestoFy system now supports **free subscription plans** (price = 0) without requiring payment during restaurant creation.
+The Servio system now supports **free subscription plans** (price = 0) without requiring payment during restaurant creation.
 
 ---
 

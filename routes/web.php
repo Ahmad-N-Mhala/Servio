@@ -354,6 +354,7 @@ Route::group([
 
             Route::resource('restaurants', \App\Http\Controllers\Admin\RestaurantController::class);
             Route::post('restaurants/{id}/restore', [\App\Http\Controllers\Admin\RestaurantController::class, 'restore'])->name('restaurants.restore');
+            Route::delete('restaurants/{id}/force-delete', [\App\Http\Controllers\Admin\RestaurantController::class, 'forceDestroy'])->name('restaurants.force-destroy');
             Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);
             Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
             Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
@@ -397,6 +398,11 @@ Route::group([
 
             // Landing Page Management
             Route::get('landing-page', [\App\Http\Controllers\Admin\LandingPageController::class, 'index'])->name('landing.index');
+
+            // System Configurations
+            Route::get('settings/system', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'index'])->name('settings.system');
+            Route::post('settings/system', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'update'])->name('settings.system.update');
+            Route::post('settings/system/test-email', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'testEmail'])->name('settings.system.test-email');
             Route::post('landing-page/settings', [\App\Http\Controllers\Admin\LandingPageController::class, 'updateSettings'])->name('landing.settings.update');
             Route::post('landing-page/modules', [\App\Http\Controllers\Admin\LandingPageController::class, 'storeModule'])->name('landing.modules.store');
             Route::put('landing-page/modules/{landingModule}', [\App\Http\Controllers\Admin\LandingPageController::class, 'updateModule'])->name('landing.modules.update');

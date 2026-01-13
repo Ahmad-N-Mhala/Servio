@@ -187,7 +187,7 @@ This shows you exactly what the frontend receives.
 3. Test the mobile experience
 
 ### Option 2: Scan Actual QR Code
-1. Go to Tables in RestoFy admin
+1. Go to Tables in Servio admin
 2. Hover on table card
 3. Click purple QR icon
 4. Click "Download PNG"

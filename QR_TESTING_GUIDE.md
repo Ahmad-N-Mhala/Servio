@@ -88,7 +88,7 @@ if (\$order) {
 
 ### Option 2: Scan Actual QR Code
 
-1. Go to Tables page in RestoFy
+1. Go to Tables page in Servio
 2. Hover on a table
 3. Click purple QR icon
 4. Click "Download PNG"

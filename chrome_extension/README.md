@@ -9,7 +9,7 @@ This extension provides quick access to your local Servio dashboard.
 3. Enable **Developer mode** in the top right corner.
 4. Click **Load unpacked**.
 5. Select the `chrome_extension` folder in your project directory:
-   `/Users/ahmadmhala/Downloads/RestoFy-main/chrome_extension`
+   `/Users/ahmadmhala/Downloads/Servio-main/chrome_extension`
 
 ## Usage
 

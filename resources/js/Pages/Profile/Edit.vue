@@ -26,8 +26,13 @@
 
                             <div>
                                 <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <input v-model="form.phone" type="tel" id="phone" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm" autocomplete="tel">
-                                <div v-if="form.errors.phone" class="text-red-500 text-xs mt-1">{{ form.errors.phone }}</div>
+                                <PhoneInput 
+                                    v-model="form.phone" 
+                                    :country="country"
+                                    id="phone" 
+                                    autocomplete="tel"
+                                    :error="form.errors.phone"
+                                />
                             </div>
 
                             <div>
@@ -92,8 +97,13 @@
 <script setup lang="ts">
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import PhoneInput from '@/Components/PhoneInput.vue';
 
-const user: any = usePage().props.auth.user;
+const page = usePage();
+const user: any = page.props.auth.user;
+
+const country = computed(() => (page.props.current_restaurant as any)?.country || 'United Arab Emirates');
 
 const form = useForm({
     name: user.name,

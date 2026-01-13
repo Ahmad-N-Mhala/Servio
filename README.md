@@ -29,7 +29,7 @@ Servio is an all-in-one restaurant management platform designed to streamline op
 1. **Clone the repository**
    ```bash
    git clone <your-repo-url>
-   cd RestoFy-main
+   cd servio
    ```
 
 2. **Install dependencies**
@@ -49,7 +49,7 @@ Servio is an all-in-one restaurant management platform designed to streamline op
    DB_CONNECTION=mongodb
    DB_HOST=127.0.0.1
    DB_PORT=27017
-   DB_DATABASE=restaurfy_central
+   DB_DATABASE=servio_central
    ```
 
 5. **Restore database backup**

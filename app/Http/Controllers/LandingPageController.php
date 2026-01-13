@@ -60,7 +60,8 @@ class LandingPageController extends Controller
             return back()->withErrors($validator);
         }
 
-        $contactEmail = LandingSetting::get('interest_notification_email')
+        $contactEmail = \App\Models\SystemConfiguration::get('registration_email')
+            ?? LandingSetting::get('interest_notification_email')
             ?? LandingSetting::get('contact_email', 'support@servio.com');
 
         // Send Email

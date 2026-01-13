@@ -1,7 +1,7 @@
 # Data Consistency Documentation
 
 ## Overview
-This document outlines how data is consistently managed across the RestoFy application to ensure all pages read from the same source.
+This document outlines how data is consistently managed across the Servio application to ensure all pages read from the same source.
 
 ## Data Models & Their Single Source of Truth
 

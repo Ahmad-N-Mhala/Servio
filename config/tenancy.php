@@ -11,7 +11,7 @@ return [
     'central_domains' => [
         '127.0.0.1',
         'localhost',
-        env('CENTRAL_DOMAIN', 'restaurfy.test'),
+        env('CENTRAL_DOMAIN', 'servio.test'),
     ],
 
     'bootstrappers' => [
@@ -27,7 +27,7 @@ return [
 
         'template_tenant_connection' => 'pgsql',
 
-        'prefix_base' => 'restaurfy_tenant_',
+        'prefix_base' => 'servio_tenant_',
 
         'suffix_base' => '',
 

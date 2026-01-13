@@ -45,7 +45,7 @@ class ExportMongoDB extends Command
         $this->info("Exporting database '{$dbName}' to: {$outputDir}");
 
         // Using mongodump (requires mongodump installed on system)
-        // Command: mongodump --host="127.0.0.1" --port=27017 --db="restofy_db" --out="./backup"
+        // Command: mongodump --host="127.0.0.1" --port=27017 --db="servio_db" --out="./backup"
 
         $command = sprintf(
             'mongodump --host="%s" --port=%s --db="%s" --out="%s"',

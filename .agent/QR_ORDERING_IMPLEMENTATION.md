@@ -2,7 +2,7 @@
 
 ## ✅ Implementation Complete!
 
-A complete QR code ordering system has been implemented for RestoFy, allowing customers to scan table QR codes and place orders directly from their phones.
+A complete QR code ordering system has been implemented for Servio, allowing customers to scan table QR codes and place orders directly from their phones.
 
 ---
 

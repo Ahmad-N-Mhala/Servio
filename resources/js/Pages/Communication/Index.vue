@@ -352,7 +352,9 @@
                         </div>
 
                         <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                            <p class="text-sm text-gray-600 line-clamp-3 italic">"{{ template.content }}"</p>
+                            <p class="text-sm text-gray-600 line-clamp-3 italic">
+                                "{{ template.content_en || template.content || template.sms_content_en || template.sms_content || 'No content defined' }}"
+                            </p>
                         </div>
 
                          <!-- Stats & Actions -->
@@ -543,23 +545,45 @@
                             :hint="$t('communication.sender_name_hint')"
                         />
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                {{ $t('communication.sms_message') }} <span class="text-red-500">*</span>
-                            </label>
-                            <textarea 
-                                v-model="templateForm.sms_content"
-                                rows="3"
-                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
-                                :placeholder="$t('communication.sms_message_placeholder')"
-                                :required="templateForm.channels.includes('sms')"
-                                maxlength="160"
-                            ></textarea>
-                            <div class="flex justify-between mt-1">
-                                <p class="text-xs text-gray-500">{{ $t('communication.sms_length_hint') }}</p>
-                                <p class="text-xs font-medium" :class="(templateForm.sms_content?.length || 0) > 160 ? 'text-red-600' : 'text-gray-600'">
-                                    {{ templateForm.sms_content?.length || 0 }}/160
-                                </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ $t('communication.sms_message') }} (EN) <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="templateForm.sms_content_en"
+                                    rows="3"
+                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm"
+                                    :placeholder="$t('communication.sms_message_placeholder')"
+                                    :required="templateForm.channels.includes('sms')"
+                                    maxlength="160"
+                                ></textarea>
+                                <div class="flex justify-between mt-1">
+                                    <p class="text-xs text-gray-500">{{ $t('communication.sms_length_hint') }}</p>
+                                    <p class="text-xs font-medium" :class="(templateForm.sms_content_en?.length || 0) > 160 ? 'text-red-600' : 'text-gray-600'">
+                                        {{ templateForm.sms_content_en?.length || 0 }}/160
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1 text-right">
+                                    {{ $t('communication.sms_message') }} (AR) <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="templateForm.sms_content_ar"
+                                    rows="3"
+                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm text-right"
+                                    dir="rtl"
+                                    :placeholder="$t('communication.sms_message_placeholder')"
+                                    :required="templateForm.channels.includes('sms')"
+                                    maxlength="160"
+                                ></textarea>
+                                <div class="flex justify-between mt-1">
+                                    <p class="text-xs text-gray-500">{{ $t('communication.sms_length_hint') }}</p>
+                                    <p class="text-xs font-medium" :class="(templateForm.sms_content_ar?.length || 0) > 160 ? 'text-red-600' : 'text-gray-600'">
+                                        {{ templateForm.sms_content_ar?.length || 0 }}/160
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -576,13 +600,23 @@
 
                     <div class="space-y-4">
                         <!-- Email Subject -->
-                        <Input 
-                            v-model="templateForm.subject"
-                            :label="$t('communication.email_subject')"
-                            :placeholder="$t('communication.email_subject_placeholder')"
-                            :required="templateForm.channels.includes('email')"
-                            :error="templateForm.errors.subject"
-                        />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input 
+                                v-model="templateForm.subject_en"
+                                :label="$t('communication.email_subject') + ' (EN)'"
+                                :placeholder="$t('communication.email_subject_placeholder')"
+                                :required="templateForm.channels.includes('email')"
+                                :error="templateForm.errors.subject_en"
+                            />
+                            <Input 
+                                v-model="templateForm.subject_ar"
+                                :label="$t('communication.email_subject') + ' (AR)'"
+                                :placeholder="$t('communication.email_subject_placeholder')"
+                                :required="templateForm.channels.includes('email')"
+                                :error="templateForm.errors.subject_ar"
+                                dir="rtl"
+                            />
+                        </div>
 
                         <!-- Email Header -->
                         <Input 
@@ -594,19 +628,34 @@
                         />
 
                         <!-- Email Content -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                {{ $t('communication.email_body') }} <span class="text-red-500">*</span>
-                            </label>
-                            <textarea 
-                                v-model="templateForm.content"
-                                rows="6"
-                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                                :placeholder="$t('communication.email_body_placeholder')"
-                                :required="templateForm.channels.includes('email')"
-                            ></textarea>
-                            <p class="mt-1 text-xs text-gray-500">{{ $t('communication.email_body_hint') }}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ $t('communication.email_body') }} (EN) <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="templateForm.content_en"
+                                    rows="6"
+                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                    :placeholder="$t('communication.email_body_placeholder')"
+                                    :required="templateForm.channels.includes('email')"
+                                ></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1 text-right">
+                                    {{ $t('communication.email_body') }} (AR) <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="templateForm.content_ar"
+                                    rows="6"
+                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-right"
+                                    dir="rtl"
+                                    :placeholder="$t('communication.email_body_placeholder')"
+                                    :required="templateForm.channels.includes('email')"
+                                ></textarea>
+                            </div>
                         </div>
+                        <p class="mt-1 text-xs text-gray-500">{{ $t('communication.email_body_hint') }}</p>
 
                         <!-- Email Footer -->
                         <Input 
@@ -801,8 +850,14 @@ interface Template {
     channel?: string; // Legacy support
     subject?: string;
     content?: string;
+    subject_en?: string;
+    subject_ar?: string;
+    content_en?: string;
+    content_ar?: string;
     sms_sender_name?: string;
     sms_content?: string;
+    sms_content_en?: string;
+    sms_content_ar?: string;
     email_header?: string;
     email_footer?: string;
     conditions?: TemplateCondition;
@@ -899,8 +954,14 @@ const templateForm = useForm({
     trigger_event: 'registration',
     subject: '',
     content: '',
+    subject_en: '',
+    subject_ar: '',
+    content_en: '',
+    content_ar: '',
     sms_sender_name: '',
     sms_content: '',
+    sms_content_en: '',
+    sms_content_ar: '',
     email_header: '',
     email_footer: '',
     conditions: {
@@ -1026,8 +1087,14 @@ const openTemplateModal = (template: Template | null = null) => {
         templateForm.trigger_event = template.trigger_event;
         templateForm.subject = template.subject || '';
         templateForm.content = template.content || '';
+        templateForm.subject_en = template.subject_en || '';
+        templateForm.subject_ar = template.subject_ar || '';
+        templateForm.content_en = template.content_en || '';
+        templateForm.content_ar = template.content_ar || '';
         templateForm.sms_sender_name = template.sms_sender_name || '';
         templateForm.sms_content = template.sms_content || '';
+        templateForm.sms_content_en = template.sms_content_en || '';
+        templateForm.sms_content_ar = template.sms_content_ar || '';
         templateForm.email_header = template.email_header || '';
         templateForm.email_footer = template.email_footer || '';
         templateForm.conditions = {

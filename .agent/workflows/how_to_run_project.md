@@ -1,8 +1,8 @@
 ---
-description: How to run the RestoFy project and login credentials
+description: How to run the Servio project and login credentials
 ---
 
-This workflow describes the steps to set up and run the RestoFy application locally, and provides the default login credentials.
+This workflow describes the steps to set up and run the Servio application locally, and provides the default login credentials.
 
 # 1. Setup & Installation (One-time)
 

@@ -676,7 +676,7 @@ class OrderController extends Controller
 
     public function receipt(Order $order)
     {
-        $order->load(['customer', 'table', 'items.menuItem', 'restaurant', 'waiter']);
+        $order->load(['customer.loyaltyPoints', 'table', 'items.menuItem', 'restaurant', 'waiter']);
 
         $restaurant = $order->restaurant; // Use the relationship
 

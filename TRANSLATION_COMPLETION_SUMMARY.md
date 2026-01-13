@@ -2,7 +2,7 @@
 
 ## Status: IN PROGRESS
 
-This document tracks the translation status of all 66 pages in the RestoFy system.
+This document tracks the translation status of all 66 pages in the Servio system.
 
 ## Completed Pages (Keys Added to Translation Files)
 

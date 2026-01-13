@@ -100,6 +100,18 @@
                 <span class="font-semibold uppercase">{{ displayOrder.payment_method ? rt('pos.' + displayOrder.payment_method.toLowerCase(), displayOrder.payment_method) : rt('pos.pending', 'Pending') }}</span>
             </div>
         </div>
+        
+        <!-- Loyalty Points -->
+        <div v-if="template.show_loyalty_points && displayOrder.customer_id" class="text-sm space-y-1 mb-3 pt-2 border-t border-dashed border-gray-300">
+            <div class="flex justify-between">
+                <span>{{ rt('loyalty.points_earned', 'Points Earned') }}:</span>
+                <span class="font-bold">+{{ displayOrder.points_earned }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>{{ rt('loyalty.total_balance', 'New Balance') }}:</span>
+                <span class="font-bold">{{ displayOrder.points_balance }}</span>
+            </div>
+        </div>
 
         <div class="border-t-2 border-dashed border-gray-400 my-3"></div>
 
@@ -266,7 +278,10 @@ const displayOrder = computed(() => {
             total: props.order.total,
             payment_method: props.order.payment_method,
             currency: props.order.currency || 'AED',
-            qr_code_url: null 
+            qr_code_url: null,
+            customer_id: props.order.customer_id,
+            points_earned: props.order.points_earned || 0,
+            points_balance: props.order.customer?.loyalty_points?.balance ?? 0
         };
     } else {
         // Dummy Data for Preview
@@ -289,7 +304,10 @@ const displayOrder = computed(() => {
             total: 73.75,
             payment_method: 'CASH',
             currency: 'AED',
-            qr_code_url: null
+            qr_code_url: null,
+            customer_id: 'dummy_cust',
+            points_earned: 75,
+            points_balance: 1250
         };
     }
 });

@@ -90,7 +90,7 @@ php artisan tinker --execute="
 \$user = \App\Models\User::where('email', 'user@example.com')->first();
 \$token = \Illuminate\Support\Facades\Password::createToken(\$user);
 \$resetUrl = route('password.reset', ['token' => \$token, 'email' => \$user->email]);
-\Illuminate\Support\Facades\Mail::to(\$user->email)->send(new \App\Mail\WelcomeEmail(\$user, 'RestoFy', \$resetUrl));
+\Illuminate\Support\Facades\Mail::to(\$user->email)->send(new \App\Mail\WelcomeEmail(\$user, 'Servio', \$resetUrl));
 echo 'Welcome email sent!';
 "
 ```

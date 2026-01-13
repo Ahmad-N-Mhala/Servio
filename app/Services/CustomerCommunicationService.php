@@ -35,8 +35,22 @@ class CustomerCommunicationService
             return;
         }
 
-        $subject = self::replaceVariables($template->subject, $data);
-        $content = self::replaceVariables($template->content, $data);
+        $locale = $restaurant->locale ?? 'en';
+
+        // Pick Subject
+        $subject = $template->{"subject_{$locale}"} ?? $template->subject;
+        if (!$subject && $locale !== 'en') {
+            $subject = $template->subject_en ?? $template->subject;
+        }
+
+        // Pick Content
+        $content = $template->{"content_{$locale}"} ?? $template->content;
+        if (!$content && $locale !== 'en') {
+            $content = $template->content_en ?? $template->content;
+        }
+
+        $subject = self::replaceVariables($subject, $data);
+        $content = self::replaceVariables($content, $data);
 
         try {
             // Real Email Integration
@@ -62,7 +76,15 @@ class CustomerCommunicationService
             return;
         }
 
-        $content = self::replaceVariables($template->sms_content, $data);
+        $locale = $restaurant->locale ?? 'en';
+
+        // Pick SMS Content
+        $content = $template->{"sms_content_{$locale}"} ?? $template->sms_content ?? $template->content;
+        if (!$content && $locale !== 'en') {
+            $content = $template->sms_content_en ?? $template->content_en ?? $template->sms_content ?? $template->content;
+        }
+
+        $content = self::replaceVariables($content, $data);
 
         try {
             // Use Centralized SmsService

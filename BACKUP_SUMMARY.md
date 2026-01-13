@@ -5,8 +5,8 @@
 ### 1. Database Backup Created
 - **Location:** `database/backups/`
 - **Files:**
-  - `restaurfy_central.sql` (57 KB) - Central database with tenant configuration
-  - `restaurfy_tenant_ahmadtest.sql` (54 KB) - Tenant database with demo data
+  - `Servio_central.sql` (57 KB) - Central database with tenant configuration
+  - `Servio_tenant_ahmadtest.sql` (54 KB) - Tenant database with demo data
   
 ### 2. Documentation Created
 - **SETUP_GUIDE.md** - Comprehensive setup guide including:
@@ -31,7 +31,7 @@
 - Removed debug/test files
 
 ### 4. Pushed to GitHub
-- **Repository:** https://github.com/Ahmad-N-Mhala/restaurfy
+- **Repository:** https://github.com/Ahmad-N-Mhala/Servio
 - **Branch:** main
 - **Commit:** deb3eb2
 
@@ -49,12 +49,12 @@
 
 ## 📦 What's Included in the Backup
 
-### Central Database (restaurfy_central)
+### Central Database (Servio_central)
 - Tenants table
 - Domains table
 - Central configuration
 
-### Tenant Database (restaurfy_tenant_ahmadtest)
+### Tenant Database (Servio_tenant_ahmadtest)
 - Users (including admin@ahmadtest.com)
 - Loyalty programs
 - Orders
@@ -68,8 +68,8 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone git@github.com:Ahmad-N-Mhala/restaurfy.git
-   cd restaurfy
+   git clone git@github.com:Ahmad-N-Mhala/Servio.git
+   cd Servio
    ```
 
 2. **Follow SETUP_GUIDE.md:**

@@ -1,5 +1,5 @@
 <template>
-    <MainLayout>
+    <AdminLayout>
         <div class="p-6">
             <div class="mb-6 flex justify-between items-center">
                 <div>
@@ -218,13 +218,13 @@
                 </div>
             </div>
         </div>
-    </MainLayout>
+    </AdminLayout>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { router, Link, useForm } from '@inertiajs/vue3';
-import MainLayout from '@/Layouts/MainLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 const props = defineProps({
     translations: Object,

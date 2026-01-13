@@ -50,7 +50,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.total_members') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ customers.total }}</p>
+                                <p class="text-2xl font-bold text-gray-900">{{ stats.total_members }}</p>
                             </div>
                         </div>
                     </div>
@@ -64,7 +64,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.active_rewards') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ rewards.length }}</p>
+                                <p class="text-2xl font-bold text-gray-900">{{ stats.active_rewards }}</p>
                             </div>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.redemptions') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">0</p>
+                                <p class="text-2xl font-bold text-gray-900">{{ stats.total_redemptions }}</p>
                             </div>
                         </div>
                     </div>
@@ -491,13 +491,19 @@ const props = withDefaults(defineProps<{
         sort_field?: string;
         sort_direction?: string;
     };
+    stats: {
+        total_members: number;
+        active_rewards: number;
+        total_redemptions: number;
+    };
 }>(), {
     customers: () => ({ data: [] }),
     rewards: () => [],
     menuItems: () => [],
     settings: () => ({}),
     earningMethod: () => null,
-    filters: () => ({})
+    filters: () => ({}),
+    stats: () => ({ total_members: 0, active_rewards: 0, total_redemptions: 0 })
 });
 
 const activeTab = ref('overview'); // Tab State

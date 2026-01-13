@@ -2,7 +2,7 @@
 
 ## 🔍 Investigation Results
 
-After thorough investigation of the RestoFy system, here's what exists regarding QR code ordering:
+After thorough investigation of the Servio system, here's what exists regarding QR code ordering:
 
 ---
 

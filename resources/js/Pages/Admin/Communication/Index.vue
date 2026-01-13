@@ -37,8 +37,12 @@
                                             <div class="text-xs text-gray-500 font-mono bg-gray-100 inline-block px-1 rounded mt-1">{{ template.trigger_event }}</div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div v-if="template.subject" class="text-sm font-semibold text-gray-800 mb-1">{{ template.subject }}</div>
-                                            <div class="text-xs text-gray-500 truncate max-w-xs">{{ template.content.substring(0, 50) }}...</div>
+                                            <div v-if="template.subject_en || template.subject" class="text-sm font-semibold text-gray-800 mb-1">
+                                                {{ template.subject_en || template.subject }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 truncate max-w-xs">
+                                                {{ (template.content_en || template.content || '').substring(0, 50) }}...
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span :class="template.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
@@ -96,35 +100,72 @@
                         class="mt-2" 
                     />
 
-                    <!-- Subject (Email Only) -->
-                    <div v-if="type === 'email'">
-                         <Input 
-                            id="subject" 
-                            label="Email Subject" 
-                            v-model="form.subject" 
-                            :error="form.errors.subject" 
-                            required 
-                        />
+                    <!-- Localized Content -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- English Content -->
+                        <div class="space-y-4">
+                            <div v-if="type === 'email'">
+                                <Input 
+                                    id="subject_en" 
+                                    label="Email Subject (EN)" 
+                                    v-model="form.subject_en" 
+                                    :error="form.errors.subject_en" 
+                                    required 
+                                />
+                            </div>
+                            <div>
+                                <label for="content_en" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
+                                    Content (EN)
+                                </label>
+                                <textarea 
+                                    id="content_en" 
+                                    v-model="form.content_en" 
+                                    rows="5" 
+                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all"
+                                    :class="{'border-rose-300 focus:border-rose-500': form.errors.content_en}"
+                                    required
+                                ></textarea>
+                                <p v-if="form.errors.content_en" class="mt-1 text-sm text-red-600">{{ form.errors.content_en }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Arabic Content -->
+                        <div class="space-y-4 text-right" dir="rtl">
+                            <div v-if="type === 'email'">
+                                <Input 
+                                    id="subject_ar" 
+                                    label="الموضوع (AR)" 
+                                    v-model="form.subject_ar" 
+                                    :error="form.errors.subject_ar" 
+                                    required 
+                                />
+                            </div>
+                            <div>
+                                <label for="content_ar" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 mr-1 text-right">
+                                    المحتوى (AR)
+                                </label>
+                                <textarea 
+                                    id="content_ar" 
+                                    v-model="form.content_ar" 
+                                    rows="5" 
+                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all text-right"
+                                    :class="{'border-rose-300 focus:border-rose-500': form.errors.content_ar}"
+                                    required
+                                ></textarea>
+                                <p v-if="form.errors.content_ar" class="mt-1 text-sm text-red-600">{{ form.errors.content_ar }}</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Content -->
-                    <div>
-                        <label for="content" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
-                            Content
-                        </label>
-                        <textarea 
-                            id="content" 
-                            v-model="form.content" 
-                            rows="5" 
-                            class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all"
-                            :class="{'border-rose-300 focus:border-rose-500': form.errors.content}"
-                            required
-                        ></textarea>
-                        <p class="text-xs text-gray-500 mt-1">
-                            Common Variables (vary by event): <code v-text="'{{ name }}'"></code>, <code v-text="'{{ email }}'"></code>, <code v-text="'{{ link }}'"></code>, <code v-text="'{{ restaurant_name }}'"></code><br>
-                            For "Restaurant Created": <code v-text="'{{ owner_email }}'"></code>, <code v-text="'{{ owner_password }}'"></code>
-                        </p>
-                        <p v-if="form.errors.content" class="mt-1 text-sm text-red-600">{{ form.errors.content }}</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-xs text-gray-500 font-medium mb-2 uppercase tracking-wider">Available Variables</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ name }}'"></span>
+                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ email }}'"></span>
+                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ link }}'"></span>
+                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ restaurant_name }}'"></span>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2 italic">Variables vary depending on the trigger event.</p>
                     </div>
 
                     <!-- Timing -->
@@ -220,6 +261,10 @@ const form = useForm({
     trigger_event: 'user_registered',
     subject: '',
     content: '',
+    subject_en: '',
+    subject_ar: '',
+    content_en: '',
+    content_ar: '',
     conditions: [],
     is_active: true,
     timing_type: 'immediately',
@@ -249,6 +294,10 @@ const editTemplate = (template: any) => {
     form.trigger_event = template.trigger_event;
     form.subject = template.subject;
     form.content = template.content;
+    form.subject_en = template.subject_en;
+    form.subject_ar = template.subject_ar;
+    form.content_en = template.content_en;
+    form.content_ar = template.content_ar;
     form.is_active = !!template.is_active;
     form.timing_type = template.timing_type || 'immediately';
     

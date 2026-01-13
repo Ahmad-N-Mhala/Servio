@@ -24,7 +24,7 @@ Run the setup script included in the repository:
 
 ```bash
 git clone <repository-url>
-cd RestoFy-main
+cd Servio-main
 ```
 
 ## 3. Install Dependencies
@@ -59,7 +59,7 @@ npm install
     DB_CONNECTION=pgsql
     DB_HOST=127.0.0.1
     DB_PORT=5432
-    DB_DATABASE=restaurfy
+    DB_DATABASE=Servio
     DB_USERNAME=your_username
     DB_PASSWORD=your_password
     ```
@@ -69,7 +69,7 @@ npm install
 1.  **Create the Database**:
     Make sure the database specified in `DB_DATABASE` exists in PostgreSQL.
     ```bash
-    createdb restaurfy
+    createdb Servio
     ```
 
 2.  **Run Migrations**:
@@ -111,20 +111,20 @@ If you have exported SQL dumps from another machine (e.g., `database/dumps/`), y
 
 1.  **Drop existing databases** (if any):
     ```bash
-    dropdb restaurfy
+    dropdb Servio
     # Drop tenant DBs if they exist
     ```
 
 2.  **Create and Import Central DB**:
     ```bash
-    createdb restaurfy
-    psql restaurfy < database/dumps/central.sql
+    createdb Servio
+    psql Servio < database/dumps/central.sql
     ```
 
 3.  **Create and Import Tenant DBs**:
     Check the dump filenames to know the tenant DB names.
     ```bash
-    createdb restaurfy_tenant_demo
-    psql restaurfy_tenant_demo < database/dumps/tenant_demo.sql
+    createdb Servio_tenant_demo
+    psql Servio_tenant_demo < database/dumps/tenant_demo.sql
     ```
 

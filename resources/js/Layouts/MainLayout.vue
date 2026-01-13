@@ -624,6 +624,64 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Contact / Support Section -->
+                <div>
+                     <div 
+                        @click="toggleMenu('support')"
+                        class="px-3 mb-1 mt-4 flex items-center justify-between cursor-pointer group" 
+                        v-if="!isSidebarCollapsed"
+                    >
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">{{ $t('landing.contact_us') }}</span>
+                        <svg 
+                            class="w-3 h-3 text-gray-400 transition-transform duration-200" 
+                            :class="openMenus['support'] ? 'rotate-180' : ''"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+
+                    <div v-show="isSidebarCollapsed || openMenus['support']" class="space-y-0.5">
+                         <div v-if="!isSidebarCollapsed" class="px-3 py-2 space-y-3">
+                             <!-- Email -->
+                             <a href="mailto:support@kenildock.com" class="flex items-center gap-2 group">
+                                <div class="w-6 h-6 rounded bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                    <svg class="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                </div>
+                                <span class="text-xs text-gray-600 dark:text-gray-400 group-hover:text-primary transition-colors truncate">{{ $t('landing.connect_via_email') }}</span>
+                             </a>
+                             
+                             <!-- Phone -->
+                             <a href="tel:+9715049460976" class="flex items-center gap-2 group">
+                                <div class="w-6 h-6 rounded bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                    <svg class="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                </div>
+                                <span dir="ltr" class="text-xs text-gray-600 dark:text-gray-400 group-hover:text-primary transition-colors">{{ $t('landing.connect_via_phone') }}</span>
+                             </a>
+
+                             <!-- Ownership -->
+                             <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+                                <p class="text-[10px] leading-relaxed text-gray-400 capitalize">
+                                    {{ $t('landing.owned_by') }}
+                                </p>
+                             </div>
+                        </div>
+                        
+                         <!-- Collapsed Icon -->
+                         <button 
+                            v-else
+                            @click="isSidebarCollapsed = false; toggleMenu('support')"
+                            class="w-full flex justify-center p-2 text-gray-400 hover:text-primary transition-colors"
+                            :title="$t('landing.contact_us')"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        </button>
+                    </div>
+                </div>
             </nav>
 
 
@@ -888,7 +946,8 @@ const getInitialMenuState = () => {
         'operations.orders': false,
         'growth': true,
         'growth.loyalty': false,
-        'growth.financial': false
+        'growth.financial': false,
+        'support': false
     };
 
     if (typeof window !== 'undefined' && window.localStorage) {

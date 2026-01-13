@@ -2,10 +2,10 @@
 
 ## ✅ What Was Configured
 
-I've successfully set up the email configuration for RestoFy with the following details:
+I've successfully set up the email configuration for Servio with the following details:
 
 ### Email Account
-- **Email Address**: `restaurfydaoudmhala@gmail.com`
+- **Email Address**: `Serviodaoudmhala@gmail.com`
 - **Password**: `ADMhala@@7@@` (⚠️ needs to be replaced with Gmail App Password)
 - **SMTP Host**: `smtp.gmail.com`
 - **SMTP Port**: `587`
@@ -40,7 +40,7 @@ Gmail requires an **App Password** for third-party applications. Follow these st
 5. **Generate Password**:
    - Select app: **Mail**
    - Select device: **Other (Custom name)**
-   - Enter name: **RestoFy**
+   - Enter name: **Servio**
    - Click **Generate**
 6. **Copy the 16-character password** (format: `xxxx xxxx xxxx xxxx`)
 7. **Update `.env` file**:
@@ -54,7 +54,7 @@ Gmail requires an **App Password** for third-party applications. Follow these st
 
 ---
 
-## 📧 How Emails Are Used in RestoFy
+## 📧 How Emails Are Used in Servio
 
 ### 1. Welcome Email (New Staff Members)
 - **Trigger**: When a new staff member is created
@@ -78,7 +78,7 @@ Gmail requires an **App Password** for third-party applications. Follow these st
 ## 🧪 Testing Email Configuration
 
 ### Test 1: Create a New Staff Member
-1. Log in to RestoFy as an admin/owner
+1. Log in to Servio as an admin/owner
 2. Go to Staff Management
 3. Click "Add New Staff Member"
 4. Fill in the details
@@ -134,11 +134,11 @@ tail -f storage/logs/laravel.log
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=restaurfydaoudmhala@gmail.com
+MAIL_USERNAME=Serviodaoudmhala@gmail.com
 MAIL_PASSWORD="ADMhala@@7@@"  # ⚠️ Replace with App Password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=restaurfydaoudmhala@gmail.com
-MAIL_FROM_NAME="RestoFy"
+MAIL_FROM_ADDRESS=Serviodaoudmhala@gmail.com
+MAIL_FROM_NAME="Servio"
 ```
 
 ---

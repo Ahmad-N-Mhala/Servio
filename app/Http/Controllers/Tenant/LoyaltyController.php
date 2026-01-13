@@ -73,7 +73,16 @@ class LoyaltyController extends Controller
 
         $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->first();
 
+        $stats = [
+            'total_members' => (int) Customer::where('restaurant_id', $restaurant->id)->count(),
+            'active_rewards' => (int) $rewards->count(),
+            'total_redemptions' => (int) \App\Models\RewardRedemption::whereHas('customer', function ($q) use ($restaurant) {
+                $q->where('restaurant_id', $restaurant->id);
+            })->count(),
+        ];
+
         return Inertia::render('Loyalty/Index', [
+            'stats' => $stats,
             'customers' => $customers,
             'rewards' => $rewards,
             'menuItems' => $menuItems,
@@ -250,6 +259,7 @@ class LoyaltyController extends Controller
             'earning_method_type' => ['nullable', 'string', 'in:order_total,visit'],
             'earning_points' => ['nullable', 'numeric', 'min:1'],
             'earning_currency_amount' => ['nullable', 'numeric', 'min:0.01'],
+            'min_spent' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
@@ -291,6 +301,7 @@ class LoyaltyController extends Controller
                     'is_active' => true,
                     // If order_total, use currency_amount, else null
                     'currency_amount' => $request->earning_method_type === 'order_total' ? ($request->earning_currency_amount ?? 1) : null,
+                    'min_spent' => $request->min_spent ?? 0,
                 ]
             );
         }

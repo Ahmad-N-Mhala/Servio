@@ -58,4 +58,4 @@ I have completely redesigned the Cart Popup (Modal) in the QR Menu to provide a 
 ## Files Modified
 - `resources/js/Pages/Public/QrMenu.vue`: Completely replaced the cart modal section.
 
-The UI is now consistent with the high standards of the RestoFy application.
+The UI is now consistent with the high standards of the Servio application.

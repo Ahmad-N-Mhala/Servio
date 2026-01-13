@@ -285,7 +285,7 @@ foreach ($inactiveUsers as $user) {
     $token = Password::createToken($user);
     $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
     
-    Mail::to($user->email)->send(new WelcomeEmail($user, 'RestoFy', $resetUrl));
+    Mail::to($user->email)->send(new WelcomeEmail($user, 'Servio', $resetUrl));
 }
 ```
 

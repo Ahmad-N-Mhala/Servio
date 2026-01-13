@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
-use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -80,8 +79,9 @@ class OnboardingController extends Controller
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'earning_method_type' => ['required', 'in:order_total,visit'],
-            'earning_points' => ['required', 'integer', 'min:1'],
+            'earning_method_type' => ['nullable', 'in:order_total,visit'],
+            'earning_points' => ['nullable', 'integer', 'min:1'],
+            'min_spent' => ['nullable', 'numeric', 'min:0'],
             // Location Details
             'country' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
@@ -93,6 +93,9 @@ class OnboardingController extends Controller
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
+
+        $planFeatures = $plan->features ?? [];
+        $hasLoyalty = in_array('loyalty', $planFeatures);
 
         // Check if plan is free (ensure strictly numeric zero)
         $planPrice = $validated['billing_cycle'] === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
@@ -166,16 +169,19 @@ class OnboardingController extends Controller
             $staff->joined_at = now();
             $staff->save();
 
-            // 5. Create Default Earning Method
-            \App\Models\EarningMethod::create([
-                'restaurant_id' => $restaurant->id,
-                'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
-                'description' => 'Default earning method set during onboarding.',
-                'type' => $validated['earning_method_type'],
-                'points' => $validated['earning_points'],
-                'currency_amount' => 1,
-                'is_active' => true,
-            ]);
+            // 5. Create Default Earning Method (Conditional)
+            if ($hasLoyalty && !empty($validated['earning_method_type'])) {
+                \App\Models\EarningMethod::create([
+                    'restaurant_id' => $restaurant->id,
+                    'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
+                    'description' => 'Default earning method set during onboarding.',
+                    'type' => $validated['earning_method_type'],
+                    'points' => $validated['earning_points'] ?? 1,
+                    'currency_amount' => 1,
+                    'min_spent' => $validated['min_spent'] ?? 0,
+                    'is_active' => true,
+                ]);
+            }
 
             // 6. Create Subscription
             // For free plans, create active subscription immediately and bypass payment
@@ -195,7 +201,7 @@ class OnboardingController extends Controller
                     DB::commit();
                 } catch (\Exception $e) {
                     // If commit fails due to transaction support, ignore it as operations likely ran in standalone mode
-                    if (!Str::contains($e->getMessage(), ['replica set member', 'mongos', 'Transaction numbers'])) {
+                    if (!\Illuminate\Support\Str::contains($e->getMessage(), ['replica set member', 'mongos', 'Transaction numbers'])) {
                         throw $e;
                     }
                 }
@@ -241,16 +247,6 @@ class OnboardingController extends Controller
             \Log::error('Onboarding failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Onboarding failed: ' . $e->getMessage()]);
         }
-    }
-
-    protected function migrateTenantDatabase(): void
-    {
-        // Deprecated: Single DB architecture usage
-    }
-
-    protected function seedTenantDatabase(Tenant $tenant): void
-    {
-        // Deprecated: Single DB architecture usage
     }
 }
 

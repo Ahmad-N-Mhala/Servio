@@ -264,7 +264,7 @@ SESSION_DRIVER=database
 
 ## 🎉 SUMMARY
 
-Your RestoFy system is **production-ready** and **secure** for your use case!
+Your Servio system is **production-ready** and **secure** for your use case!
 
 **Key Achievements**:
 - ✅ 10-100x faster database queries

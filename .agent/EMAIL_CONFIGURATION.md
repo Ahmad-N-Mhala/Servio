@@ -1,4 +1,4 @@
-# Email Configuration for RestoFy
+# Email Configuration for Servio
 
 ## Environment Variables
 
@@ -8,11 +8,11 @@ Add the following lines to your `.env` file:
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=restaurfydaoudmhala@gmail.com
+MAIL_USERNAME=Serviodaoudmhala@gmail.com
 MAIL_PASSWORD="ADMhala@@7@@"
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=restaurfydaoudmhala@gmail.com
-MAIL_FROM_NAME="RestoFy"
+MAIL_FROM_ADDRESS=Serviodaoudmhala@gmail.com
+MAIL_FROM_NAME="Servio"
 ```
 
 ## Important Notes
@@ -29,7 +29,7 @@ MAIL_FROM_NAME="RestoFy"
 4. Once 2-Step Verification is enabled, go back to Security
 5. Under "Signing in to Google", click on **App passwords**
 6. Select **Mail** as the app and **Other (Custom name)** as the device
-7. Enter "RestoFy" as the custom name
+7. Enter "Servio" as the custom name
 8. Click **Generate**
 9. Copy the 16-character app password (it will look like: `xxxx xxxx xxxx xxxx`)
 10. Replace `ADMhala@@7@@` in your `.env` file with this app password

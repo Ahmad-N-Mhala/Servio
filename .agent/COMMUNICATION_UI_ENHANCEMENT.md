@@ -272,7 +272,7 @@ Only show relevant fields based on selections:
 
 ### SMS Configuration
 ```
-Sender Name: RestoFy
+Sender Name: Servio
 Message: "Hi! Your order #12345 is ready for pickup. 
           Thanks for choosing us! 🎉"
 Character Count: 67/160
@@ -284,7 +284,7 @@ Subject: Your Order is Ready! 🎉
 Header: Thank You for Your Order
 Body: Hi there! We're excited to let you know that 
       your order #12345 is ready for pickup...
-Footer: Best regards, The RestoFy Team
+Footer: Best regards, The Servio Team
 ```
 
 ### Timing Example

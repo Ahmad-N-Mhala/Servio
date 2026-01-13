@@ -39,14 +39,64 @@ class CommunicationService
             return false; // Let caller handle fallback (standard Hardcoded Mailable)
         }
 
+        // Determine Locale
+        $restaurant = null;
+        if ($template->restaurant_id) {
+            $restaurant = $template->restaurant;
+        } else {
+            // For system templates, try to find restaurant from user context if possible
+            $restaurant = $user->currentRestaurant();
+        }
+
+        $locale = $restaurant ? ($restaurant->locale ?? 'en') : 'en';
+
         // Process Content Variables
-        $subject = $this->replaceVariables($template->subject ?? '', $user, $data);
-        $content = $this->replaceVariables($template->content ?? '', $user, $data);
+        // Pick Subject
+        $subjectText = $template->{"subject_{$locale}"} ?? $template->subject ?? '';
+        if (!$subjectText && $locale !== 'en') {
+            $subjectText = $template->subject_en ?? $template->subject ?? '';
+        }
+
+        // Pick Content
+        $contentText = $template->{"content_{$locale}"} ?? $template->content ?? '';
+        if (!$contentText && $locale !== 'en') {
+            $contentText = $template->content_en ?? $template->content ?? '';
+        }
+
+        $subject = $this->replaceVariables($subjectText, $user, $data);
+        $content = $this->replaceVariables($contentText, $user, $data);
 
         // Send Generic Email
-        Mail::to($user->email)->send(new \App\Mail\GenericSystemEmail($subject, $content));
+        try {
+            Mail::to($user->email)->send(new \App\Mail\GenericSystemEmail($subject, $content));
 
-        return true;
+            // Log the communication
+            \App\Models\CommunicationLog::create([
+                'restaurant_id' => $restaurant ? $restaurant->id : null,
+                'communication_template_id' => $template->id,
+                'recipient' => $user->email,
+                'type' => 'email',
+                'status' => 'sent',
+                'message' => substr($content, 0, 1000),
+                'sent_at' => now(),
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("System Email failed: " . $e->getMessage());
+
+            \App\Models\CommunicationLog::create([
+                'restaurant_id' => $restaurant ? $restaurant->id : null,
+                'communication_template_id' => $template->id,
+                'recipient' => $user->email,
+                'type' => 'email',
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+                'sent_at' => now(),
+            ]);
+
+            return false;
+        }
     }
 
     protected function replaceVariables(string $text, User $user, array $data): string

@@ -62,7 +62,7 @@ The email button styling has been updated across all email templates.
 ## 🧪 Testing
 
 A test email has been sent to verify the new button styling:
-- **Recipient**: restaurfydaoudmhala@gmail.com
+- **Recipient**: Serviodaoudmhala@gmail.com
 - **Status**: ✅ Sent successfully
 - **Check**: Inbox or spam folder
 
@@ -89,7 +89,7 @@ The button will now appear as:
 ## 🔄 How to Test
 
 ### Option 1: Create a New Staff Member
-1. Login to RestoFy
+1. Login to Servio
 2. Go to Staff Management
 3. Click "Add New Staff Member"
 4. Fill in the details

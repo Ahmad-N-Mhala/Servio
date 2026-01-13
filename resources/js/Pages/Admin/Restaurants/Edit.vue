@@ -29,19 +29,13 @@
                                 </div>
 
                                 <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700">
-                                        Phone Number
-                                        <span class="text-xs text-gray-500">- Current</span>
-                                    </label>
-                                    <input 
+                                    <PhoneInput 
                                         v-model="form.phone" 
-                                        type="text" 
-                                        id="phone" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm sm:text-sm cursor-not-allowed"
-                                        readonly
+                                        :country="form.country || ''"
+                                        label="Phone Number (Current)" 
                                         disabled
-                                    >
-                                    <p class="text-xs text-gray-500 mt-1">Current phone number on file</p>
+                                        help="Current phone number on file"
+                                    />
                                 </div>
 
                                 <div>
@@ -147,19 +141,17 @@
                                         <div v-if="(form.errors as any).new_owner_name" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_name }}</div>
                                     </div>
                                     
+                                    </div>
+                                    
                                      <div>
-                                        <label for="new_owner_phone" class="block text-sm font-medium text-gray-700">
-                                            Owner Phone
-                                            <span class="text-gray-500 font-normal">(Leave blank to keep current)</span>
-                                        </label>
-                                        <input 
+                                        <PhoneInput 
                                             v-model="form.new_owner_phone" 
-                                            type="text" 
-                                            id="new_owner_phone" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            :country="form.country || ''"
+                                            label="Owner Phone" 
                                             placeholder="Enter new phone"
-                                        >
-                                        <div v-if="(form.errors as any).new_owner_phone" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_phone }}</div>
+                                            help="(Leave blank to keep current)"
+                                            :error="(form.errors as any).new_owner_phone" 
+                                        />
                                     </div>
 
                                     <div>
@@ -373,6 +365,7 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm, Link } from '@inertiajs/vue3';
+import PhoneInput from '@/Components/PhoneInput.vue';
 
 const props = defineProps<{
     restaurant: {

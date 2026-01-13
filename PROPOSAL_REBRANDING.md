@@ -7,7 +7,7 @@ We will restructure the application's branding to establish **Kenildock** as the
 The application will be hosted as follows:
 
 - **Production Domain:** `https://kenildock.com`
-- **Application Logic:** The entire current "RestoFy" system will run at the root of `kenildock.com`.
+- **Application Logic:** The entire current "Servio" system will run at the root of `kenildock.com`.
 - **Tenant Subdomains:** If enabled, `restaurant-name.kenildock.com`.
 
 ### Environment Configuration (.env)
@@ -58,7 +58,7 @@ MAIL_FROM_NAME="Servio Support"
 
 ### Step 2: Localization & Strings
 - Modify `lang/en/common.php`, `lang/en/landing.php`, `lang/en/auth.php`.
-- Replace instances of "RestoFy" with "Servio".
+- Replace instances of "Servio" with "Servio".
 - Add "Kenildock" to copyright strings.
 
 ### Step 3: Frontend Templates

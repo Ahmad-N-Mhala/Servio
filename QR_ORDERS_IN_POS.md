@@ -93,7 +93,7 @@ php artisan tinker --execute="\$table = \App\Models\Table::first(); echo \$table
 
 ### Step 2: Check Kitchen
 
-1. Login to RestoFy
+1. Login to Servio
 2. Go to **Kitchen** (KDS)
 3. You should see the QR order
 4. Order number starts with "QR-"

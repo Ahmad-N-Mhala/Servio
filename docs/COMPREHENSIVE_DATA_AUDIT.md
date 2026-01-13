@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document provides a **complete audit** of all data sources across the RestoFy application, analyzing:
+This document provides a **complete audit** of all data sources across the Servio application, analyzing:
 - ✅ Admin Panel data sources
 - ✅ Tenant/Restaurant data sources  
 - ✅ Database table relationships

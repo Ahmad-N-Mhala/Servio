@@ -38,6 +38,7 @@ const form = useForm({
     earning_method_type: props.earningMethod?.type || 'order_total',
     earning_points: props.earningMethod?.points || 1,
     earning_currency_amount: props.earningMethod?.currency_amount || 1,
+    min_spent: props.earningMethod?.min_spent || 0,
 });
 
 const logoPreview = ref(initialData.loyalty_logo || '/images/logo-placeholder.png');
@@ -263,6 +264,17 @@ const handleUnsplashSelect = async (image: any) => {
                                     min="1"
                                     class="block w-full rounded-lg border-gray-300 py-1.5 text-sm focus:ring-primary focus:border-primary"
                                     placeholder="1"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Minimum Spend</label>
+                                <input 
+                                    v-model="form.min_spent"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    class="block w-full rounded-lg border-gray-300 py-1.5 text-sm focus:ring-primary focus:border-primary"
+                                    placeholder="0"
                                 />
                             </div>
                         </div>

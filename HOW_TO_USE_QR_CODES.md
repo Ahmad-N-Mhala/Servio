@@ -10,7 +10,7 @@ Restaurant users can now view, download, and manage QR codes for all tables dire
 
 ### Step 1: Go to Tables Management
 
-1. Login to RestoFy
+1. Login to Servio
 2. Navigate to **Tables** from the sidebar menu
 3. You'll see all your tables displayed as cards
 

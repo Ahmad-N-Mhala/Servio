@@ -118,9 +118,26 @@ class MultiRestaurantController extends Controller
         $defaultCountry = $this->getCountryFromIp(request()->ip());
         $countries = \App\Models\Country::all();
 
+        // Get user's plan features to determine if loyalty section should be shown
+        $user = Auth::user();
+        $existingRestaurantIds = \Illuminate\Support\Facades\DB::table('restaurant_user')
+            ->where('email', $user->email)
+            ->where('role', 'owner')
+            ->pluck('restaurant_id')
+            ->toArray();
+
+        $planFeatures = [];
+        if (!empty($existingRestaurantIds)) {
+            $existingRestaurant = Restaurant::with('subscription.plan')->whereIn('id', $existingRestaurantIds)->first();
+            if ($existingRestaurant && $existingRestaurant->subscription && $existingRestaurant->subscription->plan) {
+                $planFeatures = $existingRestaurant->subscription->plan->features ?? [];
+            }
+        }
+
         return Inertia::render('MultiRestaurant/Create', [
             'defaultCountry' => $defaultCountry,
             'countries' => $countries,
+            'planFeatures' => $planFeatures,
         ]);
     }
 
@@ -156,8 +173,9 @@ class MultiRestaurantController extends Controller
     {
         $validated = $request->validate([
             'restaurant_name' => ['required', 'string', 'max:255'],
-            'earning_method_type' => ['required', 'in:order_total,visit'],
-            'earning_points' => ['required', 'integer', 'min:1'],
+            'earning_method_type' => ['nullable', 'in:order_total,visit'], // Nullable if section hidden
+            'earning_points' => ['nullable', 'integer', 'min:1'],
+            'min_spent' => ['nullable', 'numeric', 'min:0'],
             // Location Details
             'country' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
@@ -193,6 +211,9 @@ class MultiRestaurantController extends Controller
 
         $subscription = $existingRestaurant->subscription;
         $plan = $subscription->plan;
+
+        $planFeatures = $plan->features ?? [];
+        $hasLoyalty = in_array('loyalty', $planFeatures);
 
         $useTransactions = false; // Force false for local dev/standalone mongo
         /*
@@ -256,16 +277,19 @@ class MultiRestaurantController extends Controller
             $staff->joined_at = now();
             $staff->save();
 
-            // 4. Create Default Earning Method
-            \App\Models\EarningMethod::create([
-                'restaurant_id' => $restaurant->id,
-                'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
-                'description' => 'Default earning method set.',
-                'type' => $validated['earning_method_type'],
-                'points' => $validated['earning_points'],
-                'currency_amount' => 1,
-                'is_active' => true,
-            ]);
+            // 4. Create Default Earning Method (Only if Loyalty is enabled)
+            if ($hasLoyalty && !empty($validated['earning_method_type'])) {
+                \App\Models\EarningMethod::create([
+                    'restaurant_id' => $restaurant->id,
+                    'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
+                    'description' => 'Default earning method set.',
+                    'type' => $validated['earning_method_type'],
+                    'points' => $validated['earning_points'] ?? 1,
+                    'currency_amount' => 1,
+                    'min_spent' => $validated['min_spent'] ?? 0,
+                    'is_active' => true,
+                ]);
+            }
 
             // 5. Create Subscription (using same plan and billing cycle as existing)
             \App\Models\RestaurantSubscription::create([

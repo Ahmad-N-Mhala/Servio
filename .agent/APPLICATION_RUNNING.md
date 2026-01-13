@@ -1,10 +1,10 @@
-# RestoFy Application - Now Running! 🚀
+# Servio Application - Now Running! 🚀
 
 ## ✅ Application Status
 
 **Status**: ✅ **RUNNING**
 
-The RestoFy application is now running in Chrome and ready to use!
+The Servio application is now running in Chrome and ready to use!
 
 ---
 
@@ -58,7 +58,7 @@ The RestoFy application is now running in Chrome and ready to use!
 ## 📧 Email Configuration
 
 - **Status**: ✅ Configured and tested
-- **Email**: restaurfydaoudmhala@gmail.com
+- **Email**: Serviodaoudmhala@gmail.com
 - **SMTP**: Gmail (smtp.gmail.com:587)
 - **Test**: Email sent successfully ✅
 
