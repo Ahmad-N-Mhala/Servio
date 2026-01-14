@@ -142,15 +142,15 @@
                                     {{ $t('nav.new_order') }}
                                 </Link>
                                 <Link 
-                                    v-if="hasPermission('manage_delivery_orders')"
-                                    :href="route('delivery-orders.create')"
+                                    v-if="hasPermission('create_delivery_order')"
+                                    :href="route('pos-orders.create')"
                                     class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-primary hover:bg-primary/5 transition-colors"
-                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/delivery-orders')}"
+                                    :class="{'text-primary font-medium bg-primary/5': $page.url.includes('/pos-orders')}"
                                 >
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
-                                    {{ $t('nav.delivery_order') }}
+                                    {{ $t('nav.pos_screen') }}
                                 </Link>
                                  <Link 
                                     v-if="hasPermission('view_kitchen') && hasFeature('kds')"

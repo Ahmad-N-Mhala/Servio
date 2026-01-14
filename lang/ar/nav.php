@@ -35,4 +35,5 @@ return [
     'receipt_template' => 'قالب الإيصال',
     'overview' => 'نظرة عامة',
     'orders_create' => 'إنشاء طلب',
+    'pos_screen' => 'شاشة نقاط البيع',
 ];

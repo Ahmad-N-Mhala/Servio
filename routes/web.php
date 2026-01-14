@@ -139,12 +139,12 @@ Route::group([
                     ->middleware('permission:update_item_status');
             });
 
-            // Delivery Orders (Dedicated)
-            Route::prefix('delivery-orders')->name('delivery-orders.')->group(function () {
-                Route::get('/create', [\App\Http\Controllers\Tenant\DeliveryOrderController::class, 'create'])->name('create')
-                    ->middleware('permission:manage_delivery_orders');
-                Route::post('/', [\App\Http\Controllers\Tenant\DeliveryOrderController::class, 'store'])->name('store')
-                    ->middleware('permission:manage_delivery_orders');
+            // POS Screen Orders
+            Route::prefix('pos-orders')->name('pos-orders.')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Tenant\PosOrderController::class, 'create'])->name('create')
+                    ->middleware('permission:create_delivery_order');
+                Route::post('/', [\App\Http\Controllers\Tenant\PosOrderController::class, 'store'])->name('store')
+                    ->middleware('permission:create_delivery_order');
             });
 
             // Customers
@@ -183,6 +183,8 @@ Route::group([
                     ->middleware('permission:manage_rewards');
                 Route::post('/customers/{customer}/adjust-points', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'adjustPoints'])->name('customers.adjust-points')
                     ->middleware('permission:adjust_points');
+                Route::get('/settings', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'settings'])->name('settings')
+                    ->middleware('permission:manage_rewards');
                 Route::post('/settings', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateSettings'])->name('settings.update')
                     ->middleware('permission:manage_rewards');
                 Route::post('/rewards/{reward}/design', [\App\Http\Controllers\Tenant\LoyaltyController::class, 'updateRewardDesign'])->name('rewards.update-design')

@@ -9,7 +9,8 @@ class CustomerFeedbackController extends Controller
 {
     public function create($identifier)
     {
-        $order = \App\Models\Order::where('feedback_token', $identifier)->first();
+        $order = \App\Models\Order::withoutGlobalScope(\App\Models\Scopes\RestaurantScope::class)
+            ->where('feedback_token', $identifier)->first();
         $restaurant = null;
 
         if ($order) {
@@ -38,7 +39,8 @@ class CustomerFeedbackController extends Controller
 
     public function store(\Illuminate\Http\Request $request, $identifier)
     {
-        $order = \App\Models\Order::where('feedback_token', $identifier)->first();
+        $order = \App\Models\Order::withoutGlobalScope(\App\Models\Scopes\RestaurantScope::class)
+            ->where('feedback_token', $identifier)->first();
         $restaurant = null;
 
         if ($order) {

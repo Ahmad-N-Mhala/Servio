@@ -36,6 +36,7 @@ return [
     'address' => 'العنوان',
     'loading' => 'جاري التحميل...',
     'no_data' => 'لا توجد بيانات',
+    'customer' => 'العميل',
     'confirm_delete' => 'هل أنت متأكد أنك تريد حذف هذا العنصر؟',
     'confirm_cancellation' => 'هل أنت متأكد أنك تريد الإلغاء؟',
     'quantity' => 'الكمية',

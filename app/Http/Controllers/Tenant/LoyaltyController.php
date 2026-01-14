@@ -239,6 +239,23 @@ class LoyaltyController extends Controller
         return redirect()->back()->with('message', __('loyalty.points_adjusted'));
     }
 
+
+    public function settings(Request $request): Response
+    {
+        \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
+
+        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
+
+        $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->first();
+
+        return Inertia::render('Loyalty/Settings', [
+            'settings' => $restaurant->settings ?? [],
+            'earningMethod' => $earningMethod,
+        ]);
+    }
+
     public function updateSettings(Request $request)
     {
         \Illuminate\Support\Facades\Gate::authorize('manage_rewards'); // Re-use permission for now

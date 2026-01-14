@@ -66,5 +66,11 @@ return [
         'other' => 'Other',
     ],
     'click_to_advance' => 'Click to Advance',
+    'select_type' => 'Select Order Type',
+    'dine_in' => 'Dine In',
+    'takeaway' => 'Takeaway',
+    'delivery' => 'Delivery',
+    'other_delivery_id' => 'Other Delivery ID',
+    'enter_delivery_id' => 'Enter ID',
 ];
 

@@ -141,7 +141,7 @@
                                         <div v-if="(form.errors as any).new_owner_name" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_name }}</div>
                                     </div>
                                     
-                                    </div>
+
                                     
                                      <div>
                                         <PhoneInput 

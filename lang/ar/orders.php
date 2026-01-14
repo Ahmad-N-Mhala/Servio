@@ -65,5 +65,11 @@ return [
         'other' => 'أخرى',
     ],
     'click_to_advance' => 'انقر للتقدم',
+    'select_type' => 'اختر نوع الطلب',
+    'dine_in' => 'محلي',
+    'takeaway' => 'سفري',
+    'delivery' => 'توصيل',
+    'other_delivery_id' => 'معرف توصيل آخر',
+    'enter_delivery_id' => 'أدخل المعرف',
 ];
 

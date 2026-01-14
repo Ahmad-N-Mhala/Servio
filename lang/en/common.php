@@ -36,6 +36,7 @@ return [
     'address' => 'Address',
     'loading' => 'Loading...',
     'no_data' => 'No data available',
+    'customer' => 'Customer',
     'confirm_delete' => 'Are you sure you want to delete this item?',
     'confirm_cancellation' => 'Are you sure you want to cancel?',
     'welcome' => 'Welcome',

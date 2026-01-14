@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import QRCode from 'qrcode';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import UnsplashPicker from '@/Components/UnsplashPicker.vue';
@@ -41,11 +42,45 @@ const form = useForm({
     min_spent: props.earningMethod?.min_spent || 0,
 });
 
-const logoPreview = ref(initialData.loyalty_logo || '/images/logo-placeholder.png');
+const logoPreview = ref(initialData.loyalty_logo || '/images/placeholder-logo.svg');
 const bannerPreview = ref(initialData.loyalty_banner || null);
 
-// Re-sync if reward changes (when modal opens with new reward)
-import { watch } from 'vue';
+// QR Code Generation (Local Data URL for html2canvas compatibility)
+const qrDataUrl = ref<string>('');
+
+const generateQR = async (link: string) => {
+    const text = link || 'https://example.com';
+    try {
+        // Robust import check
+        // @ts-ignore
+        const qrcodeLib = QRCode?.default || QRCode;
+        
+        if (qrcodeLib && typeof qrcodeLib.toDataURL === 'function') {
+            qrDataUrl.value = await qrcodeLib.toDataURL(text, { width: 300, margin: 2 });
+        } else if (typeof qrcodeLib === 'function') {
+             // @ts-ignore
+             qrDataUrl.value = await qrcodeLib(text, { width: 300, margin: 2 });
+        } else {
+             // Fallback
+             qrDataUrl.value = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=300&margin=2`;
+        }
+    } catch (e) {
+        console.error('QR Generation error:', e);
+        qrDataUrl.value = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=300&margin=2`;
+    }
+};
+
+watch(() => form.loyalty_qr_link, (newVal) => {
+    generateQR(newVal);
+});
+
+onMounted(() => {
+    setTimeout(() => {
+         generateQR(form.loyalty_qr_link);
+    }, 100);
+});
+
+// Watch for changes in Reward to update form data
 watch(() => props.reward, (newReward) => {
     if (isRewardMode.value && newReward) {
         const design = newReward.design || {};
@@ -57,10 +92,11 @@ watch(() => props.reward, (newReward) => {
         form.loyalty_terms = design.loyalty_terms || '';
         form.loyalty_qr_link = design.loyalty_qr_link || '';
         
-        logoPreview.value = design.loyalty_logo || '/images/logo-placeholder.png';
+        logoPreview.value = design.loyalty_logo || '/images/placeholder-logo.svg';
         bannerPreview.value = design.loyalty_banner || null;
+        generateQR(form.loyalty_qr_link);
     }
-}, { deep: true });
+}, { deep: true, immediate: true });
 
 const appRoute = (window as any).route;
 
@@ -142,9 +178,11 @@ const printCard = async () => {
     try {
         const canvas = await html2canvas(cardPreviewRef.value, {
             useCORS: true,
+            allowTaint: true,
             scale: 3, // Higher quality for print
             backgroundColor: form.loyalty_theme_color, // Ensure background is captured
-            logging: false
+            logging: true, // Enable logging to see if images are skipped
+            ignoreElements: (element) => element.classList.contains('no-print')
         });
 
         const imgData = canvas.toDataURL('image/png');
@@ -210,13 +248,13 @@ const handleUnsplashSelect = async (image: any) => {
         <div class="lg:col-span-5 space-y-6 no-print">
             <div class="glass-card p-6 rounded-2xl border border-gray-100 bg-white shadow-xl">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-900">Program Design</h3>
+                    <h3 class="text-xl font-bold text-gray-900">{{ $t('loyalty.program_design') }}</h3>
                     <Button type="button" variant="secondary" @click="printCard">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        Preview
+                        {{ $t('loyalty.preview') }}
                     </Button>
                 </div>
                 
@@ -224,7 +262,7 @@ const handleUnsplashSelect = async (image: any) => {
                     
                     <!-- Earning Rules Section -->
                     <div v-if="!isRewardMode" class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Earning Rules</h4>
+                        <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">{{ $t('loyalty.earning_rules') }}</h4>
                         
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div 
@@ -232,8 +270,8 @@ const handleUnsplashSelect = async (image: any) => {
                                 class="cursor-pointer border-2 rounded-xl p-3 text-center transition-all"
                                 :class="form.earning_method_type === 'order_total' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
                             >
-                                <div class="font-bold text-gray-900 text-sm">Per Spend</div>
-                                <div class="text-[10px] text-gray-500">Points based on bill total</div>
+                                <div class="font-bold text-gray-900 text-sm">{{ $t('loyalty.per_spend') }}</div>
+                                <div class="text-[10px] text-gray-500">{{ $t('loyalty.points_based_bill') }}</div>
                             </div>
 
                             <div 
@@ -241,14 +279,14 @@ const handleUnsplashSelect = async (image: any) => {
                                 class="cursor-pointer border-2 rounded-xl p-3 text-center transition-all"
                                 :class="form.earning_method_type === 'visit' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
                             >
-                                <div class="font-bold text-gray-900 text-sm">Per Visit</div>
-                                <div class="text-[10px] text-gray-500">Fixed points per order</div>
+                                <div class="font-bold text-gray-900 text-sm">{{ $t('loyalty.per_visit') }}</div>
+                                <div class="text-[10px] text-gray-500">{{ $t('loyalty.points_based_visit') }}</div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Points to Earn</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('loyalty.points_to_earn') }}</label>
                                 <input 
                                     v-model="form.earning_points"
                                     type="number"
@@ -257,7 +295,7 @@ const handleUnsplashSelect = async (image: any) => {
                                 />
                             </div>
                             <div v-if="form.earning_method_type === 'order_total'">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Per Currency Unit</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('loyalty.per_currency_unit') }}</label>
                                 <input 
                                     v-model="form.earning_currency_amount"
                                     type="number"
@@ -267,7 +305,7 @@ const handleUnsplashSelect = async (image: any) => {
                                 />
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Minimum Spend</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">{{ $t('loyalty.min_spend') }}</label>
                                 <input 
                                     v-model="form.min_spent"
                                     type="number"
@@ -282,11 +320,11 @@ const handleUnsplashSelect = async (image: any) => {
 
                     <!-- Branding Section -->
                     <div class="space-y-4">
-                        <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Visual Identity</h4>
+                        <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">{{ $t('loyalty.visual_identity') }}</h4>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-2">Theme Color</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-2">{{ $t('loyalty.theme_color') }}</label>
                                 <div class="flex items-center gap-2">
                                     <input 
                                         type="color" 
@@ -302,7 +340,7 @@ const handleUnsplashSelect = async (image: any) => {
                             </div>
 
                              <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-2">Text Color</label>
+                                <label class="block text-xs font-medium text-gray-700 mb-2">{{ $t('loyalty.text_color') }}</label>
                                 <div class="flex items-center gap-2">
                                     <input 
                                         type="color" 
@@ -320,24 +358,24 @@ const handleUnsplashSelect = async (image: any) => {
 
                         <Input 
                             v-model="form.loyalty_program_name"
-                            :label="isRewardMode ? 'Reward Title' : 'Program Name'"
+                            :label="isRewardMode ? $t('loyalty.reward_title') : $t('loyalty.program_name')"
                             :placeholder="isRewardMode ? 'e.g. Free Coffee' : 'e.g. VIP Club'"
                         />
 
                         <Input 
                             v-model="form.loyalty_card_title"
-                            :label="isRewardMode ? 'Subtitle / Points' : 'Card Title'"
+                            :label="isRewardMode ? $t('loyalty.subtitle_points') : $t('loyalty.card_title')"
                             :placeholder="isRewardMode ? 'e.g. 100 Points' : 'e.g. Gold Member'"
                         />
 
                         <Input 
                             v-model="form.loyalty_card_description"
-                            label="Tagline"
+                            :label="$t('loyalty.tagline')"
                             placeholder="e.g. Turn your meals into rewards"
                         />
 
                          <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Terms & Conditions</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('loyalty.terms_conditions') }}</label>
                             <textarea 
                                 v-model="form.loyalty_terms"
                                 rows="3"
@@ -348,7 +386,7 @@ const handleUnsplashSelect = async (image: any) => {
                         
                          <Input 
                             v-model="form.loyalty_qr_link"
-                            label="QR Code Link"
+                            :label="$t('loyalty.qr_code_link')"
                             placeholder="https://your-website.com/join"
                             type="url"
                         />
@@ -356,10 +394,10 @@ const handleUnsplashSelect = async (image: any) => {
 
                     <!-- Images -->
                     <div class="space-y-4 border-t pt-4">
-                        <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Imagery</h4>
+                        <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">{{ $t('loyalty.imagery') }}</h4>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Brand Logo</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('loyalty.brand_logo') }}</label>
                             <input 
                                 type="file" 
                                 accept="image/*"
@@ -370,10 +408,10 @@ const handleUnsplashSelect = async (image: any) => {
 
                         <div>
                             <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Card Background</label>
+                                <label class="block text-sm font-medium text-gray-700">{{ $t('loyalty.card_background') }}</label>
                                 <button type="button" @click="showUnsplashPicker = true" class="text-xs text-primary hover:text-primary-hover font-medium flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Select from Unsplash
+                                    {{ $t('loyalty.select_from_unsplash') }}
                                 </button>
                             </div>
                             <input 
@@ -386,7 +424,7 @@ const handleUnsplashSelect = async (image: any) => {
                     </div>
 
                     <div class="pt-4 flex justify-end">
-                        <Button :loading="form.processing" type="submit" class="w-full justify-center">Save Configuration</Button>
+                        <Button :loading="form.processing" type="submit" class="w-full justify-center">{{ $t('loyalty.save_configuration') }}</Button>
                     </div>
                 </form>
             </div>
@@ -394,7 +432,7 @@ const handleUnsplashSelect = async (image: any) => {
 
         <!-- Preview Side (Center in Print) -->
         <div class="lg:col-span-7 lg:sticky lg:top-8 printable-area">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 no-print">Live Preview</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 no-print">{{ $t('loyalty.live_preview') }}</h3>
             
             <div class="flex justify-center items-center min-h-[600px] bg-gray-100/50 rounded-[2rem] p-8 printable-container">
                 <!-- Fancy Card Design -->
@@ -424,7 +462,7 @@ const handleUnsplashSelect = async (image: any) => {
                                 <img 
                                     :src="logoPreview" 
                                     class="w-full h-full object-cover"
-                                    @error="logoPreview = '/images/logo-placeholder.png'"
+                                    @error="logoPreview = '/images/placeholder-logo.svg'"
                                 />
                             </div>
                         </div>
@@ -439,16 +477,16 @@ const handleUnsplashSelect = async (image: any) => {
 
                         <!-- Earning Explanation Box -->
                         <div v-if="!isRewardMode" class="w-full bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-inner mb-6 transform transition-all hover:scale-105">
-                            <div class="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">How it works</div>
+                            <div class="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">{{ $t('loyalty.how_it_works') }}</div>
                             <div class="text-xl font-bold">
-                                Get <span class="text-2xl">{{ form.earning_points }} Points</span>
+                                {{ $t('loyalty.get') }} <span class="text-2xl">{{ form.earning_points }} {{ $t('loyalty.points') }}</span>
                             </div>
                             <div class="text-sm opacity-90 mt-1">
                                 <span v-if="form.earning_method_type === 'order_total'">
-                                    for every {{ currency }} {{ form.earning_currency_amount || 1 }} you spend
+                                    {{ $t('loyalty.for_every') }} {{ currency }} {{ form.earning_currency_amount || 1 }} {{ $t('loyalty.you_spend') }}
                                 </span>
                                 <span v-else>
-                                    for every visit
+                                    {{ $t('loyalty.per_visit') }}
                                 </span>
                             </div>
                         </div>
@@ -459,36 +497,35 @@ const handleUnsplashSelect = async (image: any) => {
                     </div>
 
                      <!-- QR Section (Live) -->
-                    <div v-if="form.loyalty_qr_link" class="relative z-10 bg-white text-gray-900 p-8 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] w-full">
+                    <div class="relative z-10 bg-white text-gray-900 p-8 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] w-full">
                         <div class="absolute top-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full"></div>
                         
                         <div class="text-center">
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{{ isRewardMode ? 'Scan to Redeem' : 'Scan to Join' }}</p>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{{ isRewardMode ? $t('loyalty.scan_to_redeem') : $t('loyalty.scan_to_join') }}</p>
                             <div class="bg-gray-50 border p-4 rounded-xl inline-block shadow-sm mx-auto">
                                 <img 
-                                    :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(form.loyalty_qr_link)}`"
+                                    :src="qrDataUrl"
                                     class="w-32 h-32"
+                                    :class="{'opacity-50': !form.loyalty_qr_link}"
                                     alt="QR Code"
                                 />
                             </div>
-                             <p v-if="form.loyalty_terms" class="text-[10px] text-gray-400 mt-6 mx-auto max-w-[200px] hover:text-gray-600 transition-colors">
+                            <p v-if="!form.loyalty_qr_link" class="text-[10px] text-red-400 mt-2 font-medium">
+                                {{ $t('loyalty.qr_code_link_required') }}
+                            </p>
+                             <p v-else-if="form.loyalty_terms" class="text-[10px] text-gray-400 mt-6 mx-auto max-w-[200px] hover:text-gray-600 transition-colors">
                                 {{ form.loyalty_terms }}
                             </p>
                         </div>
                     </div>
                     
-                    <!-- Fallback Terms if No QR -->
-                    <div v-else-if="form.loyalty_terms" class="relative z-10 w-full text-center pb-8 pt-4 px-6">
-                         <p class="text-[10px] text-white/70 mt-4 mx-auto max-w-[200px] hover:text-white transition-colors border-t border-white/20 pt-4">
-                            {{ form.loyalty_terms }}
-                        </p>
-                    </div>
+
                 </div>
             </div>
         </div>
 
         <!-- Cropper Modal -->
-        <Modal :show="showCropper" @close="showCropper = false" :title="cropperType === 'logo' ? 'Adjust Logo' : 'Adjust Background'" size="lg">
+        <Modal :show="showCropper" @close="showCropper = false" :title="cropperType === 'logo' ? $t('loyalty.adjust_logo') : $t('loyalty.adjust_background')" size="lg">
             <div class="space-y-4">
                 <div class="h-96 w-full bg-gray-100 rounded-xl overflow-hidden">
                     <Cropper
@@ -507,7 +544,7 @@ const handleUnsplashSelect = async (image: any) => {
                 </div>
                 <div class="flex justify-end gap-3">
                     <Button variant="secondary" @click="showCropper = false">{{ $t('common.cancel') }}</Button>
-                    <Button @click="saveCrop">Confirm & Use</Button>
+                    <Button @click="saveCrop">{{ $t('loyalty.confirm_use') }}</Button>
                 </div>
             </div>
         </Modal>

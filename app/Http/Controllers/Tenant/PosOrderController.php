@@ -14,7 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Gate;
 
-class DeliveryOrderController extends Controller
+class PosOrderController extends Controller
 {
     public function __construct(
         protected LoyaltyService $loyaltyService,
@@ -27,7 +27,7 @@ class DeliveryOrderController extends Controller
         // Check permission
         // Gate::authorize('manage_delivery_orders'); // We'll use middleware in routes, but good to have here too if we define the gate
         // Since we are using Spatie permissions via middleware, we might not need Gate::authorize unless we registered a gate.
-        // The middleware 'permission:manage_delivery_orders' handles it.
+        // The middleware 'permission:create_delivery_order' handles it.
 
         $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
         if (!$restaurant)
@@ -107,7 +107,9 @@ class DeliveryOrderController extends Controller
             'customer_id' => ['nullable', 'exists:customers,id'],
             'customer_phone' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
-            'delivery_provider' => ['required', 'string'], // Required here
+            'type' => ['nullable', 'string', 'in:dine_in,takeaway,delivery'],
+            'delivery_provider' => ['nullable', 'required_if:type,delivery', 'string'],
+            'delivery_order_id' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.menu_item_id' => ['required', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -174,13 +176,15 @@ class DeliveryOrderController extends Controller
         $transactionNumber = $restaurant->next_order_number;
         $orderNumber = 'ORD-' . $transactionNumber;
 
+        $orderType = $validated['type'] ?? 'dine_in';
+
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
             'customer_id' => $customer ? $customer->id : null,
             'order_number' => $orderNumber,
             'transaction_number' => $transactionNumber,
-            'status' => 'pending', // Or maybe 'processing' directly? Kitchen flow starts at pending usually.
-            'type' => 'delivery',
+            'status' => 'pending',
+            'type' => $orderType,
             'subtotal' => $validated['subtotal'],
             'tax' => $validated['tax'] ?? 0,
             'discount_amount' => $validated['discount_amount'] ?? 0,
@@ -190,9 +194,10 @@ class DeliveryOrderController extends Controller
             'customer_phone' => $validated['customer_phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'waiter_id' => auth()->id(),
-            'delivery_provider' => $validated['delivery_provider'],
-            'payment_method' => 'online', // Usually delivery apps are prepaid or handled externally
-            'payment_status' => 'paid', // As requested "payed price", implies it's settled.
+            'delivery_provider' => $orderType === 'delivery' ? ($validated['delivery_provider'] ?? null) : null,
+            'delivery_order_id' => $orderType === 'delivery' ? ($validated['delivery_order_id'] ?? null) : null,
+            'payment_method' => null,
+            'payment_status' => 'unpaid', // Must be 'unpaid' (or null) to appear in POS list
         ]);
 
         // Items

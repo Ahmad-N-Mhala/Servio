@@ -102,7 +102,7 @@
         </div>
 
         <!-- Add/Edit Modal (Fullscreen/Large for Designer) -->
-        <Modal :show="showModal" @close="closeModal" :title="editingMethod ? 'Edit Earning Method & Design' : 'Add Earning Method & Design'" size="7xl">
+        <Modal :show="showModal" @close="closeModal" :title="editingMethod ? ($t('loyalty.edit_earning_method_design') || 'Edit Earning Method & Design') : ($t('loyalty.add_earning_method_design') || 'Add Earning Method & Design')" size="7xl">
              <!-- Use key to force re-render when editingMethod changes -->
              <div class="p-1">
                  <CardDesigner 

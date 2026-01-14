@@ -114,15 +114,7 @@ const resetToDefaultLogo = () => {
 };
 
 const submit = () => {
-    // Get current locale from URL
-    const locale = window.location.pathname.split('/')[1] || 'en';
-    const url = `/${locale}/feedback/settings`;
-    
-    console.log('Submitting to URL:', url);
-    console.log('Current pathname:', window.location.pathname);
-    console.log('Extracted locale:', locale);
-    
-    form.post(url, {
+    form.post(route('feedback.settings.update'), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {

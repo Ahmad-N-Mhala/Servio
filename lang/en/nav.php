@@ -35,4 +35,5 @@ return [
     'receipt_template' => 'Receipt Template',
     'overview' => 'Overview',
     'orders_create' => 'Create Order',
+    'pos_screen' => 'POS Screen',
 ];
