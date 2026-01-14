@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
@@ -32,6 +32,9 @@ const form = useForm({
     loyalty_text_color: initialData.loyalty_text_color || '#ffffff',
     loyalty_terms: initialData.loyalty_terms || (isRewardMode.value ? '*Valid for one time use.' : '*Points expire after 1 year.'),
     loyalty_qr_link: initialData.loyalty_qr_link || '',
+    loyalty_scan_text: initialData.loyalty_scan_text || '',
+    loyalty_qr_size: initialData.loyalty_qr_size || 'md',
+    loyalty_panel_height: initialData.loyalty_panel_height || 'md',
     loyalty_logo: null as File | null,
     loyalty_banner: null as File | null,
     
@@ -46,15 +49,33 @@ const logoPreview = ref(initialData.loyalty_logo || '/images/placeholder-logo.sv
 const bannerPreview = ref(initialData.loyalty_banner || null);
 
 // QR Code Generation (Local Data URL for html2canvas compatibility)
+// QR Code Generation (Local Canvas preferred for html2canvas)
 const qrDataUrl = ref<string>('');
+const useCanvas = ref(false);
+const qrCanvas = ref<HTMLCanvasElement | null>(null);
 
 const generateQR = async (link: string) => {
     const text = link || 'https://example.com';
+    useCanvas.value = false;
+
+    // Ensure DOM is ready if canvas is missing
+    if (!qrCanvas.value) await nextTick();
+
     try {
         // Robust import check
         // @ts-ignore
         const qrcodeLib = QRCode?.default || QRCode;
         
+        // Try Canvas First
+        if (qrCanvas.value && qrcodeLib && typeof qrcodeLib.toCanvas === 'function') {
+            await qrcodeLib.toCanvas(qrCanvas.value, text, { width: 300, margin: 2 });
+            useCanvas.value = true;
+            // Key fix: Update data URL from canvas so printCard can use it
+            qrDataUrl.value = qrCanvas.value.toDataURL('image/png');
+            return;
+        }
+
+        // Fallback to Data URL
         if (qrcodeLib && typeof qrcodeLib.toDataURL === 'function') {
             qrDataUrl.value = await qrcodeLib.toDataURL(text, { width: 300, margin: 2 });
         } else if (typeof qrcodeLib === 'function') {
@@ -91,6 +112,9 @@ watch(() => props.reward, (newReward) => {
         form.loyalty_text_color = design.loyalty_text_color || '#ffffff';
         form.loyalty_terms = design.loyalty_terms || '';
         form.loyalty_qr_link = design.loyalty_qr_link || '';
+        form.loyalty_scan_text = design.loyalty_scan_text || '';
+        form.loyalty_qr_size = design.loyalty_qr_size || 'md';
+        form.loyalty_panel_height = design.loyalty_panel_height || 'md';
         
         logoPreview.value = design.loyalty_logo || '/images/placeholder-logo.svg';
         bannerPreview.value = design.loyalty_banner || null;
@@ -176,36 +200,66 @@ const printCard = async () => {
     if (!cardPreviewRef.value) return;
 
     try {
-        const canvas = await html2canvas(cardPreviewRef.value, {
+        // 1. Capture the Card Design
+        // We use html2canvas for the layout, but we assume the QR might be missing or glitchy
+        const designCanvas = await html2canvas(cardPreviewRef.value, {
             useCORS: true,
-            allowTaint: true,
-            scale: 3, // Higher quality for print
-            backgroundColor: form.loyalty_theme_color, // Ensure background is captured
-            logging: true, // Enable logging to see if images are skipped
+            scale: 3, 
+            backgroundColor: form.loyalty_theme_color, 
+            logging: false, 
             ignoreElements: (element) => element.classList.contains('no-print')
         });
 
-        const imgData = canvas.toDataURL('image/png');
+        const designImgData = designCanvas.toDataURL('image/png');
         
-        // Calculate dimensions to fit A4 or similar
-        const imgWidth = 210; // A4 width in mm
-        const pageHeight = 297; // A4 height in mm
-        
-        // Use aspect ratio of the captured canvas
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        // Center image vertically if it's smaller, or just fit to page
-        // For a card flyer, we typically want it centered
-        
+        // 2. Setup PDF
         const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = 210;
+        const pageHeight = 297;
         
-        // Calculate vertical center
-        const yPos = (pageHeight - imgHeight) / 2;
+        // 3. Add Design Image (Centered)
+        const printWidth = 120; // Fixed width for consistent print size
+        const ratio = printWidth / designCanvas.width; // Ratio of PDF-mm to Canvas-pixels
+        const printHeight = designCanvas.height * ratio;
         
-        // Add image
-        pdf.addImage(imgData, 'PNG', 0, Math.max(0, yPos), imgWidth, imgHeight);
+        const xPos = (pageWidth - printWidth) / 2;
+        const yPos = (pageHeight - printHeight) / 2;
         
-        // Open PDF in new tab
+        pdf.addImage(designImgData, 'PNG', xPos, yPos, printWidth, printHeight);
+
+        // 4. Smart Overlay (DOM-mapping):
+        // This calculates the EXACT position of the QR code as seen on screen
+        // and maps it to the PDF coordinates, accounting for all text/padding changes automatically.
+        const qrContent = useCanvas.value ? qrCanvas.value : document.getElementById('qr-code-img');
+        
+        if (qrDataUrl.value && qrContent && cardPreviewRef.value) {
+            try {
+                // Measure positions in viewport pixels
+                const cardRect = cardPreviewRef.value.getBoundingClientRect();
+                const qrRect = qrContent.getBoundingClientRect();
+                
+                // Calculate position relative to the card container
+                const relX = qrRect.left - cardRect.left;
+                const relY = qrRect.top - cardRect.top;
+                
+                // Calculate the scaling factor (PDF mm per Screen Pixel)
+                // We map the Card's onscreen width to the fixed Print Width (120mm)
+                const mmPerPixel = printWidth / cardRect.width;
+                
+                const pdfQrX = xPos + (relX * mmPerPixel);
+                const pdfQrY = yPos + (relY * mmPerPixel);
+                const pdfQrW = qrRect.width * mmPerPixel;
+                const pdfQrH = qrRect.height * mmPerPixel;
+
+                // Add to PDF
+                pdf.addImage(qrDataUrl.value, 'PNG', pdfQrX, pdfQrY, pdfQrW, pdfQrH);
+
+            } catch (qrErr) {
+                console.error('Smart QR Overlay failed:', qrErr);
+            }
+        }
+        
+        // Open PDF
         window.open(pdf.output('bloburl'), '_blank');
 
     } catch (error) {
@@ -390,6 +444,38 @@ const handleUnsplashSelect = async (image: any) => {
                             placeholder="https://your-website.com/join"
                             type="url"
                         />
+
+                        <div class="grid grid-cols-2 gap-4">
+                             <Input 
+                                v-model="form.loyalty_scan_text"
+                                label="Scan Prompt"
+                                :placeholder="isRewardMode ? $t('loyalty.scan_to_redeem') : $t('loyalty.scan_to_join')"
+                            />
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">QR Box Size</label>
+                                <select 
+                                    v-model="form.loyalty_qr_size"
+                                    class="block w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="sm">Small</option>
+                                    <option value="md">Medium</option>
+                                    <option value="lg">Large</option>
+                                </select>
+                            </div>
+                            <!-- New Panel Height Control -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Panel Height</label>
+                                <select 
+                                    v-model="form.loyalty_panel_height"
+                                    class="block w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="sm">Short</option>
+                                    <option value="md">Normal</option>
+                                    <option value="lg">Tall</option>
+                                    <option value="xl">Extra Tall</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Images -->
@@ -438,7 +524,7 @@ const handleUnsplashSelect = async (image: any) => {
                 <!-- Fancy Card Design -->
                 <div 
                     ref="cardPreviewRef"
-                    class="w-full max-w-md aspect-[3/4.8] rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col text-center"
+                    class="w-full max-w-[300px] aspect-[3/4.8] rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col text-center justify-between"
                     :style="{ backgroundColor: form.loyalty_theme_color, color: form.loyalty_text_color }"
                 >
                     <!-- Glossy Effect -->
@@ -456,32 +542,30 @@ const handleUnsplashSelect = async (image: any) => {
                     </div>
                     
                     <!-- Top Section -->
-                    <div class="relative z-10 pt-10 px-8 pb-6 flex-1 flex flex-col items-center">
-                        <div class="w-28 h-28 rounded-full bg-white p-1 shadow-xl mb-6 ring-4 ring-white/30">
+                    <div class="relative z-10 pt-6 px-6 pb-2 flex-1 flex flex-col items-center justify-center">
+                        <div class="w-20 h-20 rounded-full bg-white p-1 shadow-xl mb-4 ring-4 ring-white/30 shrink-0">
                             <div class="w-full h-full rounded-full overflow-hidden bg-gray-50 flex items-center justify-center">
                                 <img 
                                     :src="logoPreview" 
                                     class="w-full h-full object-cover"
-                                    @error="logoPreview = '/images/placeholder-logo.svg'"
                                 />
                             </div>
                         </div>
 
-                        <h2 v-if="form.loyalty_program_name" class="text-3xl font-black uppercase tracking-tight mb-2 leading-none drop-shadow-md">
+                        <h3 class="font-black text-xl leading-tight mb-1 uppercase tracking-tight drop-shadow-md line-clamp-2">
                             {{ form.loyalty_program_name }}
-                        </h2>
-                        
-                        <p v-if="form.loyalty_card_title" class="text-sm opacity-90 font-medium tracking-wide uppercase mb-8">
+                        </h3>
+                        <p class="text-xs font-bold uppercase tracking-widest opacity-90 mb-2 drop-shadow-sm">
                             {{ form.loyalty_card_title }}
                         </p>
 
                         <!-- Earning Explanation Box -->
-                        <div v-if="!isRewardMode" class="w-full bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-inner mb-6 transform transition-all hover:scale-105">
-                            <div class="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">{{ $t('loyalty.how_it_works') }}</div>
-                            <div class="text-xl font-bold">
-                                {{ $t('loyalty.get') }} <span class="text-2xl">{{ form.earning_points }} {{ $t('loyalty.points') }}</span>
+                        <div v-if="!isRewardMode" class="w-full bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-inner mb-2 transform transition-all hover:scale-105">
+                            <div class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">{{ $t('loyalty.how_it_works') }}</div>
+                            <div class="text-sm font-bold">
+                                {{ $t('loyalty.get') }} <span class="text-base">{{ form.earning_points }} {{ $t('loyalty.points') }}</span>
                             </div>
-                            <div class="text-sm opacity-90 mt-1">
+                            <div class="text-[10px] opacity-90 mt-0.5">
                                 <span v-if="form.earning_method_type === 'order_total'">
                                     {{ $t('loyalty.for_every') }} {{ currency }} {{ form.earning_currency_amount || 1 }} {{ $t('loyalty.you_spend') }}
                                 </span>
@@ -491,29 +575,68 @@ const handleUnsplashSelect = async (image: any) => {
                             </div>
                         </div>
 
-                        <p v-if="form.loyalty_card_description" class="text-sm leading-relaxed opacity-90 mb-auto italic">
+                        <p v-if="form.loyalty_card_description" class="text-xs leading-relaxed opacity-90 mb-auto italic line-clamp-2">
                             "{{ form.loyalty_card_description }}"
                         </p>
                     </div>
 
                      <!-- QR Section (Live) -->
-                    <div class="relative z-10 bg-white text-gray-900 p-8 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] w-full">
+                    <div 
+                        v-if="form.loyalty_qr_link"
+                        class="relative z-10 bg-white text-gray-900 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] w-full transition-all px-6 shrink-0"
+                        :class="{
+                            'pt-2 pb-3': form.loyalty_panel_height === 'sm',
+                            'pt-4 pb-6': form.loyalty_panel_height === 'md',
+                            'pt-6 pb-8': form.loyalty_panel_height === 'lg',
+                            'pt-8 pb-10': form.loyalty_panel_height === 'xl'
+                        }"
+                    >
                         <div class="absolute top-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full"></div>
                         
                         <div class="text-center">
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{{ isRewardMode ? $t('loyalty.scan_to_redeem') : $t('loyalty.scan_to_join') }}</p>
-                            <div class="bg-gray-50 border p-4 rounded-xl inline-block shadow-sm mx-auto">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                                {{ form.loyalty_scan_text || (isRewardMode ? $t('loyalty.scan_to_redeem') : $t('loyalty.scan_to_join')) }}
+                            </p>
+                            <div 
+                                class="bg-gray-50 border rounded-xl inline-block shadow-sm mx-auto transition-all"
+                                :class="{
+                                    'p-1': form.loyalty_qr_size === 'sm',
+                                    'p-1.5': form.loyalty_qr_size === 'md',
+                                    'p-2': form.loyalty_qr_size === 'lg'
+                                }"
+                            >
+                                <canvas 
+                                    v-show="useCanvas"
+                                    ref="qrCanvas"
+                                    class="mx-auto max-w-full object-contain"
+                                    :class="{
+                                        'w-10 h-10': form.loyalty_qr_size === 'sm',
+                                        'w-12 h-12': form.loyalty_qr_size === 'md',
+                                        'w-16 h-16': form.loyalty_qr_size === 'lg',
+                                        'opacity-50': !form.loyalty_qr_link
+                                    }"
+                                ></canvas>
                                 <img 
+                                    v-show="!useCanvas"
+                                    id="qr-code-img"
                                     :src="qrDataUrl"
-                                    class="w-32 h-32"
-                                    :class="{'opacity-50': !form.loyalty_qr_link}"
+                                    class="max-w-full object-contain"
+                                    :class="{
+                                        'w-10 h-10': form.loyalty_qr_size === 'sm',
+                                        'w-12 h-12': form.loyalty_qr_size === 'md',
+                                        'w-16 h-16': form.loyalty_qr_size === 'lg',
+                                        'opacity-50': !form.loyalty_qr_link
+                                    }"
                                     alt="QR Code"
+                                    crossorigin="anonymous"
+                                    width="128"
+                                    height="128"
                                 />
                             </div>
                             <p v-if="!form.loyalty_qr_link" class="text-[10px] text-red-400 mt-2 font-medium">
                                 {{ $t('loyalty.qr_code_link_required') }}
                             </p>
-                             <p v-else-if="form.loyalty_terms" class="text-[10px] text-gray-400 mt-6 mx-auto max-w-[200px] hover:text-gray-600 transition-colors">
+                             <p v-else-if="form.loyalty_terms" class="text-[10px] text-gray-400 mt-2 mx-auto max-w-[180px] hover:text-gray-600 transition-colors line-clamp-2">
                                 {{ form.loyalty_terms }}
                             </p>
                         </div>

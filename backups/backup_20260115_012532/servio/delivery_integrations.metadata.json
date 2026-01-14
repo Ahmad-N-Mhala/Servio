@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"restaurant_id":{"$numberInt":"1"},"provider":{"$numberInt":"1"}},"name":"restaurant_id_1_provider_1","unique":true}],"uuid":"5e2f7888be6542c0b6bebdfcea40d655","collectionName":"delivery_integrations","type":"collection"}

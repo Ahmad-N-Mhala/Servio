@@ -67,13 +67,13 @@ class Order extends Model
         parent::boot();
 
         static::updated(function ($order) {
-            // Process loyalty points when order is completed AND paid
-            // Trigger if status/payment_status changed, or just ensure it runs if both conditions met
-            $isCompleted = $order->status === 'completed';
+            // Process loyalty points when order is PAID (regardless of status)
             $isPaid = $order->payment_status === 'paid';
-            $justBecameEligible = ($order->isDirty('status') || $order->isDirty('payment_status'));
+            // Trigger if payment status changed to paid, or if it is paid and we haven't processed points yet
+            // We use isDirty just to be safe and avoid loops, but checking points_earned === null safeguards it too.
+            $justBecamePaid = $order->isDirty('payment_status') && $isPaid;
 
-            if ($justBecameEligible && $isCompleted && $isPaid && $order->points_earned === null) {
+            if (($justBecamePaid || ($isPaid && $order->points_earned === null))) {
                 app(LoyaltyService::class)->processOrderPoints($order);
             }
         });

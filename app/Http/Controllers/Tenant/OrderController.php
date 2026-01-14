@@ -589,7 +589,15 @@ class OrderController extends Controller
             'table'
         ]), 'created'))->toOthers();
 
-        return redirect()->back()->with('message', __('orders.order_created'));
+        // Refresh to check for points
+        $order->refresh();
+
+        $message = "Order #{$order->order_number} Created Successfully.";
+        if ($order->points_earned > 0) {
+            $message .= " +{$order->points_earned} Loyalty Points Earned!";
+        }
+
+        return redirect()->back()->with('message', $message);
     }
 
     public function updateStatus(Request $request, Order $order)

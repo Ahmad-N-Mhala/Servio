@@ -21,10 +21,10 @@
                      Expand your business by adding another location
                  </p>
                  <div class="mt-4">
-                     <a href="/en/select-restaurant" class="text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors">
+                     <Link :href="route('restaurants.index')" class="text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         Back to list
-                     </a>
+                     </Link>
                  </div>
             </div>
 
@@ -146,9 +146,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                                    <div class="w-full rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500 sm:text-sm">
-                                        {{ form.country }} <span class="text-xs text-gray-400 ml-2">(Auto-detected)</span>
-                                    </div>
+                                    <Select v-model="form.country" :error="form.errors.country">
+                                        <option v-for="c in countries" :key="c.name" :value="c.name">{{ c.name }}</option>
+                                    </Select>
                                 </div>
 
                                 <Input
@@ -295,14 +295,16 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import Logo from '@/Components/Logo.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
 import Button from '@/Components/Button.vue';
 import Toast from '@/Components/Toast.vue';
 
 const props = defineProps<{
     defaultCountry?: string;
+    countries?: any[];
     planFeatures?: string[];
 }>();
 

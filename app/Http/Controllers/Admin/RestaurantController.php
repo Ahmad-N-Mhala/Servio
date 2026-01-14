@@ -107,6 +107,7 @@ class RestaurantController extends Controller
 
             // Service Type
             'service_type' => 'required|string|in:self_service,table_service,both',
+            'has_cash_drawer' => 'boolean',
 
             // Logo
             'logo' => 'nullable|image|max:2048',
@@ -134,7 +135,8 @@ class RestaurantController extends Controller
                 'zip_code',
                 'country',
                 'google_map_location',
-                'service_type'
+                'service_type',
+                'has_cash_drawer',
             ]);
 
             if ($logoPath) {
@@ -262,6 +264,7 @@ class RestaurantController extends Controller
                 'country' => 'nullable|string',
                 'google_map_location' => 'nullable|url',
                 'service_type' => 'required|string|in:self_service,table_service,both',
+                'has_cash_drawer' => 'boolean',
 
                 // Loyalty
                 'earning_method_type' => 'nullable|string|in:order_total,visit',

@@ -24,6 +24,15 @@
                          <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                         {{ $t('cash_register.withdraw') }}
                     </button>
+                    <button 
+                        v-if="currentRestaurant?.has_cash_drawer"
+                        @click="openDrawer" 
+                        class="flex-1 sm:flex-none px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm transition-all flex items-center justify-center gap-2"
+                        title="Open Cash Drawer"
+                    >
+                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        Drawer
+                    </button>
                     <button @click="showDepositModal = true" class="flex-1 sm:flex-none px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm transition-all flex items-center justify-center gap-2">
                          <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
                         {{ $t('cash_register.deposit') }}
@@ -747,6 +756,9 @@
                     :google-map-location="currentRestaurant?.google_map_location"
                 />
             </div>
+            <div id="drawer-kick-preview" class="print-overlay p-4 text-center text-xs opacity-0">
+                .
+            </div>
         </Teleport>
     </MainLayout>
 </template>
@@ -1121,7 +1133,7 @@ const saveOrderUpdates = () => {
         }
     });
     
-    router.put(`/pos/${selectedOrder.value.id}`, {
+    router.put(route('pos.update', selectedOrder.value.id), {
         // Order items
         items: itemsData,
         // Adjustments
@@ -1192,7 +1204,7 @@ const updateOrder = () => {
         }
     });
 
-    router.put(`/pos/${selectedOrder.value.id}`, {
+    router.put(route('pos.update', selectedOrder.value.id), {
         items: itemsData,
         discount_type: discountType.value,
         discount_value: discountValue.value,
@@ -1226,13 +1238,13 @@ const settleBill = () => {
 
 
     processing.value = true;
-    router.post(`/pos/${selectedOrder.value.id}/settle`, {
+    router.post(route('pos.settle', selectedOrder.value.id), {
         payment_method: paymentMethod.value,
     }, {
         onSuccess: () => {
             try {
-                // Print receipt if checkbox is checked
-                if (printBill.value) {
+                // Print receipt if checked OR if cash drawer needs to be opened (cash payment + setting enabled)
+                if (printBill.value || (currentRestaurant.value.has_cash_drawer && paymentMethod.value === 'cash')) {
                     printReceipt(selectedOrder.value);
                 }
             } catch (e) {
@@ -1284,6 +1296,15 @@ const printCurrentReceipt = async () => {
 
     // Use the existing printReceipt function for iframe printing
     await printReceipt(selectedOrder.value);
+};
+
+const openDrawer = async () => {
+    try {
+        await nextTick();
+        printReceiptPreview('drawer-kick-preview', '80');
+    } catch (e) {
+        console.error('Failed to open drawer', e);
+    }
 };
 
 // Helper functions for cash register

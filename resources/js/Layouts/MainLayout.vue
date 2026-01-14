@@ -8,6 +8,7 @@
         />
         <!-- Sidebar -->
         <aside 
+            v-if="!isFullScreen"
             class="fixed inset-y-0 z-50 glass-sidebar shadow-lifted transform transition-all duration-300 ease-in-out lg:translate-x-0 flex flex-col" 
             :class="[
                 currentLocale === 'ar' ? 'right-0' : 'left-0',
@@ -689,10 +690,10 @@
 
         <!-- Main Content -->
         <div class="min-h-screen flex flex-col transition-all duration-300" :class="[
-            currentLocale === 'ar' ? (isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-64') : (isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64')
+            !isFullScreen ? (currentLocale === 'ar' ? (isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-64') : (isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64')) : ''
         ]">
             <!-- Header -->
-            <header class="glass sticky top-0 z-40 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-gray-100/50 dark:border-gray-700/50">
+            <header v-if="!isFullScreen" class="glass sticky top-0 z-40 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-gray-100/50 dark:border-gray-700/50">
                 <div class="flex items-center gap-4">
                     <button @click="isSidebarOpen = !isSidebarOpen" class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition-all">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -892,14 +893,14 @@
             </header>
 
             <!-- Page Header -->
-            <header class="bg-white dark:bg-gray-800 shadow mb-6" v-if="$slots.header">
+            <header class="bg-white dark:bg-gray-800 shadow mb-6" v-if="$slots.header && !isFullScreen">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-in">
+            <main class="flex-1 animate-fade-in" :class="{ 'p-4 sm:p-6 lg:p-8': !isFullScreen }">
                 <slot />
             </main>
         </div>
@@ -933,6 +934,14 @@ import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasPermission, hasAnyPermission } = usePermissions();
 const { hasFeature } = useFeatures();
+
+interface Props {
+    isFullScreen?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    isFullScreen: false,
+});
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);

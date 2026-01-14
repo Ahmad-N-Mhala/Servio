@@ -162,29 +162,159 @@
             </div>
         </section>
 
-        <!-- Modules Section -->
-        <section id="modules" class="py-24 bg-gray-50/50">
-             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ $t('landing.our_modules') }}</h2>
-                    <p class="text-gray-500 text-lg">{{ $t('landing.modules_description') }}</p>
+                <!-- Detailed Features & Modules -->
+        <section id="modules" class="py-24 bg-gray-50 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-20">
+                    <h2 class="text-3xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">{{ getSetting('features_title') || $t('landing.features') }}</h2>
+                    <p class="text-xl text-gray-500 leading-relaxed">{{ getSetting('features_desc') || $t('landing.modules_description') }}</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div 
-                        v-for="module in modules" 
-                        :key="module.id" 
-                        class="bg-white p-8 rounded-3xl border border-gray-100 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all group duration-300"
-                    >
-                        <div class="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-300">
-                            {{ module.icon || '📦' }}
+                <!-- Feature 1: POS -->
+                <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 mb-24 md:mb-32">
+                       <div class="lg:w-1/2 relative" :class="locale === 'ar' ? 'lg:order-2' : 'lg:order-1'">
+                            <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-primary/20 border border-gray-100 bg-white aspect-[4/3] group transform hover:scale-[1.02] transition-transform duration-500">
+                                <template v-if="landingSettings.feature_pos_image">
+                                    <img :src="landingSettings.feature_pos_image" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="POS Feature" />
+                                </template>
+                                <template v-else>
+                                    <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+                                         <svg class="w-32 h-32 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    </div>
+                                    <div class="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div> 
+                                    <!-- Decorative Elements -->
+                                    <div class="absolute top-6 right-6 w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center animate-bounce">
+                                        <span class="text-2xl">⚡</span>
+                                    </div>
+                                </template>
+                            </div>
+                       </div>
+                       <div class="lg:w-1/2" :class="locale === 'ar' ? 'lg:order-1' : 'lg:order-2'">
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-6">
+                                Point of Sale
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 mb-6">{{ getSetting('feature_pos_title') || $t('landing.feature_pos_title') }}</h3>
+                            <p class="text-lg text-gray-500 leading-relaxed mb-8">{{ getSetting('feature_pos_desc') || $t('landing.feature_pos_desc') }}</p>
+                            <ul class="space-y-4">
+                                <li class="flex items-center gap-3 text-gray-700 font-medium">
+                                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                    Table, Quick Service & Delivery Modes
+                                </li>
+                                <li class="flex items-center gap-3 text-gray-700 font-medium">
+                                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                    Offline Capable
+                                </li>
+                            </ul>
+                       </div>
+                </div>
+
+                <!-- Feature 2: KDS -->
+                <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 mb-24 md:mb-32">
+                       <div class="lg:w-1/2" :class="locale === 'ar' ? 'lg:order-1' : 'lg:order-2'">
+                            <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-orange-500/20 border border-gray-100 bg-white aspect-[4/3] group transform hover:scale-[1.02] transition-transform duration-500">
+                                <template v-if="landingSettings.feature_kds_image">
+                                    <img :src="landingSettings.feature_kds_image" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="KDS Feature" />
+                                </template>
+                                <template v-else>
+                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
+                                         <svg class="w-32 h-32 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </div>
+                                </template>
+                            </div>
+                       </div>
+                       <div class="lg:w-1/2" :class="locale === 'ar' ? 'lg:order-2' : 'lg:order-1'">
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider mb-6">
+                                Kitchen Display
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 mb-6">{{ getSetting('feature_kds_title') || $t('landing.feature_kds_title') }}</h3>
+                            <p class="text-lg text-gray-500 leading-relaxed mb-8">{{ getSetting('feature_kds_desc') || $t('landing.feature_kds_desc') }}</p>
+                            <ul class="space-y-4">
+                                <li class="flex items-center gap-3 text-gray-700 font-medium">
+                                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                    Real-time Order Sync
+                                </li>
+                                <li class="flex items-center gap-3 text-gray-700 font-medium">
+                                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                    Color-coded Statuses
+                                </li>
+                            </ul>
+                       </div>
+                </div>
+
+                <!-- Feature 3: Inventory & Loyalty (Split Small) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
+                    <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 hover:border-primary/20 transition-all">
+                        <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-8">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
-                            {{ getLocaleText(module.title) }}
-                        </h3>
-                        <p class="text-gray-500 leading-relaxed">
-                            {{ getLocaleText(module.description) }}
-                        </p>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ getSetting('feature_inventory_title') || $t('landing.feature_inventory_title') }}</h3>
+                        <p class="text-gray-500 leading-relaxed">{{ getSetting('feature_inventory_desc') || $t('landing.feature_inventory_desc') }}</p>
+                    </div>
+                    <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 hover:border-primary/20 transition-all">
+                        <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-8">
+                           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ getSetting('feature_loyalty_title') || $t('landing.feature_loyalty_title') }}</h3>
+                        <p class="text-gray-500 leading-relaxed">{{ getSetting('feature_loyalty_desc') || $t('landing.feature_loyalty_desc') }}</p>
+                    </div>
+                </div>
+
+                <!-- How It Works Section inside Features -->
+                <div class="border-t border-gray-200 py-16">
+                     <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900">{{ getSetting('how_it_works_title') || $t('landing.how_it_works_title') }}</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                         <div class="text-center">
+                            <div class="w-16 h-16 bg-gray-900 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-gray-900/20">1</div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_1_title') || $t('landing.step_1_title') }}</h3>
+                            <p class="text-gray-500">{{ getSetting('step_1_desc') || $t('landing.step_1_desc') }}</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-primary text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/30">2</div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_2_title') || $t('landing.step_2_title') }}</h3>
+                            <p class="text-gray-500">{{ getSetting('step_2_desc') || $t('landing.step_2_desc') }}</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-emerald-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">3</div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_3_title') || $t('landing.step_3_title') }}</h3>
+                            <p class="text-gray-500">{{ getSetting('step_3_desc') || $t('landing.step_3_desc') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Original Modules Grid (Secondary) -->
+                <div v-if="modules && modules.length > 0">
+                    <div class="flex items-center gap-4 mb-8">
+                         <span class="h-px bg-gray-200 flex-grow"></span>
+                         <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ $t('landing.our_modules') }}</span>
+                         <span class="h-px bg-gray-200 flex-grow"></span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+                        <div 
+                            v-for="module in modules" 
+                            :key="module.id" 
+                            class="bg-white p-6 rounded-2xl border border-gray-100 hover:border-primary/30 transition-all text-center group relative overflow-hidden"
+                        >
+                            <div class="transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-4">
+                                <div class="text-3xl mb-3">{{ module.icon }}</div>
+                                <h4 class="font-bold text-gray-900 text-sm">{{ getLocaleText(module.title) }}</h4>
+                            </div>
+                            
+                            <!-- Hover Overlay -->
+                            <div class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
+                                <h4 class="font-bold text-gray-900 text-sm mb-2">{{ getLocaleText(module.title) }}</h4>
+                                <p class="text-xs text-gray-500 leading-relaxed">{{ getLocaleText(module.description) }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -432,6 +562,15 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const route = (window as any).route;
+
+const getSetting = (key: string) => {
+    const val = props.landingSettings[key];
+    if (!val) return null;
+    if (typeof val === 'object' && val !== null) {
+        return val[locale.value] || val['en'] || '';
+    }
+    return val;
+};
 
 const mobileMenuOpen = ref(false);
 const billingCycle = ref<'monthly' | 'yearly'>('monthly');

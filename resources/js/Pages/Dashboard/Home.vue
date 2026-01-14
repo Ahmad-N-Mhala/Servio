@@ -230,14 +230,20 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr>
-                                <th v-for="col in detailsColumns" :key="col.key" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th v-for="col in detailsColumns" :key="col.key" 
+                                    class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                    :class="col.align ? `text-${col.align}` : 'text-start'"
+                                >
                                     {{ col.label }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="(row, idx) in detailsData" :key="idx" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td v-for="col in detailsColumns" :key="col.key" class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                <td v-for="col in detailsColumns" :key="col.key" 
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
+                                     :class="col.align ? `text-${col.align}` : 'text-start'"
+                                >
                                     <template v-if="col.format === 'currency'">{{ formatCurrency(row[col.key]) }}</template>
                                     <template v-else-if="col.format === 'status'">
                                         <span :class="getStatusClass(row[col.key])" class="px-2 py-1 text-xs font-semibold rounded-full">
@@ -254,7 +260,24 @@
                 
                 <p v-else class="text-gray-500 dark:text-gray-400 text-center py-4">{{ $t('common.no_details') }}</p>
                 
-                 <div class="mt-6 flex justify-end">
+                 <div class="mt-6 flex justify-end gap-3">
+                    <a 
+                        v-if="currentDetailType === 'retention_bucket'"
+                        :href="route('dashboard.export', { 
+                            start_date: dateRange.start_date, 
+                            end_date: dateRange.end_date, 
+                            format: 'csv', 
+                            type: 'retention_bucket',
+                            ...currentDetailParams 
+                        })"
+                        target="_blank"
+                    >
+                         <Button variant="secondary" class="bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200">
+                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg> Export CSV
+                        </Button>
+                    </a>
                     <button @click="showDetailsModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">{{ $t('common.close') }}</button>
                 </div>
             </div>
@@ -320,6 +343,8 @@ const loadingDetails = ref(false);
 const detailsTitle = ref('');
 const detailsColumns = ref<any[]>([]);
 const detailsData = ref<any[]>([]);
+const currentDetailType = ref('');
+const currentDetailParams = ref<any>({});
 
 const itemSalesColumns = computed(() => [
     { key: 'name', label: t('common.item'), sortable: true },
@@ -346,6 +371,8 @@ const fetchDetails = async (type: string, params: any = {}) => {
     showDetailsModal.value = true;
     loadingDetails.value = true;
     detailsData.value = [];
+    currentDetailType.value = type;
+    currentDetailParams.value = params;
     
     try {
         const response = await axios.get(route('dashboard.details'), {
@@ -840,6 +867,16 @@ const initRetentionChart = () => {
                             const item = retentionStats.value[index];
                             return `Retention: ${item.percentage}% (${item.count} customers)`;
                         }
+                    }
+                }
+            },
+            onClick: (_e: any, activeElements: any[]) => {
+                if (activeElements && activeElements.length > 0) {
+                    const firstElement = activeElements[0];
+                    if (firstElement && typeof firstElement.index !== 'undefined') {
+                        const index = firstElement.index; // 0 = 1st Visit, 4 = 5th+
+                        const bucket = index + 1;
+                        fetchDetails('retention_bucket', { bucket });
                     }
                 }
             },

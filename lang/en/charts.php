@@ -23,4 +23,7 @@ return [
     'visit_3' => '3rd Visit',
     'visit_4' => '4th Visit',
     'visit_5_plus' => '5th+ Visit',
+    'customers_5_plus_visits' => 'Customers with 5+ Visits',
+    'customers_with_n_visits' => 'Customers with :count Visits',
+    'visits' => 'Visits',
 ];

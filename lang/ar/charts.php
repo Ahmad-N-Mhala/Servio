@@ -23,4 +23,7 @@ return [
     'visit_3' => 'الزيارة الثالثة',
     'visit_4' => 'الزيارة الرابعة',
     'visit_5_plus' => 'الزيارة 5+',
+    'customers_5_plus_visits' => 'العملاء (5 زيارات فأكثر)',
+    'customers_with_n_visits' => 'العملاء (:count زيارات)',
+    'visits' => 'الزيارات',
 ];

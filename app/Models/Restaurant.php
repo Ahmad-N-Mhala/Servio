@@ -36,6 +36,7 @@ class Restaurant extends Model
         'receipt_template',
         'next_order_number',
         'service_type',
+        'has_cash_drawer',
     ];
 
     protected $casts = [
@@ -116,6 +117,11 @@ class Restaurant extends Model
     public function rewards(): HasMany
     {
         return $this->hasMany(Reward::class);
+    }
+
+    public function earningMethods(): HasMany
+    {
+        return $this->hasMany(EarningMethod::class);
     }
 
     public function subscription(): \Illuminate\Database\Eloquent\Relations\HasOne

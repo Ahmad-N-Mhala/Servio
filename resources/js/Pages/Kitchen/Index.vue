@@ -1,10 +1,17 @@
 <template>
-    <MainLayout>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <MainLayout :isFullScreen="true">
+        <div class="w-full px-4 py-4">
             <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('kitchen.title') }}</h1>
-                    <p class="mt-1 text-sm text-gray-500">{{ $t('kitchen.subtitle') }}</p>
+                <div class="flex items-center gap-4">
+                    <Link :href="route('dashboard')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ $t('kitchen.title') }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ $t('kitchen.subtitle') }}</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="relative">
@@ -328,7 +335,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';

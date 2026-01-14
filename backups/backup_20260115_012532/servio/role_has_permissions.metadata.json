@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"permission_id":{"$numberInt":"1"},"role_id":{"$numberInt":"1"}},"name":"role_has_permissions_permission_id_role_id_primary","unique":true}],"uuid":"7b5281e5207b4d1b8a5c5a4b429ac9fd","collectionName":"role_has_permissions","type":"collection"}

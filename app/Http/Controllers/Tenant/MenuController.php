@@ -416,5 +416,26 @@ class MenuController extends Controller
 
         return redirect()->back()->with('message', __('menu.item_deleted'));
     }
+
+    public function downloadTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MenuTemplateExport, 'menu_items_template.xlsx');
+    }
+
+    public function importItems(Request $request)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('create_item');
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\MenuItemsImport, $request->file('file'));
+            return redirect()->back()->with('message', 'Menu items imported successfully.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Import Error: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['file' => 'Error importing file: ' . $e->getMessage()]);
+        }
+    }
 }
 

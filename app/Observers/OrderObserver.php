@@ -97,8 +97,8 @@ class OrderObserver
             }
         }
 
-        // Revert loyalty points if order is no longer in "Completed & Paid" state
-        $isEligible = $order->status === 'completed' && $order->payment_status === 'paid';
+        // Revert loyalty points if order is no longer in "Paid" state
+        $isEligible = $order->payment_status === 'paid';
         if ($order->points_earned > 0 && !$isEligible) {
             app(\App\Services\LoyaltyService::class)->revertOrderPoints($order);
         }

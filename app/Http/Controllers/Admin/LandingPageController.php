@@ -13,9 +13,50 @@ class LandingPageController extends Controller
     public function index()
     {
         $modules = LandingModule::orderBy('sort_order')->get();
-        $settings = LandingSetting::all()->mapWithKeys(function ($item) {
+
+        // Fetch existing DB settings
+        $dbSettings = LandingSetting::all()->mapWithKeys(function ($item) {
             return [$item->key => $item->value];
         });
+
+        // Define defaults from lang files
+        $defaults = [
+            'features_title' => ['en' => __('landing.features', [], 'en'), 'ar' => __('landing.features', [], 'ar')],
+            'features_desc' => ['en' => __('landing.modules_description', [], 'en'), 'ar' => __('landing.modules_description', [], 'ar')],
+
+            'feature_pos_title' => ['en' => __('landing.feature_pos_title', [], 'en'), 'ar' => __('landing.feature_pos_title', [], 'ar')],
+            'feature_pos_desc' => ['en' => __('landing.feature_pos_desc', [], 'en'), 'ar' => __('landing.feature_pos_desc', [], 'ar')],
+
+            'feature_kds_title' => ['en' => __('landing.feature_kds_title', [], 'en'), 'ar' => __('landing.feature_kds_title', [], 'ar')],
+            'feature_kds_desc' => ['en' => __('landing.feature_kds_desc', [], 'en'), 'ar' => __('landing.feature_kds_desc', [], 'ar')],
+
+            'feature_inventory_title' => ['en' => __('landing.feature_inventory_title', [], 'en'), 'ar' => __('landing.feature_inventory_title', [], 'ar')],
+            'feature_inventory_desc' => ['en' => __('landing.feature_inventory_desc', [], 'en'), 'ar' => __('landing.feature_inventory_desc', [], 'ar')],
+
+            'feature_loyalty_title' => ['en' => __('landing.feature_loyalty_title', [], 'en'), 'ar' => __('landing.feature_loyalty_title', [], 'ar')],
+            'feature_loyalty_desc' => ['en' => __('landing.feature_loyalty_desc', [], 'en'), 'ar' => __('landing.feature_loyalty_desc', [], 'ar')],
+
+            'how_it_works_title' => ['en' => __('landing.how_it_works_title', [], 'en'), 'ar' => __('landing.how_it_works_title', [], 'ar')],
+            'step_1_title' => ['en' => __('landing.step_1_title', [], 'en'), 'ar' => __('landing.step_1_title', [], 'ar')],
+            'step_1_desc' => ['en' => __('landing.step_1_desc', [], 'en'), 'ar' => __('landing.step_1_desc', [], 'ar')],
+            'step_2_title' => ['en' => __('landing.step_2_title', [], 'en'), 'ar' => __('landing.step_2_title', [], 'ar')],
+            'step_2_desc' => ['en' => __('landing.step_2_desc', [], 'en'), 'ar' => __('landing.step_2_desc', [], 'ar')],
+            'step_3_title' => ['en' => __('landing.step_3_title', [], 'en'), 'ar' => __('landing.step_3_title', [], 'ar')],
+            'step_3_desc' => ['en' => __('landing.step_3_desc', [], 'en'), 'ar' => __('landing.step_3_desc', [], 'ar')],
+
+            'about_us_title' => ['en' => __('landing.about_title_default', [], 'en'), 'ar' => __('landing.about_title_default', [], 'ar')],
+            'about_us_description' => ['en' => __('landing.about_us_description_default', [], 'en'), 'ar' => __('landing.about_us_description_default', [], 'ar')],
+
+            'contact_email' => __('landing.connect_via_email', [], 'en'),
+        ];
+
+        // Merge defaults into settings ONLY if key doesn't exist
+        $settings = $dbSettings->toArray();
+        foreach ($defaults as $key => $defaultVal) {
+            if (!isset($settings[$key])) {
+                $settings[$key] = $defaultVal;
+            }
+        }
 
         $screenshots = \App\Models\LandingScreenshot::orderBy('sort_order')->get();
 
@@ -28,12 +69,28 @@ class LandingPageController extends Controller
 
     public function updateSettings(Request $request)
     {
-        $data = $request->validate([
+        // Allow files in validation
+        $request->validate([
             'settings' => 'required|array',
         ]);
 
-        foreach ($data['settings'] as $key => $value) {
+        $settings = $request->input('settings', []);
+
+        // Handle basic values and arrays
+        foreach ($settings as $key => $value) {
+            // Skip files here, they are handled below
+            if ($request->hasFile("settings.$key")) {
+                continue;
+            }
             LandingSetting::set($key, $value);
+        }
+
+        // Handle File Uploads
+        if ($request->allFiles()) {
+            foreach ($request->allFiles()['settings'] ?? [] as $key => $file) {
+                $path = $file->store('landing/images', 'public');
+                LandingSetting::set($key, '/storage/' . $path);
+            }
         }
 
         return back()->with('success', 'Settings updated successfully.');

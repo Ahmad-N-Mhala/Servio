@@ -126,7 +126,155 @@
                             </div>
                          </div>
 
-                        <div class="flex justify-end pt-4 border-t">
+                        <!-- Features Section Config -->
+                        <div class="border-t pt-6 mt-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4">Features Section Content</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <Input v-model="settingsForm.settings.features_title.en" label="Main Features Title (English)" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.features_title.ar" label="Main Features Title (Arabic)" dir="rtl" />
+                                </div>
+                                <div class="md:col-span-2">
+                                     <Input v-model="settingsForm.settings.features_desc.en" label="Main Features Subtitle (English)" />
+                                </div>
+                                 <div class="md:col-span-2">
+                                     <Input v-model="settingsForm.settings.features_desc.ar" label="Main Features Subtitle (Arabic)" dir="rtl" />
+                                </div>
+                            </div>
+                            
+                            <!-- Feature 1: POS -->
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <h5 class="font-bold mb-3">Feature 1: Smart POS</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input v-model="settingsForm.settings.feature_pos_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.feature_pos_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (EN)</label>
+                                        <textarea v-model="settingsForm.settings.feature_pos_desc.en" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (AR)</label>
+                                        <textarea v-model="settingsForm.settings.feature_pos_desc.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-right" dir="rtl"></textarea>
+                                    </div>
+                                    <!-- Image Upload -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Image</label>
+                                        <div class="flex items-center gap-4">
+                                            <div v-if="landingSettings.feature_pos_image" class="w-20 h-16 rounded overflow-hidden bg-gray-200 border">
+                                                <img :src="landingSettings.feature_pos_image" class="w-full h-full object-cover">
+                                            </div>
+                                            <input type="file" @input="(e: any) => settingsForm.settings.feature_pos_image = e.target.files[0]" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feature 2: KDS -->
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <h5 class="font-bold mb-3">Feature 2: KDS</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input v-model="settingsForm.settings.feature_kds_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.feature_kds_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (EN)</label>
+                                        <textarea v-model="settingsForm.settings.feature_kds_desc.en" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (AR)</label>
+                                        <textarea v-model="settingsForm.settings.feature_kds_desc.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-right" dir="rtl"></textarea>
+                                    </div>
+                                    <!-- Image Upload -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Image</label>
+                                        <div class="flex items-center gap-4">
+                                            <div v-if="landingSettings.feature_kds_image" class="w-20 h-16 rounded overflow-hidden bg-gray-200 border">
+                                                <img :src="landingSettings.feature_kds_image" class="w-full h-full object-cover">
+                                            </div>
+                                            <input type="file" @input="(e: any) => settingsForm.settings.feature_kds_image = e.target.files[0]" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <!-- Feature 3: Inventory -->
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <h5 class="font-bold mb-3">Feature 3: Inventory</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input v-model="settingsForm.settings.feature_inventory_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.feature_inventory_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (EN)</label>
+                                        <textarea v-model="settingsForm.settings.feature_inventory_desc.en" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (AR)</label>
+                                        <textarea v-model="settingsForm.settings.feature_inventory_desc.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-right" dir="rtl"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feature 4: Loyalty -->
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <h5 class="font-bold mb-3">Feature 4: Loyalty</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input v-model="settingsForm.settings.feature_loyalty_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.feature_loyalty_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (EN)</label>
+                                        <textarea v-model="settingsForm.settings.feature_loyalty_desc.en" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm"></textarea>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (AR)</label>
+                                        <textarea v-model="settingsForm.settings.feature_loyalty_desc.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-right" dir="rtl"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- How It Works Config -->
+                        <div class="border-t pt-6 mt-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4">How It Works Section</h4>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <Input v-model="settingsForm.settings.how_it_works_title.en" label="Section Title (English)" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.how_it_works_title.ar" label="Section Title (Arabic)" dir="rtl" />
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Step 1 -->
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold mb-2">Step 1</h6>
+                                    <Input v-model="settingsForm.settings.step_1_title.en" label="Title (EN)" class="mb-2" />
+                                    <Input v-model="settingsForm.settings.step_1_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
+                                    <textarea v-model="settingsForm.settings.step_1_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
+                                    <textarea v-model="settingsForm.settings.step_1_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+                                <!-- Step 2 -->
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold mb-2">Step 2</h6>
+                                    <Input v-model="settingsForm.settings.step_2_title.en" label="Title (EN)" class="mb-2" />
+                                    <Input v-model="settingsForm.settings.step_2_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
+                                    <textarea v-model="settingsForm.settings.step_2_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
+                                    <textarea v-model="settingsForm.settings.step_2_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+                                <!-- Step 3 -->
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold mb-2">Step 3</h6>
+                                    <Input v-model="settingsForm.settings.step_3_title.en" label="Title (EN)" class="mb-2" />
+                                    <Input v-model="settingsForm.settings.step_3_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
+                                    <textarea v-model="settingsForm.settings.step_3_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
+                                    <textarea v-model="settingsForm.settings.step_3_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4 border-t mt-6">
                             <Button type="submit" :loading="settingsForm.processing">Save Settings</Button>
                         </div>
                     </form>
@@ -311,7 +459,89 @@ const settingsForm = useForm({
         stats_restaurants: props.landingSettings.stats_restaurants || '500+',
         stats_orders: props.landingSettings.stats_orders || '1M+',
         stats_uptime: props.landingSettings.stats_uptime || '99.9%',
-        stats_visible: props.landingSettings.stats_visible !== undefined ? Boolean(props.landingSettings.stats_visible) : true
+        stats_visible: props.landingSettings.stats_visible !== undefined ? Boolean(props.landingSettings.stats_visible) : true,
+
+        // Features Section
+        features_title: {
+            en: props.landingSettings.features_title?.en || '',
+            ar: props.landingSettings.features_title?.ar || ''
+        },
+        features_desc: {
+            en: props.landingSettings.features_desc?.en || '',
+            ar: props.landingSettings.features_desc?.ar || ''
+        },
+        
+        // Feature 1: POS
+        feature_pos_title: {
+            en: props.landingSettings.feature_pos_title?.en || '',
+            ar: props.landingSettings.feature_pos_title?.ar || ''
+        },
+        feature_pos_desc: {
+            en: props.landingSettings.feature_pos_desc?.en || '',
+            ar: props.landingSettings.feature_pos_desc?.ar || ''
+        },
+        feature_pos_image: null,
+
+        // Feature 2: KDS
+        feature_kds_title: {
+            en: props.landingSettings.feature_kds_title?.en || '',
+            ar: props.landingSettings.feature_kds_title?.ar || ''
+        },
+        feature_kds_desc: {
+            en: props.landingSettings.feature_kds_desc?.en || '',
+            ar: props.landingSettings.feature_kds_desc?.ar || ''
+        },
+        feature_kds_image: null,
+
+        // Feature 3: Inventory
+        feature_inventory_title: {
+            en: props.landingSettings.feature_inventory_title?.en || '',
+            ar: props.landingSettings.feature_inventory_title?.ar || ''
+        },
+        feature_inventory_desc: {
+            en: props.landingSettings.feature_inventory_desc?.en || '',
+            ar: props.landingSettings.feature_inventory_desc?.ar || ''
+        },
+
+        // Feature 4: Loyalty
+        feature_loyalty_title: {
+            en: props.landingSettings.feature_loyalty_title?.en || '',
+            ar: props.landingSettings.feature_loyalty_title?.ar || ''
+        },
+        feature_loyalty_desc: {
+            en: props.landingSettings.feature_loyalty_desc?.en || '',
+            ar: props.landingSettings.feature_loyalty_desc?.ar || ''
+        },
+
+         // How It Works
+        how_it_works_title: {
+            en: props.landingSettings.how_it_works_title?.en || '',
+            ar: props.landingSettings.how_it_works_title?.ar || ''
+        },
+        step_1_title: {
+            en: props.landingSettings.step_1_title?.en || '',
+            ar: props.landingSettings.step_1_title?.ar || ''
+        },
+        step_1_desc: {
+            en: props.landingSettings.step_1_desc?.en || '',
+            ar: props.landingSettings.step_1_desc?.ar || ''
+        },
+         step_2_title: {
+            en: props.landingSettings.step_2_title?.en || '',
+            ar: props.landingSettings.step_2_title?.ar || ''
+        },
+        step_2_desc: {
+            en: props.landingSettings.step_2_desc?.en || '',
+            ar: props.landingSettings.step_2_desc?.ar || ''
+        },
+         step_3_title: {
+            en: props.landingSettings.step_3_title?.en || '',
+            ar: props.landingSettings.step_3_title?.ar || ''
+        },
+        step_3_desc: {
+            en: props.landingSettings.step_3_desc?.en || '',
+            ar: props.landingSettings.step_3_desc?.ar || ''
+        },
     }
 });
 

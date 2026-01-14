@@ -104,6 +104,10 @@ Route::group([
                     ->middleware('permission:edit_item');
                 Route::delete('/items/{item}', [\App\Http\Controllers\Tenant\MenuController::class, 'destroyItem'])->name('items.destroy')
                     ->middleware('permission:delete_item');
+                Route::get('/items/template', [\App\Http\Controllers\Tenant\MenuController::class, 'downloadTemplate'])->name('items.template')
+                    ->middleware('permission:view_menu');
+                Route::post('/items/import', [\App\Http\Controllers\Tenant\MenuController::class, 'importItems'])->name('items.import')
+                    ->middleware('permission:create_item');
             });
 
             // Order Management

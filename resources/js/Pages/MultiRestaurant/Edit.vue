@@ -21,10 +21,10 @@
                      Update your restaurant details
                  </p>
                  <div class="mt-4">
-                     <a href="/en/select-restaurant" class="text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors">
+                     <Link :href="route('restaurants.index')" class="text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         Back to list
-                     </a>
+                     </Link>
                  </div>
             </div>
 
@@ -186,6 +186,76 @@
                                 :error="form.errors.google_map_location"
                             />
                         </div>
+
+                        <!-- Loyalty Setup -->
+                        <div v-if="hasLoyalty" class="pt-6 sm:pt-8 border-t border-gray-100">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4 tracking-tight">Loyalty Program Setup</h3>
+                            <div class="space-y-4">
+                                <label class="block text-sm font-medium text-gray-700">How should customers earn points?</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    <div 
+                                        @click="form.earning_method_type = 'order_total'"
+                                        class="cursor-pointer border-2 rounded-2xl p-4 transition-all duration-300"
+                                        :class="form.earning_method_type === 'order_total' ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' : 'border-gray-100 hover:border-gray-200'"
+                                    >
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2.5 rounded-xl" :class="form.earning_method_type === 'order_total' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-900">Per Spend</div>
+                                                <div class="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider font-medium">Bill total</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div 
+                                        @click="form.earning_method_type = 'visit'"
+                                        class="cursor-pointer border-2 rounded-2xl p-4 transition-all duration-300"
+                                        :class="form.earning_method_type === 'visit' ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' : 'border-gray-100 hover:border-gray-200'"
+                                    >
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2.5 rounded-xl" :class="form.earning_method_type === 'visit' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-900">Per Visit</div>
+                                                <div class="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider font-medium">Fixed points</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
+                                        <Input
+                                            v-model="form.earning_points"
+                                            :label="form.earning_method_type === 'order_total' ? 'Points per 1 ' + currency + ' Spent' : 'Points per Visit'"
+                                            type="number"
+                                            min="1"
+                                            required
+                                            :error="(form.errors as any).earning_points"
+                                        />
+                                        <p class="text-xs text-gray-500 mt-2 font-medium">
+                                            {{ form.earning_method_type === 'order_total' ? 'Tip: Set to 1 for basic 1 point = 1 ' + currency + '.' : 'Tip: Set to 10 for standard visit reward.' }}
+                                        </p>
+                                    </div>
+                                     <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
+                                        <Input
+                                            v-model="form.min_spent"
+                                            label="Minimum Spend"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            :error="(form.errors as any).min_spent"
+                                        />
+                                        <p class="text-xs text-gray-500 mt-2 font-medium">
+                                            Minimum bill amount required to earn points.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="pt-4">
                             <Button
@@ -210,8 +280,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { useForm, Link } from '@inertiajs/vue3';
 import Logo from '@/Components/Logo.vue';
 import Input from '@/Components/Input.vue';
 import Select from '@/Components/Select.vue';
@@ -221,7 +291,13 @@ import Toast from '@/Components/Toast.vue';
 const props = defineProps<{
     restaurant: any;
     countries: any[];
+    planFeatures?: string[];
+    earningMethod?: any;
 }>();
+
+const hasLoyalty = computed(() => {
+    return props.planFeatures ? props.planFeatures.includes('loyalty') : false;
+});
 
 const form = useForm({
     _method: 'PUT',
@@ -236,6 +312,18 @@ const form = useForm({
     google_map_location: props.restaurant.google_map_location,
     logo: null as File | null,
     service_type: props.restaurant.service_type || 'both',
+
+    // Loyalty
+    earning_method_type: props.earningMethod?.type || 'order_total',
+    earning_points: props.earningMethod?.points || 1,
+    min_spent: props.earningMethod?.min_spent || 0,
+});
+
+const currency = computed(() => {
+    if (form.country === 'United Arab Emirates') return 'AED';
+    if (form.country === 'Saudi Arabia') return 'SAR';
+    if (form.country === 'United States') return 'USD';
+    return props.restaurant.currency || 'Currency';
 });
 
 const currentLogo = ref(props.restaurant.logo ? `/storage/${props.restaurant.logo}` : null);

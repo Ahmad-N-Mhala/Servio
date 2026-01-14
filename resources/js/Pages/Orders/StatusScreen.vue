@@ -1,8 +1,16 @@
 <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans overflow-hidden py-4 px-6 flex flex-col">
         <!-- Header -->
+        <!-- Header -->
         <div class="flex items-center justify-between mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $t('charts.order_status') }}</h1>
+            <div class="flex items-center gap-4">
+                <Link :href="route('dashboard')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <svg class="w-6 h-6 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </Link>
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $t('charts.order_status') }}</h1>
+            </div>
             <div class="flex items-center gap-4">
                 <div class="text-2xl font-mono font-semibold text-gray-600 dark:text-gray-400" id="clock">{{ currentTime }}</div>
                 <Link 

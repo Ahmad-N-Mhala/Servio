@@ -48,7 +48,7 @@ class MultiRestaurantController extends Controller
                     'slug' => $restaurant->slug,
                     'logo' => null, // Add logo column later
                     'role' => $pivot ? $pivot->role : 'staff',
-                    'is_active' => $pivot ? (bool) $pivot->is_active : false,
+                    'is_active' => $pivot ? (isset($pivot->is_active) ? (bool) $pivot->is_active : true) : false,
                     'plan' => $planName,
                     'domain' => $domain,
                 ];
@@ -130,7 +130,10 @@ class MultiRestaurantController extends Controller
         if (!empty($existingRestaurantIds)) {
             $existingRestaurant = Restaurant::with('subscription.plan')->whereIn('id', $existingRestaurantIds)->first();
             if ($existingRestaurant && $existingRestaurant->subscription && $existingRestaurant->subscription->plan) {
-                $planFeatures = $existingRestaurant->subscription->plan->features ?? [];
+                $plan = $existingRestaurant->subscription->plan;
+                $raw = $plan->enabled_features ?? [];
+                $features = is_string($raw) ? json_decode($raw, true) : $raw;
+                $planFeatures = is_array($features) ? $features : [];
             }
         }
 
@@ -212,7 +215,9 @@ class MultiRestaurantController extends Controller
         $subscription = $existingRestaurant->subscription;
         $plan = $subscription->plan;
 
-        $planFeatures = $plan->features ?? [];
+        $raw = $plan->enabled_features ?? [];
+        $features = is_string($raw) ? json_decode($raw, true) : $raw;
+        $planFeatures = is_array($features) ? $features : [];
         $hasLoyalty = in_array('loyalty', $planFeatures);
 
         $useTransactions = false; // Force false for local dev/standalone mongo
@@ -326,7 +331,6 @@ class MultiRestaurantController extends Controller
     public function edit(Request $request, Restaurant $restaurant)
     {
         // 1. Permission Check
-        // If the user has global permission OR is an owner of this specific restaurant
         $isOwner = \DB::table('restaurant_user')
             ->where('restaurant_id', $restaurant->id)
             ->where('email', $request->user()->email)
@@ -337,12 +341,27 @@ class MultiRestaurantController extends Controller
             abort(403);
         }
 
+        // Load relationships
+        $restaurant->load(['subscription.plan', 'earningMethods']);
+
+        $planFeatures = [];
+        if ($restaurant->subscription && $restaurant->subscription->plan) {
+            $plan = $restaurant->subscription->plan;
+            $raw = $plan->enabled_features ?? [];
+            $features = is_string($raw) ? json_decode($raw, true) : $raw;
+            $planFeatures = is_array($features) ? $features : [];
+        }
+
+        $earningMethod = $restaurant->earningMethods->first();
+
         // 2. Fetch Countries for Selection
         $countries = \App\Models\Country::select('name', 'currency', 'states')->get();
 
         return Inertia::render('MultiRestaurant/Edit', [
             'restaurant' => $restaurant,
             'countries' => $countries,
+            'planFeatures' => $planFeatures,
+            'earningMethod' => $earningMethod,
         ]);
     }
 
@@ -372,6 +391,10 @@ class MultiRestaurantController extends Controller
             'google_map_location' => ['nullable', 'string'],
             'logo' => ['nullable', 'image', 'max:2048'],
             'service_type' => ['required', 'in:self_service,table_service,both'],
+            // Loyalty
+            'earning_method_type' => ['nullable', 'in:order_total,visit'],
+            'earning_points' => ['nullable', 'integer', 'min:1'],
+            'min_spent' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         // 3. Update Logic
@@ -387,6 +410,23 @@ class MultiRestaurantController extends Controller
         }
 
         $restaurant->update($validated);
+
+        // 4. Update Loyalty Earning Method
+        // Only update if data is provided. If empty, field might be hidden in UI so ignore.
+        // We only check earning_method_type presence to decide
+        if ($request->has('earning_method_type') && !empty($validated['earning_method_type'])) {
+            \App\Models\EarningMethod::updateOrCreate(
+                ['restaurant_id' => $restaurant->id],
+                [
+                    'type' => $validated['earning_method_type'],
+                    'points' => $validated['earning_points'] ?? 1,
+                    'min_spent' => $validated['min_spent'] ?? 0,
+                    'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
+                    'is_active' => true,
+                    'currency_amount' => 1,
+                ]
+            );
+        }
 
         return redirect()->route('restaurants.index')->with('success', 'Restaurant updated successfully.');
     }

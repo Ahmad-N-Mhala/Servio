@@ -20,6 +20,20 @@
                     </template>
                     {{ $t('menu.add_category') }}
                 </Button>
+                <!-- Import Button -->
+                <Button 
+                    v-if="hasPermission('create_item')"
+                    @click="showImportModal = true" 
+                    variant="secondary"
+                    size="md"
+                >
+                    <template #icon>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                    </template>
+                    Import Items
+                </Button>
             </div>
 
             <!-- Empty State -->
@@ -545,6 +559,43 @@
         </form>
     </Modal>
 
+    <!-- Import Modal -->
+    <Modal :show="showImportModal" @close="showImportModal = false" :title="$t('menu.import_items') || 'Import Menu Items'" size="md">
+        <form @submit.prevent="submitImport" class="space-y-6">
+            <div class="bg-blue-50 p-4 rounded-lg flex items-start gap-3">
+                <svg class="w-6 h-6 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <div>
+                    <h4 class="font-bold text-blue-800 text-sm">Instructions</h4>
+                    <p class="text-sm text-blue-700 mt-1">
+                        1. Download the template file.<br>
+                        2. Fill in the required fields (marked with *).<br>
+                        3. Upload the file to import items.
+                    </p>
+                    <a :href="route('menu.items.template')" class="text-sm font-bold text-blue-600 hover:underline mt-2 inline-block">
+                        Download Template
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Excel File</label>
+                <input 
+                    type="file" 
+                    @change="handleImportFile" 
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    accept=".xlsx,.xls,.csv"
+                    required
+                />
+                <div v-if="importForm.errors.file" class="text-red-500 text-xs mt-1">{{ importForm.errors.file }}</div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <Button type="button" variant="secondary" @click="showImportModal = false">{{ $t('common.cancel') }}</Button>
+                <Button type="submit" :loading="importForm.processing">Import</Button>
+            </div>
+        </form>
+    </Modal>
+
     <!-- Unsplash Picker Modal -->
     <UnsplashPicker 
         :show="showUnsplashPicker"
@@ -600,6 +651,29 @@ const newFiles = ref<File[]>([]);
 const newIngredientId = ref<number | null>(null);
 const newIngredientQty = ref<number | string>('');
 const newIngredientUnit = ref<string>('');
+
+// Import State
+const showImportModal = ref(false);
+const importForm = useForm({
+    file: null as File | null
+});
+
+const handleImportFile = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        importForm.file = target.files[0];
+    }
+};
+
+const submitImport = () => {
+    if (!importForm.file) return;
+    importForm.post(route('menu.items.import'), {
+        onSuccess: () => {
+            showImportModal.value = false;
+            importForm.reset();
+        }
+    });
+};
 
 // Tabs Logic
 const activeTab = ref('details');

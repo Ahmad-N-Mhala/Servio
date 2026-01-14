@@ -33,6 +33,60 @@ class DashboardController extends Controller
         if (is_string($endDate))
             $endDate = Carbon::parse($endDate)->endOfDay();
 
+        // Specific Export for Retention Bucket
+        if ($request->input('type') === 'retention_bucket' && $format === 'csv') {
+            $bucket = (int) $request->input('bucket');
+            $headers = [
+                "Content-type" => "text/csv",
+                "Content-Disposition" => "attachment; filename=customers_visit_count_{$bucket}.csv",
+                "Pragma" => "no-cache",
+                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+                "Expires" => "0"
+            ];
+
+            $callback = function () use ($restaurant, $startDate, $endDate, $bucket) {
+                $file = fopen('php://output', 'w');
+                $title = ($bucket === 5) ? "Customers with 5+ Visits" : "Customers with {$bucket} Visits";
+                fputcsv($file, [$title]);
+                fputcsv($file, [__('reports.restaurant'), $restaurant->name]);
+                fputcsv($file, [__('reports.date_range'), $startDate->format('Y-m-d') . ' ' . __('reports.to') . ' ' . $endDate->format('Y-m-d')]);
+                fputcsv($file, []);
+                fputcsv($file, ['Name', 'Phone', 'Total Visits', 'Total Spent']);
+
+                $data = Order::where('restaurant_id', $restaurant->id)
+                    ->where('payment_status', 'paid')
+                    ->whereNotNull('customer_id')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->with('customer')
+                    ->get()
+                    ->groupBy('customer_id')
+                    ->map(function ($orders) use ($bucket) {
+                        $count = $orders->count();
+                        if ($bucket < 5 && $count !== $bucket)
+                            return null;
+                        if ($bucket === 5 && $count < 5)
+                            return null;
+
+                        $customer = $orders->first()->customer;
+                        return [
+                            $customer ? $customer->name : 'Unknown',
+                            $customer ? $customer->phone : 'N/A',
+                            $count,
+                            (float) (string) $orders->sum('total'),
+                        ];
+                    })
+                    ->filter()
+                    ->values();
+
+                foreach ($data as $row) {
+                    fputcsv($file, $row);
+                }
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
         // Specific Export for Item Sales
         if ($request->input('tab') === 'item_sales' && $format === 'excel') {
             $headers = [
@@ -670,7 +724,12 @@ class DashboardController extends Controller
                 continue;
             }
 
-            $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            if ($i === 5) {
+                $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            } else {
+                $countAtLeast = $customerVisits->filter(fn($visits) => $visits === $i)->count();
+            }
+
             $percentage = ($countAtLeast / $totalCustomers) * 100;
 
             $retentionStats[] = [
@@ -984,9 +1043,9 @@ class DashboardController extends Controller
         $endDate = $request->input('end_date', now()->endOfDay());
 
         if (is_string($startDate))
-            $startDate = Carbon::parse($startDate);
+            $startDate = Carbon::parse($startDate)->startOfDay();
         if (is_string($endDate))
-            $endDate = Carbon::parse($endDate);
+            $endDate = Carbon::parse($endDate)->endOfDay();
 
         $columns = [];
         $data = [];
@@ -1397,6 +1456,43 @@ class DashboardController extends Controller
                             'time' => $log->created_at->toIso8601String()
                         ];
                     });
+                break;
+
+            case 'retention_bucket':
+                $bucket = (int) $request->input('bucket'); // 1, 2, 3, 4, or 5 (for 5+)
+                $title = ($bucket === 5) ? __('charts.customers_5_plus_visits') : __('charts.customers_with_n_visits', ['count' => $bucket]);
+
+                $columns = [
+                    ['key' => 'name', 'label' => __('common.name')],
+                    ['key' => 'phone', 'label' => __('common.phone')],
+                    ['key' => 'visit_count', 'label' => __('charts.visits'), 'align' => 'center'],
+                    ['key' => 'total_spent', 'label' => __('common.total'), 'format' => 'currency', 'align' => 'right'],
+                ];
+
+                $data = Order::where('restaurant_id', $restaurant->id)
+                    ->where('payment_status', 'paid')
+                    ->whereNotNull('customer_id')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->with('customer')
+                    ->get()
+                    ->groupBy('customer_id')
+                    ->map(function ($orders) use ($bucket) {
+                        $count = $orders->count();
+                        if ($bucket < 5 && $count !== $bucket)
+                            return null;
+                        if ($bucket === 5 && $count < 5)
+                            return null;
+
+                        $customer = $orders->first()->customer;
+                        return [
+                            'name' => $customer ? $customer->name : 'Unknown',
+                            'phone' => $customer ? $customer->phone : 'N/A',
+                            'visit_count' => $count,
+                            'total_spent' => (float) (string) $orders->sum('total'),
+                        ];
+                    })
+                    ->filter()
+                    ->values();
                 break;
         }
 

@@ -1,6 +1,6 @@
 <template>
-    <MainLayout>
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
+    <MainLayout :isFullScreen="true">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 h-screen overflow-hidden flex flex-col">
             <!-- Header -->
             <div class="flex items-center gap-4 mb-4 flex-shrink-0">
                 <Link :href="route('orders.index')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -14,7 +14,7 @@
             <form @submit.prevent="createOrder" class="flex-1 grid grid-cols-12 gap-6 overflow-hidden h-full pb-4">
                 
                 <!-- Left Column: Menu (Scrollable) -->
-                <div class="col-span-12 lg:col-span-8 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                <div class="col-span-12 lg:col-span-9 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                      <!-- Stock Error Display -->
                     <div v-if="form.errors.items" class="glass-card rounded-2xl p-4 border-2 border-red-300 bg-red-50 mb-4">
                         <div class="flex items-start gap-3">
@@ -138,7 +138,7 @@
                 </div>
 
                 <!-- Right Column: Cart & Details (Fixed Height) -->
-                <div class="col-span-12 lg:col-span-4 flex flex-col gap-4 overflow-hidden h-full">
+                <div class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-hidden h-full">
                     
                     <!-- Customer Section (Collapsible or Compact) -->
                      <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex-shrink-0">
@@ -147,23 +147,29 @@
                              {{ $t('common.customer') }}
                          </h3>
                         <div class="space-y-2">
-                             <div class="relative">
-                                <span class="absolute left-3 top-2 text-gray-500 font-medium text-xs">{{ phoneCode }}</span>
-                                <input 
-                                    v-model="phoneInput"
-                                    type="tel"
-                                    placeholder="50 123 4567"
-                                    class="w-full pl-12 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                    @input="handlePhoneInput"
-                                    @blur="lookupCustomer"
-                                />
+                             <div class="flex gap-2">
+                                <div class="relative w-1/2">
+                                    <span class="absolute left-3 top-2 text-gray-500 font-medium text-xs">{{ phoneCode }}</span>
+                                    <input 
+                                        v-model="phoneInput"
+                                        type="tel"
+                                        placeholder="50.."
+                                        class="w-full pl-10 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                        @input="handlePhoneInput"
+                                        @blur="lookupCustomer"
+                                    />
+                                </div>
+                                <div v-if="!selectedCustomer" class="w-1/2">
+                                   <input v-model="form.customer_name" :placeholder="$t('staff.name')" class="py-1.5 px-3 text-sm border border-gray-300 rounded-lg w-full" />
+                               </div>
+                               <div v-if="selectedCustomer" class="w-1/2 flex items-center bg-purple-50 px-2 rounded-lg border border-purple-100 overflow-hidden">
+                                     <span class="font-bold text-sm text-purple-900 truncate">{{ selectedCustomer.name }}</span>
+                               </div>
                             </div>
+                             
                              <div v-if="selectedCustomer" class="flex justify-between items-center bg-purple-50 p-2 rounded-lg border border-purple-100">
-                                <span class="font-bold text-sm text-purple-900">{{ selectedCustomer.name }}</span>
+                                <span class="font-bold text-xs text-purple-900">Points Balance</span>
                                 <span class="text-xs font-bold text-purple-600 bg-white px-2 py-0.5 rounded-full border border-purple-200">{{ selectedCustomer.loyalty_points }} pts</span>
-                            </div>
-                             <div v-else class="grid grid-cols-2 gap-2">
-                                <input v-model="form.customer_name" :placeholder="$t('staff.name')" class="py-1.5 px-3 text-sm border border-gray-300 rounded-lg w-full" />
                             </div>
                         </div>
                      </div>

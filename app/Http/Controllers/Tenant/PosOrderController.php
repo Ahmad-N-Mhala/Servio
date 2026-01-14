@@ -228,6 +228,14 @@ class PosOrderController extends Controller
         // Broadcast
         broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer']), 'created'))->toOthers();
 
-        return redirect()->back()->with('message', 'Delivery Order Created Successfully');
+        // Refresh to check for points
+        $order->refresh();
+
+        $message = "Order #{$order->order_number} Created Successfully.";
+        if ($order->points_earned > 0) {
+            $message .= " +{$order->points_earned} Loyalty Points Earned!";
+        }
+
+        return redirect()->back()->with('message', $message);
     }
 }

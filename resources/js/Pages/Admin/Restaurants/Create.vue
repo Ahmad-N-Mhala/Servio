@@ -73,6 +73,26 @@
                                     required 
                                     :error="form.errors.service_type" 
                                 />
+
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-900">Cash Drawer</label>
+                                        <p class="text-xs text-gray-500">Enable if a cash drawer is connected to printer</p>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        @click="form.has_cash_drawer = !form.has_cash_drawer"
+                                        :class="form.has_cash_drawer ? 'bg-indigo-600' : 'bg-gray-200'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+                                    >
+                                        <span class="sr-only">Use setting</span>
+                                        <span 
+                                            aria-hidden="true" 
+                                            :class="form.has_cash_drawer ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                        />
+                                    </button>
+                                </div>
                                 
                                 <!-- Spacer for grid alignment -->
                                 <div class="hidden md:block"></div>
@@ -391,6 +411,7 @@ const form = useForm({
     // New Fields
     logo: null as File | null,
     service_type: 'both',
+    has_cash_drawer: false,
 });
 
 

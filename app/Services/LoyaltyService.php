@@ -40,7 +40,7 @@ class LoyaltyService
             return;
         }
 
-        if (!$order->customer_id || $order->status !== 'completed' || $order->payment_status !== 'paid') {
+        if (!$order->customer_id || $order->payment_status !== 'paid') {
             return;
         }
 

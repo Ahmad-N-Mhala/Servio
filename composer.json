@@ -19,6 +19,7 @@
         "laravel/octane": "^2.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^3.1",
         "mcamara/laravel-localization": "^2.0",
         "mongodb/laravel-mongodb": "^5.5",
         "pusher/pusher-php-server": "^7.2",
