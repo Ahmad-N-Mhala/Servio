@@ -174,7 +174,10 @@
                 <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 mb-24 md:mb-32">
                        <div class="lg:w-1/2 relative" :class="locale === 'ar' ? 'lg:order-2' : 'lg:order-1'">
                             <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-primary/20 border border-gray-100 bg-white aspect-[4/3] group transform hover:scale-[1.02] transition-transform duration-500">
-                                <template v-if="landingSettings.feature_pos_image">
+                                <template v-if="landingSettings.feature_pos_images && landingSettings.feature_pos_images.length > 0">
+                                     <Carousel :images="landingSettings.feature_pos_images" heightClass="h-full" />
+                                </template>
+                                <template v-else-if="landingSettings.feature_pos_image">
                                     <img :src="landingSettings.feature_pos_image" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="POS Feature" />
                                 </template>
                                 <template v-else>
@@ -191,7 +194,7 @@
                        </div>
                        <div class="lg:w-1/2" :class="locale === 'ar' ? 'lg:order-1' : 'lg:order-2'">
                             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-6">
-                                Point of Sale
+                                {{ $t('landing.badge_pos') }}
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 mb-6">{{ getSetting('feature_pos_title') || $t('landing.feature_pos_title') }}</h3>
                             <p class="text-lg text-gray-500 leading-relaxed mb-8">{{ getSetting('feature_pos_desc') || $t('landing.feature_pos_desc') }}</p>
@@ -200,13 +203,13 @@
                                     <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </div>
-                                    Table, Quick Service & Delivery Modes
+                                    {{ $t('landing.pos_bullet_1') }}
                                 </li>
                                 <li class="flex items-center gap-3 text-gray-700 font-medium">
                                     <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </div>
-                                    Offline Capable
+                                    {{ $t('landing.pos_bullet_2') }}
                                 </li>
                             </ul>
                        </div>
@@ -216,7 +219,10 @@
                 <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 mb-24 md:mb-32">
                        <div class="lg:w-1/2" :class="locale === 'ar' ? 'lg:order-1' : 'lg:order-2'">
                             <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-orange-500/20 border border-gray-100 bg-white aspect-[4/3] group transform hover:scale-[1.02] transition-transform duration-500">
-                                <template v-if="landingSettings.feature_kds_image">
+                                <template v-if="landingSettings.feature_kds_images && landingSettings.feature_kds_images.length > 0">
+                                     <Carousel :images="landingSettings.feature_kds_images" heightClass="h-full" />
+                                </template>
+                                <template v-else-if="landingSettings.feature_kds_image">
                                     <img :src="landingSettings.feature_kds_image" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="KDS Feature" />
                                 </template>
                                 <template v-else>
@@ -228,7 +234,7 @@
                        </div>
                        <div class="lg:w-1/2" :class="locale === 'ar' ? 'lg:order-2' : 'lg:order-1'">
                             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-700 text-xs font-bold uppercase tracking-wider mb-6">
-                                Kitchen Display
+                                {{ $t('landing.badge_kds') }}
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 mb-6">{{ getSetting('feature_kds_title') || $t('landing.feature_kds_title') }}</h3>
                             <p class="text-lg text-gray-500 leading-relaxed mb-8">{{ getSetting('feature_kds_desc') || $t('landing.feature_kds_desc') }}</p>
@@ -237,13 +243,13 @@
                                     <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </div>
-                                    Real-time Order Sync
+                                    {{ $t('landing.kds_bullet_1') }}
                                 </li>
                                 <li class="flex items-center gap-3 text-gray-700 font-medium">
                                     <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </div>
-                                    Color-coded Statuses
+                                    {{ $t('landing.kds_bullet_2') }}
                                 </li>
                             </ul>
                        </div>
@@ -513,9 +519,11 @@
                     </div>
 
                     <div class="pt-4">
-                         <Button class="w-full justify-center py-3 text-lg" :loading="form.processing">
+                    <div class="pt-4">
+                         <Button type="submit" @click.prevent="submitInterest" class="w-full justify-center py-3 text-lg" :loading="form.processing">
                             {{ $t('landing.submit') }}
                         </Button>
+                    </div>
                     </div>
                 </form>
              </div>
@@ -547,6 +555,8 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+
+import axios from 'axios';
 import Logo from '@/Components/Logo.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
@@ -566,6 +576,7 @@ const route = (window as any).route;
 const getSetting = (key: string) => {
     const val = props.landingSettings[key];
     if (!val) return null;
+    if (Array.isArray(val)) return val;
     if (typeof val === 'object' && val !== null) {
         return val[locale.value] || val['en'] || '';
     }
@@ -654,16 +665,56 @@ const openRegisterModal = (plan: any) => {
     showRegisterModal.value = true;
 };
 
-const submitInterest = () => {
-    form.post(route('register.interest'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            showRegisterModal.value = false;
-            form.reset();
-            successMessage.value = t('landing.form_success');
-            setTimeout(() => successMessage.value = '', 5000);
+const submitInterest = async () => {
+    // 1. Construct URL
+    const url = `/${locale.value}/servio/register-interest`;
+    console.log("Submitting form to:", url);
+
+    // 2. Set Loading State
+    form.processing = true;
+    form.clearErrors();
+    successMessage.value = '';
+
+    try {
+        // 3. Post Data
+        const response = await axios.post(url, form.data());
+
+        // 4. Handle Success
+        console.log("Submission Success:", response);
+        
+        // Check if backend returned a redirect or JSON success
+        // Since we are using standard back() in controller, Axios might follow it or return the page content. 
+        // We assume 200 OK means success here for simplicity, as validation 422 throws error.
+
+        showRegisterModal.value = false;
+        form.reset();
+        successMessage.value = t('landing.form_success') || 'Thank you! We will contact you soon.'; // Fallback text
+        
+        // Auto hide success message
+        setTimeout(() => {
+            successMessage.value = '';
+        }, 5000);
+
+    } catch (error: any) {
+        console.error("Submission Error:", error);
+        
+        // 5. Handle Validation Errors (422)
+        if (error.response && error.response.status === 422) {
+            const errors = error.response.data.errors;
+            if (errors) {
+                // Manually map errors if form.setError expects specific format or loop
+                 Object.keys(errors).forEach(key => {
+                    form.setError(key, errors[key][0]);
+                });
+            }
+            console.log("Validation Errors:", errors);
+        } else {
+            // 6. Handle General Errors
+            alert("Something went wrong. Please check your connection or try again.");
         }
-    });
+    } finally {
+        form.processing = false;
+    }
 };
 </script>
 

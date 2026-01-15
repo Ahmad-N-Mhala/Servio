@@ -100,55 +100,52 @@
                         class="mt-2" 
                     />
 
-                    <!-- Localized Content -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- English Content -->
-                        <div class="space-y-4">
-                            <div v-if="type === 'email'">
-                                <Input 
-                                    id="subject_en" 
-                                    label="Email Subject (EN)" 
-                                    v-model="form.subject_en" 
-                                    :error="form.errors.subject_en" 
-                                    required 
-                                />
-                            </div>
+                    <!-- Content Fields -->
+                    <div class="space-y-4">
+                        <div v-if="type === 'email'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input 
+                                id="subject_en" 
+                                label="Subject (English)" 
+                                v-model="form.subject_en" 
+                                :error="form.errors.subject_en" 
+                                required 
+                            />
+                            <Input 
+                                id="subject_ar" 
+                                label="Subject (Arabic)" 
+                                v-model="form.subject_ar" 
+                                :error="form.errors.subject_ar" 
+                                required 
+                                dir="rtl"
+                            />
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="content_en" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
-                                    Content (EN)
+                                    Content (English HTML)
                                 </label>
                                 <textarea 
                                     id="content_en" 
                                     v-model="form.content_en" 
-                                    rows="5" 
-                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all"
+                                    rows="12" 
+                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all font-mono text-sm"
                                     :class="{'border-rose-300 focus:border-rose-500': form.errors.content_en}"
                                     required
                                 ></textarea>
                                 <p v-if="form.errors.content_en" class="mt-1 text-sm text-red-600">{{ form.errors.content_en }}</p>
                             </div>
-                        </div>
-
-                        <!-- Arabic Content -->
-                        <div class="space-y-4 text-right" dir="rtl">
-                            <div v-if="type === 'email'">
-                                <Input 
-                                    id="subject_ar" 
-                                    label="الموضوع (AR)" 
-                                    v-model="form.subject_ar" 
-                                    :error="form.errors.subject_ar" 
-                                    required 
-                                />
-                            </div>
+                            
                             <div>
-                                <label for="content_ar" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 mr-1 text-right">
-                                    المحتوى (AR)
+                                <label for="content_ar" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1 text-right">
+                                    Content (Arabic HTML)
                                 </label>
                                 <textarea 
                                     id="content_ar" 
                                     v-model="form.content_ar" 
-                                    rows="5" 
-                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all text-right"
+                                    rows="12" 
+                                    dir="rtl"
+                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all font-mono text-sm"
                                     :class="{'border-rose-300 focus:border-rose-500': form.errors.content_ar}"
                                     required
                                 ></textarea>
@@ -317,6 +314,7 @@ const closeModal = () => {
 };
 
 const submit = () => {
+    // Sync Custom Trigger
     if (form.trigger_event === 'custom') {
         form.trigger_event = customTrigger.value;
     }

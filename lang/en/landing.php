@@ -55,12 +55,18 @@ return [
     // Detailed Features
     'feature_pos_title' => 'Smart Point of Sale',
     'feature_pos_desc' => 'A lightning-fast interface designed for high-volume environments. Handle table service, quick service, and delivery orders from a single screen.',
+    'badge_pos' => 'Point of Sale',
     'feature_kds_title' => 'Kitchen Display System',
     'feature_kds_desc' => 'Ditch the paper tickets. Send orders directly to kitchen screens, track prep times, and ensure every dish goes out perfect.',
+    'badge_kds' => 'Kitchen Display',
     'feature_inventory_title' => 'Smart Inventory',
     'feature_inventory_desc' => 'Real-time tracking of ingredients. Receive low-stock alerts and automate purchase orders to keep your kitchen running smoothly.',
     'feature_loyalty_title' => 'Loyalty & CRM',
     'feature_loyalty_desc' => 'Build lasting relationships. Reward your best customers with points for every visit or dollar spent, directly integrated into the checkout flow.',
+    'pos_bullet_1' => 'Table, Quick Service & Delivery Modes',
+    'pos_bullet_2' => 'Offline Capable',
+    'kds_bullet_1' => 'Real-time Order Sync',
+    'kds_bullet_2' => 'Color-coded Statuses',
 
     // How It Works
     'how_it_works_title' => 'How It Works',

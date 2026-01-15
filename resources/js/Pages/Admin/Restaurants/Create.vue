@@ -140,7 +140,10 @@
                                     :error="form.errors.owner_phone" 
                                     placeholder="50 123 4567"
                                 />
-                                <Input v-model="form.owner_password" label="Owner Password" type="password" placeholder="Min 8 characters" required :error="form.errors.owner_password" />
+                                <div class="md:col-span-2 bg-blue-50 p-4 rounded-xl text-sm text-blue-700 flex items-start gap-2">
+                                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                     <p>The owner will receive an email with a secure link to set their own password.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -391,7 +394,6 @@ const form = useForm({
     owner_name: '',
     owner_email: '',
     owner_phone: '',
-    owner_password: '',
     
     // Location
     address: '',

@@ -27,7 +27,12 @@ class DashboardController extends Controller
             $stats['total_plans'] = \App\Models\Plan::count();
             $stats['active_subscriptions'] = \App\Models\RestaurantSubscription::where('status', 'active')->count();
             $stats['total_orders'] = \App\Models\Order::count();
+
             $stats['total_revenue'] = \App\Models\Order::sum('total') ?? 0;
+
+            // Landing Page Visits
+            $visitsData = \App\Models\LandingSetting::get('landing_page_visits', ['count' => 0]);
+            $stats['landing_visits'] = $visitsData['count'] ?? 0;
 
             // Restaurant Growth Chart (Last 6 months)
             $charts['restaurant_growth'] = \App\Models\Restaurant::where('created_at', '>=', now()->subMonths(6))

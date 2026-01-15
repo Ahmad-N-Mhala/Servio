@@ -24,21 +24,23 @@ class UserController extends Controller
             });
         }
 
+        // Export Logic
+        if ($request->boolean('export')) {
+            return $this->exportUsers($query);
+        }
+
         $users = $query->latest()->paginate(10)->appends([
             'search' => $request->input('search'),
         ]);
 
-        // Manually attach restaurant names because MongoDB relationship with pivot can be tricky
-        // and we want efficient fetching.
-
+        // Manually attach restaurant names AND roles
         $users->getCollection()->transform(function ($user) {
-            // Fetch restaurant IDs from pivot manually if relation is flaky, or try relation first.
-            // Given previous issues with 'owner' relation, manual fetch via pivot table is safest.
-            $restaurantIds = \Illuminate\Support\Facades\DB::connection('mongodb')
+            $pivotRows = \Illuminate\Support\Facades\DB::connection('mongodb')
                 ->table('restaurant_user')
                 ->where('email', $user->email)
-                ->pluck('restaurant_id')
-                ->toArray();
+                ->get();
+
+            $restaurantIds = collect($pivotRows)->pluck('restaurant_id')->toArray();
 
             $restaurantNames = [];
             if (!empty($restaurantIds)) {
@@ -47,13 +49,65 @@ class UserController extends Controller
                     ->toArray();
             }
 
+            // Extract Roles
+            $roles = collect($pivotRows)->pluck('role')->filter()->unique()->toArray();
+
             $user->restaurant_names = implode(', ', $restaurantNames);
+            $user->roles_list = implode(', ', $roles);
+
             return $user;
         });
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
             'filters' => $request->only(['search']),
+        ]);
+    }
+
+    protected function exportUsers($query)
+    {
+        $users = $query->latest()->get();
+        // Generate CSV stream
+        $callback = function () use ($users) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Name', 'Email', 'Phone', 'Joined', 'Last Login', 'Restaurants', 'Roles']);
+
+            foreach ($users as $user) {
+                // Fetch Restaurants & Roles (Replicate Logic)
+                $pivotRows = \Illuminate\Support\Facades\DB::connection('mongodb')
+                    ->table('restaurant_user')
+                    ->where('email', $user->email)
+                    ->get();
+
+                $restaurantIds = collect($pivotRows)->pluck('restaurant_id')->toArray();
+                $restaurantNames = [];
+                if (!empty($restaurantIds)) {
+                    $restaurantNames = \App\Models\Restaurant::whereIn('id', $restaurantIds)
+                        ->pluck('name')
+                        ->toArray();
+                }
+
+                $roles = collect($pivotRows)->pluck('role')->filter()->unique()->toArray();
+
+                fputcsv($file, [
+                    $user->name,
+                    $user->email,
+                    $user->phone,
+                    $user->created_at->format('Y-m-d'),
+                    $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : 'Never',
+                    implode(', ', $restaurantNames),
+                    implode(', ', $roles)
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=users_export_" . date('Y-m-d') . ".csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ]);
     }
 

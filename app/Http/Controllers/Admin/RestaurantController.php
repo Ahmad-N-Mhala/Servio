@@ -81,7 +81,7 @@ class RestaurantController extends Controller
             'owner_name' => 'required|string|max:255',
             'owner_email' => 'required|email|unique:users,email',
             'owner_phone' => 'required|string',
-            'owner_password' => 'required|string|min:8',
+            // 'owner_password' validation removed
 
             // Location & Details
             'phone' => 'nullable|string', // Restaurant Phone
@@ -150,7 +150,7 @@ class RestaurantController extends Controller
                 'name' => $request->owner_name,
                 'email' => $request->owner_email,
                 'phone' => $request->owner_phone,
-                'password' => \Illuminate\Support\Facades\Hash::make($request->owner_password),
+                'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(32)), // Random secure password
                 'is_super_admin' => false,
             ]);
 
@@ -195,14 +195,15 @@ class RestaurantController extends Controller
                 }
             }
 
-            // Send Welcome/Creation Notification
-            // Try System Template First
+            // Send Welcome/Creation Notification with Password Reset Link
+            $token = \Illuminate\Support\Facades\Password::createToken($user);
+            $resetLink = route('password.reset', ['token' => $token, 'email' => $user->email]);
+
             $commService = app(\App\Services\CommunicationService::class);
             $commService->sendNotification('restaurant_created', $user, [
                 'restaurant_name' => $restaurant->name,
-                'link' => route('login'), // Or setup link
+                'link' => $resetLink,
                 'owner_email' => $user->email,
-                'owner_password' => $request->owner_password,
             ]);
 
             // \DB::commit();

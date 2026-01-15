@@ -8,4 +8,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 \Illuminate\Support\Facades\Schedule::command('inventory:check-expiry')->daily();
-\Illuminate\Support\Facades\Schedule::command('subscriptions:notify-expiring')->hourly();
+\Illuminate\Support\Facades\Schedule::command('inventory:check-expiry')->daily();
+\Illuminate\Support\Facades\Schedule::command('subscription:check-expiry')->daily();

@@ -365,6 +365,7 @@ Route::group([
             Route::resource('integrations', \App\Http\Controllers\Admin\IntegrationController::class);
             Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
             Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index']);
+            Route::resource('super-admins', \App\Http\Controllers\Admin\SuperAdminController::class)->only(['index', 'store', 'destroy']);
             Route::post('users/{id}/restore', [\App\Http\Controllers\Admin\DeletedDataController::class, 'restoreUser'])->name('users.restore');
 
             // Deleted Data

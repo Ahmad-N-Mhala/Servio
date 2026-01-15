@@ -185,7 +185,7 @@ class OnboardingController extends Controller
 
             // 6. Create Subscription
             // For free plans, create active subscription immediately and bypass payment
-            \App\Models\Subscription::create([
+            $sub = \App\Models\Subscription::create([
                 'restaurant_id' => $restaurant->id,
                 'plan_id' => $plan->id,
                 'status' => $isFree ? 'active' : 'pending', // Active for free, pending for paid
@@ -195,6 +195,15 @@ class OnboardingController extends Controller
                 // Generate a dummy ID to satisfy unique index constraint on MongoDB where nulls collide
                 'stripe_subscription_id' => 'sub_free_' . Str::random(16),
             ]);
+
+            // Trigger Subscription Notification
+            if ($isFree) {
+                app(\App\Services\CommunicationService::class)->sendNotification('subscription_created', $user, [
+                    'plan_name' => is_array($plan->name) ? ($plan->name['en'] ?? reset($plan->name)) : $plan->name,
+                    'expiry_date' => $sub->ends_at->format('Y-m-d'),
+                    'restaurant_name' => $restaurant->name
+                ]);
+            }
 
             if ($useTransactions) {
                 try {
@@ -215,6 +224,11 @@ class OnboardingController extends Controller
             $commService->sendNotification('user_registered', $user, [
                 'restaurant_name' => $restaurant->name,
                 'link' => route('login'),
+            ]);
+
+            // Trigger Restaurant Created Notification
+            $commService->sendNotification('restaurant_created', $user, [
+                'restaurant_name' => $restaurant->name,
             ]);
 
             // Set active restaurant session

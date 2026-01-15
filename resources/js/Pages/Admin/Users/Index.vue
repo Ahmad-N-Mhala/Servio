@@ -3,6 +3,12 @@
         <div class="space-y-6">
             <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-900">Users Management</h1>
+                <Button @click="exportUsers" variant="outline" size="sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export CSV
+                </Button>
             </div>
 
             <Table 
@@ -32,8 +38,25 @@
                      <span class="text-sm text-gray-600">{{ row.phone || '-' }}</span>
                 </template>
 
+                <template #cell-roles_list="{ row }">
+                     <div class="flex flex-wrap gap-1">
+                         <span 
+                             v-for="role in (row.roles_list ? row.roles_list.split(', ') : [])" 
+                             :key="role"
+                             class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 capitalize"
+                         >
+                             {{ role }}
+                         </span>
+                         <span v-if="!row.roles_list" class="text-xs text-gray-400">-</span>
+                     </div>
+                </template>
+
                 <template #cell-restaurant_names="{ row }">
                      <span class="text-sm text-gray-600">{{ row.restaurant_names || 'None' }}</span>
+                </template>
+
+                <template #cell-last_login_at="{ value }">
+                    <span class="text-sm text-gray-500">{{ value ? new Date(value).toLocaleDateString() + ' ' + new Date(value).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Never' }}</span>
                 </template>
 
                 <template #cell-created_at="{ value }">
@@ -50,13 +73,16 @@ import { ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { router } from '@inertiajs/vue3';
 import Table from '@/Components/Table.vue';
+import Button from '@/Components/Button.vue';
 import { debounce } from 'lodash';
 
 const columns = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
     { key: 'phone', label: 'Phone', sortable: true },
+    { key: 'roles_list', label: 'Roles', sortable: false },
     { key: 'restaurant_names', label: 'Restaurants', sortable: false },
+    { key: 'last_login_at', label: 'Last Login', sortable: true },
     { key: 'created_at', label: 'Joined', sortable: true },
 ];
 
@@ -81,4 +107,8 @@ const handleSearch = debounce(() => {
 watch(search, handleSearch);
 
 const route = (window as any).route;
+
+const exportUsers = () => {
+    window.location.href = route('admin.users.index', { export: true, search: search.value });
+};
 </script>

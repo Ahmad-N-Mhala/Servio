@@ -16,6 +16,11 @@ class LandingPageController extends Controller
 {
     public function index()
     {
+        // Increment landing page visits
+        $currentVisits = LandingSetting::get('landing_page_visits', ['count' => 0]);
+        $newCount = ($currentVisits['count'] ?? 0) + 1;
+        LandingSetting::set('landing_page_visits', ['count' => $newCount]);
+
         $plans = Plan::where('is_active', true)->get();
 
         $modules = LandingModule::where('is_active', true)
@@ -62,13 +67,16 @@ class LandingPageController extends Controller
 
         $contactEmail = \App\Models\SystemConfiguration::get('registration_email')
             ?? LandingSetting::get('interest_notification_email')
-            ?? LandingSetting::get('contact_email', 'support@servio.com');
+            ?? LandingSetting::get('contact_email', 'support@kenildock.com');
 
         // Send Email
         try {
+            \Log::info("Attempting to send Registration Interest email to: " . $contactEmail);
             Mail::to($contactEmail)->send(new RegistrationInterest($request->all()));
+            \Log::info("Registration Interest email sent successfully.");
         } catch (\Exception $e) {
             \Log::error('Registration Interest Email Error: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString()); // Log trace
             return back()->with('error', 'Failed to send email. Please try again or contact us directly.');
         }
 

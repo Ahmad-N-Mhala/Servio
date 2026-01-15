@@ -128,7 +128,7 @@
                         </div>
                          <h3 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $t('landing.register_interest') }}</h3>
                          <p class="text-gray-500 font-medium text-lg">
-                            {{ $t('landing.for_plan', { plan: selectedPlan?.name }) }}
+                            {{ $t('landing.for_plan', { plan: getPlanDisplayName(selectedPlan) }) }}
                          </p>
                     </div>
 
@@ -177,7 +177,7 @@
                         </div>
 
                         <div class="pt-4">
-                             <Button class="w-full justify-center py-3 text-lg" :loading="form.processing">
+                             <Button type="submit" @click.prevent="submitInterest" class="w-full justify-center py-3 text-lg" :loading="form.processing">
                                 {{ $t('landing.submit') }}
                             </Button>
                         </div>
@@ -209,21 +209,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
+import axios from 'axios';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
-import PhoneInput from '@/Components/PhoneInput.vue';
 
 const props = defineProps<{
     plans: any[];
 }>();
 
-const { locale } = useI18n();
-const route = (window as any).route;
+const { t, locale } = useI18n();
+// route is unused but let's keep it if we need it later, or remove it. It was used in old submit interest.
+// Actually, remove it as it is flagged unused.
 
 const billingCycle = ref<'monthly' | 'yearly'>('monthly');
 const showRegisterModal = ref(false);
@@ -262,16 +263,62 @@ const openRegisterModal = (plan: any) => {
     showRegisterModal.value = true;
 };
 
-const submitInterest = () => {
-    form.post(route('register.interest'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            showRegisterModal.value = false;
-            form.reset();
-            successMessage.value = 'We received your request! We will contact you shortly.'; // Or use t() key if available
-            setTimeout(() => successMessage.value = '', 5000);
+const getPlanDisplayName = (plan: any) => {
+    if (!plan) return '';
+    if (plan.slug) {
+        const localized = t('plans.' + plan.slug);
+        if (localized && localized !== 'plans.' + plan.slug) {
+            return localized;
         }
-    });
+    }
+    return plan.name || '';
+};
+
+const submitInterest = async () => {
+    // 1. Construct URL
+    const url = `/${locale.value}/servio/register-interest`;
+    console.log("Submitting form to:", url);
+
+    // 2. Set Loading State
+    form.processing = true;
+    form.clearErrors();
+    successMessage.value = '';
+
+    try {
+        // 3. Post Data
+        const response = await axios.post(url, form.data());
+
+        // 4. Handle Success
+        console.log("Submission Success:", response);
+        
+        showRegisterModal.value = false;
+        form.reset();
+        successMessage.value = t('landing.form_success') || 'Thank you! We will contact you soon.';
+        
+        // Auto hide success message
+        setTimeout(() => {
+            successMessage.value = '';
+        }, 5000);
+
+    } catch (error: any) {
+        console.error("Submission Error:", error);
+        
+        // 5. Handle Validation Errors (422)
+        if (error.response && error.response.status === 422) {
+            const errors = error.response.data.errors;
+            if (errors) {
+                 Object.keys(errors).forEach(key => {
+                    form.setError(key as any, errors[key][0]);
+                });
+            }
+            console.log("Validation Errors:", errors);
+        } else {
+            // 6. Handle General Errors
+            alert("Something went wrong. Please check your connection or try again.");
+        }
+    } finally {
+        form.processing = false;
+    }
 };
 </script>
 

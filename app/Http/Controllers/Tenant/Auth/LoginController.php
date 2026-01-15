@@ -32,6 +32,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+            $user->update(['last_login_at' => now()]);
 
             // 1. Check for Super Admin
             if ($user->is_super_admin) {

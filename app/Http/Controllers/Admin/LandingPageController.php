@@ -87,9 +87,32 @@ class LandingPageController extends Controller
 
         // Handle File Uploads
         if ($request->allFiles()) {
-            foreach ($request->allFiles()['settings'] ?? [] as $key => $file) {
-                $path = $file->store('landing/images', 'public');
-                LandingSetting::set($key, '/storage/' . $path);
+            foreach ($request->allFiles()['settings'] ?? [] as $key => $fileOrFiles) {
+                // If array of files (multiple)
+                if (is_array($fileOrFiles)) {
+                    $newPaths = [];
+                    foreach ($fileOrFiles as $file) {
+                        $newPaths[] = '/storage/' . $file->store('landing/images', 'public');
+                    }
+
+                    // Check for _new suffix to merge with existing
+                    if (str_ends_with($key, '_new')) {
+                        $baseKey = substr($key, 0, -4); // remove _new
+                        $existing = LandingSetting::get($baseKey, []);
+                        if (!is_array($existing))
+                            $existing = $existing ? [$existing] : []; // Ensure array
+
+                        $merged = array_merge($existing, $newPaths);
+                        LandingSetting::set($baseKey, $merged);
+                    } else {
+                        // Standard array replace
+                        LandingSetting::set($key, $newPaths);
+                    }
+                } else {
+                    // Single File
+                    $path = $fileOrFiles->store('landing/images', 'public');
+                    LandingSetting::set($key, '/storage/' . $path);
+                }
             }
         }
 

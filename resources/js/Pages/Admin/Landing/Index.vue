@@ -161,12 +161,26 @@
                                     </div>
                                     <!-- Image Upload -->
                                     <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Image</label>
-                                        <div class="flex items-center gap-4">
-                                            <div v-if="landingSettings.feature_pos_image" class="w-20 h-16 rounded overflow-hidden bg-gray-200 border">
-                                                <img :src="landingSettings.feature_pos_image" class="w-full h-full object-cover">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Images</label>
+                                        
+                                        <!-- Existing Images List -->
+                                        <div v-if="settingsForm.settings.feature_pos_images && settingsForm.settings.feature_pos_images.length > 0" class="flex flex-wrap gap-4 mb-3">
+                                            <div v-for="(img, idx) in settingsForm.settings.feature_pos_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
+                                                <img :src="img" class="w-full h-full object-cover">
+                                                <button type="button" @click="removeImage('feature_pos_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
                                             </div>
-                                            <input type="file" @input="(e: any) => settingsForm.settings.feature_pos_image = e.target.files[0]" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                        </div>
+
+                                        <!-- New Files Input -->
+                                        <input type="file" multiple @change="(e) => handleFileChange(e, 'feature_pos_images_new')" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                        
+                                        <!-- Preview New Files -->
+                                         <div v-if="settingsForm.settings.feature_pos_images_new && settingsForm.settings.feature_pos_images_new.length > 0" class="flex flex-wrap gap-2 mt-2">
+                                            <div v-for="(file, idx) in settingsForm.settings.feature_pos_images_new" :key="idx" class="relative group w-16 h-16 rounded overflow-hidden bg-gray-100 border">
+                                                <img :src="getObjectUrl(file)" class="w-full h-full object-cover opacity-70">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -188,12 +202,23 @@
                                     </div>
                                     <!-- Image Upload -->
                                     <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Image</label>
-                                        <div class="flex items-center gap-4">
-                                            <div v-if="landingSettings.feature_kds_image" class="w-20 h-16 rounded overflow-hidden bg-gray-200 border">
-                                                <img :src="landingSettings.feature_kds_image" class="w-full h-full object-cover">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Images</label>
+                                         <!-- Existing -->
+                                        <div v-if="settingsForm.settings.feature_kds_images && settingsForm.settings.feature_kds_images.length > 0" class="flex flex-wrap gap-4 mb-3">
+                                            <div v-for="(img, idx) in settingsForm.settings.feature_kds_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
+                                                <img :src="img" class="w-full h-full object-cover">
+                                                <button type="button" @click="removeImage('feature_kds_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
                                             </div>
-                                            <input type="file" @input="(e: any) => settingsForm.settings.feature_kds_image = e.target.files[0]" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                        </div>
+                                        
+                                        <input type="file" multiple @change="(e) => handleFileChange(e, 'feature_kds_images_new')" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+
+                                         <div v-if="settingsForm.settings.feature_kds_images_new && settingsForm.settings.feature_kds_images_new.length > 0" class="flex flex-wrap gap-2 mt-2">
+                                            <div v-for="(file, idx) in settingsForm.settings.feature_kds_images_new" :key="idx" class="relative group w-16 h-16 rounded overflow-hidden bg-gray-100 border">
+                                                <img :src="getObjectUrl(file)" class="w-full h-full object-cover opacity-70">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -526,7 +551,7 @@ const settingsForm = useForm({
             en: props.landingSettings.step_1_desc?.en || '',
             ar: props.landingSettings.step_1_desc?.ar || ''
         },
-         step_2_title: {
+        step_2_title: {
             en: props.landingSettings.step_2_title?.en || '',
             ar: props.landingSettings.step_2_title?.ar || ''
         },
@@ -534,7 +559,7 @@ const settingsForm = useForm({
             en: props.landingSettings.step_2_desc?.en || '',
             ar: props.landingSettings.step_2_desc?.ar || ''
         },
-         step_3_title: {
+        step_3_title: {
             en: props.landingSettings.step_3_title?.en || '',
             ar: props.landingSettings.step_3_title?.ar || ''
         },
@@ -542,8 +567,32 @@ const settingsForm = useForm({
             en: props.landingSettings.step_3_desc?.en || '',
             ar: props.landingSettings.step_3_desc?.ar || ''
         },
+
+        // Images
+        feature_pos_images: props.landingSettings.feature_pos_images || (props.landingSettings.feature_pos_image ? [props.landingSettings.feature_pos_image] : []),
+        feature_pos_images_new: [],
+        
+        feature_kds_images: props.landingSettings.feature_kds_images || (props.landingSettings.feature_kds_image ? [props.landingSettings.feature_kds_image] : []),
+        feature_kds_images_new: [],
     }
 });
+
+const handleFileChange = (event: any, key: string) => {
+    if (event.target.files) {
+        (settingsForm.settings as any)[key] = Array.from(event.target.files);
+    }
+};
+
+const getObjectUrl = (file: File) => {
+    return URL.createObjectURL(file);
+};
+
+const removeImage = (key: string, index: number) => {
+    const settings = settingsForm.settings as any;
+    if (Array.isArray(settings[key])) {
+        settings[key].splice(index, 1);
+    }
+};
 
 const saveSettings = () => {
     settingsForm.post(route('admin.landing.settings.update'), {

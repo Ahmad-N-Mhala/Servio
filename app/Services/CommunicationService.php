@@ -48,23 +48,53 @@ class CommunicationService
             $restaurant = $user->currentRestaurant();
         }
 
-        $locale = $restaurant ? ($restaurant->locale ?? 'en') : 'en';
+        // For System Templates (where restaurant_id is null), we enforce Bilingual Output
+        // For Custom Restaurant Templates, we respect the restaurant's locale.
+        $isSystemTemplate = is_null($template->restaurant_id);
 
-        // Process Content Variables
-        // Pick Subject
-        $subjectText = $template->{"subject_{$locale}"} ?? $template->subject ?? '';
-        if (!$subjectText && $locale !== 'en') {
-            $subjectText = $template->subject_en ?? $template->subject ?? '';
+        if ($isSystemTemplate) {
+            // BILINGUAL MODE
+            $subjectEn = $template->subject_en ?? $template->subject;
+            $subjectAr = $template->subject_ar;
+
+            // Combine Subject: "English / Arabic"
+            $subject = $subjectEn;
+            if ($subjectAr && $subjectAr !== $subjectEn) {
+                $subject .= ' / ' . $subjectAr;
+            }
+
+            // Combine Content: English <hr> Arabic
+            $contentEn = $template->content_en ?? $template->content;
+            $contentAr = $template->content_ar;
+
+            $content = $contentEn;
+            if ($contentAr && $contentAr !== $contentEn) {
+                $content .= "<hr style='border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;'>" . $contentAr;
+            }
+
+            // Do replacements on the combined string
+            $subject = $this->replaceVariables($subject, $user, $data);
+            $content = $this->replaceVariables($content, $user, $data);
+
+        } else {
+            $locale = $restaurant ? ($restaurant->locale ?? 'en') : 'en';
+
+            // Process Content Variables
+            // Pick Subject
+            $subjectText = $template->{"subject_{$locale}"} ?? $template->subject ?? '';
+            if (!$subjectText && $locale !== 'en') {
+                $subjectText = $template->subject_en ?? $template->subject ?? '';
+            }
+
+            // Pick Content
+            $contentText = $template->{"content_{$locale}"} ?? $template->content ?? '';
+            if (!$contentText && $locale !== 'en') {
+                $contentText = $template->content_en ?? $template->content ?? '';
+            }
+
+            $subject = $this->replaceVariables($subjectText, $user, $data);
+            $content = $this->replaceVariables($contentText, $user, $data);
         }
-
-        // Pick Content
-        $contentText = $template->{"content_{$locale}"} ?? $template->content ?? '';
-        if (!$contentText && $locale !== 'en') {
-            $contentText = $template->content_en ?? $template->content ?? '';
-        }
-
-        $subject = $this->replaceVariables($subjectText, $user, $data);
-        $content = $this->replaceVariables($contentText, $user, $data);
 
         // Send Generic Email
         try {
