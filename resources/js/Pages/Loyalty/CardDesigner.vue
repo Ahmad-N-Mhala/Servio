@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
@@ -56,38 +56,27 @@ const qrCanvas = ref<HTMLCanvasElement | null>(null);
 
 const generateQR = async (link: string) => {
     const text = link || 'https://example.com';
-    useCanvas.value = false;
-
-    // Ensure DOM is ready if canvas is missing
-    if (!qrCanvas.value) await nextTick();
+    // Always use img tag for reliability in preview, simplifies PDF capture too (since we use qrDataUrl there)
+    useCanvas.value = false; 
 
     try {
         // Robust import check
         // @ts-ignore
         const qrcodeLib = QRCode?.default || QRCode;
         
-        // Try Canvas First
-        if (qrCanvas.value && qrcodeLib && typeof qrcodeLib.toCanvas === 'function') {
-            await qrcodeLib.toCanvas(qrCanvas.value, text, { width: 300, margin: 2 });
-            useCanvas.value = true;
-            // Key fix: Update data URL from canvas so printCard can use it
-            qrDataUrl.value = qrCanvas.value.toDataURL('image/png');
-            return;
-        }
-
-        // Fallback to Data URL
+        // Use toDataURL for everything. It's robust and works for both img tag and PDF generation.
         if (qrcodeLib && typeof qrcodeLib.toDataURL === 'function') {
-            qrDataUrl.value = await qrcodeLib.toDataURL(text, { width: 300, margin: 2 });
+            qrDataUrl.value = await qrcodeLib.toDataURL(text, { width: 800, margin: 1 });
         } else if (typeof qrcodeLib === 'function') {
              // @ts-ignore
-             qrDataUrl.value = await qrcodeLib(text, { width: 300, margin: 2 });
+             qrDataUrl.value = await qrcodeLib(text, { width: 800, margin: 1 });
         } else {
              // Fallback
-             qrDataUrl.value = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=300&margin=2`;
+             qrDataUrl.value = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=800&margin=1`;
         }
     } catch (e) {
         console.error('QR Generation error:', e);
-        qrDataUrl.value = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=300&margin=2`;
+        qrDataUrl.value = `https://quickchart.io/qr?text=${encodeURIComponent(text)}&size=800&margin=1`;
     }
 };
 
@@ -230,7 +219,7 @@ const printCard = async () => {
         // 4. Smart Overlay (DOM-mapping):
         // This calculates the EXACT position of the QR code as seen on screen
         // and maps it to the PDF coordinates, accounting for all text/padding changes automatically.
-        const qrContent = useCanvas.value ? qrCanvas.value : document.getElementById('qr-code-img');
+        const qrContent = document.getElementById('qr-code-img');
         
         if (qrDataUrl.value && qrContent && cardPreviewRef.value) {
             try {
@@ -524,11 +513,11 @@ const handleUnsplashSelect = async (image: any) => {
                 <!-- Fancy Card Design -->
                 <div 
                     ref="cardPreviewRef"
-                    class="w-full max-w-[300px] aspect-[3/4.8] rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col text-center justify-between"
+                    class="w-[320px] min-h-[520px] bg-slate-900 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center justify-between"
                     :style="{ backgroundColor: form.loyalty_theme_color, color: form.loyalty_text_color }"
                 >
                     <!-- Glossy Effect -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none z-10"></div>
 
                     <!-- Background Image -->
                      <div v-if="bannerPreview" class="absolute inset-0 z-0">
@@ -538,12 +527,14 @@ const handleUnsplashSelect = async (image: any) => {
                             @error="handleImageError($event, '/images/default-pattern.png')"
                         />
                          <!-- Optional Gradient to ensure text readability -->
-                        <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 to-transparent"></div>
                     </div>
                     
-                    <!-- Top Section -->
-                    <div class="relative z-10 pt-6 px-6 pb-2 flex-1 flex flex-col items-center justify-center">
-                        <div class="w-20 h-20 rounded-full bg-white p-1 shadow-xl mb-4 ring-4 ring-white/30 shrink-0">
+                    <!-- Top Content Section -->
+                    <div class="relative z-20 w-full pt-10 px-6 pb-6 flex flex-col items-center flex-grow text-center">
+                        
+                        <!-- Logo -->
+                        <div class="w-24 h-24 rounded-full bg-white p-1.5 shadow-2xl mb-5 ring-4 ring-white/20 shrink-0">
                             <div class="w-full h-full rounded-full overflow-hidden bg-gray-50 flex items-center justify-center">
                                 <img 
                                     :src="logoPreview" 
@@ -552,22 +543,23 @@ const handleUnsplashSelect = async (image: any) => {
                             </div>
                         </div>
 
-                        <h3 class="font-black text-xl leading-tight mb-1 uppercase tracking-tight drop-shadow-md line-clamp-2">
+                        <!-- Text Content -->
+                        <h3 class="font-black text-2xl leading-none mb-2 uppercase tracking-tight drop-shadow-md">
                             {{ form.loyalty_program_name }}
                         </h3>
-                        <p class="text-xs font-bold uppercase tracking-widest opacity-90 mb-2 drop-shadow-sm">
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] opacity-80 mb-6 drop-shadow-sm">
                             {{ form.loyalty_card_title }}
                         </p>
 
                         <!-- Earning Explanation Box -->
-                        <div v-if="!isRewardMode" class="w-full bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 shadow-inner mb-2 transform transition-all hover:scale-105">
-                            <div class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">{{ $t('loyalty.how_it_works') }}</div>
-                            <div class="text-sm font-bold">
-                                {{ $t('loyalty.get') }} <span class="text-base">{{ form.earning_points }} {{ $t('loyalty.points') }}</span>
+                        <div v-if="!isRewardMode" class="w-full bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-inner mb-6">
+                            <div class="text-[9px] font-bold uppercase tracking-widest opacity-80 mb-1.5 border-b border-white/20 pb-1 mx-4">{{ $t('loyalty.how_it_works') }}</div>
+                            <div class="text-lg font-bold">
+                                {{ $t('loyalty.get') }} <span class="text-2xl">{{ form.earning_points }}</span> {{ $t('loyalty.points') }}
                             </div>
-                            <div class="text-[10px] opacity-90 mt-0.5">
+                            <div class="text-[10px] opacity-90 mt-1 font-medium">
                                 <span v-if="form.earning_method_type === 'order_total'">
-                                    {{ $t('loyalty.for_every') }} {{ currency }} {{ form.earning_currency_amount || 1 }} {{ $t('loyalty.you_spend') }}
+                                    {{ $t('loyalty.for_every') }} <span class="font-bold">{{ currency }} {{ form.earning_currency_amount || 1 }}</span> {{ $t('loyalty.you_spend') }}
                                 </span>
                                 <span v-else>
                                     {{ $t('loyalty.per_visit') }}
@@ -575,75 +567,42 @@ const handleUnsplashSelect = async (image: any) => {
                             </div>
                         </div>
 
-                        <p v-if="form.loyalty_card_description" class="text-xs leading-relaxed opacity-90 mb-auto italic line-clamp-2">
+                        <p v-if="form.loyalty_card_description" class="text-xs leading-relaxed opacity-90 italic">
                             "{{ form.loyalty_card_description }}"
                         </p>
                     </div>
 
-                     <!-- QR Section (Live) -->
+                     <!-- QR Section (Bottom Docked) -->
                     <div 
                         v-if="form.loyalty_qr_link"
-                        class="relative z-10 bg-white text-gray-900 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] w-full transition-all px-6 shrink-0"
-                        :class="{
-                            'pt-2 pb-3': form.loyalty_panel_height === 'sm',
-                            'pt-4 pb-6': form.loyalty_panel_height === 'md',
-                            'pt-6 pb-8': form.loyalty_panel_height === 'lg',
-                            'pt-8 pb-10': form.loyalty_panel_height === 'xl'
-                        }"
+                        class="relative z-20 bg-white text-gray-900 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)] w-full px-6 pt-5 pb-8 shrink-0 mt-auto"
                     >
-                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full"></div>
+                        <!-- Handle Indicator -->
+                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 w-10 h-1 bg-gray-200 rounded-full"></div>
                         
                         <div class="text-center">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">
                                 {{ form.loyalty_scan_text || (isRewardMode ? $t('loyalty.scan_to_redeem') : $t('loyalty.scan_to_join')) }}
                             </p>
-                            <div 
-                                class="bg-gray-50 border rounded-xl inline-block shadow-sm mx-auto transition-all"
-                                :class="{
-                                    'p-1': form.loyalty_qr_size === 'sm',
-                                    'p-1.5': form.loyalty_qr_size === 'md',
-                                    'p-2': form.loyalty_qr_size === 'lg'
-                                }"
-                            >
-                                <canvas 
-                                    v-show="useCanvas"
-                                    ref="qrCanvas"
-                                    class="mx-auto max-w-full object-contain"
-                                    :class="{
-                                        'w-10 h-10': form.loyalty_qr_size === 'sm',
-                                        'w-12 h-12': form.loyalty_qr_size === 'md',
-                                        'w-16 h-16': form.loyalty_qr_size === 'lg',
-                                        'opacity-50': !form.loyalty_qr_link
-                                    }"
-                                ></canvas>
+                            
+                            <!-- QR Code Container -->
+                            <div class="bg-white border rounded-2xl inline-block shadow-sm p-2 mx-auto">
                                 <img 
-                                    v-show="!useCanvas"
                                     id="qr-code-img"
                                     :src="qrDataUrl"
-                                    class="max-w-full object-contain"
+                                    class="object-contain"
                                     :class="{
-                                        'w-10 h-10': form.loyalty_qr_size === 'sm',
-                                        'w-12 h-12': form.loyalty_qr_size === 'md',
-                                        'w-16 h-16': form.loyalty_qr_size === 'lg',
+                                        'w-28 h-28': form.loyalty_qr_size === 'sm',
+                                        'w-36 h-36': form.loyalty_qr_size === 'md',
+                                        'w-48 h-48': form.loyalty_qr_size === 'lg',
                                         'opacity-50': !form.loyalty_qr_link
                                     }"
                                     alt="QR Code"
-                                    crossorigin="anonymous"
-                                    width="128"
-                                    height="128"
                                 />
                             </div>
-                            <p v-if="!form.loyalty_qr_link" class="text-[10px] text-red-400 mt-2 font-medium">
-                                {{ $t('loyalty.qr_code_link_required') }}
-                            </p>
-                             <p v-else-if="form.loyalty_terms" class="text-[10px] text-gray-400 mt-2 mx-auto max-w-[180px] hover:text-gray-600 transition-colors line-clamp-2">
-                                {{ form.loyalty_terms }}
-                            </p>
                         </div>
                     </div>
-                    
-
-                </div>
+                </div>  
             </div>
         </div>
 
