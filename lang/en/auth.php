@@ -29,5 +29,7 @@ return [
     'remember_password' => 'Remember your password?',
     'back_to_login' => 'Back to login',
     'enter_email_placeholder' => 'Enter your email',
+    'logout' => 'Sign Out',
+    'profile' => 'Profile',
 ];
 

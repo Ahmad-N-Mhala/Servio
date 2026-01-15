@@ -16,9 +16,35 @@
                                 Restaurant Details
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                
+                                <!-- Logo Upload -->
+                                <div class="md:col-span-2 flex justify-center mb-6">
+                                    <div class="relative group cursor-pointer" @click="logoInput?.click()">
+                                        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg bg-white flex items-center justify-center relative">
+                                            <img v-if="logoPreview" :src="logoPreview" class="w-full h-full object-cover" />
+                                            <div v-else class="text-gray-300">
+                                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            </div>
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                            </div>
+                                        </div>
+                                        <input type="file" ref="logoInput" class="hidden" accept="image/*" @change="handleLogoChange" />
+                                    </div>
+                                    <div v-if="form.errors.logo" class="text-red-500 text-xs mt-1 text-center w-full">{{ form.errors.logo }}</div>
+                                </div>
+
                                 <Input v-model="form.name" label="Restaurant Name" required :error="form.errors.name" />
                                 <Input v-model="form.slug" label="Slug (URL Friendly)" required :error="form.errors.slug" />
-                                <Input v-model="form.email" label="Contact Email" type="email" required :error="form.errors.email" />
+                                <div>
+                                    <Input v-model="form.email" label="Restaurant Email (General)" type="email" required :error="form.errors.email" />
+                                    <p class="text-xs text-gray-500 mt-1">General contact email for the business.</p>
+                                </div>
+                                <div>
+                                    <Input v-model="form.notification_email" label="Notification Email (Reminders)" type="email" required :error="form.errors.notification_email" />
+                                    <p class="text-xs text-gray-500 mt-1">Receives system alerts, low stock warnings, etc.</p>
+                                </div>
                                 <PhoneInput 
                                     v-model="form.phone" 
                                     :country="form.country"
@@ -45,11 +71,6 @@
                                     :error="form.errors.currency" 
                                 />
                                 
-                                <div>
-                                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">Logo</label>
-                                    <input @change="handleLogoChange" type="file" ref="logoInput" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors" accept="image/*">
-                                    <div v-if="form.errors.logo" class="text-rose-500 text-xs mt-1">{{ form.errors.logo }}</div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -160,7 +181,6 @@
                                     <Input v-model="form.address" label="Street Address" :error="form.errors.address" />
                                 </div>
                                 <Input v-model="form.city" label="City" :error="form.errors.city" />
-                                <Input v-model="form.state" label="State / Province" :error="form.errors.state" />
                                 <Input v-model="form.state" label="State / Province" :error="form.errors.state" />
                                 <Input v-model="form.zip_code" label="Zip / Postal Code" :error="form.errors.zip_code" />
                                 <div class="md:col-span-2">
@@ -326,7 +346,7 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm, Link } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { computed, watch, ref } from 'vue';
 import Input from '@/Components/Input.vue';
 import Select from '@/Components/Select.vue';
 import Button from '@/Components/Button.vue';
@@ -383,6 +403,7 @@ const form = useForm({
     name: '',
     slug: '',
     email: '',
+    notification_email: '',
     phone: '',
     currency: 'AED', // Default
     
@@ -440,12 +461,23 @@ const selectedPlanFeatures = computed(() => {
     return selectedPlan ? (selectedPlan.enabled_features || []) : [];
 });
 
+const logoPreview = ref<string | null>(null);
+const logoInput = ref<HTMLInputElement | null>(null);
+
 const handleLogoChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files[0]) {
         form.logo = target.files[0];
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            logoPreview.value = e.target?.result as string;
+        };
+        reader.readAsDataURL(target.files[0]);
     } else {
         form.logo = null;
+        logoPreview.value = null;
     }
 };
 

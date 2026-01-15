@@ -98,6 +98,14 @@
                                     :error="form.errors.email"
                                 />
                                 <Input
+                                    v-model="form.notification_email"
+                                    label="Notification Email (Reminders)"
+                                    type="email"
+                                    placeholder="alerts@restaurant.com"
+                                    required
+                                    :error="form.errors.notification_email"
+                                />
+                                <Input
                                     v-model="form.phone"
                                     label="Phone Number"
                                     type="tel"
@@ -330,6 +338,7 @@ const form = useForm({
 
     // New Fields
     email: '',
+    notification_email: '',
     phone: '',
     google_map_location: '',
     service_type: 'both',

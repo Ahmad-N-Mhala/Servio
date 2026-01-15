@@ -63,6 +63,30 @@ class LoginController extends Controller
             $restaurant = $restaurants->first();
             session(['active_restaurant_id' => $restaurant->id]);
 
+            // Check Subscription Status Immediately for Login Feedback
+            $subscription = $restaurant->subscription;
+            $isExpired = false;
+
+            if (!$subscription || $subscription->status !== 'active' || ($subscription->ends_at && $subscription->ends_at->isPast())) {
+                $isExpired = true;
+            }
+
+            if ($isExpired) {
+                Auth::logout();
+                $request->session()->invalidate();
+
+                // Return generic error or specific one
+                $supportEmail = \App\Models\SystemConfiguration::get('support_email') ?? 'support@kenildock.com';
+                $supportPhone = \App\Models\SystemConfiguration::get('support_phone') ?? '+9715049460976';
+
+                return back()->withErrors([
+                    'email' => __('subscription.expired_with_contact', [
+                        'email' => $supportEmail,
+                        'phone' => $supportPhone
+                    ]),
+                ])->onlyInput('email');
+            }
+
             // Ensure the redirect URL is localized
             $targetUrl = $user->getLandingRoute();
 

@@ -29,4 +29,6 @@ return [
     'remember_password' => 'تذكرت كلمة المرور؟',
     'back_to_login' => 'العودة لتسجيل الدخول',
     'enter_email_placeholder' => 'أدخل بريدك الإلكتروني',
+    'logout' => 'تسجيل الخروج',
+    'profile' => 'الملف الشخصي',
 ];

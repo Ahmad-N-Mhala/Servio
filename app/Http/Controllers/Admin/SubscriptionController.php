@@ -52,13 +52,14 @@ class SubscriptionController extends Controller
             'restaurant_id' => 'required|exists:restaurants,id',
             'plan_id' => 'required|exists:plans,id',
             'starts_at' => 'required|date',
-            'ends_at' => 'nullable|date|after:starts_at',
-            'status' => 'required|in:active,cancelled,expired',
+            'ends_at' => 'nullable|date',
+            'status' => 'required|in:active,cancelled,expired,trial',
+            'billing_cycle' => 'nullable|in:monthly,yearly'
         ]);
 
         RestaurantSubscription::create($validated);
 
-        return redirect()->route('admin.subscriptions.index')
+        return redirect()->back()
             ->with('success', 'Subscription created successfully');
     }
 
@@ -80,14 +81,17 @@ class SubscriptionController extends Controller
             'restaurant_id' => 'required|exists:restaurants,id',
             'plan_id' => 'required|exists:plans,id',
             'starts_at' => 'required|date',
-            'ends_at' => 'nullable|date|after:starts_at',
-            'status' => 'required|in:active,cancelled,expired',
+            'ends_at' => 'nullable|date', // Removed after:starts_at constraint to allow flexibility
+            'status' => 'required|in:active,cancelled,expired,trial',
+            'billing_cycle' => 'nullable|in:monthly,yearly'
         ]);
 
-        $subscription->update($validated);
+        // To preserve history (logs), we create a new record instead of overwriting the old one.
+        // The Restaurant model's subscription() relation uses latest(), so the new one becomes active.
+        RestaurantSubscription::create($validated);
 
-        return redirect()->route('admin.subscriptions.index')
-            ->with('success', 'Subscription updated successfully');
+        return redirect()->back()
+            ->with('success', 'Subscription updated (new history record created).');
     }
 
     public function destroy(RestaurantSubscription $subscription)

@@ -1,332 +1,187 @@
 <template>
-    <div class="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8 font-sans">
-        <!-- Toast for Global Feedback -->
-        <Toast 
-            :message="toastMessage" 
-            :title="toastTitle" 
-            :type="toastType" 
-            :trigger="toastTrigger" 
-        />
-        
-        <div class="max-w-2xl mx-auto">
-            <!-- Header -->
-            <div class="text-center mb-8 sm:mb-12">
-                 <div class="flex justify-center mb-4 sm:mb-6">
-                     <Logo class="h-16 w-16 sm:h-20 sm:w-20" iconClass="w-16 h-16 sm:w-20 sm:h-20" :showText="true" />
-                 </div>
-                 <h1 class="text-3xl font-extrabold text-gray-900 sm:text-4xl md:text-5xl tracking-tight">
-                     Edit Restaurant
-                 </h1>
-                 <p class="mt-2 sm:mt-4 text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto">
-                     Update your restaurant details
-                 </p>
-                 <div class="mt-4">
-                     <Link :href="route('restaurants.index')" class="text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        Back to list
-                     </Link>
-                 </div>
-            </div>
+    <MainLayout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $t('restaurants.edit_title') }}</h2>
+        </template>
 
-            <!-- Global Error Message -->
-            <div v-if="(form.errors as any).error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 animate-fade-in mx-2 sm:mx-0">
-                <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <h3 class="text-sm font-bold text-red-800">Update Error</h3>
-                    <p class="text-sm text-red-700 mt-1">{{ (form.errors as any).error }}</p>
-                </div>
-            </div>
-
-            <!-- Form -->
-            <div class="bg-white rounded-[2rem] shadow-xl sm:shadow-2xl overflow-hidden border border-gray-100 mx-1 sm:mx-0">
-                <div class="p-6 sm:p-10">
-                    <form @submit.prevent="submit" class="space-y-6 sm:space-y-8">
-                        
-                        <!-- Logo Upload -->
-                        <div class="flex flex-col items-center justify-center p-6 bg-gray-50 border border-gray-100 rounded-2xl">
-                             <div class="relative group cursor-pointer mb-4" @click="logoInput?.click()">
-                                <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white flex items-center justify-center relative">
-                                    <img v-if="logoPreview || currentLogo" :src="logoPreview || currentLogo" class="w-full h-full object-cover" />
-                                    <div v-else class="text-gray-300">
-                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <form @submit.prevent="submit" class="space-y-8">
+                    
+                    <!-- Restaurant Info Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                {{ $t('restaurants.details') }}
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                
+                                <!-- Logo Upload -->
+                                <div class="md:col-span-2 flex justify-center mb-6">
+                                    <div class="relative group cursor-pointer" @click="logoInput?.click()">
+                                        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg bg-white flex items-center justify-center relative">
+                                            <img v-if="logoPreview || props.restaurant.logo" :src="logoPreview || props.restaurant.logo" class="w-full h-full object-cover" />
+                                            <div v-else class="text-gray-300">
+                                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            </div>
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                            </div>
+                                        </div>
+                                        <input type="file" ref="logoInput" class="hidden" accept="image/*" @change="handleLogoChange" />
                                     </div>
-                                    
-                                    <!-- Overlay -->
-                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    </div>
+                                    <div v-if="form.errors.logo" class="text-red-500 text-xs mt-1 text-center w-full">{{ form.errors.logo }}</div>
                                 </div>
-                                <div class="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-md border-2 border-white translate-x-1 translate-y-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                                </div>
-                             </div>
-                             <p class="text-sm text-gray-500 font-medium">Click to upload brand logo</p>
-                             <input type="file" ref="logoInput" class="hidden" accept="image/*" @change="handleLogoChange" />
-                             <p v-if="form.errors.logo" class="text-xs text-red-500 mt-2">{{ form.errors.logo }}</p>
-                        </div>
 
-                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100">
-                            <Input
-                                v-model="form.name"
-                                label="Restaurant Name"
-                                type="text"
-                                placeholder="e.g. My Great Bistro - Downtown"
-                                required
-                                :error="form.errors.name"
-                            />
-                        </div>
-
-                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
-                            <h3 class="text-lg font-bold text-gray-900">Contact Details</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Input
-                                    v-model="form.email"
-                                    label="Public Email"
-                                    type="email"
-                                    :error="form.errors.email"
-                                />
-                                <Input
-                                    v-model="form.phone"
-                                    label="Phone Number"
-                                    type="text"
-                                    :error="form.errors.phone"
-                                />
-                            </div>
-                        </div>
-
-                        <!-- Service Type Configuration -->
-                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
-                            <h3 class="text-lg font-bold text-gray-900">Service Configuration</h3>
-                            <label class="block text-sm font-medium text-gray-700">Service Type</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div 
-                                    @click="form.service_type = 'both'"
-                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                    :class="form.service_type === 'both' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                >
-                                    <div class="font-bold text-gray-900 text-center">Both</div>
-                                    <div class="text-xs text-gray-500 text-center mt-1">Table & Self Service</div>
-                                </div>
-                                <div 
-                                    @click="form.service_type = 'table_service'"
-                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                    :class="form.service_type === 'table_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                >
-                                    <div class="font-bold text-gray-900 text-center">Table Service</div>
-                                    <div class="text-xs text-gray-500 text-center mt-1">Waiter Only</div>
-                                </div>
-                                <div 
-                                    @click="form.service_type = 'self_service'"
-                                    class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                    :class="form.service_type === 'self_service' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-                                >
-                                    <div class="font-bold text-gray-900 text-center">Self Service</div>
-                                    <div class="text-xs text-gray-500 text-center mt-1">Pickup/Kiosk</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
-                            <h3 class="text-lg font-bold text-gray-900">Location Details</h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Input v-model="form.name" :label="$t('restaurants.name')" required :error="form.errors.name" />
+                                <Input v-model="form.slug" :label="$t('restaurants.slug')" required :error="form.errors.slug" />
+                                
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                                    <Select v-model="form.country" :error="form.errors.country">
-                                        <option v-for="c in countries" :key="c.name" :value="c.name">{{ c.name }}</option>
-                                    </Select>
+                                    <Input v-model="form.email" :label="$t('restaurants.email')" type="email" required :error="form.errors.email" />
+                                    <p class="text-xs text-gray-500 mt-1">{{ $t('restaurants.email_help') }}</p>
+                                </div>
+                                
+                                <div>
+                                    <Input v-model="form.notification_email" :label="$t('restaurants.notification_email')" type="email" required :error="form.errors.notification_email" />
+                                    <p class="text-xs text-gray-500 mt-1">{{ $t('restaurants.notification_email_help') }}</p>
                                 </div>
 
-                                <Input
-                                    v-model="form.state"
-                                    label="State / Province"
-                                    type="text"
-                                    placeholder="e.g. Dubai"
+                                <PhoneInput 
+                                    v-model="form.phone" 
+                                    :country="form.country || ''"
+                                    :label="$t('restaurants.phone')" 
+                                    :error="form.errors.phone" 
+                                />
+
+                                <Select 
+                                    v-model="form.country" 
+                                    :label="$t('restaurants.country')" 
+                                    :options="countries.map(c => ({ label: c.name, value: c.name }))" 
+                                    :error="form.errors.country" 
                                     required
-                                    :error="form.errors.state"
                                 />
+
+                                <Input v-model="form.currency" :label="$t('restaurants.currency')" readonly class="bg-gray-100" />
+                                
                             </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Input
-                                    v-model="form.city"
-                                    label="City"
-                                    type="text"
-                                    placeholder="e.g. Downtown"
-                                    required
-                                    :error="form.errors.city"
-                                />
-                                <Input
-                                    v-model="form.zip_code"
-                                    label="Zip / Postal Code"
-                                    type="text"
-                                    placeholder="e.g. 00000"
-                                    :error="form.errors.zip_code"
-                                />
-                            </div>
-
-                            <Input
-                                v-model="form.address"
-                                label="Street Name / Address"
-                                type="text"
-                                placeholder="e.g. Sheikh Zayed Road, Building 5"
-                                required
-                                :error="form.errors.address"
-                            />
                         </div>
+                    </div>
 
-                        <div class="bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-100 space-y-4">
-                             <Input
-                                v-model="form.google_map_location"
-                                label="Google Map Embed URL (Optional)"
-                                type="text"
-                                placeholder="<iframe>...</iframe> or URL"
-                                :error="form.errors.google_map_location"
-                            />
-                        </div>
+                    <!-- Service & Configuration Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                {{ $t('restaurants.configuration') }}
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Select 
+                                    v-model="form.service_type" 
+                                    :label="$t('restaurants.service_type')" 
+                                    :options="[
+                                        { label: $t('restaurants.service_both'), value: 'both' },
+                                        { label: $t('restaurants.service_table'), value: 'table_service' },
+                                        { label: $t('restaurants.service_self'), value: 'self_service' }
+                                    ]"
+                                    required 
+                                    :error="form.errors.service_type" 
+                                />
 
-                        <!-- Loyalty Setup -->
-                        <div v-if="hasLoyalty" class="pt-6 sm:pt-8 border-t border-gray-100">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4 tracking-tight">Loyalty Program Setup</h3>
-                            <div class="space-y-4">
-                                <label class="block text-sm font-medium text-gray-700">How should customers earn points?</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <div 
-                                        @click="form.earning_method_type = 'order_total'"
-                                        class="cursor-pointer border-2 rounded-2xl p-4 transition-all duration-300"
-                                        :class="form.earning_method_type === 'order_total' ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' : 'border-gray-100 hover:border-gray-200'"
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-900">{{ $t('restaurants.cash_drawer') }}</label>
+                                        <p class="text-xs text-gray-500">{{ $t('restaurants.cash_drawer_help') }}</p>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        @click="form.has_cash_drawer = !form.has_cash_drawer"
+                                        :class="form.has_cash_drawer ? 'bg-indigo-600' : 'bg-gray-200'"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
                                     >
-                                        <div class="flex items-center gap-3">
-                                            <div class="p-2.5 rounded-xl" :class="form.earning_method_type === 'order_total' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            </div>
-                                            <div>
-                                                <div class="font-bold text-gray-900">Per Spend</div>
-                                                <div class="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider font-medium">Bill total</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div 
-                                        @click="form.earning_method_type = 'visit'"
-                                        class="cursor-pointer border-2 rounded-2xl p-4 transition-all duration-300"
-                                        :class="form.earning_method_type === 'visit' ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' : 'border-gray-100 hover:border-gray-200'"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <div class="p-2.5 rounded-xl" :class="form.earning_method_type === 'visit' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                            </div>
-                                            <div>
-                                                <div class="font-bold text-gray-900">Per Visit</div>
-                                                <div class="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wider font-medium">Fixed points</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
-                                        <Input
-                                            v-model="form.earning_points"
-                                            :label="form.earning_method_type === 'order_total' ? 'Points per 1 ' + currency + ' Spent' : 'Points per Visit'"
-                                            type="number"
-                                            min="1"
-                                            required
-                                            :error="(form.errors as any).earning_points"
+                                        <span class="sr-only">Use setting</span>
+                                        <span 
+                                            aria-hidden="true" 
+                                            :class="form.has_cash_drawer ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
                                         />
-                                        <p class="text-xs text-gray-500 mt-2 font-medium">
-                                            {{ form.earning_method_type === 'order_total' ? 'Tip: Set to 1 for basic 1 point = 1 ' + currency + '.' : 'Tip: Set to 10 for standard visit reward.' }}
-                                        </p>
-                                    </div>
-                                     <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-100">
-                                        <Input
-                                            v-model="form.min_spent"
-                                            label="Minimum Spend"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            :error="(form.errors as any).min_spent"
-                                        />
-                                        <p class="text-xs text-gray-500 mt-2 font-medium">
-                                            Minimum bill amount required to earn points.
-                                        </p>
-                                    </div>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="pt-4">
-                            <Button
-                                type="submit"
-                                :loading="form.processing"
-                                block
-                                size="xl"
-                                class="w-full text-lg font-bold py-4 rounded-2xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 active:scale-[0.98]"
-                            >
-                                <span class="flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    Update Details
-                                </span>
-                            </Button>
+                    </div>
+
+                    <!-- Location Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                {{ $t('restaurants.location_details') }}
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <Input v-model="form.address" :label="$t('restaurants.address')" :error="form.errors.address" />
+                                </div>
+                                <Input v-model="form.city" :label="$t('restaurants.city')" :error="form.errors.city" />
+                                <Input v-model="form.state" :label="$t('restaurants.state')" :error="form.errors.state" />
+                                <Input v-model="form.zip_code" :label="$t('restaurants.zip')" :error="form.errors.zip_code" />
+                                <div class="md:col-span-2">
+                                    <Input v-model="form.google_map_location" :label="$t('restaurants.google_map')" type="url" placeholder="https://maps.google.com/..." :error="form.errors.google_map_location" />
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                
+                    <div class="flex items-center justify-end gap-4 p-4">
+                        <Link :href="route('restaurants.index')" class="px-6 py-3 rounded-xl text-gray-600 font-bold hover:bg-gray-100 transition-colors">
+                            {{ $t('restaurants.cancel') }}
+                        </Link>
+                        <Button type="submit" :loading="form.processing" class="px-8 py-3 text-lg shadow-xl shadow-indigo-500/20">
+                            {{ $t('restaurants.save_changes') }}
+                        </Button>
+                    </div>
+                </form>
             </div>
-
         </div>
-    </div>
+    </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import MainLayout from '@/Layouts/MainLayout.vue';
 import { useForm, Link } from '@inertiajs/vue3';
-import Logo from '@/Components/Logo.vue';
+import { ref } from 'vue';
 import Input from '@/Components/Input.vue';
 import Select from '@/Components/Select.vue';
 import Button from '@/Components/Button.vue';
-import Toast from '@/Components/Toast.vue';
+import PhoneInput from '@/Components/PhoneInput.vue';
 
 const props = defineProps<{
     restaurant: any;
-    countries: any[];
+    countries: any[]; 
     planFeatures?: string[];
     earningMethod?: any;
 }>();
 
-const hasLoyalty = computed(() => {
-    return props.planFeatures ? props.planFeatures.includes('loyalty') : false;
-});
-
 const form = useForm({
     _method: 'PUT',
     name: props.restaurant.name,
+    slug: props.restaurant.slug,
     email: props.restaurant.email,
+    notification_email: props.restaurant.notification_email || props.restaurant.email,
     phone: props.restaurant.phone,
-    country: props.restaurant.country || 'United Arab Emirates',
-    state: props.restaurant.state,
-    city: props.restaurant.city,
-    address: props.restaurant.address,
-    zip_code: props.restaurant.zip_code,
-    google_map_location: props.restaurant.google_map_location,
-    logo: null as File | null,
+    currency: props.restaurant.currency,
     service_type: props.restaurant.service_type || 'both',
-
-    // Loyalty
-    earning_method_type: props.earningMethod?.type || 'order_total',
-    earning_points: props.earningMethod?.points || 1,
-    min_spent: props.earningMethod?.min_spent || 0,
+    has_cash_drawer: props.restaurant.has_cash_drawer || false,
+    address: props.restaurant.address,
+    city: props.restaurant.city,
+    country: props.restaurant.country || 'United Arab Emirates', // Default for now
+    state: props.restaurant.state,
+    zip_code: props.restaurant.zip_code,
+    google_map_location: props.restaurant.google_map_location || '',
+    logo: null as File | null,
 });
 
-const currency = computed(() => {
-    if (form.country === 'United Arab Emirates') return 'AED';
-    if (form.country === 'Saudi Arabia') return 'SAR';
-    if (form.country === 'United States') return 'USD';
-    return props.restaurant.currency || 'Currency';
-});
-
-const currentLogo = ref(props.restaurant.logo ? `/storage/${props.restaurant.logo}` : null);
 const logoPreview = ref<string | null>(null);
 const logoInput = ref<HTMLInputElement | null>(null);
 
@@ -347,33 +202,11 @@ const handleLogoChange = (event: Event) => {
     }
 };
 
-// Toast state
-const toastMessage = ref('');
-const toastTitle = ref('');
-const toastType = ref('info');
-const toastTrigger = ref(0);
-
-const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info', title: string = '') => {
-    toastMessage.value = message;
-    toastTitle.value = title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Notification');
-    toastType.value = type;
-    toastTrigger.value++;
-};
+const route = (window as any).route;
 
 const submit = () => {
-    form.post((window as any).route('restaurants.update', props.restaurant.id), {
-        onSuccess: () => {
-             // Reset preview if needed or rely on page reload. 
-             // Since we redirect to index, it's fine.
-            showToast('Restaurant details updated successfully!', 'success');
-        },
-        onError: (errors) => {
-            if (errors.error) {
-                showToast(errors.error, 'error', 'Action Required');
-            } else {
-                showToast('Please check the form for errors.', 'error');
-            }
-        }
+    form.post(route('restaurants.update', props.restaurant.id), {
+        forceFormData: true,
     });
 };
 </script>

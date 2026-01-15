@@ -188,6 +188,7 @@ class MultiRestaurantController extends Controller
             'logo' => ['nullable', 'image', 'max:2048'], // 2MB Max
             // New Fields for Alignment
             'email' => ['required', 'email'],
+            'notification_email' => ['required', 'email'],
             'phone' => ['nullable', 'string', 'max:20'],
             'service_type' => ['required', 'in:self_service,table_service,both'],
             'google_map_location' => ['nullable', 'url'],
@@ -258,6 +259,7 @@ class MultiRestaurantController extends Controller
                 'zip_code' => $validated['zip_code'] ?? null,
                 'logo' => $logoPath,
                 'email' => $validated['email'],
+                'notification_email' => $validated['notification_email'],
                 'phone' => $validated['phone'] ?? null,
                 'service_type' => $validated['service_type'],
                 'google_map_location' => $validated['google_map_location'] ?? null,
@@ -383,6 +385,7 @@ class MultiRestaurantController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
+            'notification_email' => ['required', 'email', 'max:255'],
             'country' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
             'city' => ['required', 'string', 'max:100'],
@@ -391,6 +394,7 @@ class MultiRestaurantController extends Controller
             'google_map_location' => ['nullable', 'string'],
             'logo' => ['nullable', 'image', 'max:2048'],
             'service_type' => ['required', 'in:self_service,table_service,both'],
+            'has_cash_drawer' => ['boolean'],
             // Loyalty
             'earning_method_type' => ['nullable', 'in:order_total,visit'],
             'earning_points' => ['nullable', 'integer', 'min:1'],

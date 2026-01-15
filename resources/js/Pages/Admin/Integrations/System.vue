@@ -183,6 +183,36 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Support Contact Section -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-100/50 overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:shadow-gray-200/50">
+                <div class="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center gap-4">
+                        <div class="p-3 bg-blue-100 rounded-2xl text-blue-600 shadow-sm">
+                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        </div>
+                        <div>
+                            Support Information
+                             <p class="mt-1 text-gray-500 text-sm font-normal">Contact details shown to users and on landing pages.</p>
+                        </div>
+                    </h3>
+                </div>
+                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <Input 
+                        v-model="form.support_email" 
+                        label="Support Email" 
+                        placeholder="support@example.com"
+                        type="email"
+                        :error="form.errors.support_email"
+                     />
+                     <Input 
+                        v-model="form.support_phone" 
+                        label="Support Phone" 
+                        placeholder="+1234567890" 
+                        :error="form.errors.support_phone"
+                     />
+                </div>
+            </div>
             
             <!-- Spacer for floating button -->
             <div class="h-20"></div>
@@ -229,6 +259,8 @@ const form = useForm({
     sms_sid: props.configurations.sms_sid || '',
     sms_token: props.configurations.sms_token || '',
     sms_from: props.configurations.sms_from || '',
+    support_email: props.configurations.support_email || '',
+    support_phone: props.configurations.support_phone || '',
 });
 
 const submit = () => {

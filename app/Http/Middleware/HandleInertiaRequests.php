@@ -114,6 +114,15 @@ class HandleInertiaRequests extends Middleware
                 }
                 return $data;
             },
+            'system_settings' => function () {
+                // Fetch cached settings or DB
+                // Since this runs on every request, we should ideally cache this if using SQL/Mongo
+                // For now, simple fetch
+                return [
+                    'support_email' => \App\Models\SystemConfiguration::get('support_email') ?? 'support@kenildock.com',
+                    'support_phone' => \App\Models\SystemConfiguration::get('support_phone') ?? '+9715049460976',
+                ];
+            }
         ]);
     }
 }

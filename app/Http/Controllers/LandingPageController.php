@@ -65,6 +65,13 @@ class LandingPageController extends Controller
             return back()->withErrors($validator);
         }
 
+        // Save to Database
+        try {
+            \App\Models\PlanInterest::create($request->all());
+        } catch (\Exception $e) {
+            \Log::error('Registration Interest Database Error: ' . $e->getMessage());
+        }
+
         $contactEmail = \App\Models\SystemConfiguration::get('registration_email')
             ?? LandingSetting::get('interest_notification_email')
             ?? LandingSetting::get('contact_email', 'support@kenildock.com');

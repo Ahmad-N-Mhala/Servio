@@ -13,11 +13,11 @@ class CommunicationService
      * Send a notification based on a trigger event or specific template.
      *
      * @param string|CommunicationTemplate $trigger Notification event or specific template
-     * @param User $user
+     * @param User|string $recipient User object or email string
      * @param array $data Additional data for replacement (e.g., link, restaurant_name)
      * @return bool True if a custom template was used, False if fallback logic should be used.
      */
-    public function sendNotification(string|CommunicationTemplate $trigger, User $user, array $data = []): bool
+    public function sendNotification(string|CommunicationTemplate $trigger, User|string $recipient, array $data = []): bool
     {
         $template = null;
 
@@ -39,13 +39,22 @@ class CommunicationService
             return false; // Let caller handle fallback (standard Hardcoded Mailable)
         }
 
-        // Determine Locale
+        // Determine Locale and Restaurant
         $restaurant = null;
-        if ($template->restaurant_id) {
-            $restaurant = $template->restaurant;
+        $recipientEmail = $recipient instanceof User ? $recipient->email : $recipient;
+        // Try to find user if string passed, to get context? No, just rely on passed data or existing logic.
+
+        if ($trigger instanceof CommunicationTemplate && $trigger->restaurant_id) {
+            $restaurant = $trigger->restaurant;
+        } elseif ($recipient instanceof User) {
+            $restaurant = $recipient->currentRestaurant();
         } else {
-            // For system templates, try to find restaurant from user context if possible
-            $restaurant = $user->currentRestaurant();
+            // If recipient is string, we might need restaurant passed in $data?
+            // Or if we are sending to restaurant notification_email, we likely know the restaurant context elsewhere.
+            // But let's assume system template for now if no restaurant found.
+            if (isset($data['restaurant_id'])) {
+                $restaurant = \App\Models\Restaurant::find($data['restaurant_id']);
+            }
         }
 
         // For System Templates (where restaurant_id is null), we enforce Bilingual Output
@@ -73,8 +82,8 @@ class CommunicationService
             }
 
             // Do replacements on the combined string
-            $subject = $this->replaceVariables($subject, $user, $data);
-            $content = $this->replaceVariables($content, $user, $data);
+            $subject = $this->replaceVariables($subject, $recipient, $data);
+            $content = $this->replaceVariables($content, $recipient, $data);
 
         } else {
             $locale = $restaurant ? ($restaurant->locale ?? 'en') : 'en';
@@ -92,19 +101,19 @@ class CommunicationService
                 $contentText = $template->content_en ?? $template->content ?? '';
             }
 
-            $subject = $this->replaceVariables($subjectText, $user, $data);
-            $content = $this->replaceVariables($contentText, $user, $data);
+            $subject = $this->replaceVariables($subjectText, $recipient, $data);
+            $content = $this->replaceVariables($contentText, $recipient, $data);
         }
 
         // Send Generic Email
         try {
-            Mail::to($user->email)->send(new \App\Mail\GenericSystemEmail($subject, $content));
+            Mail::to($recipientEmail)->send(new \App\Mail\GenericSystemEmail($subject, $content));
 
             // Log the communication
             \App\Models\CommunicationLog::create([
                 'restaurant_id' => $restaurant ? $restaurant->id : null,
                 'communication_template_id' => $template->id,
-                'recipient' => $user->email,
+                'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'sent',
                 'message' => substr($content, 0, 1000),
@@ -118,7 +127,7 @@ class CommunicationService
             \App\Models\CommunicationLog::create([
                 'restaurant_id' => $restaurant ? $restaurant->id : null,
                 'communication_template_id' => $template->id,
-                'recipient' => $user->email,
+                'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'failed',
                 'error_message' => $e->getMessage(),
@@ -129,14 +138,17 @@ class CommunicationService
         }
     }
 
-    protected function replaceVariables(string $text, User $user, array $data): string
+    protected function replaceVariables(string $text, User|string $recipient, array $data): string
     {
+        $name = ($recipient instanceof User) ? $recipient->name : ($data['name'] ?? 'Partner');
+        $email = ($recipient instanceof User) ? $recipient->email : $recipient;
+
         $vars = [
-            '{{ name }}' => $user->name,
-            '{{ email }}' => $user->email,
+            '{{ name }}' => $name,
+            '{{ email }}' => $email,
             '{{ link }}' => $data['link'] ?? '#',
             '{{ restaurant_name }}' => $data['restaurant_name'] ?? config('app.name'),
-            '{{ owner_email }}' => $data['owner_email'] ?? $user->email,
+            '{{ owner_email }}' => $data['owner_email'] ?? $email,
             // Only expose password if explicitly passed (e.g. new account creation)
             '{{ owner_password }}' => $data['owner_password'] ?? '********',
             '{{ expiry_date }}' => $data['expiry_date'] ?? '',

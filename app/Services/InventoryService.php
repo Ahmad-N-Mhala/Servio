@@ -101,37 +101,36 @@ class InventoryService
 
     protected function sendLowStockNotification(Ingredient $ingredient)
     {
-        $userId = $ingredient->notification_user_id;
+        $recipient = null;
+        $restaurant = $ingredient->restaurant;
 
-        // If no specific user set, try finding the owner from the first batch logic, or just owner of Restaurant
-        // Ideally we use the configured ID.
-        // If no specific user set, try finding the owner from the first batch logic, or just owner of Restaurant
-        // Ideally we use the configured ID.
-        // if (!$userId) {
-        //     // Fallback removed: If null (No notifications needed), we do NOT send to owner.
-        // }
+        // Priority: Restaurant Notification Email
+        if ($restaurant && !empty($restaurant->notification_email)) {
+            $recipient = $restaurant->notification_email;
+        } elseif ($ingredient->notification_user_id) {
+            $recipient = \App\Models\User::find($ingredient->notification_user_id);
+        }
 
-        if ($userId) {
-            $user = \App\Models\User::find($userId);
-            if ($user) {
-                try {
-                    // Prepare data for dynamic template
-                    $data = [
-                        'ingredient_name_en' => $ingredient->name['en'] ?? '',
-                        'ingredient_name_ar' => $ingredient->name['ar'] ?? ($ingredient->name['en'] ?? ''),
-                        'current_stock' => $ingredient->current_stock . ' ' . $ingredient->unit,
-                        'reorder_level' => $ingredient->reorder_level . ' ' . $ingredient->unit,
-                    ];
+        if ($recipient) {
+            try {
+                // Prepare data for dynamic template
+                $data = [
+                    'ingredient_name_en' => $ingredient->name['en'] ?? '',
+                    'ingredient_name_ar' => $ingredient->name['ar'] ?? ($ingredient->name['en'] ?? ''),
+                    'current_stock' => $ingredient->current_stock . ' ' . $ingredient->unit,
+                    'reorder_level' => $ingredient->reorder_level . ' ' . $ingredient->unit,
+                    'restaurant_id' => $restaurant ? $restaurant->id : null,
+                ];
 
-                    $commService = app(\App\Services\CommunicationService::class);
-                    $sent = $commService->sendNotification('inventory_low_stock_warning', $user, $data);
+                $commService = app(\App\Services\CommunicationService::class);
+                $sent = $commService->sendNotification('inventory_low_stock_warning', $recipient, $data);
 
-                    if (!$sent) {
-                        \Illuminate\Support\Facades\Mail::to($user)->send(new \App\Mail\LowStockWarningMail($ingredient));
-                    }
-                } catch (\Exception $e) {
-                    Log::error("Failed to send low stock warning for ingredient {$ingredient->id}: " . $e->getMessage());
+                if (!$sent) {
+                    $emailTarget = ($recipient instanceof \App\Models\User) ? $recipient->email : $recipient;
+                    \Illuminate\Support\Facades\Mail::to($emailTarget)->send(new \App\Mail\LowStockWarningMail($ingredient));
                 }
+            } catch (\Exception $e) {
+                Log::error("Failed to send low stock warning for ingredient {$ingredient->id}: " . $e->getMessage());
             }
         }
     }

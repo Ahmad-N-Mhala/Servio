@@ -35,6 +35,8 @@ class SystemConfigurationController extends Controller
             'sms_sid' => 'nullable|string',
             'sms_token' => 'nullable|string',
             'sms_from' => 'nullable|string',
+            'support_email' => 'nullable|email',
+            'support_phone' => 'nullable|string',
         ]);
 
         foreach ($data as $key => $value) {

@@ -39,8 +39,7 @@ class SendExpiryReminders extends Command
         $batches = IngredientBatch::where('quantity_remaining', '>', 0)
             ->whereNotNull('expiration_date')
             ->whereNotNull('reminder_days_before')
-            ->whereNotNull('reminder_user_id')
-            ->with(['ingredient'])
+            ->with(['ingredient.restaurant'])
             ->get();
 
         $count = 0;
@@ -55,37 +54,52 @@ class SendExpiryReminders extends Command
             // Alternatively, we could add a flag 'reminder_sent' to the batch if we wanted to be safer.
             // For now, based on requirements, sending on the reminder date is sufficient.
             if ($today->isSameDay($reminderDate)) {
+                $recipient = null;
+                $restaurant = $batch->ingredient->restaurant ?? null;
 
-                $user = User::find($batch->reminder_user_id);
+                // Priority: Restaurant Notification Email
+                if ($restaurant && !empty($restaurant->notification_email)) {
+                    $recipient = $restaurant->notification_email;
+                    $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to Restaurant Email: {$recipient}");
+                }
+                // Fallback: Assigned User
+                elseif ($batch->reminder_user_id) {
+                    $user = User::find($batch->reminder_user_id);
+                    if ($user) {
+                        $recipient = $user;
+                        $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to User: {$user->email}");
+                    }
+                }
 
-                if ($user) {
-                    $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to {$user->email}");
-
+                if ($recipient) {
                     try {
                         // Prepare data for dynamic template
                         $data = [
                             'batch_number' => $batch->batch_number,
                             'ingredient_name_en' => $batch->ingredient->name['en'] ?? '',
                             'ingredient_name_ar' => $batch->ingredient->name['ar'] ?? ($batch->ingredient->name['en'] ?? ''),
-                            'quantity_remaining' => $batch->quantity_remaining . ' ' . $batch->ingredient->unit,
+                            'quantity_remaining' => $batch->quantity_remaining . ' ' . ($batch->ingredient->unit ?? ''), // Fixed access to unit
                             'days_remaining' => $batch->reminder_days_before,
                             'expiry_date' => Carbon::parse($batch->expiration_date)->format('Y-m-d'),
+                            'restaurant_id' => $restaurant ? $restaurant->id : null, // Pass context if string recipient
                         ];
 
                         $commService = app(\App\Services\CommunicationService::class);
-                        $sent = $commService->sendNotification('inventory_expiry_warning', $user, $data);
+                        $sent = $commService->sendNotification('inventory_expiry_warning', $recipient, $data);
 
                         if (!$sent) {
+                            $emailTarget = ($recipient instanceof User) ? $recipient->email : $recipient;
                             // Fallback to hardcoded Mailable
-                            Mail::to($user)->send(new ExpiryWarningMail($batch, $batch->reminder_days_before));
+                            Mail::to($emailTarget)->send(new ExpiryWarningMail($batch, $batch->reminder_days_before));
                         }
 
                         $count++;
                     } catch (\Exception $e) {
-                        $this->error("Failed to mail {$user->email}: " . $e->getMessage());
+                        $emailTarget = ($recipient instanceof User) ? $recipient->email : $recipient;
+                        $this->error("Failed to mail {$emailTarget}: " . $e->getMessage());
                     }
                 } else {
-                    $this->warn("User ID {$batch->reminder_user_id} not found for Batch {$batch->batch_number}");
+                    $this->warn("No recipient found (User or Restaurant Email) for Batch {$batch->batch_number}");
                 }
             }
         }

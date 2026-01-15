@@ -36,4 +36,5 @@ return [
     'overview' => 'Overview',
     'orders_create' => 'Create Order',
     'pos_screen' => 'POS Screen',
+    'multi_store' => 'Multi-Store Overview',
 ];

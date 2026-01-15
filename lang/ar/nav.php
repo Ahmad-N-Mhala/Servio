@@ -36,4 +36,5 @@ return [
     'overview' => 'نظرة عامة',
     'orders_create' => 'إنشاء طلب',
     'pos_screen' => 'شاشة نقاط البيع',
+    'multi_store' => 'نظرة عامة على المتاجر',
 ];

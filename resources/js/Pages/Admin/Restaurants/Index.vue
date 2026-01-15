@@ -109,6 +109,16 @@
                                 🕒 {{ formatExpiry(row.subscription.ends_at) }}
                             </span>
                         </div>
+                        
+                        <!-- Log Icon -->
+                         <button 
+                            @click.stop="openLogsModal(row)"
+                            class="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 mt-1 w-fit hover:underline"
+                            title="View Subscription History"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                             View History
+                        </button>
                     </div>
                     <div v-else class="text-sm text-gray-400 italic">
                         No Active Subscription
@@ -335,6 +345,75 @@
             </div>
         </Modal>
 
+        <!-- Logs Modal -->
+        <Modal :show="showLogsModal" @close="closeLogsModal">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Subscription History</h3>
+                    <button @click="closeLogsModal" class="text-gray-400 hover:text-gray-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div v-if="logsLoading" class="flex justify-center py-8">
+                     <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                
+                <div v-else-if="subscriptionLogs.length === 0" class="text-center py-8 text-gray-500">
+                    No history found.
+                </div>
+
+                <div v-else class="relative border-l-2 border-indigo-100 ml-3 space-y-8 py-4">
+                    <div v-for="(log, index) in subscriptionLogs" :key="log.id" class="relative pl-8">
+                        <!-- Timeline Dot -->
+                        <span 
+                            class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                            :class="{
+                                'bg-green-500': log.status === 'active',
+                                'bg-red-500': log.status === 'expired' || log.status === 'cancelled',
+                                'bg-yellow-500': log.status === 'trial',
+                                'bg-gray-300': !log.status
+                            }"
+                        ></span>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-bold text-gray-900">{{ log.plan?.name?.en || log.plan?.name || 'Unknown Plan' }}</h4>
+                                    <span class="text-xs text-gray-500 capitalize">{{ log.billing_cycle || 'monthly' }} cycle</span>
+                                </div>
+                                <span 
+                                    class="px-2 py-0.5 rounded text-xs font-bold capitalize"
+                                    :class="{
+                                        'bg-green-100 text-green-700': log.status === 'active',
+                                        'bg-red-100 text-red-700': log.status === 'expired' || log.status === 'cancelled',
+                                        'bg-yellow-100 text-yellow-700': log.status === 'trial',
+                                        'bg-gray-100 text-gray-600': !log.status
+                                    }"
+                                >
+                                    {{ log.status }}
+                                </span>
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="block text-xs text-gray-400 uppercase">Started</span>
+                                    {{ new Date(log.starts_at).toLocaleDateString() }}
+                                </div>
+                                <div>
+                                    <span class="block text-xs text-gray-400 uppercase">Ended</span>
+                                    {{ log.ends_at ? new Date(log.ends_at).toLocaleDateString() : 'Ongoing' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+
     </AdminLayout>
 </template>
 
@@ -499,6 +578,34 @@ const openActionModal = (restaurant: any) => {
 };
 const closeActionModal = () => {
     showActionModal.value = false;
+};
+
+// Logs Logic
+const showLogsModal = ref(false);
+const subscriptionLogs = ref<any[]>([]);
+const logsLoading = ref(false);
+
+const openLogsModal = async (restaurant: any) => {
+    editingRestaurant.value = restaurant;
+    showLogsModal.value = true;
+    logsLoading.value = true;
+    subscriptionLogs.value = [];
+
+    try {
+        const response = await fetch(route('admin.restaurants.subscription-logs', restaurant.id));
+        if (response.ok) {
+            subscriptionLogs.value = await response.json();
+        }
+    } catch (error) {
+        console.error('Failed to fetch logs', error);
+    } finally {
+        logsLoading.value = false;
+    }
+};
+
+const closeLogsModal = () => {
+    showLogsModal.value = false;
+    subscriptionLogs.value = [];
 };
 
 const route = (window as any).route;

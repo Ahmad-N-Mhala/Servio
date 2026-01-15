@@ -359,6 +359,7 @@ Route::group([
             Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
             Route::resource('restaurants', \App\Http\Controllers\Admin\RestaurantController::class);
+            Route::get('restaurants/{id}/subscription-logs', [\App\Http\Controllers\Admin\RestaurantController::class, 'getSubscriptionLogs'])->name('restaurants.subscription-logs');
             Route::post('restaurants/{id}/restore', [\App\Http\Controllers\Admin\RestaurantController::class, 'restore'])->name('restaurants.restore');
             Route::delete('restaurants/{id}/force-delete', [\App\Http\Controllers\Admin\RestaurantController::class, 'forceDestroy'])->name('restaurants.force-destroy');
             Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);
@@ -367,6 +368,11 @@ Route::group([
             Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index']);
             Route::resource('super-admins', \App\Http\Controllers\Admin\SuperAdminController::class)->only(['index', 'store', 'destroy']);
             Route::post('users/{id}/restore', [\App\Http\Controllers\Admin\DeletedDataController::class, 'restoreUser'])->name('users.restore');
+
+            // Plan Interests
+            Route::get('plan-interests', [\App\Http\Controllers\Admin\PlanInterestController::class, 'index'])->name('plan-interests.index');
+            Route::get('plan-interests/export', [\App\Http\Controllers\Admin\PlanInterestController::class, 'export'])->name('plan-interests.export');
+            Route::put('plan-interests/{planInterest}', [\App\Http\Controllers\Admin\PlanInterestController::class, 'update'])->name('plan-interests.update');
 
             // Deleted Data
             Route::get('deleted-data', [\App\Http\Controllers\Admin\DeletedDataController::class, 'index'])->name('deleted-data.index');

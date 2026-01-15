@@ -6,64 +6,98 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 bg-white border-b border-gray-200">
-                        <form @submit.prevent="submit" class="space-y-6">
+                <form @submit.prevent="submit" class="space-y-8">
+                    
+                    <!-- Restaurant Info Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                Restaurant Details
+                            </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
-                                    <input v-model="form.name" type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                    <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
+                                
+                                <!-- Logo Upload -->
+                                <div class="md:col-span-2 flex justify-center mb-6">
+                                    <div class="relative group cursor-pointer" @click="logoInput?.click()">
+                                        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg bg-white flex items-center justify-center relative">
+                                            <img v-if="logoPreview || props.restaurant.logo" :src="logoPreview || props.restaurant.logo" class="w-full h-full object-cover" />
+                                            <div v-else class="text-gray-300">
+                                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                            </div>
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                            </div>
+                                        </div>
+                                        <input type="file" ref="logoInput" class="hidden" accept="image/*" @change="handleLogoChange" />
+                                    </div>
+                                    <div v-if="form.errors.logo" class="text-red-500 text-xs mt-1 text-center w-full">{{ form.errors.logo }}</div>
                                 </div>
 
+                                <Input v-model="form.name" label="Restaurant Name" required :error="form.errors.name" />
+                                <Input v-model="form.slug" label="Slug (URL Friendly)" required :error="form.errors.slug" />
+                                
                                 <div>
-                                    <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
-                                    <input v-model="form.slug" type="text" id="slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                    <div v-if="form.errors.slug" class="text-red-500 text-xs mt-1">{{ form.errors.slug }}</div>
-                                </div>
-
-                                <div>
-                                    <label for="email" class="block text-sm font-medium text-gray-700">Contact Email</label>
-                                    <input v-model="form.email" type="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                    <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</div>
-                                </div>
-
-                                <div>
-                                    <PhoneInput 
-                                        v-model="form.phone" 
-                                        :country="form.country || ''"
-                                        label="Phone Number (Current)" 
-                                        disabled
-                                        help="Current phone number on file"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label for="currency" class="block text-sm font-medium text-gray-700">Currency</label>
-                                    <input v-model="form.currency" type="text" id="currency" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="AED" required>
-                                    <div v-if="form.errors.currency" class="text-red-500 text-xs mt-1">{{ form.errors.currency }}</div>
+                                    <Input v-model="form.email" label="Restaurant Email (General)" type="email" required :error="form.errors.email" />
+                                    <p class="text-xs text-gray-500 mt-1">General contact email for the business.</p>
                                 </div>
                                 
                                 <div>
-                                    <label for="status" class="block text-sm font-medium text-gray-700">{{ $t('common.status') }}</label>
-                                    <select v-model="form.status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                        <option value="active">{{ $t('common.active') }}</option>
-                                        <option value="suspended">Suspended</option>
-                                    </select>
-                                    <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</div>
+                                    <Input v-model="form.notification_email" label="Notification Email (Reminders)" type="email" required :error="form.errors.notification_email" />
+                                    <p class="text-xs text-gray-500 mt-1">Receives system alerts, low stock warnings, etc.</p>
                                 </div>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Service Type</label>
-                                    <select v-model="form.service_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                        <option value="both">Both (Table Service & Self Service)</option>
-                                        <option value="self_service">Self Service Only (Counter/Kiosk)</option>
-                                        <option value="table_service">Table Service Only (Waiter)</option>
-                                    </select>
-                                    <div v-if="form.errors.service_type" class="text-red-500 text-xs mt-1">{{ form.errors.service_type }}</div>
-                                    <p class="text-xs text-gray-500 mt-1" v-if="form.service_type === 'self_service'">Hides waiter UI, enables pickup screen.</p>
-                                    <p class="text-xs text-gray-500 mt-1" v-if="form.service_type === 'table_service'">Hides public status screen.</p>
-                                </div>
+                                <PhoneInput 
+                                    v-model="form.phone" 
+                                    :country="form.country || ''"
+                                    label="Contact Phone" 
+                                    :error="form.errors.phone" 
+                                />
+
+                                <Select 
+                                    v-model="form.country" 
+                                    label="Country" 
+                                    :options="countries.map(c => ({ label: c, value: c }))" 
+                                    :error="form.errors.country" 
+                                    required
+                                />
+
+                                <Input v-model="form.currency" label="Currency" required :error="form.errors.currency" />
+                                
+                                <Select 
+                                    v-model="form.status" 
+                                    label="Status" 
+                                    :options="[
+                                        { label: 'Active', value: 'active' },
+                                        { label: 'Suspended', value: 'suspended' }
+                                    ]" 
+                                    required 
+                                    :error="form.errors.status" 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service & Configuration Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                Service Configuration
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Select 
+                                    v-model="form.service_type" 
+                                    label="Service Type" 
+                                    :options="[
+                                        { label: 'Both (Table & Self Service)', value: 'both' },
+                                        { label: 'Table Service Only', value: 'table_service' },
+                                        { label: 'Self Service Only', value: 'self_service' }
+                                    ]"
+                                    required 
+                                    :error="form.errors.service_type" 
+                                />
 
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                                     <div>
@@ -85,298 +119,210 @@
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Owner Account Management -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                Owner Account Management
+                            </h3>
                             
-                            <div class="border-t pt-4 mt-2">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Location Details</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="md:col-span-2">
-                                        <label for="address" class="block text-sm font-medium text-gray-700">Street Name / Address</label>
-                                        <input v-model="form.address" type="text" id="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <div v-if="form.errors.address" class="text-red-500 text-xs mt-1">{{ form.errors.address }}</div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
-                                        <select v-model="form.country" id="country" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                            <option value="" disabled>Select Country</option>
-                                            <option v-for="c in countries" :key="c" :value="c">{{ c }}</option>
-                                        </select>
-                                        <div v-if="form.errors.country" class="text-red-500 text-xs mt-1">{{ form.errors.country }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label for="state" class="block text-sm font-medium text-gray-700">State / Province</label>
-                                        <input v-model="form.state" type="text" id="state" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <div v-if="form.errors.state" class="text-red-500 text-xs mt-1">{{ form.errors.state }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-                                        <input v-model="form.city" type="text" id="city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <div v-if="form.errors.city" class="text-red-500 text-xs mt-1">{{ form.errors.city }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label for="zip_code" class="block text-sm font-medium text-gray-700">Zip / Postal Code</label>
-                                        <input v-model="form.zip_code" type="text" id="zip_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        <div v-if="form.errors.zip_code" class="text-red-500 text-xs mt-1">{{ form.errors.zip_code }}</div>
-                                    </div>
-
-                                    <div class="md:col-span-2">
-                                        <label for="google_map_location" class="block text-sm font-medium text-gray-700">Google Map Location (Optional)</label>
-                                        <input v-model="form.google_map_location" type="url" id="google_map_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="https://maps.google.com/...">
-                                        <div v-if="form.errors.google_map_location" class="text-red-500 text-xs mt-1">{{ form.errors.google_map_location }}</div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Existing Owner Info -->
+                                <div class="md:col-span-2">
+                                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                        <label class="block text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">Current Owner Email</label>
+                                        <div class="text-gray-900 font-medium">{{ props.restaurant.owner_email }}</div>
                                     </div>
                                 </div>
+
+                                <Input 
+                                    v-model="form.new_owner_name" 
+                                    label="Change Owner Name"
+                                    placeholder="Leave blank to keep current" 
+                                    :error="(form.errors as any).new_owner_name"
+                                />
+
+                                <PhoneInput 
+                                    v-model="form.new_owner_phone" 
+                                    :country="form.country || ''"
+                                    label="Change Owner Phone"
+                                    placeholder="Leave blank to keep current" 
+                                    :error="(form.errors as any).new_owner_phone"
+                                />
+
+                                <Input 
+                                    v-model="form.new_owner_email" 
+                                    label="Change Owner Email"
+                                    type="email"
+                                    placeholder="Leave blank to keep current" 
+                                    :error="(form.errors as any).new_owner_email"
+                                />
+
+                                <Input 
+                                    v-model="form.new_owner_password" 
+                                    label="Change Owner Password"
+                                    type="text"
+                                    placeholder="Leave blank to keep current" 
+                                    :error="(form.errors as any).new_owner_password"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                Location Details
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <Input v-model="form.address" label="Street Address" :error="form.errors.address" />
+                                </div>
+                                <Input v-model="form.city" label="City" :error="form.errors.city" />
+                                <Input v-model="form.state" label="State / Province" :error="form.errors.state" />
+                                <Input v-model="form.zip_code" label="Zip / Postal Code" :error="form.errors.zip_code" />
+                                <div class="md:col-span-2">
+                                    <Input v-model="form.google_map_location" label="Google Map Link (Optional)" type="url" placeholder="https://maps.google.com/..." :error="form.errors.google_map_location" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loyalty Setup Card -->
+                    <div class="bg-white shadow-xl sm:rounded-2xl border border-emerald-100 ring-1 ring-emerald-500/20">
+                        <div class="p-8">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <div class="bg-emerald-100 p-1.5 rounded-lg text-emerald-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg>
+                                    </div>
+                                    Loyalty Program Setup
+                                </h3>
                             </div>
                             
-                            <!-- Owner Account Management -->
-                            <div class="border-t pt-4 mt-2">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Owner Account Management</h3>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Display Current Owner Email -->
-                                    <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700">
-                                            Current Owner Email
-                                        </label>
-                                        <div class="mt-1 p-2 bg-gray-100 rounded-md border border-gray-300 text-gray-600 sm:text-sm">
-                                            {{ props.restaurant.owner_email }}
+                            <div class="space-y-6">
+                                <label class="block text-sm font-bold text-gray-700">How should customers earn points?</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div 
+                                        @click="form.earning_method_type = 'order_total'"
+                                        class="cursor-pointer border-2 rounded-2xl p-5 hover:border-indigo-200 transition-all duration-200 flex items-center gap-4 relative overflow-hidden group"
+                                        :class="form.earning_method_type === 'order_total' ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-100 bg-white'"
+                                    >
+                                        <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="p-3 rounded-xl transition-colors" :class="form.earning_method_type === 'order_total' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-gray-100 text-gray-400'">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         </div>
-                                        <p class="text-xs text-gray-500 mt-1">To change this email, use the field below.</p>
+                                        <div>
+                                            <div class="font-bold text-gray-900 text-lg">Per Spend</div>
+                                            <div class="text-sm text-gray-500 font-medium">Earn points based on bill total</div>
+                                        </div>
+                                        <div v-if="form.earning_method_type === 'order_total'" class="absolute top-4 right-4 text-indigo-500">
+                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                        </div>
                                     </div>
-                                    
-                                     <div>
-                                        <label for="new_owner_name" class="block text-sm font-medium text-gray-700">
-                                            Owner Name
-                                            <span class="text-gray-500 font-normal">(Leave blank to keep current)</span>
-                                        </label>
-                                        <input 
-                                            v-model="form.new_owner_name" 
-                                            type="text" 
-                                            id="new_owner_name" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            placeholder="Enter new name"
-                                        >
-                                        <div v-if="(form.errors as any).new_owner_name" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_name }}</div>
-                                    </div>
-                                    
 
-                                    
-                                     <div>
-                                        <PhoneInput 
-                                            v-model="form.new_owner_phone" 
-                                            :country="form.country || ''"
-                                            label="Owner Phone" 
-                                            placeholder="Enter new phone"
-                                            help="(Leave blank to keep current)"
-                                            :error="(form.errors as any).new_owner_phone" 
+                                    <div 
+                                        @click="form.earning_method_type = 'visit'"
+                                        class="cursor-pointer border-2 rounded-2xl p-5 hover:border-indigo-200 transition-all duration-200 flex items-center gap-4 relative overflow-hidden group"
+                                        :class="form.earning_method_type === 'visit' ? 'border-indigo-500 bg-indigo-50/50' : 'border-gray-100 bg-white'"
+                                    >
+                                        <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <div class="p-3 rounded-xl transition-colors" :class="form.earning_method_type === 'visit' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-gray-100 text-gray-400'">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-900 text-lg">Per Visit</div>
+                                            <div class="text-sm text-gray-500 font-medium">Fixed points per visit</div>
+                                        </div>
+                                        <div v-if="form.earning_method_type === 'visit'" class="absolute top-4 right-4 text-indigo-500">
+                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-6">
+                                    <div v-if="form.earning_method_type === 'order_total'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                                <Input 
+                                                v-model="form.earning_points" 
+                                                label="Earn Points" 
+                                                type="number" 
+                                                min="1" 
+                                                required 
+                                                :error="form.errors.earning_points" 
+                                            />
+                                        </div>
+                                        <div>
+                                                <Input 
+                                                v-model="form.earning_currency_amount" 
+                                                :label="'For Every (' + form.currency + ')'" 
+                                                type="number" 
+                                                min="0.01"
+                                                step="0.01" 
+                                                required 
+                                                :error="form.errors.earning_currency_amount" 
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div v-else>
+                                        <Input 
+                                            v-model="form.earning_points" 
+                                            label="Points per Visit" 
+                                            type="number" 
+                                            min="1" 
+                                            required 
+                                            :error="form.errors.earning_points" 
                                         />
                                     </div>
 
-                                    <div>
-                                        <label for="new_owner_email" class="block text-sm font-medium text-gray-700">
-                                            Owner Email
-                                            <span class="text-gray-500 font-normal">(Leave blank to keep current)</span>
-                                        </label>
-                                        <input 
-                                            v-model="form.new_owner_email" 
-                                            type="email" 
-                                            id="new_owner_email" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            placeholder="Enter new email to change"
-                                        >
-                                        <div v-if="(form.errors as any).new_owner_email" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_email }}</div>
-                                        <p class="text-xs text-gray-500 mt-1">⚠️ This will update the owner's login email</p>
-                                    </div>
-
-                                    <div>
-                                        <label for="new_owner_password" class="block text-sm font-medium text-gray-700">
-                                            Owner Password
-                                            <span class="text-gray-500 font-normal">(Leave blank to keep current)</span>
-                                        </label>
-                                        <input 
-                                            v-model="form.new_owner_password" 
-                                            type="text" 
-                                            id="new_owner_password" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono"
-                                            placeholder="Enter new password"
-                                        >
-                                        <div v-if="(form.errors as any).new_owner_password" class="text-red-500 text-xs mt-1">{{ (form.errors as any).new_owner_password }}</div>
-                                        <p class="text-xs text-gray-500 mt-1">💡 Minimum 8 characters recommended. Current password cannot be viewed.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Loyalty Program Setup (Aligned with Earning Methods) -->
-                            <div class="border-t pt-4 mt-2">
-                                <h3 class="text-lg font-medium text-gray-900 mb-4">Loyalty Program Setup</h3>
-                                
-                                <!-- Name (Multilingual) -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <label for="method_name_en" class="block text-sm font-medium text-gray-700">Method Name (English)</label>
-                                        <input 
-                                            v-model="form.earning_method_name_en" 
-                                            type="text" 
-                                            id="method_name_en" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            placeholder="e.g. Loyalty Points"
-                                        >
-                                    </div>
-                                    <div>
-                                        <label for="method_name_ar" class="block text-sm font-medium text-gray-700">Method Name (Arabic)</label>
-                                        <input 
-                                            v-model="form.earning_method_name_ar" 
-                                            type="text" 
-                                            id="method_name_ar" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-right"
-                                            dir="rtl"
-                                            placeholder="نقاط الولاء"
-                                        >
-                                    </div>
-                                </div>
-
-                                <!-- Description -->
-                                <div class="mb-4">
-                                    <label for="method_description" class="block text-sm font-medium text-gray-700">{{ $t('common.description') }}</label>
-                                    <textarea 
-                                        v-model="form.earning_method_description"
-                                        id="method_description"
-                                        rows="2"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        placeholder="Brief description of how this method works..."
-                                    ></textarea>
-                                </div>
-
-                                <!-- Type Selection -->
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Earning Type</label>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div 
-                                            @click="form.earning_method_type = 'order_total'"
-                                            class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                            :class="form.earning_method_type === 'order_total' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'"
-                                        >
-                                            <div class="flex items-center gap-3">
-                                                <div class="p-2 rounded-full" :class="form.earning_method_type === 'order_total' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500'">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-gray-900">Per Order Amount</div>
-                                                    <div class="text-xs text-gray-500">Earn points based on bill total</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div 
-                                            @click="form.earning_method_type = 'visit'"
-                                            class="cursor-pointer border-2 rounded-xl p-4 transition-all duration-200"
-                                            :class="form.earning_method_type === 'visit' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'"
-                                        >
-                                            <div class="flex items-center gap-3">
-                                                <div class="p-2 rounded-full" :class="form.earning_method_type === 'visit' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500'">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-gray-900">Per Visit</div>
-                                                    <div class="text-xs text-gray-500">Fixed points per order/visit</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Points Configuration -->
-                                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4 mb-4">
-                                    <h4 class="text-sm font-semibold text-gray-900">Points Configuration</h4>
-                                    
-                                    <!-- For Order Total Type -->
-                                    <div v-if="form.earning_method_type === 'order_total'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Earn Points</label>
-                                            <input 
-                                                v-model="form.earning_points" 
-                                                type="number" 
-                                                min="1"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            >
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">For Every ({{ form.currency || 'Currency Unit' }})</label>
-                                            <input 
-                                                v-model="form.earning_currency_amount" 
-                                                type="number" 
-                                                min="0.01"
-                                                step="0.01"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            >
-                                        </div>
-                                    </div>
-
-                                    <!-- For Visit Type -->
-                                    <div v-else>
-                                        <label class="block text-sm font-medium text-gray-700">Points per Visit</label>
-                                        <input 
-                                            v-model="form.earning_points" 
-                                            type="number" 
-                                            min="1"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        >
-                                    </div>
-
                                     <!-- Conditions -->
-                                    <div class="pt-4 mt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Min Spent Amount (Optional)</label>
-                                            <input 
-                                                v-model="form.earning_min_spent" 
-                                                type="number" 
-                                                min="0"
-                                                step="0.01"
-                                                placeholder="Optional"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            >
-                                        </div>
-                                        <div v-if="form.earning_method_type === 'order_total'">
-                                            <label class="block text-sm font-medium text-gray-700">Max Points Cap (Optional)</label>
-                                            <input 
-                                                v-model="form.earning_max_points" 
-                                                type="number" 
-                                                min="1"
-                                                placeholder="Optional"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            >
+                                    <div class="border-t border-gray-200 pt-4">
+                                        <h4 class="text-sm font-bold text-gray-900 mb-3">Conditions</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Input 
+                                                    v-model="form.earning_min_spent" 
+                                                    :label="'Minimum Spend (' + form.currency + ') - Optional'" 
+                                                    type="number" 
+                                                    min="0" 
+                                                    step="0.01" 
+                                                    placeholder="0"
+                                                    :error="form.errors.earning_min_spent" 
+                                                />
+                                            </div>
+                                            <div v-if="form.earning_method_type === 'order_total'">
+                                                <Input 
+                                                    v-model="form.earning_max_points" 
+                                                    label="Max Points Cap (Optional)" 
+                                                    type="number" 
+                                                    min="1"
+                                                    placeholder="No Limit"
+                                                    :error="form.errors.earning_max_points" 
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Active Status -->
-                                <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                    <div class="flex items-center h-5">
-                                        <input 
-                                            type="checkbox" 
-                                            v-model="form.earning_is_active"
-                                            id="earning_is_active"
-                                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4 cursor-pointer"
-                                        >
-                                    </div>
-                                    <div class="ml-3 text-sm">
-                                        <label for="earning_is_active" class="font-medium text-gray-700 cursor-pointer">Active Status</label>
-                                        <p class="text-gray-500">Enable or disable this earning method.</p>
-                                    </div>
-                                </div>
                             </div>
-
-                            <div class="flex items-center justify-end">
-                                <Link :href="route('admin.restaurants.index')" class="text-gray-600 hover:text-gray-900 mr-4">{{ $t('common.cancel') }}</Link>
-                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">
-                                    Update Restaurant
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="flex items-center justify-end gap-4 p-4">
+                        <Link :href="route('admin.restaurants.index')" class="px-6 py-3 rounded-xl text-gray-600 font-bold hover:bg-gray-100 transition-colors">
+                            Cancel
+                        </Link>
+                        <Button type="submit" :loading="form.processing" class="px-8 py-3 text-lg shadow-xl shadow-indigo-500/20">
+                            Save Changes
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     </AdminLayout>
@@ -385,6 +331,10 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
+import Button from '@/Components/Button.vue';
 import PhoneInput from '@/Components/PhoneInput.vue';
 
 const props = defineProps<{
@@ -393,6 +343,7 @@ const props = defineProps<{
         name: string;
         slug: string;
         email: string;
+        notification_email?: string; 
         owner_email?: string;
         phone: string | null;
         currency: string;
@@ -414,6 +365,7 @@ const props = defineProps<{
         earning_min_spent?: number;
         earning_max_points?: number;
         earning_is_active?: boolean;
+        logo?: string;
     };
 }>();
 
@@ -424,9 +376,11 @@ const countries = [
 ];
 
 const form = useForm({
+    _method: 'PUT',
     name: props.restaurant.name,
     slug: props.restaurant.slug,
     email: props.restaurant.email,
+    notification_email: props.restaurant.notification_email || props.restaurant.email,
     phone: props.restaurant.phone,
     currency: props.restaurant.currency,
     service_type: props.restaurant.service_type || 'both',
@@ -434,12 +388,13 @@ const form = useForm({
     status: props.restaurant.status || 'active',
     address: props.restaurant.address,
     city: props.restaurant.city,
-    country: props.restaurant.country || '',
+    country: props.restaurant.country || 'United Arab Emirates',
     state: props.restaurant.state,
     zip_code: props.restaurant.zip_code,
     google_map_location: props.restaurant.google_map_location || '',
+    logo: null as File | null,
 
-    // Loyalty/Earning Method fields - comprehensive
+    // Loyalty/Earning Method fields
     earning_method_type: props.restaurant.earning_method_type || 'order_total',
     earning_points: props.restaurant.earning_points || 1,
     earning_method_name_en: props.restaurant.earning_method_name_en || 'Loyalty Points',
@@ -449,6 +404,7 @@ const form = useForm({
     earning_min_spent: props.restaurant.earning_min_spent || null,
     earning_max_points: props.restaurant.earning_max_points || null,
     earning_is_active: props.restaurant.earning_is_active !== undefined ? props.restaurant.earning_is_active : true,
+
     // New owner management fields
     new_owner_name: '',
     new_owner_email: '',
@@ -456,10 +412,33 @@ const form = useForm({
     new_owner_password: '',
 });
 
+const logoPreview = ref<string | null>(null);
+const logoInput = ref<HTMLInputElement | null>(null);
+
+const handleLogoChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        form.logo = target.files[0];
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            logoPreview.value = e.target?.result as string;
+        };
+        reader.readAsDataURL(target.files[0]);
+    } else {
+        form.logo = null;
+        logoPreview.value = null;
+    }
+};
+
 const route = (window as any).route;
 
 const submit = () => {
-    form.put(route('admin.restaurants.update', props.restaurant.id));
+    // We use form.post because we may be uploading a file (logo), even though logic is update.
+    // _method: 'PUT' is handled by Laravel to treat this as a PUT request.
+    form.post(route('admin.restaurants.update', props.restaurant.id), {
+        forceFormData: true,
+    });
 };
 </script>
-

@@ -52,7 +52,6 @@ const bannerPreview = ref(initialData.loyalty_banner || null);
 // QR Code Generation (Local Canvas preferred for html2canvas)
 const qrDataUrl = ref<string>('');
 const useCanvas = ref(false);
-const qrCanvas = ref<HTMLCanvasElement | null>(null);
 
 const generateQR = async (link: string) => {
     const text = link || 'https://example.com';

@@ -93,6 +93,7 @@ class RestaurantController extends Controller
             'zip_code' => 'nullable|string',
             'country' => 'nullable|string',
             'google_map_location' => 'nullable|url',
+            'notification_email' => 'required|email', // Reminders Receiver
 
             // Loyalty
             'earning_method_type' => 'nullable|string|in:order_total,visit',
@@ -137,6 +138,7 @@ class RestaurantController extends Controller
                 'google_map_location',
                 'service_type',
                 'has_cash_drawer',
+                'notification_email',
             ]);
 
             if ($logoPath) {
@@ -264,6 +266,7 @@ class RestaurantController extends Controller
                 'zip_code' => 'nullable|string',
                 'country' => 'nullable|string',
                 'google_map_location' => 'nullable|url',
+                'notification_email' => 'required|email',
                 'service_type' => 'required|string|in:self_service,table_service,both',
                 'has_cash_drawer' => 'boolean',
 
@@ -468,5 +471,14 @@ class RestaurantController extends Controller
             return redirect()->route('admin.restaurants.index')
                 ->with('error', 'Failed to permanently delete restaurant: ' . $e->getMessage());
         }
+    }
+    public function getSubscriptionLogs($id)
+    {
+        $logs = \App\Models\RestaurantSubscription::where('restaurant_id', $id)
+            ->with('plan')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($logs);
     }
 }

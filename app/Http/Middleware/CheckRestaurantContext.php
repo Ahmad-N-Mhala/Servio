@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Inertia\Inertia;
 
 class CheckRestaurantContext
 {
@@ -27,27 +28,27 @@ class CheckRestaurantContext
 
         $restaurantId = session('active_restaurant_id');
 
-            // If no restaurant in session, auto-select the first one
-            if (!$restaurantId) {
-                //TODO:
-                // FIX: Use manual query
-                $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
-                    ->table('restaurant_user')
-                    ->where('email', $request->user()->email)
-                    ->pluck('restaurant_id')
-                    ->toArray();
-                
-                \Illuminate\Support\Facades\Log::info('CheckRestaurantContext: User ' . $request->user()->email . ' has pivot IDs: ' . json_encode($pivotIds));
+        // If no restaurant in session, auto-select the first one
+        if (!$restaurantId) {
+            //TODO:
+            // FIX: Use manual query
+            $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
+                ->table('restaurant_user')
+                ->where('email', $request->user()->email)
+                ->pluck('restaurant_id')
+                ->toArray();
 
-                $firstRestaurant = !empty($pivotIds) 
-                    ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first() 
-                    : null;
+            \Illuminate\Support\Facades\Log::info('CheckRestaurantContext: User ' . $request->user()->email . ' has pivot IDs: ' . json_encode($pivotIds));
 
-                if (!$firstRestaurant) {
-                    // User has no restaurants - redirect to login with error
-                    auth()->logout();
-                    return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
-                }
+            $firstRestaurant = !empty($pivotIds)
+                ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first()
+                : null;
+
+            if (!$firstRestaurant) {
+                // User has no restaurants - redirect to login with error
+                auth()->logout();
+                return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
+            }
 
             // Set the first restaurant as active and continue
             session(['active_restaurant_id' => $firstRestaurant->id]);
@@ -72,8 +73,8 @@ class CheckRestaurantContext
             session()->forget('active_restaurant_id');
 
             // FIX: Use manual query (reusing pivotIds from above)
-            $anotherRestaurant = !empty($pivotIds) 
-                ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first() 
+            $anotherRestaurant = !empty($pivotIds)
+                ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first()
                 : null;
 
             if ($anotherRestaurant) {
@@ -88,6 +89,33 @@ class CheckRestaurantContext
 
         // Share restaurant ID globally or with views if needed
         // config(['app.active_restaurant_id' => $restaurantId]); 
+
+        // Validated Access - Now Check Subscription Status
+        $restaurant = \App\Models\Restaurant::find($restaurantId);
+
+        if ($restaurant) {
+            $subscription = $restaurant->subscription; // HasOne relationship
+
+            // Check if subscription exists and is valid
+            // You can adjust these rules (e.g., allow grace period)
+            $isExpired = false;
+
+            if (!$subscription) {
+                // If missing, we treat as expired
+                $isExpired = true;
+            } elseif ($subscription->status !== 'active') {
+                $isExpired = true;
+            } elseif ($subscription->ends_at && $subscription->ends_at->isPast()) {
+                $isExpired = true;
+            }
+
+            if ($isExpired) {
+                // Return Inertia response directly (interrupting the request)
+                return Inertia::render('Error/SubscriptionExpired')
+                    ->toResponse($request)
+                    ->setStatusCode(403);
+            }
+        }
 
         return $next($request);
     }

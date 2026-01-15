@@ -20,6 +20,7 @@ class Restaurant extends Model
         'description',
         'phone',
         'email',
+        'notification_email',
         'address',
         'city',
         'country',
