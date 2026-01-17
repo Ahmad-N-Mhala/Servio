@@ -173,5 +173,33 @@ class Restaurant extends Model
         return $this->hasFeature('feedback');
     }
 
-}
+    protected static function booted()
+    {
+        static::forceDeleting(function ($restaurant) {
+            // 1. Delete HasMany relations (Data owned by restaurant)
+            $restaurant->orders()->forceDelete();
+            $restaurant->menuItems()->forceDelete();
+            $restaurant->menuCategories()->forceDelete();
+            $restaurant->customers()->forceDelete();
+            $restaurant->staff()->forceDelete();
+            $restaurant->rewards()->forceDelete();
+            $restaurant->earningMethods()->forceDelete();
+            $restaurant->subscription()->forceDelete();
 
+            // 2. Handle Users (BelongsToMany)
+            // If a user belongs ONLY to this restaurant, delete the user.
+            // If they belong to others, just detach.
+            foreach ($restaurant->users as $user) {
+                // Check if user has other restaurants
+                // Note: We use raw query or relationship count. 
+                // Since this restaurant is not deleted yet (deleting event), count should include it.
+                // So if count <= 1, it's the only one.
+                if ($user->restaurants()->count() <= 1) {
+                    $user->forceDelete();
+                } else {
+                    $restaurant->users()->detach($user->id);
+                }
+            }
+        });
+    }
+}
