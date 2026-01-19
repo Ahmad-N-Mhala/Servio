@@ -5,7 +5,7 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('tables.title') }}</h1>
                 <div class="flex gap-3">
                      <Button v-if="hasPermission('create_table')" @click="openZoneModal()" variant="secondary" class="bg-gray-100 hover:bg-gray-200 text-gray-800 border-none shadow-sm">
-                        <span class="mr-2">🏢</span> Add Zone
+                        <span class="mr-2">🏢</span> {{ $t('tables.add_zone') }}
                     </Button>
                     <Button v-if="hasPermission('create_table')" @click="openModal()">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,12 +25,12 @@
                     </h2>
                     <button v-if="hasPermission('delete_table')" @click="deleteZone(zone)" class="text-red-500 hover:text-red-700 text-sm font-semibold flex items-center gap-1 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        Delete Zone
+                        {{ $t('tables.delete_zone') }}
                     </button>
                 </div>
                 
                 <div v-if="zone.tables.length === 0" class="text-gray-500 italic text-sm mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center border border-gray-100 dark:border-gray-800">
-                    No tables in this zone.
+                    {{ $t('tables.no_tables_in_zone') }}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -43,8 +43,8 @@
             <!-- Unassigned Tables -->
             <div v-if="orphanTables.length > 0" class="mb-12 mt-8">
                 <div class="flex items-center gap-2 mb-4 pb-2 border-b border-dashed border-gray-300 dark:border-gray-700">
-                     <h2 class="text-xl font-bold text-gray-600 dark:text-gray-400">Unassigned Tables</h2>
-                     <span class="text-xs font-normal text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{{ orphanTables.length }} tables</span>
+                     <h2 class="text-xl font-bold text-gray-600 dark:text-gray-400">{{ $t('tables.unassigned_tables') }}</h2>
+                     <span class="text-xs font-normal text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{{ orphanTables.length }} {{ $t('tables.title') }}</span>
                 </div>
                
                   <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -59,7 +59,7 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                 </div>
                 <p class="text-gray-500 font-medium">{{ $t('charts.no_data') }}</p>
-                <p class="text-sm text-gray-400 mt-1">Start by adding a zone or a table.</p>
+                <p class="text-sm text-gray-400 mt-1">{{ $t('tables.no_zones') }}</p>
             </div>
 
             <!-- Edit/Create Table Modal -->
@@ -68,32 +68,43 @@
                     <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">{{ form.id ? $t('common.edit') + ' ' + $t('tables.table_name') : $t('tables.add_table') }}</h2>
                      <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zone</label>
-                            <select v-model="form.zone_id" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option :value="null">None (Unassigned)</option>
-                                <option v-for="zone in zones" :key="zone.id" :value="zone.id">{{ zone.name }}</option>
-                            </select>
+                            <Select
+                                v-model="form.zone_id"
+                                :label="$t('tables.zone')"
+                                :options="zoneOptions"
+                                :placeholder="$t('tables.unassigned')"
+                            />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.name') }}</label>
-                            <input v-model="form.name" type="text" placeholder="e.g. T-12" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <Input
+                                v-model="form.name"
+                                :label="$t('common.name')"
+                                :placeholder="$t('tables.table_placeholder')"
+                            />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('tables.capacity') }}</label>
-                            <input v-model="form.capacity" type="number" min="1" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <Input
+                                v-model="form.capacity"
+                                :label="$t('tables.capacity')"
+                                type="number"
+                                min="1"
+                            />
                         </div>
                         <!-- Deprecated Location Field, kept for backward compatibility if user wants manual override, but Zone is preferred -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('tables.location') }} <span class="text-gray-400 text-xs font-normal">(Optional description)</span></label>
-                            <input v-model="form.location" type="text" placeholder="e.g. Near Window" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <Input
+                                v-model="form.location"
+                                :label="$t('tables.location')"
+                                :placeholder="$t('tables.location_placeholder')"
+                            />
+                             <p class="text-xs text-gray-500 mt-1">({{ $t('common.optional') }})</p>
                         </div>
                          <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.status') }}</label>
-                            <select v-model="form.status" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option value="available">{{ $t('tables.available') }}</option>
-                                <option value="occupied">{{ $t('tables.occupied') }}</option>
-                                <option value="reserved">{{ $t('tables.reserved') }}</option>
-                            </select>
+                            <Select
+                                v-model="form.status"
+                                :label="$t('common.status')"
+                                :options="statusOptions"
+                            />
                         </div>
                     </div>
                     <div class="mt-8 flex justify-end gap-3">
@@ -106,11 +117,14 @@
              <!-- Create Zone Modal -->
             <Modal :show="showZoneModal" @close="closeZoneModal">
                  <div class="p-6">
-                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">Add new Zone</h2>
+                    <h2 class="text-lg font-bold mb-6 text-gray-900 dark:text-white">{{ $t('tables.add_new_zone') }}</h2>
                     <div class="mb-4">
-                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zone Name</label>
-                         <input v-model="zoneForm.name" type="text" placeholder="e.g. Main Hall" class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                         <p v-if="zoneForm.errors.name" class="text-red-500 text-xs mt-1">{{ zoneForm.errors.name }}</p>
+                         <Input
+                            v-model="zoneForm.name"
+                            :label="$t('tables.zone_name')"
+                            :placeholder="$t('tables.zone_name_placeholder')"
+                            :error="zoneForm.errors.name"
+                         />
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <Button variant="secondary" @click="closeZoneModal" class="bg-gray-100 text-gray-700 hover:bg-gray-200">{{ $t('common.cancel') }}</Button>
@@ -153,13 +167,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent, h } from 'vue';
+import { ref, defineComponent, h, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 import { usePermissions } from '@/Composables/usePermissions';
+
+const { t } = useI18n(); // Moved up scope for computed access if needed
 
 // Define a small internal component for the table card content to reuse it
 const TableCardContent = defineComponent({
@@ -208,7 +226,6 @@ const TableCardContent = defineComponent({
     }
 });
 
-const { t } = useI18n();
 const { hasPermission } = usePermissions();
 
 const props = defineProps<{
@@ -234,6 +251,20 @@ const form = useForm({
 const zoneForm = useForm({
     name: '',
 });
+
+const zoneOptions = computed(() => {
+    const opts = [{ label: t('tables.unassigned'), value: null }];
+    props.zones.forEach((z: any) => {
+        opts.push({ label: z.name, value: z.id });
+    });
+    return opts;
+});
+
+const statusOptions = computed(() => [
+    { label: t('tables.available'), value: 'available' },
+    { label: t('tables.occupied'), value: 'occupied' },
+    { label: t('tables.reserved'), value: 'reserved' },
+]);
 
 const openModal = (table: any = null) => {
     form.reset();
@@ -290,7 +321,7 @@ const submitZone = () => {
 };
 
 const deleteZone = (zone: any) => {
-     if (confirm('Are you sure? Tables in this zone will become unassigned.')) {
+     if (confirm(t('tables.confirm_delete_zone'))) {
         router.delete(route('tables.zones.destroy', zone.id));
     }
 };

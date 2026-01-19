@@ -347,27 +347,28 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $t('cash_register.open_cash_register') }}</h3>
                 <form @submit.prevent="submitOpen">
                     <div class="space-y-4">
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.opening_balance') }}</label>
-                            <input
+                            <Input
                                 v-model="openForm.opening_balance"
+                                :label="$t('cash_register.opening_balance')"
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 placeholder="0.00"
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.notes_optional') }}</label>
-                            <textarea
+                             <Input
                                 v-model="openForm.opening_notes"
+                                :label="$t('cash_register.notes_optional')"
+                                type="textarea"
                                 rows="3"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 :placeholder="$t('cash_register.notes_placeholder')"
-                            ></textarea>
+                            />
                         </div>
+                    </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="closeOpenModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
@@ -405,27 +406,28 @@
                 </div>
                 <form @submit.prevent="submitClose">
                     <div class="space-y-4">
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.actual_balance') }}</label>
-                            <input
+                            <Input
                                 v-model="closeForm.closing_balance"
+                                :label="$t('cash_register.actual_balance')"
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 :placeholder="$t('cash_register.count_placeholder')"
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.closing_notes') }}</label>
-                            <textarea
+                            <Input
                                 v-model="closeForm.closing_notes"
+                                :label="$t('cash_register.closing_notes')"
+                                type="textarea"
                                 rows="3"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 :placeholder="$t('cash_register.closing_notes_placeholder')"
-                            ></textarea>
+                            />
                         </div>
+                    </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="closeCloseModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">{{ $t('common.cancel') }}</button>
@@ -447,27 +449,26 @@
                 <form @submit.prevent="submitWithdraw">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.withdraw_amount') }}</label>
-                            <input
+                            <Input
                                 v-model="withdrawForm.amount"
+                                :label="$t('cash_register.withdraw_amount')"
                                 type="number"
                                 step="0.01"
                                 min="0.01"
                                 :max="currentBalance"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 placeholder="0.00"
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.withdraw_reason') }} <span class="text-red-500">*</span></label>
-                            <textarea
+                            <Input
                                 v-model="withdrawForm.notes"
-                                rows="3"
+                                :label="$t('cash_register.withdraw_reason')"
+                                type="textarea"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                rows="3"
                                 :placeholder="$t('cash_register.withdraw_reason_placeholder')"
-                            ></textarea>
+                            />
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
@@ -487,26 +488,25 @@
                 <form @submit.prevent="submitDeposit">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.add_amount') }}</label>
-                            <input
+                            <Input
                                 v-model="depositForm.amount"
+                                :label="$t('cash_register.add_amount')"
                                 type="number"
                                 step="0.01"
                                 min="0.01"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 placeholder="0.00"
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('cash_register.deposit_reason') }} <span class="text-red-500">*</span></label>
-                            <textarea
+                            <Input
                                 v-model="depositForm.notes"
-                                rows="3"
+                                :label="$t('cash_register.deposit_reason')"
+                                type="textarea"
                                 required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                rows="3"
                                 :placeholder="$t('cash_register.deposit_reason_placeholder')"
-                            ></textarea>
+                            />
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
@@ -569,7 +569,7 @@
                     </div>
 
                     <!-- Order Type & Table Section -->
-                    <div v-if="currentRestaurant?.service_type !== 'self_service'" class="glass-card rounded-xl p-5 border border-gray-200">
+                    <div v-if="currentRestaurant?.service_type !== 'self_service'" class="glass-card rounded-xl p-5 border border-gray-200 overflow-visible">
                         <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <div class="p-1.5 bg-blue-100 rounded-lg">
                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -598,17 +598,13 @@
                                 </div>
                             </label>
                         </div>
-                        <div v-if="updateForm.type === 'dine_in'" class="animate-fade-in-up">
-                            <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('common.select') }} {{ $t('common.table') }}</label>
-                            <select 
-                                v-model="updateForm.table_id" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                            >
-                                <option :value="null">{{ $t('common.no_table') }}</option>
-                                <option v-for="table in tables" :key="table.id" :value="table.id" :disabled="!table.is_available && table.id !== selectedOrder.table_id">
-                                    {{ table.name }} ({{ table.capacity }} seats){{ table.location ? ' - ' + table.location : '' }}{{ !table.is_available && table.id !== selectedOrder.table_id ? ' [' + $t('tables.occupied') + ']' : '' }}
-                                </option>
-                            </select>
+                        <div v-if="updateForm.type === 'dine_in'" class="animate-fade-in-up relative" style="z-index: 9999;">
+                            <Select
+                                v-model="updateForm.table_id"
+                                :label="$t('common.select') + ' ' + $t('common.table')"
+                                :options="tableOptions"
+                                :placeholder="$t('common.no_table')"
+                            />
                         </div>
                     </div>
 
@@ -772,6 +768,8 @@ import { usePermissions } from '@/Composables/usePermissions';
 import ReceiptPreview from '@/Components/ReceiptPreview.vue';
 import { printReceiptPreview } from '@/Utils/printReceipt';
 import PhoneInput from '@/Components/PhoneInput.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 
 const { t } = useI18n();
 
@@ -1438,6 +1436,29 @@ const calculateDifference = () => {
 
 // Add route helper
 const route = (window as any).route;
+
+const tableOptions = computed(() => {
+    const list: { label: string; value: number | null; disabled?: boolean }[] = [
+        { label: t('common.no_table'), value: null }
+    ];
+    
+    props.tables.forEach((table: any) => {
+        let label = `${table.name} (${table.capacity} seats)`;
+        if (table.location) label += ` - ${table.location}`;
+        
+        const isOccupied = !table.is_available && (selectedOrder.value ? table.id !== selectedOrder.value.table_id : true);
+        
+        if (isOccupied) label += ` [${t('tables.occupied') || 'Occupied'}]`;
+        
+        list.push({
+            label: label,
+            value: table.id,
+            disabled: isOccupied
+        });
+    });
+    
+    return list;
+});
 
 // Auto-refresh every 2 seconds to sync with kitchen
 let refreshInterval: any;

@@ -1,11 +1,11 @@
 <template>
-    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-gray-50 to-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
         
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
             <div class="text-center mb-16">
                  <div class="flex justify-center mb-6">
-                     <Logo class="h-20 w-20" iconClass="w-20 h-20" :showText="true" />
+                     <Logo class="h-20 w-auto justify-center" iconClass="w-20 h-20" :showText="true" />
                  </div>
                  <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">
                      {{ $t('landing.plans_pricing') }}
@@ -117,6 +117,25 @@
                 </div>
             </div>
 
+            <!-- Contact Support Footer -->
+            <div class="mt-16 w-full text-center text-sm text-gray-500/80">
+                <p class="font-medium mb-2">{{ $t('landing.contact_support') }}</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                    <a href="mailto:support@kenildock.com" class="flex items-center gap-2 hover:text-primary transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2V7a2 2 0 00-2-2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span dir="ltr">support@kenildock.com</span>
+                    </a>
+                    <a href="tel:+9715049460976" class="flex items-center gap-2 hover:text-primary transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        <span dir="ltr">+971 50 494 60976</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- Registration Modal (Interest Only) -->
             <Modal :show="showRegisterModal" @close="showRegisterModal = false">
                  <div class="p-8">
@@ -168,12 +187,13 @@
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('landing.message') }}</label>
-                            <textarea 
+                            <Input
                                 v-model="form.message"
+                                :label="$t('landing.message')"
+                                type="textarea"
                                 rows="3"
-                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                            ></textarea>
+                                inputClass="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                            />
                         </div>
 
                         <div class="pt-4">

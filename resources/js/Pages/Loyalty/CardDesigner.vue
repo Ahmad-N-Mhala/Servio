@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
 import html2canvas from 'html2canvas';
@@ -440,29 +441,30 @@ const handleUnsplashSelect = async (image: any) => {
                                 :placeholder="isRewardMode ? $t('loyalty.scan_to_redeem') : $t('loyalty.scan_to_join')"
                             />
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">QR Box Size</label>
-                                <select 
+                                <Select
                                     v-model="form.loyalty_qr_size"
-                                    class="block w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-primary focus:border-primary"
-                                >
-                                    <option value="sm">Small</option>
-                                    <option value="md">Medium</option>
-                                    <option value="lg">Large</option>
-                                </select>
+                                    label="QR Box Size"
+                                    :options="[
+                                        { label: 'Small', value: 'sm' },
+                                        { label: 'Medium', value: 'md' },
+                                        { label: 'Large', value: 'lg' }
+                                    ]"
+                                />
                             </div>
-                            <!-- New Panel Height Control -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Panel Height</label>
-                                <select 
-                                    v-model="form.loyalty_panel_height"
-                                    class="block w-full rounded-lg border-gray-300 py-2 text-sm focus:ring-primary focus:border-primary"
-                                >
-                                    <option value="sm">Short</option>
-                                    <option value="md">Normal</option>
-                                    <option value="lg">Tall</option>
-                                    <option value="xl">Extra Tall</option>
-                                </select>
-                            </div>
+                        </div>
+
+                        <!-- New Panel Height Control -->
+                        <div>
+                            <Select
+                                v-model="form.loyalty_panel_height"
+                                label="Panel Height"
+                                :options="[
+                                    { label: 'Short', value: 'sm' },
+                                    { label: 'Normal', value: 'md' },
+                                    { label: 'Tall', value: 'lg' },
+                                    { label: 'Extra Tall', value: 'xl' }
+                                ]"
+                            />
                         </div>
                     </div>
 

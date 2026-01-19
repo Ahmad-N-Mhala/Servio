@@ -32,7 +32,7 @@
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                     </template>
-                    Import Items
+                    {{ $t('menu.import_items') }}
                 </Button>
             </div>
 
@@ -560,25 +560,25 @@
     </Modal>
 
     <!-- Import Modal -->
-    <Modal :show="showImportModal" @close="showImportModal = false" :title="$t('menu.import_items') || 'Import Menu Items'" size="md">
+    <Modal :show="showImportModal" @close="showImportModal = false" :title="$t('menu.import_items')" size="md">
         <form @submit.prevent="submitImport" class="space-y-6">
             <div class="bg-blue-50 p-4 rounded-lg flex items-start gap-3">
                 <svg class="w-6 h-6 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <div>
-                    <h4 class="font-bold text-blue-800 text-sm">Instructions</h4>
+                    <h4 class="font-bold text-blue-800 text-sm">{{ $t('menu.import_instructions') }}</h4>
                     <p class="text-sm text-blue-700 mt-1">
-                        1. Download the template file.<br>
-                        2. Fill in the required fields (marked with *).<br>
-                        3. Upload the file to import items.
+                        {{ $t('menu.import_step_1') }}<br>
+                        {{ $t('menu.import_step_2') }}<br>
+                        {{ $t('menu.import_step_3') }}
                     </p>
                     <a :href="route('menu.items.template')" class="text-sm font-bold text-blue-600 hover:underline mt-2 inline-block">
-                        Download Template
+                        {{ $t('menu.download_template') }}
                     </a>
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Excel File</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('menu.upload_excel') }}</label>
                 <input 
                     type="file" 
                     @change="handleImportFile" 
@@ -591,7 +591,7 @@
 
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <Button type="button" variant="secondary" @click="showImportModal = false">{{ $t('common.cancel') }}</Button>
-                <Button type="submit" :loading="importForm.processing">Import</Button>
+                <Button type="submit" :loading="importForm.processing">{{ $t('menu.import_btn') }}</Button>
             </div>
         </form>
     </Modal>

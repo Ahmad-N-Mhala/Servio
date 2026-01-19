@@ -19,19 +19,31 @@ class PermissionController extends Controller
 
         foreach ($dbRoles as $role) {
             $label = null;
+            $display = (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name)))
+                ? (array) $role->display_name
+                : [];
 
-            // 1. Check DB display_name (User Override)
-            if (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name))) {
-                $display = (array) $role->display_name;
-                $label = $display[$locale] ?? $display['en'] ?? null;
+            // 1. Check DB display_name (Current Locale) - User Override
+            if (!empty($display[$locale])) {
+                $label = $display[$locale];
             }
 
-            // 2. Fallback to Config
+            // 2. Check Translation File
+            if (!$label && \Illuminate\Support\Facades\Lang::has('roles.' . $role->name)) {
+                $label = __('roles.' . $role->name);
+            }
+
+            // 3. Fallback to DB display_name (English)
+            if (!$label && !empty($display['en'])) {
+                $label = $display['en'];
+            }
+
+            // 4. Fallback to Config
             if (!$label) {
                 $label = $configNames[$role->name] ?? null;
             }
 
-            // 3. Fallback to Name
+            // 5. Fallback to Name
             if (!$label) {
                 $label = ucwords(str_replace('_', ' ', $role->name));
             }

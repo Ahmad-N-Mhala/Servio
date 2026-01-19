@@ -21,9 +21,10 @@ const design = props.settings?.feedback_design || {};
 const route = (window as any).route;
 
 const form = useForm({
-    header_title: design.page_title || t('feedback.default_page_title'), // Changed from page_title
+    page_title: design.page_title || t('feedback.default_page_title'),
     welcome_message: design.welcome_message || t('feedback.default_welcome_message'),
-    primary_color: design.theme_color || '#1e3a8a', // default primary-900 (blue) - Changed from theme_color
+    rating_label: design.rating_label || t('feedback.how_was_experience'),
+    theme_color: design.theme_color || '#1e3a8a', // default primary-900 (blue)
     text_color: design.text_color || '#ffffff',
     header_logo: null as File | null,
     background_image: null as File | null,
@@ -137,7 +138,7 @@ const submit = () => {
                 
                 <form @submit.prevent="submit" class="space-y-6">
                     <div class="space-y-4">
-                        <Input v-model="form.header_title" :label="$t('feedback.header_title')" placeholder="e.g. We Value Your Feedback" />
+                        <Input v-model="form.page_title" :label="$t('feedback.header_title')" placeholder="e.g. We Value Your Feedback" />
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('feedback.welcome_message_label') }}</label>
@@ -148,12 +149,14 @@ const submit = () => {
                             ></textarea>
                         </div>
 
+                        <Input v-model="form.rating_label" :label="$t('feedback.rating_label') || 'Rating Question'" placeholder="How was your experience?" />
+
                          <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('feedback.theme_color') }}</label>
                                 <div class="flex items-center space-x-2">
-                                    <input type="color" v-model="form.primary_color" class="h-10 w-20 rounded border border-gray-300" />
-                                    <span class="text-sm font-mono text-gray-500">{{ form.primary_color }}</span>
+                                    <input type="color" v-model="form.theme_color" class="h-10 w-20 rounded border border-gray-300" />
+                                    <span class="text-sm font-mono text-gray-500">{{ form.theme_color }}</span>
                                 </div>
                             </div>
                             <div>
@@ -214,7 +217,7 @@ const submit = () => {
                     <div 
                         class="p-6 text-center relative overflow-hidden transition-colors duration-500"
                         :style="{ 
-                            backgroundColor: form.primary_color, 
+                            backgroundColor: form.theme_color, 
                             color: form.text_color,
                             backgroundImage: form.background_url ? `url(${form.background_url})` : 'none',
                             backgroundSize: 'cover',
@@ -235,7 +238,7 @@ const submit = () => {
                             <div class="w-20 h-20 mx-auto bg-white rounded-full shadow-xl flex items-center justify-center mb-3 overflow-hidden border-4 border-white/40">
                                 <img :src="form.logo_url || props.restaurant?.logo || '/images/logo-placeholder.png'" class="w-full h-full object-cover" />
                             </div>
-                            <h2 class="text-xl font-bold tracking-tight mb-1 drop-shadow-md">{{ form.header_title }}</h2>
+                            <h2 class="text-xl font-bold tracking-tight mb-1 drop-shadow-md">{{ form.page_title }}</h2>
                             <p class="text-xs font-medium tracking-wide uppercase opacity-90">{{ form.welcome_message }}</p>
                         </div>
                     </div>
@@ -243,9 +246,21 @@ const submit = () => {
                     <!-- Content Mock -->
                     <div class="p-6">
                         <div class="text-center mb-6">
-                             <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $t('feedback.how_was_experience') }}</h3>
+                             <h3 class="text-lg font-bold text-gray-800 mb-4">{{ form.rating_label }}</h3>
                              <div class="flex justify-center gap-2 mb-6">
-                                <span v-for="i in 5" :key="i" class="text-yellow-400 text-3xl">★</span>
+                                <svg 
+                                    v-for="i in 5" 
+                                    :key="i"
+                                    class="w-8 h-8 text-amber-400 fill-amber-400 drop-shadow-sm"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round" 
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.563.046.8.773.35 1.139l-4.14 3.393a.562.562 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.92 19.95a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.14-3.393a.562.562 0 01.35-1.139l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                </svg>
                              </div>
                              
                              <!-- Comment textarea mock -->
@@ -254,7 +269,7 @@ const submit = () => {
                              <!-- Submit button with theme color -->
                              <div 
                                 class="h-12 w-full rounded-xl flex items-center justify-center text-white font-semibold shadow-lg"
-                                :style="{ backgroundColor: form.primary_color }"
+                                :style="{ backgroundColor: form.theme_color }"
                              >
                                 {{ $t('feedback.submit_feedback') }}
                              </div>

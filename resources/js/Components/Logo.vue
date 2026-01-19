@@ -2,7 +2,7 @@
     <div :class="['flex items-center gap-2', className]">
         <!-- New Servio Logo Icon -->
         <svg
-            viewBox="0 0 100 100"
+            viewBox="-10 -10 120 120"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             :class="['text-primary', iconClass]"

@@ -19,16 +19,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Month Selector -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">{{ $t('expenses.select_month') }}</label>
-                    <select
+                    <Select
                         v-model="selectedMonth"
-                        @change="filterByMonth"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                    >
-                        <option v-for="month in availableMonths" :key="month.value" :value="month.value">
-                            {{ month.label }}
-                        </option>
-                    </select>
+                        @update:modelValue="filterByMonth"
+                        :label="$t('expenses.select_month')"
+                        :options="availableMonths"
+                    />
                 </div>
 
                 <!-- Summary Cards -->
@@ -153,72 +149,66 @@
                         <form @submit.prevent="submitForm" class="space-y-6">
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.category') }} *</label>
-                                    <select
+                                    <Select
                                         v-model="form.category"
+                                        :label="$t('expenses.category') + ' *'"
+                                        :options="categories.map(c => ({ label: c, value: c }))"
+                                        :placeholder="$t('expenses.select_category')"
                                         required
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    >
-                                        <option value="">{{ $t('expenses.select_category') }}</option>
-                                        <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-                                    </select>
+                                    />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.amount').replace('AED', currency) }} *</label>
-                                    <input
+                                    <Input
                                         v-model="form.amount"
+                                        :label="$t('expenses.amount').replace('AED', currency) + ' *'"
                                         type="number"
                                         step="0.01"
                                         min="0"
                                         required
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="0.00"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.description') }}</label>
-                                <input
+                                <Input
                                     v-model="form.description"
-                                    type="text"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    :label="$t('expenses.description')"
                                     :placeholder="$t('expenses.brief_description')"
                                 />
                             </div>
 
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.payment_status') }} *</label>
-                                    <select
+                                    <Select
                                         v-model="form.payment_status"
+                                        :label="$t('expenses.payment_status') + ' *'"
+                                        :options="[
+                                            { label: $t('expenses.pending'), value: 'pending' },
+                                            { label: $t('expenses.paid'), value: 'paid' }
+                                        ]"
                                         required
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    >
-                                        <option value="pending">{{ $t('expenses.pending') }}</option>
-                                        <option value="paid">{{ $t('expenses.paid') }}</option>
-                                    </select>
+                                    />
                                 </div>
 
                                 <div v-if="form.payment_status === 'paid'">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.paid_date') }}</label>
-                                    <input
+                                    <Input
                                         v-model="form.paid_at"
+                                        :label="$t('expenses.paid_date')"
                                         type="date"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('expenses.notes') }}</label>
-                                <textarea
+                                <Input
                                     v-model="form.notes"
-                                    rows="3"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    :label="$t('expenses.notes')"
+                                    type="textarea"
+                                    :rows="3"
                                     :placeholder="$t('expenses.additional_notes')"
-                                ></textarea>
+                                />
                             </div>
 
                             <div class="flex justify-end gap-4 pt-4">
@@ -249,6 +239,8 @@ import { ref, reactive, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 
 const page = usePage();
 const { t } = useI18n();

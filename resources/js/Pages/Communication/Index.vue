@@ -242,15 +242,12 @@
                                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                                             >
                                         </div>
-                                        <div class="w-32">
-                                            <select 
+                                        <div class="w-40">
+                                            <Select 
                                                 v-model="feedbackForm.timing_unit"
-                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                                            >
-                                                <option value="minutes">{{ $t('communication.minutes') }}</option>
-                                                <option value="hours">{{ $t('communication.hours') }}</option>
-                                                <option value="days">{{ $t('communication.days') }}</option>
-                                            </select>
+                                                :options="timingUnitOptions"
+                                                :clearable="false"
+                                            />
                                         </div>
                                         <span class="text-sm text-gray-600">{{ $t('communication.after_payment') }}</span>
                                     </div>
@@ -380,16 +377,12 @@
                     <div class="flex-1">
                         <Input v-model="params.search" :placeholder="$t('communication.search_logs')" type="search" />
                     </div>
-                    <select v-model="params.type" class="rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]">
-                        <option value="">{{ $t('communication.all_channels') }}</option>
-                        <option value="sms">{{ $t('communication.sms') }}</option>
-                        <option value="email">{{ $t('communication.email') }}</option>
-                    </select>
-                    <select v-model="params.status" class="rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]">
-                        <option value="">{{ $t('communication.all_statuses') }}</option>
-                        <option value="sent">{{ $t('common.sent') }}</option>
-                        <option value="failed">{{ $t('common.failed') }}</option>
-                    </select>
+                    <div class="w-40">
+                        <Select v-model="params.type" :options="channelOptions" />
+                    </div>
+                    <div class="w-40">
+                        <Select v-model="params.status" :options="statusOptions" />
+                    </div>
                     <DateRangePicker 
                         :initial-start-date="params.date_from"
                         :initial-end-date="params.date_to"
@@ -482,23 +475,13 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <!-- Trigger Event -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ $t('communication.trigger_event') }} <span class="text-red-500">*</span>
-                            </label>
-                            <select 
+                             <Select 
                                 v-model="templateForm.trigger_event"
-                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                :label="$t('communication.trigger_event')"
+                                :options="triggerEventOptions"
                                 required
-                            >
-                                <option value="registration">📝 {{ $t('communication.trigger_registration') }}</option>
-                                <option value="order_created">🛒 {{ $t('communication.trigger_order_created') }}</option>
-                                <option value="order_completed">✅ {{ $t('communication.trigger_order_completed') }}</option>
-                                <option value="order_cancelled">❌ {{ $t('communication.trigger_order_cancelled') }}</option>
-                                <option value="birthday">🎂 {{ $t('communication.trigger_birthday') }}</option>
-                                <option value="churn_risk">⚠️ {{ $t('communication.trigger_churn_risk') }}</option>
-                                <option value="feedback_received">⭐ {{ $t('communication.trigger_feedback_received') }}</option>
-                            </select>
-                            <p class="mt-1 text-xs text-gray-500">{{ $t('communication.trigger_when_hint') }}</p>
+                                :hint="$t('communication.trigger_when_hint')"
+                             />
                         </div>
 
                         <!-- Channels (Checkbox Group) -->
@@ -679,15 +662,11 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('communication.when') }}</label>
-                            <select 
+                            <Select 
                                 v-model="templateForm.timing_type"
-                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
-                            >
-                                <option value="immediately">⚡ {{ $t('communication.immediately') }}</option>
-                                <option value="before">⏪ {{ $t('communication.before_event') }}</option>
-                                <option value="after">⏩ {{ $t('communication.after_event') }}</option>
-                            </select>
+                                :label="$t('communication.when')"
+                                :options="timingTypeOptions"
+                            />
                         </div>
                         <div v-if="templateForm.timing_type !== 'immediately'">
                             <Input 
@@ -824,6 +803,8 @@ import DateRangePicker from '@/Components/DateRangePicker.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
+import { computed } from 'vue';
 import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasFeature } = useFeatures();
@@ -911,6 +892,40 @@ const params = ref({
     // Clear template_id if switching tabs or filtered
     template_id: props.filters?.template_id || '', 
 });
+
+const channelOptions = computed(() => [
+    { label: t('communication.all_channels'), value: '' },
+    { label: t('communication.sms'), value: 'sms' },
+    { label: t('communication.email'), value: 'email' }
+]);
+
+const statusOptions = computed(() => [
+    { label: t('communication.all_statuses'), value: '' },
+    { label: t('common.sent'), value: 'sent' },
+    { label: t('common.failed'), value: 'failed' }
+]);
+
+const timingUnitOptions = computed(() => [
+    { label: t('communication.minutes'), value: 'minutes' },
+    { label: t('communication.hours'), value: 'hours' },
+    { label: t('communication.days'), value: 'days' }
+]);
+
+const timingTypeOptions = computed(() => [
+    { label: '⚡ ' + t('communication.immediately'), value: 'immediately' },
+    { label: '⏪ ' + t('communication.before_event'), value: 'before' },
+    { label: '⏩ ' + t('communication.after_event'), value: 'after' }
+]);
+
+const triggerEventOptions = computed(() => [
+    { label: '📝 ' + t('communication.trigger_registration'), value: 'registration' },
+    { label: '🛒 ' + t('communication.trigger_order_created'), value: 'order_created' },
+    { label: '✅ ' + t('communication.trigger_order_completed'), value: 'order_completed' },
+    { label: '❌ ' + t('communication.trigger_order_cancelled'), value: 'order_cancelled' },
+    { label: '🎂 ' + t('communication.trigger_birthday'), value: 'birthday' },
+    { label: '⚠️ ' + t('communication.trigger_churn_risk'), value: 'churn_risk' },
+    { label: '⭐ ' + t('communication.trigger_feedback_received'), value: 'feedback_received' }
+]);
 
 const onDateRangeUpdate = (range: { startDate: string; endDate: string }) => {
     params.value.date_from = range.startDate;

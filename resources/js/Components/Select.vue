@@ -22,6 +22,9 @@
                 <template #option="option">
                     <span :class="{'text-gray-400': option.disabled}">{{ option.label }}</span>
                 </template>
+                <template #no-options>
+                    <span class="p-2 text-sm text-gray-500">{{ $t('common.no_matching_options') }}</span>
+                </template>
             </v-select>
         </div>
 
@@ -141,5 +144,10 @@ const formattedOptions = computed(() => {
 
 .vs__search::placeholder {
     color: #94a3b8;
+}
+
+/* Ensure dropdown menu appears above other content */
+.style-chooser .vs__dropdown-menu {
+    z-index: 9999 !important;
 }
 </style>

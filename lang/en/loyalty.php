@@ -82,5 +82,8 @@ return [
     'settings' => 'Loyalty Settings',
     'manage_settings_description' => 'Configure your loyalty program settings, design, and earning rules.',
     'qr_code_link_required' => 'Link required for QR Code',
+    'loyalty' => 'Loyalty Program',
+    'points_per_spend' => 'Points per Spend',
+    'points_per_visit' => 'Points per Visit',
 ];
 

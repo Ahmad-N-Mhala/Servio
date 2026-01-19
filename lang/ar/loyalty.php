@@ -147,4 +147,7 @@ return [
     'settings' => 'إعدادات الولاء',
     'manage_settings_description' => 'قم بتكوين إعدادات برنامج الولاء والتصميم وقواعد الكسب.',
     'qr_code_link_required' => 'الرابط مطلوب لرمز QR',
+    'loyalty' => 'برنامج الولاء',
+    'points_per_spend' => 'نقاط مقابل الإنفاق',
+    'points_per_visit' => 'نقاط لكل زيارة',
 ];

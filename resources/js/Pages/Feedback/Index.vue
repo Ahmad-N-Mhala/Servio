@@ -56,18 +56,11 @@
                                     type="search"
                                 />
                             </div>
-                            <div class="w-full sm:w-auto">
-                                <select 
+                            <div class="w-full sm:w-60">
+                                <Select 
                                     v-model="filters.rating" 
-                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary h-[42px]"
-                                >
-                                    <option value="">{{ $t('feedback.all_ratings') || 'All Ratings' }}</option>
-                                    <option value="5">⭐⭐⭐⭐⭐ (5 {{ $t('feedback.stars') || 'stars' }})</option>
-                                    <option value="4">⭐⭐⭐⭐ (4 {{ $t('feedback.stars') || 'stars' }})</option>
-                                    <option value="3">⭐⭐⭐ (3 {{ $t('feedback.stars') || 'stars' }})</option>
-                                    <option value="2">⭐⭐ (2 {{ $t('feedback.stars') || 'stars' }})</option>
-                                    <option value="1">⭐ (1 {{ $t('feedback.stars') || 'stars' }})</option>
-                                </select>
+                                    :options="ratingOptions"
+                                />
                             </div>
                             <div class="w-full sm:w-auto">
                                 <DateRangePicker 
@@ -142,6 +135,7 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Table from '@/Components/Table.vue';
 import Design from './Design.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
 import DateRangePicker from '@/Components/DateRangePicker.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -206,6 +200,15 @@ const columns = computed(() => [
     { key: 'customer', label: t('customers.title') || 'Customer' },
     { key: 'order', label: t('nav.orders') || 'Order' },
     { key: 'redirected_to_google', label: t('feedback.google_redirect') || 'Google Redirect' },
+]);
+
+const ratingOptions = computed(() => [
+    { label: t('feedback.all_ratings') || 'All Ratings', value: '' },
+    { label: '⭐⭐⭐⭐⭐ (5 ' + (t('feedback.stars') || 'stars') + ')', value: '5' },
+    { label: '⭐⭐⭐⭐ (4 ' + (t('feedback.stars') || 'stars') + ')', value: '4' },
+    { label: '⭐⭐⭐ (3 ' + (t('feedback.stars') || 'stars') + ')', value: '3' },
+    { label: '⭐⭐ (2 ' + (t('feedback.stars') || 'stars') + ')', value: '2' },
+    { label: '⭐ (1 ' + (t('feedback.stars') || 'stars') + ')', value: '1' }
 ]);
 
 const route = (window as any).route;

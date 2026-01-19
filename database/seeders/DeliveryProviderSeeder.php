@@ -11,7 +11,7 @@ class DeliveryProviderSeeder extends Seeder
     {
         $providers = [
             [
-                'name' => 'Talabat',
+                'name' => 'Talabat (طلبات)',
                 'slug' => 'talabat',
                 'description' => 'Leading food delivery platform in the Middle East, operating across UAE, Saudi Arabia, Kuwait, Bahrain, Oman, Qatar, Jordan, and Egypt.',
                 'logo_url' => '/images/delivery-partners/talabat.svg',
@@ -24,7 +24,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
-                'name' => 'Noon Food',
+                'name' => 'Noon Food (نون فود)',
                 'slug' => 'noon',
                 'description' => 'Noon\'s food delivery service offering fast delivery across UAE and Saudi Arabia with a wide selection of restaurants.',
                 'logo_url' => '/images/delivery-partners/noon.svg',
@@ -38,7 +38,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
-                'name' => 'Careem Food', // Updated Name
+                'name' => 'Careem Food (كريم فود)', // Updated Name
                 'slug' => 'careem',
                 'description' => 'Careem\'s food and grocery delivery service.',
                 'logo_url' => '/images/delivery-partners/careem.svg',
@@ -53,7 +53,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 3,
             ],
             [
-                'name' => 'Deliveroo',
+                'name' => 'Deliveroo (ديليفيرو)',
                 'slug' => 'deliveroo',
                 'description' => 'International food delivery company.',
                 'logo_url' => '/images/delivery-partners/deliveroo.svg',
@@ -66,7 +66,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 4,
             ],
             [
-                'name' => 'Uber Eats',
+                'name' => 'Uber Eats (أوبر إيتس)',
                 'slug' => 'ubereats',
                 'description' => 'Global food delivery platform by Uber.',
                 'logo_url' => '/images/delivery-partners/ubereats.svg',
@@ -81,7 +81,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 5,
             ],
             [
-                'name' => 'Zomato',
+                'name' => 'Zomato (زوماتو)',
                 'slug' => 'zomato',
                 'description' => 'Indian food delivery and restaurant discovery platform expanding in the Middle East region.',
                 'logo_url' => '/images/delivery-partners/zomato.svg',
@@ -94,7 +94,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 6,
             ],
             [
-                'name' => 'HungerStation',
+                'name' => 'HungerStation (هنقرستيشن)',
                 'slug' => 'hungerstation',
                 'description' => 'Saudi Arabia\'s leading food delivery app, serving customers across the Kingdom.',
                 'logo_url' => '/images/delivery-partners/hungerstation.svg',
@@ -107,7 +107,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 7,
             ],
             [
-                'name' => 'Jahez',
+                'name' => 'Jahez (جاهز)',
                 'slug' => 'jahez',
                 'description' => 'Popular Saudi food delivery platform known for fast delivery and local restaurant partnerships.',
                 'logo_url' => '/images/delivery-partners/jahez.png',
@@ -120,7 +120,7 @@ class DeliveryProviderSeeder extends Seeder
                 'sort_order' => 8,
             ],
             [
-                'name' => 'Keeta',
+                'name' => 'Keeta (كيتا)',
                 'slug' => 'keeta',
                 'description' => 'Fast-growing food delivery app in the Middle East, backed by Meituan.',
                 'logo_url' => '/images/delivery-partners/keeta.png',

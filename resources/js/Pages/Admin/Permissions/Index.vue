@@ -87,15 +87,12 @@
                             <div class="w-full max-w-md">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Select Role to Manage</label>
                                 <div class="flex gap-2">
-                                    <select 
-                                        v-model="selectedRole" 
-                                        class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                    >
-                                        <option value="">Choose a role...</option>
-                                        <option v-for="(label, role) in roles" :key="role" :value="role">
-                                            {{ label }}
-                                        </option>
-                                    </select>
+                                    <Select
+                                        v-model="selectedRole"
+                                        :options="roleOptions"
+                                        placeholder="Choose a role..."
+                                        class="w-full"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -187,27 +184,23 @@
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Create New Role</h3>
                             <div class="mt-4 space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Role Name (English)</label>
-                                    <input 
+                                    <Input
                                         v-model="createRoleForm.name_en"
-                                        type="text" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                        label="Role Name (English)"
                                         placeholder="e.g. Supervisor"
                                         required
-                                    >
-                                    <p v-if="createRoleForm.errors.name_en" class="mt-1 text-sm text-red-600">{{ createRoleForm.errors.name_en }}</p>
+                                        :error="createRoleForm.errors.name_en"
+                                    />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Role Name (Arabic)</label>
-                                    <input 
+                                    <Input
                                         v-model="createRoleForm.name_ar"
-                                        type="text" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-right"
-                                        dir="rtl"
+                                        label="Role Name (Arabic)"
                                         placeholder="مثال: مشرف"
+                                        dir="rtl"
                                         required
-                                    >
-                                    <p v-if="createRoleForm.errors.name_ar" class="mt-1 text-sm text-red-600">{{ createRoleForm.errors.name_ar }}</p>
+                                        :error="createRoleForm.errors.name_ar"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -238,25 +231,21 @@
                             <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Role</h3>
                             <div class="mt-4 space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Role Name (English)</label>
-                                    <input 
+                                    <Input
                                         v-model="editRoleForm.name_en"
-                                        type="text" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                                        label="Role Name (English)"
                                         required
-                                    >
-                                    <p v-if="editRoleForm.errors.name_en" class="mt-1 text-sm text-red-600">{{ editRoleForm.errors.name_en }}</p>
+                                        :error="editRoleForm.errors.name_en"
+                                    />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Role Name (Arabic)</label>
-                                    <input 
+                                    <Input
                                         v-model="editRoleForm.name_ar"
-                                        type="text" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-right"
+                                        label="Role Name (Arabic)"
                                         dir="rtl"
                                         required
-                                    >
-                                    <p v-if="editRoleForm.errors.name_ar" class="mt-1 text-sm text-red-600">{{ editRoleForm.errors.name_ar }}</p>
+                                        :error="editRoleForm.errors.name_ar"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -282,9 +271,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 
 const props = defineProps<{
     roles: Record<string, string>;
@@ -299,6 +290,13 @@ const activeTab = ref('permissions');
 const selectedRole = ref('owner');
 const selectedPermissions = ref<string[]>(props.rolePermissions[selectedRole.value] || []);
 const showCreateRoleModal = ref(false);
+
+const roleOptions = computed(() => {
+    return Object.entries(props.roles).map(([key, label]) => ({
+        label: label,
+        value: key
+    }));
+});
 
 const form = useForm({
     role: '',

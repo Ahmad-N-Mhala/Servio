@@ -12,67 +12,79 @@
                     <form @submit.prevent="submit">
                         <!-- Restaurant Selection -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Restaurant *</label>
-                            <select v-model="form.restaurant_id" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option :value="null">Select a Restaurant</option>
-                                <option v-for="restaurant in restaurants" :key="restaurant.id" :value="restaurant.id">
-                                    {{ restaurant.name }}
-                                </option>
-                            </select>
-                            <div v-if="form.errors.restaurant_id" class="text-red-600 text-sm mt-1">{{ form.errors.restaurant_id }}</div>
+                            <Select
+                                v-model="form.restaurant_id"
+                                label="Restaurant *"
+                                :options="restaurantOptions"
+                                placeholder="Select a Restaurant"
+                                :error="form.errors.restaurant_id"
+                            />
                         </div>
 
                         <!-- Provider -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Provider Name *</label>
-                            <select v-model="form.provider" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="">Select Provider</option>
-                                <option value="uber-eats">Uber Eats</option>
-                                <option value="deliveroo">Deliveroo</option>
-                                <option value="talabat">Talabat</option>
-                                <option value="careem">Careem</option>
-                                <option value="noon">Noon Food</option>
-                            </select>
-                            <div v-if="form.errors.provider" class="text-red-600 text-sm mt-1">{{ form.errors.provider }}</div>
+                            <Select
+                                v-model="form.provider"
+                                label="Provider Name *"
+                                :options="providerOptions"
+                                placeholder="Select Provider"
+                                :error="form.errors.provider"
+                            />
                         </div>
 
                         <!-- Store ID (Common) -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Store ID (External ID) *</label>
-                            <input v-model="form.store_id" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="e.g. 12345 or X-999">
-                            <div v-if="form.errors.store_id" class="text-red-600 text-sm mt-1">{{ form.errors.store_id }}</div>
+                            <Input
+                                v-model="form.store_id"
+                                label="Store ID (External ID) *"
+                                :error="form.errors.store_id"
+                                placeholder="e.g. 12345 or X-999"
+                            />
                         </div>
 
                         <!-- Uber Eats Specifics -->
                         <template v-if="form.provider === 'uber-eats'">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
-                                <input v-model="form.client_id" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <Input
+                                    v-model="form.client_id"
+                                    label="Client ID"
+                                />
                             </div>
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
-                                <input v-model="form.client_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <Input
+                                    v-model="form.client_secret"
+                                    label="Client Secret"
+                                    type="password"
+                                />
                             </div>
                         </template>
 
                         <!-- Standard API Key/Secret (Deliveroo, Talabat, etc) -->
                          <template v-if="form.provider !== 'uber-eats'">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">API Key / Token</label>
-                                <input v-model="form.api_key" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <div v-if="form.errors.api_key" class="text-red-600 text-sm mt-1">{{ form.errors.api_key }}</div>
+                                <Input
+                                    v-model="form.api_key"
+                                    label="API Key / Token"
+                                    :error="form.errors.api_key"
+                                />
                             </div>
 
                             <div class="mb-4" v-if="form.provider === 'deliveroo' || form.provider === 'noon'">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">API Secret</label>
-                                <input v-model="form.api_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <Input
+                                    v-model="form.api_secret"
+                                    label="API Secret"
+                                    type="password"
+                                />
                             </div>
                         </template>
 
                         <!-- Webhook Secrets -->
                          <div class="mb-4" v-if="form.provider === 'deliveroo'">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook Secret</label>
-                            <input v-model="form.webhook_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            <Input
+                                v-model="form.webhook_secret"
+                                label="Webhook Secret"
+                                type="password"
+                            />
                              <p class="text-xs text-gray-500 mt-1">Used to verify incoming webhook signatures.</p>
                         </div>
 
@@ -109,8 +121,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 
 
 const props = defineProps<{
@@ -118,6 +133,18 @@ const props = defineProps<{
 }>();
 
 const route = (window as any).route;
+
+const restaurantOptions = computed(() => {
+    return props.restaurants.map(r => ({ label: r.name, value: r.id }));
+});
+
+const providerOptions = [
+    { value: 'uber-eats', label: 'Uber Eats' },
+    { value: 'deliveroo', label: 'Deliveroo' },
+    { value: 'talabat', label: 'Talabat' },
+    { value: 'careem', label: 'Careem' },
+    { value: 'noon', label: 'Noon Food' },
+];
 
 const form = useForm({
     restaurant_id: null,

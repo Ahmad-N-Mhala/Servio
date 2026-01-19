@@ -69,4 +69,14 @@ return [
     'no_extras_defined' => 'No extras defined.',
     'add_first_extra' => 'Add the first extra option',
     'sold_out' => 'Sold Out',
+
+    // Import Modal
+    'import_items' => 'Import Menu Items',
+    'import_instructions' => 'Instructions',
+    'import_step_1' => '1. Download the template file.',
+    'import_step_2' => '2. Fill in the required fields (marked with *).',
+    'import_step_3' => '3. Upload the file to import items.',
+    'download_template' => 'Download Template',
+    'upload_excel' => 'Upload Excel File',
+    'import_btn' => 'Import',
 ];

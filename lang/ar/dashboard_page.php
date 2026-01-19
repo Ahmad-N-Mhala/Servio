@@ -22,4 +22,6 @@ return [
     'avg_dining_time' => 'متوسط وقت تناول الطعام',
     'avg_dining_time_subtitle' => 'متوسط الوقت من الطلب حتى الاكتمال',
     'details' => 'التفاصيل',
+    'feedback_collection' => 'جمع التقييمات',
+    'feedback_subtitle' => 'التقييمات 4-5 نجوم يتم نشرها على خرائط جوجل',
 ];

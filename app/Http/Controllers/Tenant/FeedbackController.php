@@ -69,6 +69,7 @@ class FeedbackController extends Controller
         $validated = $request->validate([
             'page_title' => ['nullable', 'string', 'max:50'],
             'welcome_message' => ['nullable', 'string', 'max:100'],
+            'rating_label' => ['nullable', 'string', 'max:100'],
             'theme_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
             'text_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
             'header_logo' => ['nullable', 'image', 'max:2048'],
@@ -106,7 +107,7 @@ class FeedbackController extends Controller
         }
 
         // Update Fields
-        $fields = ['page_title', 'welcome_message', 'theme_color', 'text_color'];
+        $fields = ['page_title', 'welcome_message', 'rating_label', 'theme_color', 'text_color'];
         foreach ($fields as $field) {
             if ($request->has($field)) {
                 $feedbackDesign[$field] = $validated[$field];

@@ -45,4 +45,7 @@ return [
     'unpaid' => 'Unpaid',
     'pending' => 'Pending',
     'paid' => 'Paid',
+    'left' => 'Left',
+    'center' => 'Center',
+    'right' => 'Right',
 ];

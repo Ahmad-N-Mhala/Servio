@@ -25,58 +25,55 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Email Address</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Input
+                        v-model="form.email"
+                        type="email"
+                        required
+                        readonly
+                        label="Email Address"
+                        inputClass="bg-gray-50 text-gray-500 cursor-not-allowed"
+                    >
+                        <template #prefix>
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
                             </svg>
-                        </div>
-                        <input
-                            type="email"
-                            v-model="form.email"
-                            required
-                            readonly
-                            class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed"
-                        />
-                    </div>
+                        </template>
+                    </Input>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">New Password</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Input
+                        v-model="form.password"
+                        type="password"
+                        required
+                        autofocus
+                        label="New Password"
+                        placeholder="Min 8 characters"
+                        inputClass="bg-white/80 backdrop-blur-sm"
+                    >
+                        <template #prefix>
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
-                        </div>
-                        <input
-                            type="password"
-                            v-model="form.password"
-                            required
-                            autofocus
-                            placeholder="Min 8 characters"
-                            class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        />
-                    </div>
+                        </template>
+                    </Input>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Confirm Password</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Input
+                        v-model="form.password_confirmation"
+                        type="password"
+                        required
+                        label="Confirm Password"
+                        placeholder="Retype password"
+                        inputClass="bg-white/80 backdrop-blur-sm"
+                    >
+                        <template #prefix>
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
-                        </div>
-                        <input
-                            type="password"
-                            v-model="form.password_confirmation"
-                            required
-                            placeholder="Retype password"
-                            class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                        />
-                    </div>
+                        </template>
+                    </Input>
                 </div>
 
                 <button
@@ -98,6 +95,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import Logo from '@/Components/Logo.vue';
+import Input from '@/Components/Input.vue';
 
 const route = (window as any).route;
 

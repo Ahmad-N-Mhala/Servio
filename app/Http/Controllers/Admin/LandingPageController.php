@@ -36,6 +36,11 @@ class LandingPageController extends Controller
             'feature_loyalty_title' => ['en' => __('landing.feature_loyalty_title', [], 'en'), 'ar' => __('landing.feature_loyalty_title', [], 'ar')],
             'feature_loyalty_desc' => ['en' => __('landing.feature_loyalty_desc', [], 'en'), 'ar' => __('landing.feature_loyalty_desc', [], 'ar')],
 
+            'inventory_bullet_1' => ['en' => __('landing.inventory_bullet_1', [], 'en'), 'ar' => __('landing.inventory_bullet_1', [], 'ar')],
+            'inventory_bullet_2' => ['en' => __('landing.inventory_bullet_2', [], 'en'), 'ar' => __('landing.inventory_bullet_2', [], 'ar')],
+            'loyalty_bullet_1' => ['en' => __('landing.loyalty_bullet_1', [], 'en'), 'ar' => __('landing.loyalty_bullet_1', [], 'ar')],
+            'loyalty_bullet_2' => ['en' => __('landing.loyalty_bullet_2', [], 'en'), 'ar' => __('landing.loyalty_bullet_2', [], 'ar')],
+
             'how_it_works_title' => ['en' => __('landing.how_it_works_title', [], 'en'), 'ar' => __('landing.how_it_works_title', [], 'ar')],
             'step_1_title' => ['en' => __('landing.step_1_title', [], 'en'), 'ar' => __('landing.step_1_title', [], 'ar')],
             'step_1_desc' => ['en' => __('landing.step_1_desc', [], 'en'), 'ar' => __('landing.step_1_desc', [], 'ar')],

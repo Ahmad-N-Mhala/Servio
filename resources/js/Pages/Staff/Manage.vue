@@ -164,18 +164,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('staff.role') }} *</label>
-                    <select 
+                    <Select
                         v-model="form.role"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                        required
-                    >
-                        <option value="" disabled>{{ $t('common.select') }} {{ $t('staff.role') }}</option>
-                        <option v-for="role in roles" :key="role.value" :value="role.value">
-                            {{ role.label }}
-                        </option>
-                    </select>
-                    <p v-if="form.errors.role" class="mt-1 text-sm text-red-600">{{ form.errors.role }}</p>
+                        :label="$t('staff.role') + ' *'"
+                        :options="roles"
+                        :placeholder="$t('common.select') + ' ' + $t('staff.role')"
+                        :error="form.errors.role"
+                    />
                 </div>
 
                 <div class="pt-2 text-sm text-gray-500" v-if="!editingId">
@@ -206,6 +201,7 @@ import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import Modal from '@/Components/Modal.vue';
 import Table from '@/Components/Table.vue';
+import Select from '@/Components/Select.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 
 const { hasPermission } = usePermissions();

@@ -14,7 +14,8 @@
                 >
                     <img 
                         :src="getImageUrl(img)" 
-                        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        class="w-full h-full transition-transform duration-500 group-hover:scale-110"
+                        :class="imageClass"
                         alt="Item image"
                     />
                 </div>
@@ -64,9 +65,11 @@ import { ref, watch } from 'vue';
 const props = withDefaults(defineProps<{
     images: string[];
     heightClass?: string;
+    imageClass?: string;
 }>(), {
     images: () => [],
-    heightClass: 'h-48'
+    heightClass: 'h-48',
+    imageClass: 'object-cover'
 });
 
 const currentIndex = ref(0);
@@ -87,6 +90,7 @@ const prev = () => {
 const getImageUrl = (img: string) => {
     if (!img) return '';
     if (img.startsWith('http') || img.startsWith('blob:') || img.startsWith('data:')) return img;
+    if (img.startsWith('/storage')) return img;
     return '/storage/' + img;
 };
 </script>

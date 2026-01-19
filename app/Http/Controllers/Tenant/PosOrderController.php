@@ -92,10 +92,16 @@ class PosOrderController extends Controller
                 ];
             });
 
+        // 3. Delivery Providers
+        $deliveryProviders = \App\Models\DeliveryProvider::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['name', 'slug', 'logo_url']);
+
         return Inertia::render('Orders/DeliveryCreate', [
             'menuCategories' => $menuCategories,
             'customers' => $customers,
             'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
+            'deliveryProviders' => $deliveryProviders,
         ]);
     }
 

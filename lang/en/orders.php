@@ -72,5 +72,8 @@ return [
     'delivery' => 'Delivery',
     'other_delivery_id' => 'Other Delivery ID',
     'enter_delivery_id' => 'Enter ID',
+    'delivery_provider_label' => 'Delivery Provider (e.g. Uber Eats, Talabat)',
+    'external_order_id' => 'External Order ID (Optional)',
+    'waiter' => 'Waiter',
 ];
 

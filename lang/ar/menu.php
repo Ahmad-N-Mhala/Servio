@@ -68,4 +68,14 @@ return [
     'no_extras_defined' => 'لم يتم تعريف أي إضافات.',
     'add_first_extra' => 'أضف أول خيار إضافي',
     'sold_out' => 'نفذت الكمية',
+
+    // Import Modal
+    'import_items' => 'استيراد عناصر القائمة',
+    'import_instructions' => 'تعليمات',
+    'import_step_1' => '1. قم بتنزيل ملف القالب.',
+    'import_step_2' => '2. املأ الحقول المطلوبة (المميزة بـ *).',
+    'import_step_3' => '3. قم برفع الملف لاستيراد العناصر.',
+    'download_template' => 'تنزيل القالب',
+    'upload_excel' => 'رفع ملف Excel',
+    'import_btn' => 'استيراد',
 ];

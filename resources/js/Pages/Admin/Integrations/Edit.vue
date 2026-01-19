@@ -12,23 +12,25 @@
                     <form @submit.prevent="submit">
                         <!-- Provider -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Provider Name *</label>
-                            <select v-model="form.provider" disabled class="w-full rounded-lg border-gray-300 bg-gray-100 cursor-not-allowed">
-                                <option value="">Select Provider</option>
-                                <option value="uber-eats">Uber Eats</option>
-                                <option value="deliveroo">Deliveroo</option>
-                                <option value="talabat">Talabat</option>
-                                <option value="careem">Careem</option>
-                                <option value="noon">Noon Food</option>
-                            </select>
-                            <div v-if="form.errors.provider" class="text-red-600 text-sm mt-1">{{ form.errors.provider }}</div>
+                            <Select
+                                v-model="form.provider"
+                                label="Provider Name *"
+                                :options="providerOptions"
+                                placeholder="Select Provider"
+                                disabled
+                                :error="form.errors.provider"
+                            />
                         </div>
 
                          <!-- Store ID (Common) -->
+                         <!-- Store ID (Common) -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Store ID (External ID) *</label>
-                            <input v-model="form.store_id" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="e.g. 12345 or X-999">
-                            <div v-if="form.errors.store_id" class="text-red-600 text-sm mt-1">{{ form.errors.store_id }}</div>
+                            <Input
+                                v-model="form.store_id"
+                                label="Store ID (External ID) *"
+                                :error="form.errors.store_id"
+                                placeholder="e.g. 12345 or X-999"
+                            />
                         </div>
 
                         <!-- Webhook URL Display (Read Only) -->
@@ -45,42 +47,61 @@
                         <!-- Uber Eats Specifics -->
                         <template v-if="form.provider === 'uber-eats'">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
-                                <input v-model="form.client_id" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                <Input
+                                    v-model="form.client_id"
+                                    label="Client ID"
+                                />
                             </div>
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
-                                <input v-model="form.client_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="Leave blank to keep current">
+                                <Input
+                                    v-model="form.client_secret"
+                                    label="Client Secret"
+                                    type="password"
+                                    placeholder="Leave blank to keep current"
+                                />
                             </div>
                         </template>
 
                         <!-- Standard API Key/Secret (Deliveroo, Talabat, etc) -->
                          <template v-if="form.provider !== 'uber-eats'">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">API Key / Token</label>
-                                <input v-model="form.api_key" type="text" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <div v-if="form.errors.api_key" class="text-red-600 text-sm mt-1">{{ form.errors.api_key }}</div>
+                                <Input
+                                    v-model="form.api_key"
+                                    label="API Key / Token"
+                                    :error="form.errors.api_key"
+                                />
                             </div>
 
                             <div class="mb-4" v-if="form.provider === 'deliveroo' || form.provider === 'noon'">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">API Secret</label>
-                                <input v-model="form.api_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="Leave blank to keep current">
+                                <Input
+                                    v-model="form.api_secret"
+                                    label="API Secret"
+                                    type="password"
+                                    placeholder="Leave blank to keep current"
+                                />
                             </div>
                         </template>
 
                         <!-- Webhook Secrets -->
                          <div class="mb-4" v-if="form.provider === 'deliveroo'">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook Secret</label>
-                            <input v-model="form.webhook_secret" type="password" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" placeholder="Leave blank to keep current">
+                            <Input
+                                v-model="form.webhook_secret"
+                                label="Webhook Secret"
+                                type="password"
+                                placeholder="Leave blank to keep current"
+                            />
                              <p class="text-xs text-gray-500 mt-1">Used to verify incoming webhook signatures.</p>
                         </div>
 
 
                         <!-- Webhook URL -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
-                            <input v-model="form.webhook_url" type="url" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <div v-if="form.errors.webhook_url" class="text-red-600 text-sm mt-1">{{ form.errors.webhook_url }}</div>
+                            <Input
+                                v-model="form.webhook_url"
+                                label="Webhook URL"
+                                type="url"
+                                :error="form.errors.webhook_url"
+                            />
                         </div>
 
                         <!-- Active Status -->
@@ -108,6 +129,16 @@
 <script setup lang="ts">
 import { useForm, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
+
+const providerOptions = [
+    { value: 'uber-eats', label: 'Uber Eats' },
+    { value: 'deliveroo', label: 'Deliveroo' },
+    { value: 'talabat', label: 'Talabat' },
+    { value: 'careem', label: 'Careem' },
+    { value: 'noon', label: 'Noon Food' },
+];
 
 const props = defineProps<{
     integration: any;

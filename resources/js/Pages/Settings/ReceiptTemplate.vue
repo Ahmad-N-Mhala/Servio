@@ -45,12 +45,11 @@
                             />
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.alignment') }}</label>
-                                <select v-model="form.header_alignment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="left">Left</option>
-                                    <option value="center">Center</option>
-                                    <option value="right">Right</option>
-                                </select>
+                                <Select
+                                    v-model="form.header_alignment"
+                                    :label="$t('receipt.alignment')"
+                                    :options="alignmentOptions"
+                                />
                             </div>
                         </div>
                     </div>
@@ -131,12 +130,11 @@
                             </label>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.item_name_width') }}</label>
-                                <select v-model="form.item_name_width" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="50">50%</option>
-                                    <option value="60">60%</option>
-                                    <option value="70">70%</option>
-                                </select>
+                                <Select
+                                    v-model="form.item_name_width"
+                                    :label="$t('receipt.item_name_width')"
+                                    :options="itemNameWidthOptions"
+                                />
                             </div>
                         </div>
                     </div>
@@ -209,12 +207,11 @@
                             </label>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.alignment') || 'Alignment' }}</label>
-                                <select v-model="form.footer_alignment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="left">{{ $t('pos.left') || 'Left' }}</option>
-                                    <option value="center">{{ $t('pos.center') || 'Center' }}</option>
-                                    <option value="right">{{ $t('pos.right') || 'Right' }}</option>
-                                </select>
+                                <Select
+                                    v-model="form.footer_alignment"
+                                    :label="$t('receipt.alignment') || 'Alignment'"
+                                    :options="alignmentOptions"
+                                />
                             </div>
                         </div>
                     </div>
@@ -249,20 +246,19 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.paper_width') || 'Paper Width' }}</label>
-                                <select v-model="form.paper_width" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="58">58mm ({{ $t('common.small') }})</option>
-                                    <option value="80">80mm ({{ $t('common.medium') }})</option>
-                                </select>
+                                <Select
+                                    v-model="form.paper_width"
+                                    :label="$t('receipt.paper_width') || 'Paper Width'"
+                                    :options="paperWidthOptions"
+                                />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('receipt.font_size') || 'Font Size' }}</label>
-                                <select v-model="form.font_size" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                                    <option value="small">{{ $t('common.small') || 'Small' }}</option>
-                                    <option value="medium">{{ $t('common.medium') || 'Medium' }}</option>
-                                    <option value="large">{{ $t('common.large') || 'Large' }}</option>
-                                </select>
+                                <Select
+                                    v-model="form.font_size"
+                                    :label="$t('receipt.font_size') || 'Font Size'"
+                                    :options="fontSizeOptions"
+                                />
                             </div>
                         </div>
                     </div>
@@ -321,6 +317,7 @@ import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
+import Select from '@/Components/Select.vue';
 import ReceiptPreview from '@/Components/ReceiptPreview.vue';
 
 const { t } = useI18n();
@@ -376,6 +373,29 @@ const form = useForm({
     paper_width: props.template?.paper_width ?? '80',
     font_size: props.template?.font_size ?? 'medium',
 });
+
+const alignmentOptions = [
+    { value: 'left', label: t('pos.left') || 'Left' },
+    { value: 'center', label: t('pos.center') || 'Center' },
+    { value: 'right', label: t('pos.right') || 'Right' },
+];
+
+const itemNameWidthOptions = [
+    { value: '50', label: '50%' },
+    { value: '60', label: '60%' },
+    { value: '70', label: '70%' },
+];
+
+const paperWidthOptions = [
+    { value: '58', label: `58mm (${t('common.small')})` },
+    { value: '80', label: `80mm (${t('common.medium')})` },
+];
+
+const fontSizeOptions = [
+    { value: 'small', label: t('common.small') || 'Small' },
+    { value: 'medium', label: t('common.medium') || 'Medium' },
+    { value: 'large', label: t('common.large') || 'Large' },
+];
 
 const saveTemplate = () => {
     form.post(route('settings.receipt-template.store'), {

@@ -15,24 +15,23 @@
                 <!-- Header Actions -->
                 <template #header-actions>
                     <div class="flex items-center gap-3">
-                        <select 
-                            v-model="statusFilter" 
-                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
-                        >
-                            <option value="">All Status</option>
-                            <option value="active">Active Only</option>
-                            <option value="deleted">Deleted Only</option>
-                        </select>
+                        <div class="w-40">
+                            <Select
+                                v-model="statusFilter"
+                                :options="statusFilterOptions"
+                                placeholder="Status"
+                                class="text-sm"
+                            />
+                        </div>
                         
-                        <select 
-                            v-model="selectedRestaurant" 
-                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
-                        >
-                            <option value="">All Restaurants</option>
-                            <option v-for="option in restaurantOptions" :key="option.id" :value="option.id">
-                                {{ option.name }}
-                            </option>
-                        </select>
+                        <div class="w-48">
+                            <Select
+                                v-model="selectedRestaurant"
+                                :options="restaurantFilterOptions"
+                                placeholder="Restaurant"
+                                class="text-sm"
+                            />
+                        </div>
                         
                         <Link :href="route('admin.restaurants.create')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/30 text-center whitespace-nowrap flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -284,37 +283,40 @@
                     <div class="space-y-4">
                         <!-- Plan -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Subscription Plan</label>
-                            <select v-model="subForm.plan_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">Select Plan</option>
-                                <option v-for="plan in plans" :key="plan.id" :value="plan.id">
-                                    {{ plan.name }}
-                                </option>
-                            </select>
-                            <p v-if="subForm.errors.plan_id" class="text-sm text-red-600 mt-1">{{ subForm.errors.plan_id }}</p>
+                            <Select
+                                v-model="subForm.plan_id"
+                                label="Subscription Plan"
+                                :options="planOptions"
+                                placeholder="Select Plan"
+                                :error="subForm.errors.plan_id"
+                            />
                         </div>
 
                         <!-- Dates -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                <input type="date" v-model="subForm.starts_at" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                <Input
+                                    v-model="subForm.starts_at"
+                                    label="Start Date"
+                                    type="date"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">End Date (Optional)</label>
-                                <input type="date" v-model="subForm.ends_at" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                <Input
+                                    v-model="subForm.ends_at"
+                                    label="End Date (Optional)"
+                                    type="date"
+                                />
                             </div>
                         </div>
 
                         <!-- Status -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('common.status') }}</label>
-                             <select v-model="subForm.status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="active">{{ $t('common.active') }}</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="expired">Expired</option>
-                                <option value="trial">Trial</option>
-                            </select>
+                            <Select
+                                v-model="subForm.status"
+                                :label="$t('common.status')"
+                                :options="subscriptionStatusOptions"
+                            />
                         </div>
                     </div>
 
@@ -418,12 +420,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import Table from '@/Components/Table.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 import { debounce } from 'lodash';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const columns = [
     { key: 'name', label: 'Restaurant & Owner', sortable: true },
@@ -431,6 +438,19 @@ const columns = [
     { key: 'status', label: 'Status', sortable: true, align: 'center' as const },
     { key: 'actions', label: 'Actions', sortable: false, align: 'right' as const },
 ];
+
+const statusFilterOptions = [
+    { label: 'All Status', value: '' },
+    { label: 'Active Only', value: 'active' },
+    { label: 'Deleted Only', value: 'deleted' },
+];
+
+const subscriptionStatusOptions = computed(() => [
+    { label: t('common.active'), value: 'active' },
+    { label: 'Cancelled', value: 'cancelled' },
+    { label: 'Expired', value: 'expired' },
+    { label: 'Trial', value: 'trial' },
+]);
 
 // Helper to format date relative (e.g. "in 5 days" or "Active")
 const formatExpiry = (dateStr: string) => {
@@ -461,6 +481,17 @@ const props = defineProps<{
     restaurantOptions: Array<{ id: number; name: string }>;
     plans: Array<any>;
 }>();
+
+const restaurantFilterOptions = computed(() => {
+    return [
+        { label: 'All Restaurants', value: '' },
+        ...props.restaurantOptions.map(r => ({ label: r.name, value: r.id }))
+    ];
+});
+
+const planOptions = computed(() => {
+    return props.plans.map(p => ({ label: p.name, value: p.id }));
+});
 
 const search = ref(props.filters.search || '');
 const selectedRestaurant = ref(props.filters.restaurant_id || '');

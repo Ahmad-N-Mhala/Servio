@@ -83,4 +83,12 @@ return [
     'no_items' => 'لا توجد عناصر لعرضها',
     'previous' => 'السابق',
     'next' => 'التالي',
+    'no_matching_options' => 'عذراً، لا توجد خيارات مطابقة.',
+    'small' => 'صغير',
+    'medium' => 'متوسط',
+    'large' => 'كبير',
+    'start_from' => 'يبدأ من',
+    'example_short' => 'مثال',
+    'confirm' => 'هل أنت متأكد؟',
+    'table' => 'الطاولة',
 ];

@@ -44,4 +44,6 @@ return [
     'contact_info' => 'Contact Information',
     'contact_placeholder' => 'e.g., Tel: +971 50 123 4567',
     'header_placeholder' => 'e.g., Thank you for dining with us!',
+    'language' => 'Receipt Language',
+    'show_loyalty_points' => 'Show Loyalty Points',
 ];

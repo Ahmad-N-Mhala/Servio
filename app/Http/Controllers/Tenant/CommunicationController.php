@@ -27,7 +27,7 @@ class CommunicationController extends Controller
         }
 
         // --- Logs Query ---
-        $logsQuery = CommunicationLog::query()->with('template');
+        $logsQuery = CommunicationLog::query()->where('restaurant_id', $restaurant->id)->with('template');
 
         if ($request->filled('type')) {
             $logsQuery->where('type', $request->input('type'));
@@ -139,6 +139,11 @@ class CommunicationController extends Controller
 
     public function updateTemplate(Request $request, CommunicationTemplate $template)
     {
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant || $template->restaurant_id !== $restaurant->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'channels' => 'required|array',
@@ -166,6 +171,11 @@ class CommunicationController extends Controller
 
     public function destroyTemplate(CommunicationTemplate $template)
     {
+        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        if (!$restaurant || $template->restaurant_id !== $restaurant->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $template->delete();
         return redirect()->back()->with('message', 'Communication rule deleted successfully.');
     }

@@ -169,7 +169,11 @@ watch(
 const methodsList = computed(() => props.methods.data || []);
 
 const getLocaleName = (name: any) => {
-    if (typeof name === 'string') return name;
+    if (typeof name === 'string') {
+        if (name === 'Points per Spend') return t('loyalty.points_per_spend');
+        if (name === 'Points per Visit') return t('loyalty.points_per_visit');
+        return name;
+    }
     if (!name) return t('common.unknown') || 'Unknown';
     return name[locale.value] || Object.values(name)[0] || '';
 };

@@ -27,7 +27,7 @@
         <div class="max-w-md w-full">
             <div class="text-center mb-10 flex flex-col items-center justify-center">
                 <div class="flex justify-center w-full mb-6">
-                    <Logo class="h-20 w-20" iconClass="w-20 h-25" :showText="true" />
+                    <Logo class="h-20 w-auto justify-center" iconClass="w-20 h-20" :showText="true" />
                 </div>
                 <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">{{ $t('auth.welcome_back') }}</h1>
                 <p class="mt-3 text-lg text-gray-600">{{ $t('auth.sign_in_subtitle') }}</p>
@@ -36,49 +36,41 @@
             <form @submit.prevent="submit" class="bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 md:p-10 border border-white/50 transition-all duration-300">
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">{{ $t('auth.email_address') }}</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Input
+                        name="email"
+                        v-model="form.email"
+                        type="email"
+                        required
+                        :label="$t('auth.email_address')"
+                        :placeholder="$t('auth.email_placeholder')"
+                        :error="form.errors.email"
+                        inputClass="bg-white/80 backdrop-blur-sm"
+                    >
+                        <template #prefix>
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
                             </svg>
-                        </div>
-                        <input
-                            type="email"
-                            name="email"
-                            v-model="form.email"
-                            required
-                            class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': form.errors.email }"
-                            :placeholder="$t('auth.email_placeholder')"
-                        />
-                    </div>
-                    <div v-if="form.errors.email" class="text-red-500 text-sm mt-1 ml-1 animate-slide-in">
-                        {{ form.errors.email }}
-                    </div>
+                        </template>
+                    </Input>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">{{ $t('auth.password_label') }}</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Input
+                        name="password"
+                        v-model="form.password"
+                        type="password"
+                        required
+                        :label="$t('auth.password_label')"
+                        :placeholder="$t('auth.password_placeholder')"
+                        :error="form.errors.password"
+                        inputClass="bg-white/80 backdrop-blur-sm"
+                    >
+                        <template #prefix>
                             <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
-                        </div>
-                        <input
-                            type="password"
-                            name="password"
-                            v-model="form.password"
-                            required
-                            class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-200': form.errors.password }"
-                            :placeholder="$t('auth.password_placeholder')"
-                        />
-                    </div>
-                    <div v-if="form.errors.password" class="text-red-500 text-sm mt-1 ml-1 animate-slide-in">
-                        {{ form.errors.password }}
-                    </div>
+                        </template>
+                    </Input>
                 </div>
 
                 <div class="flex items-center justify-end mb-6">
@@ -102,6 +94,25 @@
                 </div>
             </form>
         </div>
+
+        <!-- Contact Support Footer -->
+        <div class="absolute bottom-6 w-full text-center text-sm text-gray-500/80">
+            <p class="font-medium mb-2">{{ $t('landing.contact_support') }}</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                <a href="mailto:support@kenildock.com" class="flex items-center gap-2 hover:text-primary transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span dir="ltr">support@kenildock.com</span>
+                </a>
+                <a href="tel:+9715049460976" class="flex items-center gap-2 hover:text-primary transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span dir="ltr">+971 50 494 60976</span>
+                </a>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -111,6 +122,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
 import Toast from '@/Components/Toast.vue';
+import Input from '@/Components/Input.vue';
 
 const { t, locale } = useI18n();
 

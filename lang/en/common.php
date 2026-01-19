@@ -76,4 +76,12 @@ return [
     'no_items' => 'No items to display',
     'previous' => 'Previous',
     'next' => 'Next',
+    'no_matching_options' => 'Sorry, no matching options.',
+    'small' => 'Small',
+    'medium' => 'Medium',
+    'large' => 'Large',
+    'start_from' => 'Start From',
+    'example_short' => 'e.g.',
+    'confirm' => 'Are you sure?',
+    'table' => 'Table',
 ];

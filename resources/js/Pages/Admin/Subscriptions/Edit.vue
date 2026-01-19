@@ -12,52 +12,55 @@
                     <form @submit.prevent="submit">
                         <!-- Restaurant -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Restaurant *</label>
-                            <select v-model="form.restaurant_id" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="">Select Restaurant</option>
-                                <option v-for="restaurant in restaurants" :key="restaurant.id" :value="restaurant.id">
-                                    {{ restaurant.name }}
-                                </option>
-                            </select>
-                            <div v-if="form.errors.restaurant_id" class="text-red-600 text-sm mt-1">{{ form.errors.restaurant_id }}</div>
+                            <Select
+                                v-model="form.restaurant_id"
+                                label="Restaurant *"
+                                :options="restaurantOptions"
+                                placeholder="Select Restaurant"
+                                :error="form.errors.restaurant_id"
+                            />
                         </div>
 
                         <!-- Plan -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Subscription Plan *</label>
-                            <select v-model="form.plan_id" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="">Select Plan</option>
-                                <option v-for="plan in plans" :key="plan.id" :value="plan.id">
-                                    {{ plan.name }} - ${{ plan.price_monthly }}/month
-                                </option>
-                            </select>
-                            <div v-if="form.errors.plan_id" class="text-red-600 text-sm mt-1">{{ form.errors.plan_id }}</div>
+                            <Select
+                                v-model="form.plan_id"
+                                label="Subscription Plan *"
+                                :options="planOptions"
+                                placeholder="Select Plan"
+                                :error="form.errors.plan_id"
+                            />
                         </div>
 
                         <!-- Start Date -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
-                            <input v-model="form.starts_at" type="date" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <div v-if="form.errors.starts_at" class="text-red-600 text-sm mt-1">{{ form.errors.starts_at }}</div>
+                            <Input
+                                v-model="form.starts_at"
+                                label="Start Date *"
+                                type="date"
+                                :error="form.errors.starts_at"
+                            />
                         </div>
 
                         <!-- End Date -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
-                            <input v-model="form.ends_at" type="date" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            <Input
+                                v-model="form.ends_at"
+                                label="End Date (Optional)"
+                                type="date"
+                                :error="form.errors.ends_at"
+                            />
                             <p class="text-xs text-gray-500 mt-1">Leave blank for ongoing subscription</p>
-                            <div v-if="form.errors.ends_at" class="text-red-600 text-sm mt-1">{{ form.errors.ends_at }}</div>
                         </div>
 
                         <!-- Status -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.status') }} *</label>
-                            <select v-model="form.status" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="active">{{ $t('common.active') }}</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="expired">Expired</option>
-                            </select>
-                            <div v-if="form.errors.status" class="text-red-600 text-sm mt-1">{{ form.errors.status }}</div>
+                            <Select
+                                v-model="form.status"
+                                :label="$t('common.status') + ' *'"
+                                :options="statusOptions"
+                                :error="form.errors.status"
+                            />
                         </div>
 
                         <!-- Actions -->
@@ -75,8 +78,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
     subscription: any;
@@ -93,6 +102,20 @@ const form = useForm({
     ends_at: props.subscription.ends_at?.split('T')[0] || '',
     status: props.subscription.status,
 });
+
+const restaurantOptions = computed(() => {
+    return props.restaurants.map(r => ({ label: r.name, value: r.id }));
+});
+
+const planOptions = computed(() => {
+    return props.plans.map(p => ({ label: `${p.name} - $${p.price_monthly}/month`, value: p.id }));
+});
+
+const statusOptions = computed(() => [
+    { label: t('common.active'), value: 'active' },
+    { label: 'Cancelled', value: 'cancelled' },
+    { label: 'Expired', value: 'expired' },
+]);
 
 const submit = () => {
     form.put(route('admin.subscriptions.update', props.subscription.id));

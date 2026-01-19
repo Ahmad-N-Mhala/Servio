@@ -79,10 +79,10 @@ class MonthlyExpenseController extends Controller
                 });
         }
 
-        // Get available months (last 12 months + current)
+        // Get available months (3 future months + current + 12 past months)
         $availableMonths = collect();
-        for ($i = 0; $i < 12; $i++) {
-            $date = now()->subMonths($i);
+        for ($i = 3; $i >= -12; $i--) {
+            $date = now()->addMonths($i);
             $availableMonths->push([
                 'value' => $date->format('Y-m'),
                 'label' => $date->format('F Y'),

@@ -238,6 +238,34 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Description (AR)</label>
                                         <textarea v-model="settingsForm.settings.feature_inventory_desc.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-right" dir="rtl"></textarea>
                                     </div>
+                                    
+                                    <!-- Image Upload -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Images</label>
+                                        <div v-if="settingsForm.settings.feature_inventory_images && settingsForm.settings.feature_inventory_images.length > 0" class="flex flex-wrap gap-4 mb-3">
+                                            <div v-for="(img, idx) in settingsForm.settings.feature_inventory_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
+                                                <img :src="img" class="w-full h-full object-cover">
+                                                <button type="button" @click="removeImage('feature_inventory_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input type="file" multiple @change="(e) => handleFileChange(e, 'feature_inventory_images_new')" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                         <div v-if="settingsForm.settings.feature_inventory_images_new && settingsForm.settings.feature_inventory_images_new.length > 0" class="flex flex-wrap gap-2 mt-2">
+                                            <div v-for="(file, idx) in settingsForm.settings.feature_inventory_images_new" :key="idx" class="relative group w-16 h-16 rounded overflow-hidden bg-gray-100 border">
+                                                <img :src="getObjectUrl(file)" class="w-full h-full object-cover opacity-70">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bullets -->
+                                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                                        <div class="md:col-span-2 font-semibold text-gray-700">Bullet Points</div>
+                                        <Input v-model="settingsForm.settings.inventory_bullet_1.en" label="Bullet 1 (EN)" />
+                                        <Input v-model="settingsForm.settings.inventory_bullet_1.ar" label="Bullet 1 (AR)" dir="rtl" />
+                                        <Input v-model="settingsForm.settings.inventory_bullet_2.en" label="Bullet 2 (EN)" />
+                                        <Input v-model="settingsForm.settings.inventory_bullet_2.ar" label="Bullet 2 (AR)" dir="rtl" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -254,6 +282,34 @@
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Description (AR)</label>
                                         <textarea v-model="settingsForm.settings.feature_loyalty_desc.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm text-right" dir="rtl"></textarea>
+                                    </div>
+
+                                    <!-- Image Upload -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Feature Images</label>
+                                        <div v-if="settingsForm.settings.feature_loyalty_images && settingsForm.settings.feature_loyalty_images.length > 0" class="flex flex-wrap gap-4 mb-3">
+                                            <div v-for="(img, idx) in settingsForm.settings.feature_loyalty_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
+                                                <img :src="img" class="w-full h-full object-cover">
+                                                <button type="button" @click="removeImage('feature_loyalty_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input type="file" multiple @change="(e) => handleFileChange(e, 'feature_loyalty_images_new')" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
+                                         <div v-if="settingsForm.settings.feature_loyalty_images_new && settingsForm.settings.feature_loyalty_images_new.length > 0" class="flex flex-wrap gap-2 mt-2">
+                                            <div v-for="(file, idx) in settingsForm.settings.feature_loyalty_images_new" :key="idx" class="relative group w-16 h-16 rounded overflow-hidden bg-gray-100 border">
+                                                <img :src="getObjectUrl(file)" class="w-full h-full object-cover opacity-70">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bullets -->
+                                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                                        <div class="md:col-span-2 font-semibold text-gray-700">Bullet Points</div>
+                                        <Input v-model="settingsForm.settings.loyalty_bullet_1.en" label="Bullet 1 (EN)" />
+                                        <Input v-model="settingsForm.settings.loyalty_bullet_1.ar" label="Bullet 1 (AR)" dir="rtl" />
+                                        <Input v-model="settingsForm.settings.loyalty_bullet_2.en" label="Bullet 2 (EN)" />
+                                        <Input v-model="settingsForm.settings.loyalty_bullet_2.ar" label="Bullet 2 (AR)" dir="rtl" />
                                     </div>
                                 </div>
                             </div>
@@ -295,6 +351,55 @@
                                     <Input v-model="settingsForm.settings.step_3_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
                                     <textarea v-model="settingsForm.settings.step_3_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
                                     <textarea v-model="settingsForm.settings.step_3_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Collection Section -->
+                        <div class="border-t pt-6 mt-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-4">Feedback Collection Section</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <Input v-model="settingsForm.settings.feedback_title.en" label="Section Title (English)" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.feedback_title.ar" label="Section Title (Arabic)" dir="rtl" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <Input v-model="settingsForm.settings.feedback_desc.en" label="Section Description (English)" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <Input v-model="settingsForm.settings.feedback_desc.ar" label="Section Description (Arabic)" dir="rtl" />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Feature 1: Collection -->
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold mb-2">Feature 1: Collection</h6>
+                                    <Input v-model="settingsForm.settings.feedback_feature_1_title.en" label="Title (EN)" class="mb-2" />
+                                    <Input v-model="settingsForm.settings.feedback_feature_1_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
+                                    <textarea v-model="settingsForm.settings.feedback_feature_1_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
+                                    <textarea v-model="settingsForm.settings.feedback_feature_1_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+                                
+                                <!-- Feature 2: Google Maps -->
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold mb-2">Feature 2: Google Maps</h6>
+                                    <Input v-model="settingsForm.settings.feedback_feature_2_title.en" label="Title (EN)" class="mb-2" />
+                                    <Input v-model="settingsForm.settings.feedback_feature_2_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
+                                    <textarea v-model="settingsForm.settings.feedback_feature_2_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
+                                    <textarea v-model="settingsForm.settings.feedback_feature_2_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+
+                                <!-- Feature 3: Insights -->
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <h6 class="font-bold mb-2">Feature 3: Insights</h6>
+                                    <Input v-model="settingsForm.settings.feedback_feature_3_title.en" label="Title (EN)" class="mb-2" />
+                                    <Input v-model="settingsForm.settings.feedback_feature_3_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
+                                    <textarea v-model="settingsForm.settings.feedback_feature_3_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
+                                    <textarea v-model="settingsForm.settings.feedback_feature_3_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -538,34 +643,68 @@ const settingsForm = useForm({
             ar: props.landingSettings.feature_loyalty_desc?.ar || ''
         },
 
-         // How It Works
+        // How It Works
         how_it_works_title: {
-            en: props.landingSettings.how_it_works_title?.en || '',
-            ar: props.landingSettings.how_it_works_title?.ar || ''
+            en: props.landingSettings.how_it_works_title?.en || 'How It Works',
+            ar: props.landingSettings.how_it_works_title?.ar || 'كيف يعمل النظام'
         },
         step_1_title: {
-            en: props.landingSettings.step_1_title?.en || '',
-            ar: props.landingSettings.step_1_title?.ar || ''
+            en: props.landingSettings.step_1_title?.en || 'Create Account',
+            ar: props.landingSettings.step_1_title?.ar || 'أنشئ حساباً'
         },
         step_1_desc: {
-            en: props.landingSettings.step_1_desc?.en || '',
-            ar: props.landingSettings.step_1_desc?.ar || ''
+            en: props.landingSettings.step_1_desc?.en || 'Sign up in seconds and setup your restaurant profile with ease.',
+            ar: props.landingSettings.step_1_desc?.ar || 'سجل في ثوانٍ وقم بإعداد ملف تعريف مطعمك بسهولة.'
         },
         step_2_title: {
-            en: props.landingSettings.step_2_title?.en || '',
-            ar: props.landingSettings.step_2_title?.ar || ''
+            en: props.landingSettings.step_2_title?.en || 'Build Menu',
+            ar: props.landingSettings.step_2_title?.ar || 'ابنِ القائمة'
         },
         step_2_desc: {
-            en: props.landingSettings.step_2_desc?.en || '',
-            ar: props.landingSettings.step_2_desc?.ar || ''
+            en: props.landingSettings.step_2_desc?.en || 'Add your items, variants, and categories.',
+            ar: props.landingSettings.step_2_desc?.ar || 'قم بإضافة الأصناف، والإضافات، والأقسام الخاصة بك.'
         },
         step_3_title: {
-            en: props.landingSettings.step_3_title?.en || '',
-            ar: props.landingSettings.step_3_title?.ar || ''
+            en: props.landingSettings.step_3_title?.en || 'Start Selling',
+            ar: props.landingSettings.step_3_title?.ar || 'ابدأ البيع'
         },
         step_3_desc: {
-            en: props.landingSettings.step_3_desc?.en || '',
-            ar: props.landingSettings.step_3_desc?.ar || ''
+            en: props.landingSettings.step_3_desc?.en || 'Download the app or use web POS to start taking orders immediately.',
+            ar: props.landingSettings.step_3_desc?.ar || 'نزل التطبيق أو استخدم نقطة البيع عبر الويب لبدء العمل فوراً.'
+        },
+
+        // Feedback Collection Section
+        feedback_title: {
+            en: props.landingSettings.feedback_title?.en || 'Collect Feedback & Boost Your Google Reviews',
+            ar: props.landingSettings.feedback_title?.ar || 'جمع الآراء وتعزيز تقييماتك على جوجل'
+        },
+        feedback_desc: {
+            en: props.landingSettings.feedback_desc?.en || 'Gather valuable customer feedback seamlessly and automatically promote positive experiences to Google Maps.',
+            ar: props.landingSettings.feedback_desc?.ar || 'اجمع آراء العملاء القيمة بسهولة واعرض التجارب الإيجابية تلقائياً على خرائط جوجل.'
+        },
+        feedback_feature_1_title: {
+            en: props.landingSettings.feedback_feature_1_title?.en || 'Easy Feedback Collection',
+            ar: props.landingSettings.feedback_feature_1_title?.ar || 'جمع الآراء بسهولة'
+        },
+        feedback_feature_1_desc: {
+            en: props.landingSettings.feedback_feature_1_desc?.en || 'Capture customer ratings and reviews after every order with a simple, user-friendly interface.',
+            ar: props.landingSettings.feedback_feature_1_desc?.ar || 'احصل على تقييمات ومراجعات العملاء بعد كل طلب من خلال واجهة بسيطة وسهلة الاستخدام.'
+        },
+        feedback_feature_2_title: {
+            en: props.landingSettings.feedback_feature_2_title?.en || 'Automatic Google Maps Boost',
+            ar: props.landingSettings.feedback_feature_2_title?.ar || 'تعزيز تلقائي على خرائط جوجل'
+        },
+        feedback_feature_2_desc: {
+            en: props.landingSettings.feedback_feature_2_desc?.en || '4-5 star reviews are automatically directed to Google Maps, helping you build a stellar online reputation effortlessly.',
+            ar: props.landingSettings.feedback_feature_2_desc?.ar || 'التقييمات 4-5 نجوم توجه تلقائياً إلى خرائط جوجل، مما يساعدك على بناء سمعة رائعة عبر الإنترنت بسهولة.'
+        },
+        feedback_feature_3_title: {
+            en: props.landingSettings.feedback_feature_3_title?.en || 'Actionable Insights',
+            ar: props.landingSettings.feedback_feature_3_title?.ar || 'رؤى قابلة للتنفيذ'
+        },
+        feedback_feature_3_desc: {
+            en: props.landingSettings.feedback_feature_3_desc?.en || 'Lower ratings provide valuable feedback to improve your service, while high ratings boost your visibility.',
+            ar: props.landingSettings.feedback_feature_3_desc?.ar || 'التقييمات المنخفضة توفر ملاحظات قيمة لتحسين خدمتك، بينما التقييمات العالية تعزز ظهورك.'
         },
 
         // Images
@@ -574,6 +713,28 @@ const settingsForm = useForm({
         
         feature_kds_images: props.landingSettings.feature_kds_images || (props.landingSettings.feature_kds_image ? [props.landingSettings.feature_kds_image] : []),
         feature_kds_images_new: [],
+
+        feature_inventory_images: props.landingSettings.feature_inventory_images || (props.landingSettings.feature_inventory_image ? [props.landingSettings.feature_inventory_image] : []),
+        feature_inventory_images_new: [],
+        inventory_bullet_1: {
+             en: props.landingSettings.inventory_bullet_1?.en || '',
+             ar: props.landingSettings.inventory_bullet_1?.ar || ''
+        },
+        inventory_bullet_2: {
+             en: props.landingSettings.inventory_bullet_2?.en || '',
+             ar: props.landingSettings.inventory_bullet_2?.ar || ''
+        },
+
+        feature_loyalty_images: props.landingSettings.feature_loyalty_images || (props.landingSettings.feature_loyalty_image ? [props.landingSettings.feature_loyalty_image] : []),
+        feature_loyalty_images_new: [],
+        loyalty_bullet_1: {
+             en: props.landingSettings.loyalty_bullet_1?.en || '',
+             ar: props.landingSettings.loyalty_bullet_1?.ar || ''
+        },
+        loyalty_bullet_2: {
+             en: props.landingSettings.loyalty_bullet_2?.en || '',
+             ar: props.landingSettings.loyalty_bullet_2?.ar || ''
+        },
     }
 });
 

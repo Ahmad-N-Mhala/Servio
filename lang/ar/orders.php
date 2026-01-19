@@ -71,5 +71,8 @@ return [
     'delivery' => 'توصيل',
     'other_delivery_id' => 'معرف توصيل آخر',
     'enter_delivery_id' => 'أدخل المعرف',
+    'delivery_provider_label' => 'شركة التوصيل (مثل: أوبر إيتس، طلبات)',
+    'external_order_id' => 'معرف الطلب الخارجي (اختياري)',
+    'waiter' => 'النادل',
 ];
 

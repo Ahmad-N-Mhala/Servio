@@ -44,17 +44,17 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('staff.phone') }}</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-2.5 text-gray-500 font-medium">{{ phoneCode }}</span>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('staff.phone') }}</label>
+                            <div class="relative group" dir="ltr">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 font-medium z-10 select-none pointer-events-none border-r border-gray-200 pr-3 my-2">{{ phoneCode }}</span>
                                 <input 
                                     v-model="phoneInput"
                                     type="tel"
-                                    placeholder="50 123 4567"
                                     maxlength="15"
                                     @input="handlePhoneInput"
                                     @blur="lookupCustomer"
-                                    class="w-full pl-14 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                    :placeholder="'501234567'"
+                                    class="w-full text-left rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 pl-20 pr-4 transition-all hover:border-slate-300 dark:hover:border-slate-600"
                                 />
                             </div>
                         </div>
@@ -131,17 +131,13 @@
                     </div>
 
                     <div v-if="form.type === 'dine_in'" class="animate-fade-in-up">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.select') }} {{ $t('nav.tables') }} ({{ $t('common.optional') }})</label>
-                        <select 
-                            v-model="form.table_id" 
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary transition-colors"
-                        >
-                            <option :value="null">{{ $t('orders.no_table_assigned') }}</option>
-                            <option v-for="table in tablesList" :key="table.id" :value="table.id" :disabled="!table.is_available">
-                                {{ table.name }} ({{ table.capacity }} {{ $t('common.guest') }}) - {{ table.location || 'Main' }}{{ !table.is_available ? ' [' + $t('common.sold_out') + ']' : '' }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.table_id" class="mt-1 text-sm text-red-600">{{ form.errors.table_id }}</p>
+                        <Select
+                            v-model="form.table_id"
+                            :label="$t('common.select') + ' ' + $t('nav.tables') + ' (' + $t('common.optional') + ')'"
+                            :options="tableOptions"
+                            :placeholder="$t('orders.no_table_assigned')"
+                            :error="form.errors.table_id"
+                        />
                     </div>
 
 
@@ -500,6 +496,7 @@
                         <Button 
                             type="submit" 
                             block 
+                            size="lg"
                             :loading="form.processing"
                             :disabled="cart.length === 0"
                         >
@@ -604,6 +601,7 @@ import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import Carousel from '@/Components/Carousel.vue';
 import Modal from '@/Components/Modal.vue';
+import Select from '@/Components/Select.vue';
 
 interface MenuItem {
     id: number;
@@ -700,6 +698,26 @@ const currencyCode = computed(() => (page.props.current_restaurant as any)?.curr
 const phoneCode = computed(() => (page.props.current_restaurant as any)?.phone_code || '+971');
 const availableRewards = computed(() => props.rewards || []);
 const tablesList = computed(() => props.tables || []);
+
+const tableOptions = computed(() => {
+    const opts: { label: string; value: number | null; disabled?: boolean }[] = [
+        { label: t('orders.no_table_assigned'), value: null }
+    ];
+    
+    tablesList.value.forEach((table) => {
+        let label = `${table.name} (${table.capacity} ${t('common.guest')})`;
+        if (table.location) label += ` - ${table.location}`;
+        if (!table.is_available) label += ` [${t('common.sold_out') || 'Sold Out'}]`;
+        
+        opts.push({
+            label: label,
+            value: table.id,
+            disabled: !table.is_available
+        });
+    });
+    
+    return opts;
+});
 
 // State
 const cart = ref<CartItem[]>([]);

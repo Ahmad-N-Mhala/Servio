@@ -22,4 +22,6 @@ return [
     'avg_dining_time' => 'Average Dining Time',
     'avg_dining_time_subtitle' => 'Average time from order to completion',
     'details' => 'Details',
+    'feedback_collection' => 'Feedback Collection',
+    'feedback_subtitle' => '4-5 star reviews posted to Google Maps',
 ];

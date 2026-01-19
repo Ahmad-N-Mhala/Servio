@@ -47,7 +47,7 @@ return [
     'custom_plan_desc' => 'Contact our sales team for enterprise solutions tailored to your needs',
     'contact_sales' => 'Contact Sales',
     'about_title_default' => 'Elevating Every Aspect of Your Restaurant',
-    'about_us_description_default' => "Servio is a state-of-the-art restaurant management ecosystem designed to empower modern food businesses. Our platform goes beyond simple transactions, offering a seamless integration of Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management.\n\nWe specialize in enhancing customer engagement through our advanced Loyalty Program, integrated Feedback Forms, and customizable Receipt Templates. With smart Inventory Management and automated reminders, we help you reduce waste and focus on what matters most: delivering exceptional dining experiences.",
+    'about_us_description_default' => "Servio is a comprehensive, cloud-native restaurant operating system engineered to streamline operations for businesses of all sizes—from cozy cafes to multi-location franchises. We unify your entire workflow into one intuitive platform, eliminating the chaos of disjointed systems and manual errors.\n\nMASTER YOUR INVENTORY:\nSay goodbye to food waste and stockouts. Servio provides real-time tracking of every ingredient. Our smart inventory system monitors stock levels as you sell, automatically alerting you when supplies run low. You can manage recipes, track wastage, and generate purchase orders effortlessly, ensuring your kitchen is always stocked and profitable.\n\nBUILD LASTING LOYALTY:\nTurn every customer into a regular with our integrated Loyalty & CRM tools. Create personalized reward programs that engage diverse customer bases. Whether it's points-based systems, tiered rewards, or special promotions, Servio helps you understand buying habits and automate marketing campaigns via SMS and email, driving repeat business and maximizing customer lifetime value.\n\nBeyond this, Servio integrates powerful Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management into a single, seamless ecosystem designed to deliver exceptional dining experiences.",
     'owned_by' => 'Owned by KENILDOCK FOR DEVELOPMENT AND INNOVATION IN COMPUTER SYSTEMS AND SOFTWARE',
     'connect_via_email' => "support{'@'}kenildock.com",
     'connect_via_phone' => '+9715049460976',
@@ -67,6 +67,12 @@ return [
     'pos_bullet_2' => 'Offline Capable',
     'kds_bullet_1' => 'Real-time Order Sync',
     'kds_bullet_2' => 'Color-coded Statuses',
+    'badge_inventory' => 'Inventory Control',
+    'inventory_bullet_1' => 'Real-time stock tracking',
+    'inventory_bullet_2' => 'Automated low-stock alerts',
+    'badge_loyalty' => 'Loyalty Program',
+    'loyalty_bullet_1' => 'Customizable reward tiers',
+    'loyalty_bullet_2' => 'Engage customers with SMS',
 
     // How It Works
     'how_it_works_title' => 'How It Works',
@@ -76,4 +82,20 @@ return [
     'step_2_desc' => 'Upload your items, modifiers, and categories easily.',
     'step_3_title' => 'Start Selling',
     'step_3_desc' => 'Download the app or use the web POS to start taking orders.',
+
+    // Feedback Collection
+    'feedback_feature' => 'Customer Feedback',
+    'feedback_title' => 'Collect Feedback & Boost Your Google Reviews',
+    'feedback_desc' => 'Gather valuable customer feedback seamlessly and automatically promote positive experiences to Google Maps.',
+    'collect_feedback' => 'Easy Feedback Collection',
+    'collect_feedback_desc' => 'Capture customer ratings and reviews after every order with a simple, user-friendly interface.',
+    'google_maps_boost' => 'Automatic Google Maps Boost',
+    'google_maps_feature' => '4-5 star reviews are automatically directed to Google Maps',
+    'google_maps_desc' => ', helping you build a stellar online reputation effortlessly.',
+    'insights' => 'Actionable Insights',
+    'insights_desc' => 'Lower ratings provide valuable feedback to improve your service, while high ratings boost your visibility.',
+    'rating' => 'Rating',
+    'excellent_service' => 'Excellent service!',
+    'posted_to_google' => 'Posted to Google Maps',
+    'automatically_shared' => 'Automatically shared with potential customers',
 ];

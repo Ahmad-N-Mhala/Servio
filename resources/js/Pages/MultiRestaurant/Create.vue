@@ -154,9 +154,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                                    <Select v-model="form.country" :error="form.errors.country">
-                                        <option v-for="c in countries" :key="c.name" :value="c.name">{{ c.name }}</option>
-                                    </Select>
+                                    <Select 
+                                        v-model="form.country" 
+                                        :options="(countries || []).map(c => ({ label: c.name, value: c.name }))"
+                                        :error="form.errors.country"
+                                    />
                                 </div>
 
                                 <Input
@@ -315,6 +317,8 @@ const props = defineProps<{
     countries?: any[];
     planFeatures?: string[];
 }>();
+
+const route = (window as any).route;
 
 const hasLoyalty = computed(() => {
     return props.planFeatures ? props.planFeatures.includes('loyalty') : false;

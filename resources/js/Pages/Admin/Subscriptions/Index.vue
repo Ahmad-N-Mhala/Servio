@@ -97,49 +97,61 @@
                     <form @submit.prevent="saveSubscription">
                         <!-- Plan -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Subscription Plan</label>
-                            <select v-model="form.plan_id" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="">Select Plan</option>
-                                <option v-for="plan in plans" :key="plan.id" :value="plan.id">
-                                    {{ plan.name }}
-                                </option>
-                            </select>
-                            <div v-if="form.errors.plan_id" class="text-red-600 text-sm mt-1">{{ form.errors.plan_id }}</div>
+                            <Select
+                                v-model="form.plan_id"
+                                label="Subscription Plan"
+                                :options="planOptions"
+                                placeholder="Select Plan"
+                                :error="form.errors.plan_id"
+                            />
                         </div>
 
                          <!-- Billing Cycle -->
                          <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Billing Cycle</label>
-                            <select v-model="form.billing_cycle" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
-                            </select>
+                            <Select
+                                v-model="form.billing_cycle"
+                                label="Billing Cycle"
+                                :options="[
+                                    { label: 'Monthly', value: 'monthly' },
+                                    { label: 'Yearly', value: 'yearly' }
+                                ]"
+                                :error="form.errors.billing_cycle"
+                            />
                         </div>
 
                         <!-- Start Date -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                            <input v-model="form.starts_at" type="date" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <div v-if="form.errors.starts_at" class="text-red-600 text-sm mt-1">{{ form.errors.starts_at }}</div>
+                            <Input
+                                v-model="form.starts_at"
+                                label="Start Date"
+                                type="date"
+                                :error="form.errors.starts_at"
+                            />
                         </div>
 
                         <!-- End Date -->
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
-                            <input v-model="form.ends_at" type="date" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            <Input
+                                v-model="form.ends_at"
+                                label="End Date (Optional)"
+                                type="date"
+                                :error="form.errors.ends_at"
+                            />
                             <p class="text-xs text-gray-500 mt-1">Leave blank for ongoing subscription</p>
-                            <div v-if="form.errors.ends_at" class="text-red-600 text-sm mt-1">{{ form.errors.ends_at }}</div>
                         </div>
 
                         <!-- Status -->
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('common.status') }}</label>
-                            <select v-model="form.status" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                <option value="active">{{ $t('common.active') }}</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="expired">Expired</option>
-                            </select>
-                            <div v-if="form.errors.status" class="text-red-600 text-sm mt-1">{{ form.errors.status }}</div>
+                            <Select
+                                v-model="form.status"
+                                :label="$t('common.status')"
+                                :options="[
+                                    { label: $t('common.active'), value: 'active' },
+                                    { label: 'Cancelled', value: 'cancelled' },
+                                    { label: 'Expired', value: 'expired' }
+                                ]"
+                                :error="form.errors.status"
+                            />
                         </div>
 
                         <!-- Actions -->
@@ -157,10 +169,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Table from '@/Components/Table.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 import { debounce } from 'lodash';
 
 const columns = [
@@ -241,4 +255,7 @@ const deleteSubscription = (id: number) => {
         });
     }
 };
+const planOptions = computed(() => {
+    return props.plans.map(p => ({ label: p.name, value: p.id }));
+});
 </script>

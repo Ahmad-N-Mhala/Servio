@@ -44,4 +44,6 @@ return [
     'contact_info' => 'معلومات الاتصال',
     'contact_placeholder' => 'مثلاً: هاتف: 4567 123 50 971+',
     'header_placeholder' => 'مثلاً: شكراً لتناول الطعام معنا!',
+    'language' => 'لغة الإيصال',
+    'show_loyalty_points' => 'إظهار نقاط الولاء',
 ];

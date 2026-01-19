@@ -14,17 +14,21 @@
             >
                 <template #header-actions>
                     <div class="flex items-center gap-3">
-                        <select 
-                            v-model="statusFilter" 
-                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm py-2"
-                        >
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="not_started">Not Started</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="subscribed">Subscribed</option>
-                            <option value="not_subscribed">Not Subscribed</option>
-                        </select>
+                        <div class="w-40">
+                            <Select
+                                v-model="statusFilter"
+                                :options="[
+                                    { label: 'All Status', value: '' },
+                                    { label: 'Pending', value: 'pending' },
+                                    { label: 'Not Started', value: 'not_started' },
+                                    { label: 'In Progress', value: 'in_progress' },
+                                    { label: 'Subscribed', value: 'subscribed' },
+                                    { label: 'Not Subscribed', value: 'not_subscribed' }
+                                ]"
+                                placeholder="Status"
+                                class="text-sm"
+                            />
+                        </div>
 
                         <a 
                             :href="route('admin.plan-interests.export', { search: search, status: statusFilter })"
@@ -132,13 +136,13 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Admin Notes</label>
-                        <textarea 
-                            v-model="notesForm.admin_notes" 
-                            rows="4" 
-                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        <Input
+                            v-model="notesForm.admin_notes"
+                            label="Admin Notes"
+                            type="textarea"
+                            :rows="4"
                             placeholder="Add internal notes updates here..."
-                        ></textarea>
+                        />
                     </div>
                 </div>
 
@@ -159,6 +163,8 @@ import { router, useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import Table from '@/Components/Table.vue';
 import Button from '@/Components/Button.vue';
+import Select from '@/Components/Select.vue';
+import Input from '@/Components/Input.vue';
 import { debounce } from 'lodash';
 
 const props = defineProps<{

@@ -142,16 +142,31 @@ class StaffController extends Controller
         $rolesList = [];
         foreach ($dbRoles as $role) {
             $label = null;
-            // 1. DB Display Name
-            if (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name))) {
-                $display = (array) $role->display_name;
-                $label = $display[$locale] ?? $display['en'] ?? null;
+            $display = (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name)))
+                ? (array) $role->display_name
+                : [];
+
+            // 1. DB Display Name (Current Locale)
+            if (!empty($display[$locale])) {
+                $label = $display[$locale];
             }
-            // 2. Config
+
+            // 2. Translation File
+            if (!$label && \Illuminate\Support\Facades\Lang::has('roles.' . $role->name)) {
+                $label = __('roles.' . $role->name);
+            }
+
+            // 3. DB Display Name (English Fallback)
+            if (!$label && !empty($display['en'])) {
+                $label = $display['en'];
+            }
+
+            // 4. Config
             if (!$label) {
                 $label = $configNames[$role->name] ?? null;
             }
-            // 3. Fallback
+
+            // 5. Fallback
             if (!$label) {
                 $label = ucwords(str_replace('_', ' ', $role->name));
             }

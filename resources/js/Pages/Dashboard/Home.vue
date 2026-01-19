@@ -113,6 +113,14 @@
                         color="purple"
                         :subtitle="$t('dashboard_page.avg_dining_time_subtitle')"
                     />
+
+                    <StatsCard
+                        :title="$t('dashboard_page.feedback_collection')"
+                        :value="stats.feedback_count || 0"
+                        icon="feedback"
+                        color="green"
+                        :subtitle="$t('dashboard_page.feedback_subtitle')"
+                    />
                 </div>
     
                 <!-- Charts Grid -->
@@ -347,10 +355,10 @@ const currentDetailType = ref('');
 const currentDetailParams = ref<any>({});
 
 const itemSalesColumns = computed(() => [
-    { key: 'name', label: t('common.item'), sortable: true },
-    { key: 'category', label: t('common.category'), sortable: false },
-    { key: 'quantity', label: t('dashboard.quantity_sold'), sortable: true, align: 'right' as const },
-    { key: 'revenue', label: t('common.revenue'), sortable: true, format: 'currency' as const, align: 'right' as const }
+    { key: 'name', label: t('common.item'), sortable: true, align: 'center' as const },
+    { key: 'category', label: t('common.category'), sortable: false, align: 'center' as const },
+    { key: 'quantity', label: t('dashboard.quantity_sold'), sortable: true, align: 'center' as const },
+    { key: 'revenue', label: t('common.revenue'), sortable: true, format: 'currency' as const, align: 'center' as const }
 ]);
 
 const itemSalesList = computed(() => itemSalesData.value?.data || []);
