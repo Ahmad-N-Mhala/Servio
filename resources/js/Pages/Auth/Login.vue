@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-gray-50 to-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-gray-50 to-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         
         <Toast 
             :message="toastMessage" 
@@ -96,7 +96,7 @@
         </div>
 
         <!-- Contact Support Footer -->
-        <div class="absolute bottom-6 w-full text-center text-sm text-gray-500/80">
+        <div class="mt-8 w-full text-center text-sm text-gray-500/80">
             <p class="font-medium mb-2">{{ $t('landing.contact_support') }}</p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
                 <a href="mailto:support@kenildock.com" class="flex items-center gap-2 hover:text-primary transition-colors">

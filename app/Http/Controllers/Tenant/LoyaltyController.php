@@ -66,10 +66,20 @@ class LoyaltyController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $menuItems = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
-            ->where('is_available', true)
-            ->orderBy('name.en', 'asc') // Mongo object sort syntax
-            ->get(['id', 'name']);
+        $menuCategories = \App\Models\MenuCategory::where('restaurant_id', $restaurant->id)
+            ->with([
+                'items' => function ($q) {
+                    $q->select(['id', 'name', 'price', 'menu_category_id']);
+                }
+            ])
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($cat) {
+                $cat->setRelation('items', $cat->items->sortBy(function ($item) {
+                    return is_array($item->name) ? ($item->name['en'] ?? $item->name['ar'] ?? '') : $item->name;
+                })->values());
+                return $cat;
+            });
 
         $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->first();
 
@@ -85,7 +95,7 @@ class LoyaltyController extends Controller
             'stats' => $stats,
             'customers' => $customers,
             'rewards' => $rewards,
-            'menuItems' => $menuItems,
+            'menuCategories' => $menuCategories,
             'settings' => $restaurant->settings ?? [],
             'earningMethod' => $earningMethod,
             'filters' => $request->only(['search', 'sort_field', 'sort_direction']),

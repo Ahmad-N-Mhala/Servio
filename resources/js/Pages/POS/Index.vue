@@ -144,7 +144,7 @@
                 <div class="w-full lg:w-7/12 flex flex-col h-full lg:h-auto">
                     <div v-if="selectedOrder" class="bg-white flex flex-col h-full rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                         <!-- Bill Header -->
-                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <div class="px-5 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
@@ -165,46 +165,48 @@
 
                         <!-- Bill Items -->
                         <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                            <div v-if="editableItems.length === 0" class="flex flex-col items-center justify-center h-48 text-gray-400">
+                            <div v-if="(displayOrder?.items || []).length === 0" class="flex flex-col items-center justify-center h-48 text-gray-400">
                                 <p class="text-sm">{{ $t('orders.no_items') }}</p>
                             </div>
                             
-                            <div v-for="item in editableItems" :key="item.id" class="flex text-sm group border-b border-gray-50 pb-2 last:border-0 last:pb-0">
-                                <div class="w-8 pt-1">
-                                    <span class="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-600 text-xs font-bold rounded-full border border-gray-200 shadow-sm">{{ item.quantity }}</span>
+                            <div v-for="item in (displayOrder?.items || [])" :key="item.id" class="flex items-start text-sm group border-b border-dashed border-gray-100 py-3 last:border-0">
+                                <div class="w-10 pt-0.5 font-bold text-primary text-xs">
+                                    {{ item.quantity }}x
                                 </div>
-                                <div class="flex-1 px-2">
-                                    <p class="font-medium text-gray-900">
+                                <div class="flex-1 pr-2">
+                                    <p class="font-bold text-gray-900 text-[13px] leading-snug">
                                         {{ item.menu_item?.name?.en || item.menu_item?.name || item.name || $t('common.item') }}
-                                        <span v-if="item.menu_item?.deleted_at" class="text-red-500 text-xs">({{ $t('common.deleted') }})</span>
+                                        <span v-if="item.menu_item?.deleted_at" class="text-red-500 text-xs font-normal">({{ $t('common.deleted') }})</span>
                                     </p>
-                                    <p v-if="item.notes" class="text-xs text-amber-600 mt-0.5 italic flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                        {{ item.notes }}
+                                    
+                                    <p v-if="item.notes" class="text-[11px] text-amber-600 mt-1 italic flex items-start gap-1">
+                                        <svg class="w-3 h-3 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        <span>{{ item.notes }}</span>
                                     </p>
-                                    <div v-if="item.extras && item.extras.length > 0" class="mt-1 space-y-0.5">
-                                        <p v-for="(extra, i) in item.extras" :key="i" class="text-xs text-gray-500 flex justify-between w-full max-w-[200px]">
-                                            <span>+ {{ extra.name?.en || extra.name || 'Extra' }}</span>
-                                            <span>{{ selectedOrder.currency || currentCurrency }} {{ Number(extra.price).toFixed(2) }}</span>
-                                        </p>
+
+                                    <div v-if="item.extras && item.extras.length > 0" class="mt-1.5 space-y-1">
+                                        <div v-for="(extra, i) in item.extras" :key="i" class="text-[11px] text-gray-500 flex justify-between items-center w-full pl-2 border-l-2 border-gray-100">
+                                            <span>{{ extra.name?.en || extra.name || 'Extra' }}</span>
+                                            <span class="font-medium text-gray-700">{{ selectedOrder.currency || currentCurrency }} {{ Number(extra.price).toFixed(2) }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="text-right font-bold text-gray-900">
+                                <div class="text-right font-bold text-gray-900 text-[13px]">
                                     {{ selectedOrder.currency || currentCurrency }} {{ ((Number(item.unit_price) + (item.extras?.reduce((acc: number, extra: any) => acc + Number(extra.price), 0) || 0)) * item.quantity).toFixed(2) }}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Bottom Section: Adjustments, Totals, Payment -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 space-y-4 shrink-0">
+                        <div class="px-5 py-2 bg-gray-50 border-t border-gray-100 space-y-2 shrink-0">
                             
                             <!-- Adjustments Toggle -->
                             <div v-if="adjustmentMode === 'none'" class="flex gap-2">
-                                <button @click="adjustmentMode = 'discount'" class="flex-1 py-2 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm flex items-center justify-center gap-2">
+                                <button @click="adjustmentMode = 'discount'" class="flex-1 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm flex items-center justify-center gap-2">
                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     {{ $t('pos.add_discount') }}
                                 </button>
-                                <button @click="adjustmentMode = 'extra'" class="flex-1 py-2 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm flex items-center justify-center gap-2">
+                                <button @click="adjustmentMode = 'extra'" class="flex-1 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                                     {{ $t('pos.add_extra_charge') }}
                                 </button>
@@ -236,48 +238,45 @@
                             </div>
 
                             <!-- Calculations Table -->
-                            <div class="space-y-2 py-3 border-t border-gray-100/50">
+                            <div class="space-y-1.5 py-2 border-t border-dashed border-gray-200">
                                 <div class="flex justify-between text-sm text-gray-500">
                                     <span>{{ $t('pos.subtotal') }}</span>
-                                    <span class="font-medium text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.subtotal.toFixed(2) }}</span>
+                                    <span class="font-bold text-gray-800">{{ selectedOrder.currency || currentCurrency }} {{ (displayOrder?.subtotal || 0).toFixed(2) }}</span>
                                 </div>
                                 <div class="flex justify-between text-sm text-gray-500">
                                     <span>{{ $t('pos.tax') }}</span>
-                                    <span class="font-medium text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.tax.toFixed(2) }}</span>
+                                    <span class="font-bold text-gray-800">{{ selectedOrder.currency || currentCurrency }} {{ (displayOrder?.tax || 0).toFixed(2) }}</span>
                                 </div>
-                                <div v-if="totals.discountAmount > 0" class="flex justify-between text-sm text-red-600 bg-red-50 p-2 rounded-lg">
-                                    <span>{{ $t('pos.discount') }} <span v-if="discountType === 'percent'" class="text-xs opacity-75">({{ discountValue }}%)</span></span>
-                                    <span class="font-bold">- {{ selectedOrder.currency || currentCurrency }} {{ totals.discountAmount.toFixed(2) }}</span>
+                                <div v-if="(displayOrder?.discountAmount || 0) > 0" class="flex justify-between text-sm text-red-500 py-1">
+                                    <span>{{ $t('pos.discount') }} <span v-if="displayOrder?.discountType === 'percent'" class="text-xs bg-red-50 px-1 rounded ml-1">({{ displayOrder?.discountValue }}%)</span></span>
+                                    <span class="font-bold">- {{ selectedOrder.currency || currentCurrency }} {{ (displayOrder?.discountAmount || 0).toFixed(2) }}</span>
                                 </div>
-                                <div v-if="totals.additionalChargeAmount > 0" class="flex justify-between text-sm text-blue-600 bg-blue-50 p-2 rounded-lg">
-                                    <span>{{ $t('pos.extra_charge') }} <span v-if="additionalChargeType === 'percent'" class="text-xs opacity-75">({{ additionalChargeValue }}%)</span></span>
-                                    <span class="font-bold">+ {{ selectedOrder.currency || currentCurrency }} {{ totals.additionalChargeAmount.toFixed(2) }}</span>
+                                <div v-if="(displayOrder?.additionalChargeAmount || 0) > 0" class="flex justify-between text-sm text-blue-500 py-1">
+                                    <span>{{ $t('pos.extra_charge') }} <span v-if="displayOrder?.additionalChargeType === 'percent'" class="text-xs bg-blue-50 px-1 rounded ml-1">({{ displayOrder?.additionalChargeValue }}%)</span></span>
+                                    <span class="font-bold">+ {{ selectedOrder.currency || currentCurrency }} {{ (displayOrder?.additionalChargeAmount || 0).toFixed(2) }}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Bottom Payment Area -->
-                        <div class="bg-gray-50 p-6 border-t border-gray-200">
+                        <div class="bg-gray-50 px-5 pt-0 pb-4 border-t border-gray-200">
                             <!-- Total Display -->
-                            <div class="flex justify-between items-center mb-6">
+                            <div class="flex justify-between items-center mb-3 mt-3">
                                 <div>
-                                    <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">{{ $t('pos.total_amount') }}</p>
-                                    <div v-if="hasUnsavedChanges" class="flex items-center gap-2 mt-1 animate-pulse text-yellow-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                        <span class="text-xs font-bold">{{ $t('pos.changes_detected') }}</span>
-                                    </div>
+                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $t('pos.total_amount') }}</p>
+
                                 </div>
-                                <p class="text-3xl font-black text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ totals.total.toFixed(2) }}</p>
+                                <p class="text-3xl font-black text-gray-900">{{ selectedOrder.currency || currentCurrency }} {{ (displayOrder?.total || 0).toFixed(2) }}</p>
                             </div>
 
                             <!-- Payment Methods -->
-                            <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div class="grid grid-cols-3 gap-2 mb-3">
                                 <button 
                                     v-for="method in ['cash', 'card', 'online']" 
                                     :key="method"
                                     @click="selectPaymentMethod(method)"
                                     :disabled="method === 'cash' && !currentRegister"
-                                    :class="['py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all',
+                                    :class="['py-2.5 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all',
                                         paymentMethod === method 
                                             ? 'border-primary bg-primary/5 text-primary shadow-sm' 
                                             : 'border-white bg-white text-gray-400 hover:border-gray-200 hover:text-gray-600 shadow-sm'
@@ -304,25 +303,15 @@
                                         <input type="checkbox" v-model="printBill" class="rounded border-gray-300 text-primary focus:ring-primary shadow-sm">
                                         <span class="font-medium">{{ $t('pos.print_bill_pos') }}</span>
                                     </label>
-                                    <span v-if="hasUnsavedChanges" class="text-xs text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full font-bold">Unsaved Changes</span>
                                 </div>
 
                                 <button 
-                                    v-if="hasUnsavedChanges"
-                                    @click="updateOrder" 
-                                    :disabled="processing"
-                                    class="w-full py-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                                >
-                                    {{ processing ? $t('common.saving') : $t('orders.save_changes') }}
-                                </button>
-                                <button 
-                                    v-else
                                     @click="settleBill" 
                                     :disabled="processing || !paymentMethod"
-                                    class="w-full py-4 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 transform active:scale-[0.99]"
+                                    class="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 transform active:scale-[0.99]"
                                 >
                                     <span v-if="processing" class="animate-spin mr-2">⟳</span>
-                                    {{ $t('pos.settle') }} {{ selectedOrder.currency || currentCurrency }} {{ totals.total.toFixed(2) }}
+                                    {{ $t('pos.settle') }} {{ selectedOrder.currency || currentCurrency }} {{ (displayOrder?.total || 0).toFixed(2) }}
                                 </button>
                             </div>
                         </div>
@@ -559,17 +548,17 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('customers.phone_number') }}</label>
-                                <PhoneInput 
-                                    v-model="updateForm.customer_phone"
-                                    :country="currentRestaurant?.country"
-                                    :placeholder="$t('common.optional')"
-                                />
+                                    <PhoneInput 
+                                        v-model="updateForm.customer_phone"
+                                        :country="currentCountry"
+                                        :placeholder="$t('common.optional')"
+                                    />
                             </div>
                         </div>
                     </div>
 
                     <!-- Order Type & Table Section -->
-                    <div v-if="currentRestaurant?.service_type !== 'self_service'" class="glass-card rounded-xl p-5 border border-gray-200 overflow-visible">
+                    <div v-if="currentRestaurant?.service_type !== 'self_service'" class="glass-card rounded-xl p-5 border border-gray-200 overflow-visible relative z-30">
                         <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <div class="p-1.5 bg-blue-100 rounded-lg">
                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -609,7 +598,7 @@
                     </div>
 
                     <!-- Current Order Items -->
-                    <div class="glass-card rounded-xl p-5 border border-gray-200">
+                    <div class="glass-card rounded-xl p-5 border border-gray-200 relative z-20">
                         <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <div class="p-1.5 bg-green-100 rounded-lg">
                                 <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -776,6 +765,7 @@ const { t } = useI18n();
 const page = usePage();
 const currentCurrency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 const currentRestaurant = computed(() => (page.props.current_restaurant as any));
+const currentCountry = computed(() => (page.props.current_restaurant as any)?.country || 'United Arab Emirates');
 const { hasPermission } = usePermissions();
 
 const props = defineProps<{
@@ -920,10 +910,9 @@ onUnmounted(() => {
     }
 });
 
-watch(selectedOrder, (newOrder) => {
+const resetOrderState = (newOrder: any) => {
     if (newOrder) {
         editableItems.value = JSON.parse(JSON.stringify(newOrder.items)).map((item: any) => {
-            // Safely parse extras if string
             let parsedExtras = item.extras;
             if (typeof parsedExtras === 'string') {
                 try {
@@ -946,7 +935,6 @@ watch(selectedOrder, (newOrder) => {
         additionalChargeType.value = newOrder.additional_charge_type || 'fixed';
         additionalChargeValue.value = parseFloat(newOrder.additional_charge_value) || 0;
         
-        // Legacy fallback
         if (!newOrder.discount_type && newOrder.discount_amount > 0) {
             discountType.value = 'fixed';
             discountValue.value = newOrder.discount_amount;
@@ -957,9 +945,8 @@ watch(selectedOrder, (newOrder) => {
         }
 
         paymentMethod.value = newOrder.payment_method || 'cash';
-        adjustmentMode.value = 'none'; // reset mode
+        adjustmentMode.value = 'none';
         
-        // Populate update form with order details
         updateForm.value = {
             customer_name: newOrder.customer_name || '',
             customer_phone: newOrder.customer_phone || '',
@@ -967,7 +954,6 @@ watch(selectedOrder, (newOrder) => {
             table_id: newOrder.table_id || null
         };
         
-        // Initialize selected category to first category
         if (menuCategories.value.length > 0) {
             selectedCategory.value = menuCategories.value[0].id;
         }
@@ -976,14 +962,20 @@ watch(selectedOrder, (newOrder) => {
         additionalChargeValue.value = 0;
         editableItems.value = [];
     }
+};
+
+watch(selectedOrder, (newOrder) => {
+    // Only reset if we are not already editing or if we are switching orders
+    // But logic dictates when selectedOrder changes, we load it.
+    resetOrderState(newOrder);
 });
 
 // Sync selected order when localOrders update
 watch(localOrders, (newOrders) => {
     if (selectedOrder.value) {
         const freshOrder = newOrders.find(o => o.id === selectedOrder.value.id);
-        if (freshOrder && !hasUnsavedChanges.value) {
-            // Update selected order with fresh data from server IF no unsaved edits
+        if (freshOrder && !showUpdateOrderModal.value) {
+            // Update selected order with fresh data from server IF modal is closed
             selectedOrder.value = freshOrder; 
         }
     }
@@ -997,6 +989,70 @@ const filteredOrders = computed(() => {
         (order.customer_name && order.customer_name.toLowerCase().includes(query)) ||
         (order.table && order.table.name.toLowerCase().includes(query))
     );
+});
+
+const displayOrder = computed(() => {
+    if (!selectedOrder.value) return null;
+
+    const items = selectedOrder.value.items.map((item: any) => {
+        let parsedExtras = item.extras;
+        if (typeof parsedExtras === 'string') {
+            try {
+                parsedExtras = JSON.parse(parsedExtras);
+            } catch (e) {
+                parsedExtras = [];
+            }
+        }
+        return {
+            ...item,
+            extras: Array.isArray(parsedExtras) ? parsedExtras : [],
+            quantity: Number(item.quantity),
+            unit_price: Number(item.unit_price)
+        };
+    });
+
+    const subtotal = items.reduce((sum: number, item: any) => {
+        const itemTotal = item.unit_price * item.quantity;
+        const extrasTotal = (item.extras || []).reduce((acc: number, extra: any) => acc + Number(extra.price), 0) * item.quantity;
+        return sum + itemTotal + extrasTotal;
+    }, 0);
+
+    const tax = subtotal * 0.05;
+    
+    const dType = selectedOrder.value.discount_type || 'fixed';
+    const dVal = parseFloat(selectedOrder.value.discount_value) || parseFloat(selectedOrder.value.discount_amount) || 0;
+    
+    let discountAmount = 0;
+    if (dType === 'percent') {
+        discountAmount = subtotal * (dVal / 100);
+    } else {
+        discountAmount = dVal;
+    }
+
+    const cType = selectedOrder.value.additional_charge_type || 'fixed';
+    const cVal = parseFloat(selectedOrder.value.additional_charge_value) || parseFloat(selectedOrder.value.additional_charge) || 0;
+
+    let additionalChargeAmount = 0;
+    if (cType === 'percent') {
+        additionalChargeAmount = subtotal * (cVal / 100);
+    } else {
+        additionalChargeAmount = cVal;
+    }
+
+    const total = Math.max(0, subtotal + tax + additionalChargeAmount - discountAmount);
+
+    return {
+        items,
+        subtotal,
+        tax,
+        discountAmount,
+        additionalChargeAmount,
+        total,
+        discountType: dType,
+        discountValue: dVal,
+        additionalChargeType: cType,
+        additionalChargeValue: cVal
+    };
 });
 
 // Live Calculation of Totals based on editableItems and current adjustment settings
@@ -1044,6 +1100,8 @@ const selectOrder = (order: any) => {
 
 const closeUpdateOrderModal = () => {
     showUpdateOrderModal.value = false;
+    // Reset to saved state (discard unsaved changes)
+    resetOrderState(selectedOrder.value);
 };
 
 // Modal functions for updating order items

@@ -97,11 +97,17 @@ class PosOrderController extends Controller
             ->orderBy('sort_order')
             ->get(['name', 'slug', 'logo_url']);
 
+        // 4. Tables (for Dine In support in POS)
+        $tables = \App\Models\Table::where('restaurant_id', $restaurant->id)
+            ->where('is_active', true)
+            ->get();
+
         return Inertia::render('Orders/DeliveryCreate', [
             'menuCategories' => $menuCategories,
             'customers' => $customers,
             'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
             'deliveryProviders' => $deliveryProviders,
+            'tables' => $tables,
         ]);
     }
 
@@ -111,6 +117,7 @@ class PosOrderController extends Controller
 
         $validated = $request->validate([
             'customer_id' => ['nullable', 'exists:customers,id'],
+            'table_id' => ['nullable', 'exists:tables,id'],
             'customer_phone' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
             'type' => ['nullable', 'string', 'in:dine_in,takeaway,delivery'],
@@ -200,6 +207,7 @@ class PosOrderController extends Controller
             'customer_phone' => $validated['customer_phone'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'waiter_id' => auth()->id(),
+            'table_id' => $validated['table_id'] ?? null,
             'delivery_provider' => $orderType === 'delivery' ? ($validated['delivery_provider'] ?? null) : null,
             'delivery_order_id' => $orderType === 'delivery' ? ($validated['delivery_order_id'] ?? null) : null,
             'payment_method' => null,

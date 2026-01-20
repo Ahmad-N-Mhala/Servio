@@ -1,169 +1,64 @@
 <template>
     <MainLayout>
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Header -->
-            <div class="flex items-center gap-4 mb-8">
-                <Link :href="route('orders.index')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </Link>
-                <h1 class="text-3xl font-bold text-gray-900">{{ $t('nav.orders_create') }}</h1>
-            </div>
+        <div class="flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden bg-gray-50">
+            <!-- LEFT COLUMN: MENU (Flex Grow) -->
+            <div class="flex-1 flex flex-col min-w-0 border-gray-200 overflow-hidden relative order-1 md:order-2">
+                <!-- Top Header: Title & Stock Errors -->
+                <div class="bg-white border-b border-gray-200 px-5 py-3 shadow-sm z-10 shrink-0 flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <Link :href="route('orders.index')" class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                            </Link>
+                            <h1 class="text-xl font-bold text-gray-800">{{ $t('nav.orders_create') }}</h1>
+                        </div>
+                        
+                        <div class="relative w-full max-w-xs">
+                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                             </div>
+                             <input 
+                                v-model="searchQuery"
+                                type="text" 
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-primary focus:ring-primary sm:text-sm transition-colors" 
+                                :placeholder="$t('common.search') + '...'"
+                             >
+                        </div>
+                    </div>
 
-            <form @submit.prevent="createOrder" class="space-y-8">
-                <!-- Stock Error Display -->
-                <div v-if="form.errors.items" class="glass-card rounded-2xl p-6 border-2 border-red-300 bg-red-50">
-                    <div class="flex items-start gap-3">
-                        <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+                    <!-- Stock Error Display (Inlined Header) -->
+                    <div v-if="form.errors.items" class="bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2 text-sm">
+                        <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                         <div class="flex-1">
-                            <h4 class="font-bold text-red-900 mb-2">⚠️ {{ $t('dashboard_page.low_stock') }}</h4>
-                            <ul class="space-y-1 text-sm text-red-800">
-                                <li v-for="(error, idx) in (Array.isArray(form.errors.items) ? form.errors.items : [form.errors.items])" :key="idx">
-                                    {{ error }}
-                                </li>
+                            <p class="font-bold text-red-800 text-xs">{{ $t('dashboard_page.low_stock') }}</p>
+                            <ul class="list-disc list-inside text-xs text-red-700">
+                                <li v-for="(error, idx) in (Array.isArray(form.errors.items) ? form.errors.items : [form.errors.items])" :key="idx">{{ error }}</li>
                             </ul>
-                            <p class="mt-3 text-sm text-red-700 font-medium">
-                                {{ $t('common.please_correct') }}
-                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Customer Details Card -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <div class="p-2 bg-primary/10 rounded-lg">
-                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        {{ $t('common.guest') }} {{ $t('dashboard_page.details') }}
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">{{ $t('staff.phone') }}</label>
-                            <div class="relative group" dir="ltr">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 font-medium z-10 select-none pointer-events-none border-r border-gray-200 pr-3 my-2">{{ phoneCode }}</span>
-                                <input 
-                                    v-model="phoneInput"
-                                    type="tel"
-                                    maxlength="15"
-                                    @input="handlePhoneInput"
-                                    @blur="lookupCustomer"
-                                    :placeholder="'501234567'"
-                                    class="w-full text-left rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 pl-20 pr-4 transition-all hover:border-slate-300 dark:hover:border-slate-600"
-                                />
-                            </div>
-                        </div>
-                        <Input 
-                            v-model="form.customer_name"
-                            :label="$t('staff.name')"
-                            type="text"
-                            placeholder="Optional"
-                            :error="form.errors.customer_name"
-                        />
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <Input 
-                            v-model="form.customer_birth_date"
-                            :label="$t('staff.birth_date')"
-                            type="date"
-                            placeholder="YYYY-MM-DD"
-                            :error="form.errors.customer_birth_date"
-                        />
-                        <div></div> <!-- Spacer -->
-                    </div>
-                    
-                    <!-- Customer Loyalty Points Display -->
-                    <div v-if="selectedCustomer" class="mt-4 p-4 bg-gradient-to-r from-primary/10 to-purple-100 rounded-xl">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-600">{{ $t('loyalty.member') || 'Loyalty Member' }}</p>
-                                    <p class="font-bold text-gray-900">{{ selectedCustomer.name || 'Customer' }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-bold text-primary">{{ selectedCustomer.loyalty_points }}</p>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Categories Tabs -->
+                <div class="bg-white border-b border-gray-200 px-4 py-2 flex gap-2 overflow-x-auto custom-scrollbar shadow-sm shrink-0">
+                    <a 
+                        v-for="category in categoriesList" 
+                        :key="category.id"
+                        :href="'#cat-' + category.id"
+                        class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-white hover:shadow-md border border-transparent hover:border-gray-200 text-sm font-bold text-gray-700 whitespace-nowrap transition-all flex-shrink-0"
+                    >
+                        {{ getLocaleName(category.name) }}
+                    </a>
                 </div>
 
-                <!-- Order Type Selection -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <div class="p-2 bg-blue-100 rounded-lg">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        {{ $t('orders.type') || 'Order Type' }}
-                    </h3>
-                    <div class="flex gap-4 mb-6">
-                        <label class="flex-1 cursor-pointer group">
-                            <input type="radio" v-model="form.type" value="dine_in" class="peer sr-only" />
-                            <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
-                                <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.704 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-                                </svg>
-                                <span class="font-semibold text-gray-700 peer-checked:text-primary">{{ $t('kitchen.dine_in') }}</span>
-                            </div>
-                        </label>
-                        <label class="flex-1 cursor-pointer group">
-                            <input type="radio" v-model="form.type" value="takeaway" class="peer sr-only" />
-                            <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-gray-300 peer-checked:hover:border-primary transition-all text-center h-full flex flex-col items-center justify-center gap-2">
-                                <svg class="w-6 h-6 text-gray-400 peer-checked:text-primary group-hover:text-gray-600 peer-checked:group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
-                                <span class="font-semibold text-gray-700 peer-checked:text-primary">{{ $t('kitchen.takeaway') }}</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div v-if="form.type === 'dine_in'" class="animate-fade-in-up">
-                        <Select
-                            v-model="form.table_id"
-                            :label="$t('common.select') + ' ' + $t('nav.tables') + ' (' + $t('common.optional') + ')'"
-                            :options="tableOptions"
-                            :placeholder="$t('orders.no_table_assigned')"
-                            :error="form.errors.table_id"
-                        />
-                    </div>
-
-
-                </div>
-
-                <!-- Menu Items Card -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <div class="p-2 bg-primary/10 rounded-lg">
-                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        {{ $t('nav.menu') }} {{ $t('common.items') }}
-                    </h3>
-                    
-                    <div class="space-y-6">
-                        <div v-for="category in categoriesList" :key="category.id">
-                            <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                                {{ getLocaleName(category.name) }}
-                            </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Menu Grid -->
+                <div class="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/50 scroll-smooth">
+                    <div v-for="category in categoriesList" :key="category.id" :id="'cat-' + category.id" class="mb-8 scroll-mt-24">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3 px-1 sticky top-0 bg-gray-50/95 backdrop-blur py-2 z-10 rounded-lg">{{ getLocaleName(category.name) }}</h3>
+                        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 <div 
                                     v-for="item in category.items" 
                                     :key="item.id"
-                                    class="group flex flex-col bg-white border border-gray-100 dark:border-gray-700 hover:border-primary/50 hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-300 relative"
+                                    class="group flex flex-col bg-white border border-gray-200 hover:border-primary/50 hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-300 relative h-full"
                                     :class="{'opacity-75': (!canAddItem(item.id) && getQty(item.id) === 0) || item.inventory_status?.sold_out}"
                                 >
                                     <!-- Free Item Badge -->
@@ -177,12 +72,11 @@
                                     <!-- Stock Warning Overlay -->
                                     <div 
                                         v-if="!canAddItem(item.id) || item.inventory_status?.sold_out" 
-                                        class="absolute inset-x-0 top-0 z-10 w-full h-48 bg-gray-900/10 backdrop-blur-[1px] flex items-center justify-center"
+                                        class="absolute inset-x-0 top-0 z-10 w-full h-48 bg-gray-900/10 backdrop-blur-[1px] flex items-center justify-center pointer-events-none"
                                     >
                                         <span 
                                             class="text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm"
                                             :class="item.inventory_status?.sold_out ? 'bg-red-600' : 'bg-gray-900/80'"
-                                            :title="item.inventory_status?.sold_out ? 'Missing: ' + item.inventory_status.missing_ingredients.join(', ') : ''"
                                         >
                                             {{ item.inventory_status?.sold_out ? $t('common.sold_out') : getStockMessage(item.id) }}
                                         </span>
@@ -207,35 +101,34 @@
                                     </div>
 
                                     <!-- Content Area -->
-                                    <div class="flex-1 p-4 flex flex-col">
+                                    <div class="flex-1 p-3 flex flex-col">
                                         <div class="flex-1 mb-2">
-                                            <h5 class="font-bold text-gray-900 line-clamp-1" :title="typeof item.name === 'string' ? item.name : getLocaleName(item.name)">
+                                            <h5 class="font-bold text-gray-900 line-clamp-1 text-sm leading-tight" :title="typeof item.name === 'string' ? item.name : getLocaleName(item.name)">
                                                 {{ getLocaleName(item.name) }}
                                             </h5>
-                                            <p class="text-sm font-medium text-primary mt-1">
+                                            <p class="text-sm font-bold text-primary mt-1">
                                                 {{ currencyCode }} {{ item.price.toFixed(2) }}
                                             </p>
-                                            <p v-if="item.description" class="text-xs text-gray-500 mt-1 line-clamp-2" :title="item.description">
+                                            <p v-if="item.description" class="text-[10px] text-gray-500 mt-1 line-clamp-2 leading-none" :title="item.description">
                                                 {{ item.description }}
                                             </p>
-
                                         </div>
 
                                         <!-- Controls -->
-                                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-gray-100 dark:border-gray-700">
+                                        <div class="flex items-center justify-between mt-auto pt-2 border-t border-dashed border-gray-100 dark:border-gray-700">
                                             <button 
                                                 type="button"
                                                 @click="removeItem(item)"
                                                 :disabled="!getQty(item.id)"
-                                                class="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                                                class="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
                                                 :class="getQty(item.id) 
                                                     ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95' 
                                                     : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
                                             >
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
                                             </button>
                                             
-                                            <span class="font-bold text-gray-900 min-w-[1.5rem] text-center">
+                                            <span class="font-bold text-gray-900 min-w-[1.2rem] text-center text-sm">
                                                 {{ getQty(item.id) > 0 ? getQty(item.id) : 0 }}
                                             </span>
 
@@ -243,268 +136,240 @@
                                                 type="button"
                                                 @click="addItem(item)"
                                                 :disabled="!canAddItem(item.id) || item.inventory_status?.sold_out"
-                                                class="w-8 h-8 flex items-center justify-center rounded-xl transition-all relative group/btn"
+                                                class="w-7 h-7 flex items-center justify-center rounded-lg transition-all relative group/btn"
                                                 :class="canAddItem(item.id) && !item.inventory_status?.sold_out
                                                     ? 'bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:scale-105 active:scale-95' 
                                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                                             >
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: CART (Fixed Width) -->
+            <div id="cart-section" class="w-full md:w-[400px] lg:w-[450px] bg-white flex flex-col h-full shadow-xl z-20 overflow-hidden relative border-gray-200 order-2 md:order-1 md:border-r">
+                <!-- Customer & Type Header -->
+                <div class="p-4 border-b border-gray-100 bg-white space-y-4 shrink-0">
+                    <!-- Customer Section -->
+                    <div v-if="selectedCustomer" class="bg-gray-50 rounded-xl p-4 border border-gray-200 relative group transition-all hover:border-purple-200">
+                        <button @click="selectedCustomer = null; form.customer_phone = ''; form.customer_name = ''; form.customer_id = null;" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 p-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg">
+                                {{ selectedCustomer.name?.charAt(0).toUpperCase() || '?' }}
                             </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg leading-tight">{{ selectedCustomer.name }}</h3>
+                                <p class="text-xs text-gray-500">{{ selectedCustomer.phone }}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 mt-2">
+                            <div class="text-center bg-white border border-gray-100 rounded-lg p-2 flex-1 shadow-sm">
+                                <span class="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">Points</span>
+                                <span class="block text-lg font-bold text-purple-600">{{ selectedCustomer.loyalty_points }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="space-y-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide px-1">Customer</p>
+                        <div class="flex gap-2">
+                            <div class="flex-1">
+                                <PhoneInput 
+                                    v-model="form.customer_phone"
+                                    :country="currentCountry"
+                                    @blur="lookupCustomer"
+                                    placeholder="Phone"
+                                    class="w-full"
+                                />
+                            </div>
+                            <div class="flex-1">
+                                <Input 
+                                    v-model="form.customer_name"
+                                    type="text"
+                                    :placeholder="$t('staff.name')"
+                                    class="w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Type & Table -->
+                    <div class="space-y-2">
+                        <div class="flex p-1 bg-gray-100 rounded-lg">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" v-model="form.type" value="dine_in" class="sr-only peer">
+                                <div class="text-center py-2 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm transition-all">
+                                    {{ $t('kitchen.dine_in') }}
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" v-model="form.type" value="takeaway" class="sr-only peer">
+                                <div class="text-center py-2 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm transition-all">
+                                    {{ $t('kitchen.takeaway') }}
+                                </div>
+                            </label>
+                        </div>
+
+                        <div v-if="form.type === 'dine_in'">
+                            <Select
+                                v-model="form.table_id"
+                                :options="tableOptions"
+                                :placeholder="$t('orders.no_table_assigned')"
+                                class="w-full"
+                            />
                         </div>
                     </div>
                 </div>
 
-                <!-- Loyalty Rewards Redemption Card -->
-                <div v-if="availableRewards.length > 0" class="glass-card rounded-2xl p-6 border-2 border-purple-200">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <div class="p-2 bg-purple-100 rounded-lg">
-                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                            </svg>
-                        </div>
-                        {{ $t('loyalty.redeem_rewards') }}
-                        <span v-if="selectedCustomer" class="ml-auto text-sm font-normal text-gray-500">
-                            {{ selectedCustomer.loyalty_points }} {{ $t('loyalty.points') }} {{ $t('common.available') }}
-                        </span>
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div 
-                            v-for="reward in availableRewards" 
-                            :key="reward.id"
-                            @click="toggleReward(reward)"
-                            :class="[
-                                'p-4 rounded-xl border-2 cursor-pointer transition-all',
-                                selectedReward?.id === reward.id 
-                                    ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200' 
-                                    : canRedeemReward(reward) 
-                                        ? 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50/50' 
-                                        : 'border-gray-200 bg-gray-100 opacity-60 cursor-not-allowed'
-                            ]"
-                        >
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-900">{{ getLocaleName(reward.name) }}</h4>
-                                    <p class="text-sm text-gray-500 mt-1">{{ reward.description || getRewardTypeLabel(reward) }}</p>
-                                </div>
-                                <div v-if="selectedReward?.id === reward.id" class="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="mt-3 flex items-center justify-between">
-                                <span :class="['px-2 py-1 rounded-full text-xs font-semibold', 
-                                    canRedeemReward(reward) ? 'bg-purple-100 text-purple-700' : 'bg-gray-200 text-gray-600']">
-                                    {{ reward.points_required }} {{ $t('loyalty.points') }}
-                                </span>
-                                <span class="text-sm font-semibold text-green-600">
-                                    {{ getRewardValue(reward) }}
-                                </span>
-                            </div>
-                             <p v-if="reward.min_order_value && subtotal < reward.min_order_value" class="text-xs text-red-500 mt-1">
-                                {{ $t('loyalty.min_order', { amount: currencyCode + ' ' + reward.min_order_value }) }}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p v-if="!selectedCustomer" class="mt-4 text-sm text-amber-600 bg-amber-50 p-3 rounded-xl">
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        {{ $t('loyalty.check_points_hint') }}
-                    </p>
-                </div>
+                <!-- Cart List -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar bg-gray-50/30">
+                     <!-- Empty State -->
+                     <div v-if="cart.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400 p-8 text-center opacity-60">
+                        <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        <p class="text-lg font-medium">{{ $t('orders.no_items') }}</p>
+                        <p class="text-sm">{{ $t('common.select') }} items from menu</p>
+                     </div>
 
-                <!-- Order Summary Card -->
-                <div v-if="cart.length > 0" class="glass-card rounded-2xl p-6 border-2 border-primary/20">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <div class="p-2 bg-primary/10 rounded-lg">
-                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </div>
-                        {{ $t('orders.summary') || 'Order Summary' }}
-                    </h3>
-                    
-                    <div class="space-y-3 mb-4">
-                        <div 
-                            v-for="(item, index) in cart" 
-                            :key="index" 
-                            class="py-3 border-b border-gray-100 last:border-0"
-                        >
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-medium">{{ item.name }}</span>
-                                        <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">{{ $t('loyalty.one_free') }}</span>
-                                        <span class="text-gray-500">× {{ item.qty }}</span>
-                                    </div>
-                                    <div v-if="item.extras && item.extras.length > 0" class="mt-1 text-xs text-blue-600 font-medium space-y-0.5">
-                                        <div v-for="(ex, i) in item.extras" :key="i">
-                                            + {{ ex.name }} ({{ currencyCode }} {{ ex.price.toFixed(2) }})
+                     <div v-else class="p-4 space-y-6">
+                        <!-- Items -->
+                        <div class="space-y-3">
+                            <div 
+                                v-for="(item, index) in cart" 
+                                :key="index" 
+                                class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative group hover:border-primary/30 transition-all"
+                            >
+                                <div class="flex justify-between items-start gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="font-bold text-gray-800 text-sm truncate">{{ item.name }}</span>
+                                            <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-wide">FREE</span>
+                                        </div>
+                                        
+                                        <!-- Extras -->
+                                        <div v-if="item.extras && item.extras.length > 0" class="text-xs text-gray-500 space-y-0.5 mb-1.5">
+                                            <div v-for="(ex, i) in item.extras" :key="i" class="flex justify-between">
+                                                <span>+ {{ ex.name }}</span>
+                                                <span>{{ currencyCode }} {{ ex.price.toFixed(2) }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-3 mt-2">
+                                            <div class="flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-200">
+                                                <button @click="item.qty > 1 ? item.qty-- : cart.splice(index, 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-red-500 text-lg leading-none pb-0.5">-</button>
+                                                <span class="w-6 text-center font-bold text-sm text-gray-800">{{ item.qty }}</span>
+                                                <button @click="item.qty++" :disabled="!canAddItem(item.id)" :class="!canAddItem(item.id) ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary'" class="w-6 h-6 flex items-center justify-center text-gray-500 text-lg leading-none pb-0.5">+</button>
+                                            </div>
+                                            <span class="font-bold text-primary text-sm">{{ currencyCode }} {{ ((item.price + (item.extras?.reduce((sum, e) => sum + e.price, 0) || 0)) * item.qty).toFixed(2) }}</span>
                                         </div>
                                     </div>
-                                    <div v-if="item.notes" class="mt-1 text-xs text-gray-600 italic bg-amber-50 px-2 py-1 rounded">
-                                        📝 {{ item.notes }}
+
+                                    <!-- Actions -->
+                                    <div class="flex flex-col gap-1">
+                                        <button @click="cart.splice(index, 1)" class="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        <button @click="openNotesModal(item)" :class="item.notes ? 'text-amber-500 bg-amber-50' : 'text-gray-300 hover:text-gray-600'" class="p-1.5 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <button 
-                                        type="button"
-                                        @click="openNotesModal(item)"
-                                        class="p-1.5 text-gray-400 hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
-                                        title="Add/Edit Note"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <!-- Remove Button -->
-                                    <button 
-                                        type="button"
-                                        @click="cart.splice(index, 1)"
-                                        class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
-                                        title="Remove Item"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </button>
-                                    <span class="font-semibold min-w-[4rem] text-right">{{ currencyCode }} {{ ((item.price + (item.extras?.reduce((sum, e) => sum + e.price, 0) || 0)) * item.qty).toFixed(2) }}</span>
+                                <div v-if="item.notes" class="mt-2 text-xs text-amber-700 bg-amber-50 px-2 py-1.5 rounded border border-amber-100 italic flex gap-1">
+                                    <span>📝</span> {{ item.notes }}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="space-y-2 pt-3 border-t-2 border-gray-200">
-                        <div class="flex justify-between text-gray-600">
-                            <span>{{ $t('common.subtotal') }}</span>
-                            <span>{{ currencyCode }} {{ subtotal.toFixed(2) }}</span>
+
+                        <!-- Global Notes -->
+                        <div>
+                             <label class="text-xs font-bold text-gray-400 uppercase tracking-wide block mb-1.5">Order Notes</label>
+                             <textarea 
+                                v-model="form.notes"
+                                rows="2"
+                                class="w-full text-sm rounded-xl border-gray-200 bg-white focus:border-primary focus:ring-primary placeholder-gray-400"
+                                :placeholder="$t('orders.instructions_placeholder')"
+                            ></textarea>
                         </div>
-                        
-                        <!-- Reward Discount -->
-                        <div v-if="selectedReward && discountAmount > 0" class="flex justify-between text-green-600">
-                            <span class="flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                                </svg>
-                                {{ $t('loyalty.reward_discount') }}
-                            </span>
-                            <span>-{{ currencyCode }} {{ discountAmount.toFixed(2) }}</span>
+
+                        <!-- Rewards Section -->
+                        <div v-if="availableRewards.length > 0 && selectedCustomer" class="border-t border-dashed border-gray-200 pt-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3 flex justify-between items-center">
+                                <span>available rewards</span>
+                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px]">{{ selectedCustomer.loyalty_points }} pts</span>
+                            </h4>
+                            <div class="space-y-2">
+                                <div 
+                                    v-for="reward in availableRewards" 
+                                    :key="reward.id"
+                                    @click="toggleReward(reward)"
+                                    class="p-3 rounded-xl border transition-all cursor-pointer relative"
+                                    :class="selectedReward?.id === reward.id ? 'border-purple-500 bg-purple-50' : (canRedeemReward(reward) ? 'border-gray-200 bg-white hover:border-purple-300' : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed')"
+                                >
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-bold text-sm text-gray-800">{{ getLocaleName(reward.name) }}</p>
+                                            <p class="text-xs text-gray-500">{{ reward.points_required }} pts • {{ getRewardTypeLabel(reward) }}</p>
+                                        </div>
+                                        <div v-if="selectedReward?.id === reward.id" class="text-purple-600 bg-white rounded-full p-0.5 shadow-sm">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        
+                     </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-white border-t border-gray-100 p-4 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+                     <!-- Totals -->
+                     <div class="space-y-1.5 mb-4 text-sm">
                         <div class="flex justify-between text-gray-500">
-                            <span>{{ $t('pos.tax') }} (5%)</span>
-                            <span>{{ currencyCode }} {{ tax.toFixed(2) }}</span>
+                             <span>{{ $t('common.subtotal') }}</span>
+                             <span class="font-medium text-gray-700">{{ currencyCode }} {{ subtotal.toFixed(2) }}</span>
                         </div>
-                        <div class="flex justify-between text-xl font-bold text-primary pt-2">
-                            <span>{{ $t('common.total') }}</span>
-                            <span>{{ currencyCode }} {{ total.toFixed(2) }}</span>
+                        <div v-if="discountAmount > 0" class="flex justify-between text-green-600">
+                             <span>{{ $t('loyalty.discount') }}</span>
+                             <span class="font-bold">-{{ currencyCode }} {{ discountAmount.toFixed(2) }}</span>
                         </div>
-                        
-
-
-                        <!-- OTP Verification Section (Inline) -->
-                        <div v-if="selectedReward && !otpVerified" class="mt-4 p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
-                            <div class="flex flex-col gap-3">
-                                <div class="flex justify-between items-center">
-                                    <label class="text-sm font-bold text-gray-700">{{ $t('loyalty.verify_redemption') }}</label>
-                                    <span class="text-xs text-gray-500">{{ $t('loyalty.code_sent_to', { phone: selectedCustomer?.phone }) }}</span>
-                                </div>
-                                
-                                <div class="flex gap-2">
-                                    <input 
-                                        v-model="otpInput"
-                                        type="text" 
-                                        maxlength="6"
-                                        :placeholder="$t('loyalty.enter_otp')"
-                                        class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-center font-mono tracking-widest uppercase transition-colors"
-                                        :class="{'border-red-500 bg-red-50': otpError}"
-                                        @input="otpError = ''"
-                                    />
-                                    <Button 
-                                        type="button" 
-                                        v-if="(!otpSent && otpTimer === 0) && otpInput.length < 6"
-                                        size="sm"
-                                        @click="requestOtp"
-                                    >
-                                        {{ $t('loyalty.send_code') }}
-                                    </Button>
-                                    <Button 
-                                        type="button" 
-                                        v-else
-                                        size="sm" 
-                                        @click="verifyOtp"
-                                        :disabled="otpInput.length !== 6"
-                                    >
-                                        {{ $t('common.verify') }}
-                                    </Button>
-                                </div>
-
-                                <div v-if="otpError" class="text-xs text-red-600 font-bold flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    {{ otpError }}
-                                </div>
-
-                                <div v-if="otpSent || otpTimer > 0" class="flex justify-between items-center text-xs">
-                                    <span v-if="otpSent" class="text-green-600">{{ $t('loyalty.otp_sent') }}</span>
-                                    <button 
-                                        type="button" 
-                                        @click="requestOtp" 
-                                        :disabled="otpTimer > 0"
-                                        class="text-purple-600 font-medium hover:underline disabled:text-gray-400 disabled:no-underline"
-                                    >
-                                        {{ otpTimer > 0 ? $t('loyalty.resend_in', { seconds: otpTimer }) : $t('loyalty.resend_code') }}
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="flex justify-between text-gray-500">
+                             <span>{{ $t('pos.tax') }} (5%)</span>
+                             <span class="font-medium text-gray-700">{{ currencyCode }} {{ tax.toFixed(2) }}</span>
                         </div>
-
-                        <!-- OTP Success State -->
-                        <div v-if="selectedReward && otpVerified" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-sm font-bold text-green-700">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $t('loyalty.reward_verified') }}
-                            </span>
-                            <button @click="otpVerified = false; form.otp = ''; otpInput = ''" class="text-xs text-gray-500 underline hover:text-red-500">
-                                {{ $t('loyalty.change') }}
-                            </button>
+                        <div class="flex justify-between items-end pt-2 border-t border-dashed border-gray-200 mt-2">
+                             <span class="font-bold text-gray-800 text-lg">{{ $t('common.total') }}</span>
+                             <span class="font-extrabold text-primary text-3xl lg:text-4xl">{{ currencyCode }} {{ total.toFixed(2) }}</span>
                         </div>
+                     </div>
+
+                     <!-- OTP (Compact) -->
+                    <div v-if="selectedReward && !otpVerified" class="mb-4 bg-purple-50 rounded-lg p-2 border border-purple-100 flex gap-2">
+                         <input v-model="otpInput" type="text" maxlength="6" placeholder="OTP" class="w-20 text-center rounded border-gray-200 text-sm p-1 font-mono uppercase focus:ring-purple-500 focus:border-purple-500" :class="{'border-red-500': otpError}">
+                          <Button v-if="(!otpSent && otpTimer === 0) && otpInput.length < 6" size="sm" @click="requestOtp" class="flex-1 text-xs py-1 h-8">{{ $t('loyalty.send_code') }}</Button>
+                          <Button v-else size="sm" @click="verifyOtp" class="flex-1 text-xs py-1 h-8" :disabled="otpInput.length !== 6">{{ $t('common.verify') }}</Button>
                     </div>
-                </div>
 
-                <!-- Notes -->
-                <div class="glass-card rounded-2xl p-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ $t('orders.special_instructions') }} ({{ $t('common.optional') }})</label>
-                    <textarea 
-                        v-model="form.notes"
-                        rows="3"
-                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4"
-                        :placeholder="$t('orders.instructions_placeholder')"
-                    ></textarea>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="flex gap-4">
-                    <Link :href="route('orders.index')" class="flex-1 block">
-                        <Button type="button" variant="secondary" block size="lg">{{ $t('common.cancel') }}</Button>
-                    </Link>
-                    <div class="flex-1">
-                        <Button 
-                            type="submit" 
-                            block 
-                            size="lg"
-                            :loading="form.processing"
-                            :disabled="cart.length === 0"
+                     <!-- Submit -->
+                     <div class="flex gap-3">
+                         <Link :href="route('orders.index')" class="px-4 py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold transition-colors">
+                            {{ $t('common.cancel') }}
+                         </Link>
+                         <button 
+                            @click="createOrder" 
+                            :disabled="cart.length === 0 || form.processing" 
+                            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl py-3 shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                         >
+                            <span v-if="form.processing" class="animate-spin">⟳</span>
                             {{ $t('nav.orders_create') }}
-                        </Button>
-                    </div>
+                         </button>
+                     </div>
                 </div>
-            </form>
+            </div>
         </div>
 
         <!-- Item Notes Modal -->
@@ -589,6 +454,15 @@
             </div>
         </Modal>
 
+        <!-- Mobile Cart Summary (Fixed Bottom) -->
+        <div v-if="cart.length > 0" class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 safe-area-bottom">
+            <button @click="scrollToCart" class="w-full bg-primary text-white font-bold py-3 rounded-xl flex justify-between px-6 shadow-lg active:scale-95 transition-transform">
+                <span>{{ cart.reduce((s,i)=>s+i.qty,0) }} Items</span>
+                <span>View Cart</span>
+                <span>{{ currencyCode }} {{ total.toFixed(2) }}</span>
+            </button>
+        </div>
+
     </MainLayout>
 </template>
 
@@ -602,6 +476,7 @@ import Input from '@/Components/Input.vue';
 import Carousel from '@/Components/Carousel.vue';
 import Modal from '@/Components/Modal.vue';
 import Select from '@/Components/Select.vue';
+import PhoneInput from '@/Components/PhoneInput.vue';
 
 interface MenuItem {
     id: number;
@@ -693,9 +568,29 @@ const route = (window as any).route;
 const page = usePage();
 
 // Computed
-const categoriesList = computed(() => props.menuCategories || []);
+const searchQuery = ref('');
+
+const categoriesList = computed(() => {
+    const all = props.menuCategories || [];
+    if (!searchQuery.value) return all;
+
+    const query = searchQuery.value.toLowerCase().trim();
+    if (!query) return all;
+
+    return all.map(cat => {
+        const items = cat.items.filter(item => {
+            let name = '';
+            // Safe locale access
+            if (typeof item.name === 'string') name = item.name;
+            else name = item.name[locale.value] || Object.values(item.name)[0] || '';
+            
+            return name.toLowerCase().includes(query);
+        });
+        return { ...cat, items };
+    }).filter(cat => cat.items.length > 0);
+});
 const currencyCode = computed(() => (page.props.current_restaurant as any)?.currency || props.currency || 'AED');
-const phoneCode = computed(() => (page.props.current_restaurant as any)?.phone_code || '+971');
+const currentCountry = computed(() => (page.props.current_restaurant as any)?.country || 'United Arab Emirates');
 const availableRewards = computed(() => props.rewards || []);
 const tablesList = computed(() => props.tables || []);
 
@@ -723,7 +618,7 @@ const tableOptions = computed(() => {
 const cart = ref<CartItem[]>([]);
 const selectedCustomer = ref<Customer | null>(null);
 const selectedReward = ref<Reward | null>(null);
-const phoneInput = ref('');
+// const phoneInput = ref(''); // Removed
 const showNotesModal = ref(false);
 const editingCartItem = ref<CartItem | null>(null);
 const tempNotes = ref('');
@@ -752,21 +647,7 @@ const form = useForm({
 });
 
 // Handle phone input
-const handlePhoneInput = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    // Allow only numbers
-    const value = target.value.replace(/\D/g, '');
-    
-    // Update the display value
-    phoneInput.value = value;
-    
-    // Update the form value with full format based on restaurant country
-    if (value) {
-        form.customer_phone = phoneCode.value + value;
-    } else {
-        form.customer_phone = '';
-    }
-};
+// Handle phone input removed (handled by PhoneInput)
 
 // OTP State
 const otpInput = ref('');
@@ -826,35 +707,30 @@ const startOtpTimer = () => {
 
 // Customer lookup
 const lookupCustomer = () => {
-    if (!phoneInput.value) {
+    if (!form.customer_phone) {
         selectedCustomer.value = null;
         return;
     }
     
-    // Search using the input value (local number without prefix issues)
-    // We compare against the stored phone which likely contains the country code
-    const searchText = phoneInput.value;
+    const searchText = form.customer_phone;
     
+    // Normalize comparison by stripping non-digits
     const customer = props.customers?.find(c => 
-        (c.phone && c.phone.includes(searchText))
+        (c.phone && c.phone.replace(/\D/g, '') === searchText.replace(/\D/g, ''))
     );
     
     if (customer) {
         selectedCustomer.value = customer;
         form.customer_name = customer.name || '';
         form.customer_id = customer.id;
-        // Ensure form phone matches found customer
-        form.customer_phone = customer.phone;
     } else {
         selectedCustomer.value = null;
         form.customer_id = null;
-        // Keep the entered phone number in form
-        form.customer_phone = phoneCode.value + phoneInput.value;
     }
 };
 
 // Watch phone changes for auto-lookup
-watch(phoneInput, (newVal) => {
+watch(() => form.customer_phone, (newVal) => {
     if (newVal && newVal.length >= 7) {
         lookupCustomer();
     } else {
@@ -982,7 +858,7 @@ const canAddCustomizedItem = computed(() => {
      return true; 
 });
 
-const removeItem = (item: MenuItem) => {
+const removeItem = (item: { id: number }) => {
     const idx = cart.value.findIndex(i => i.id === item.id);
     if (idx !== -1) {
         if (cart.value[idx].qty > 1) {
@@ -1304,7 +1180,7 @@ const submitOrder = () => {
             cart.value = [];
             selectedReward.value = null;
             selectedCustomer.value = null;
-            phoneInput.value = '';
+            // phoneInput reset not needed as form.reset handles it
             otpInput.value = '';
             otpSent.value = false;
             otpVerified.value = false;
@@ -1312,5 +1188,9 @@ const submitOrder = () => {
             form.reset();
         }
     });
+};
+
+const scrollToCart = () => {
+    document.getElementById('cart-section')?.scrollIntoView({ behavior: 'smooth' });
 };
 </script>

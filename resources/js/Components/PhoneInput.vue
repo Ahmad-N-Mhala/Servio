@@ -17,6 +17,7 @@
                 :placeholder="placeholder"
                 :disabled="disabled"
                 @input="emitUpdate"
+                @blur="$emit('blur', $event)"
             />
         </div>
         <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -39,7 +40,7 @@ const props = defineProps<{
     disabled?: boolean;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'blur']);
 
 const countryPhonePrefixMap: Record<string, string> = {
     'United Arab Emirates': '+971',

@@ -127,11 +127,22 @@
                             </div>
                             
                             <h3 class="text-lg font-bold text-gray-900 mb-1">{{ getLocaleName(reward.name) }}</h3>
-                            <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ reward.description || $t('common.no_description') }}</p>
+                            <p class="text-sm text-gray-500 mb-2 line-clamp-2">{{ reward.description || $t('common.no_description') }}</p>
                             
+                            <!-- Applied On details -->
+                            <div class="text-xs mb-4">
+                                <span class="text-gray-500">{{ $t('loyalty.apply_on') }}: </span>
+                                <span v-if="reward.menu_items && reward.menu_items.length > 0" class="font-medium text-primary">
+                                    {{ reward.menu_items.map((i: any) => getLocaleName(i.name)).join(', ') }}
+                                </span>
+                                <span v-else class="font-medium text-gray-700">
+                                    {{ $t('loyalty.whole_menu') }}
+                                </span>
+                            </div>
+
                             <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                                 <span class="text-sm font-medium text-gray-600">
-                                    {{ $t('loyalty.type') }}: {{ formatRewardType(reward.reward_type) }}
+                                    {{ formatRewardType(reward.reward_type) }}
                                 </span>
                                 <span class="text-sm font-bold text-gray-900">
                                     {{ formatRewardValue(reward) }}
@@ -433,28 +444,50 @@
                         class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
                     >
                     
-                    <div class="h-64 overflow-y-auto border border-gray-200 rounded-xl divide-y divide-gray-100">
-                        <label 
-                            v-for="item in filteredModalItems" 
-                            :key="item.id"
-                            class="flex items-center p-3 hover:bg-gray-50 cursor-pointer transition-colors"
-                        >
-                            <input 
-                                type="checkbox"
-                                :checked="rewardForm.menu_item_ids.includes(item.id)"
-                                @change="toggleModalItem(item.id)"
-                                class="h-5 w-5 text-primary border-gray-300 rounded focus:ring-primary"
-                            >
-                            <span class="ml-3 text-sm text-gray-700 font-medium">{{ getLocaleName(item.name) }}</span>
-                            <span class="ml-auto text-xs text-gray-400">{{ currency }} {{ item.price }}</span>
-                        </label>
-                        <div v-if="filteredModalItems.length === 0" class="p-4 text-center text-gray-500 text-sm">
-                            {{ $t('loyalty.no_items_found') }}
+                    <div class="h-96 overflow-y-auto border border-gray-200 rounded-xl px-2 py-2">
+                        <div v-for="category in filteredCategories" :key="category.id" class="mb-5 last:mb-0">
+                            <!-- Category Header -->
+                             <h4 class="sticky top-0 z-10 bg-gray-50/95 backdrop-blur-sm px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-500 rounded-lg mb-2 border border-gray-100 shadow-sm">
+                                {{ getLocaleName(category.name) }}
+                            </h4>
+
+                            <!-- Items Grid -->
+                            <div class="space-y-1">
+                                <div 
+                                    v-for="item in category.items" 
+                                    :key="item.id"
+                                    @click="toggleModalItem(item.id)"
+                                    class="flex items-center p-3 cursor-pointer transition-all rounded-lg border group"
+                                    :class="rewardForm.menu_item_ids.includes(item.id) 
+                                        ? 'bg-primary/5 border-primary ring-1 ring-primary/20' 
+                                        : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-100'"
+                                >
+                                    <div class="relative flex items-center justify-center h-5 w-5 rounded-full border transition-colors"
+                                        :class="rewardForm.menu_item_ids.includes(item.id) ? 'border-primary bg-primary' : 'border-gray-300 bg-white'"
+                                    >
+                                        <div v-if="rewardForm.menu_item_ids.includes(item.id)" class="h-2 w-2 rounded-full bg-white"></div>
+                                    </div>
+                                    <span class="ml-3 text-sm font-medium transition-colors"
+                                        :class="rewardForm.menu_item_ids.includes(item.id) ? 'text-primary' : 'text-gray-700 group-hover:text-gray-900'"
+                                    >{{ getLocaleName(item.name) }}</span>
+                                    <span class="ml-auto text-xs font-mono px-2 py-1 rounded"
+                                         :class="rewardForm.menu_item_ids.includes(item.id) ? 'text-primary bg-primary/10' : 'text-gray-400 bg-gray-50'"
+                                    >{{ currency }} {{ item.price }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-if="filteredCategories.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
+                            <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <span class="text-sm font-medium">{{ $t('loyalty.no_items_found') }}</span>
                         </div>
                     </div>
 
                     <div class="flex justify-between items-center pt-2">
-                        <span class="text-sm text-gray-500">{{ $t('loyalty.items_selected', { count: rewardForm.menu_item_ids.length }) }}</span>
+                        <span class="text-sm text-gray-500">
+                            <span v-if="rewardForm.menu_item_ids.length > 0">{{ $t('loyalty.item_selected') }}</span>
+                            <span v-else>{{ $t('loyalty.no_item_selected') }}</span>
+                        </span>
                         <Button @click="showItemModal = false">{{ $t('loyalty.done') }}</Button>
                     </div>
                 </div>
@@ -483,7 +516,7 @@ const { hasPermission } = usePermissions();
 const props = withDefaults(defineProps<{
     customers: any;
     rewards: any[];
-    menuItems: any[];
+    menuCategories: any[];
     settings?: any;
     earningMethod?: any;
     filters?: {
@@ -499,7 +532,7 @@ const props = withDefaults(defineProps<{
 }>(), {
     customers: () => ({ data: [] }),
     rewards: () => [],
-    menuItems: () => [],
+    menuCategories: () => [],
     settings: () => ({}),
     earningMethod: () => null,
     filters: () => ({}),
@@ -559,20 +592,25 @@ const sort = (field: string) => {
 const showItemModal = ref(false);
 const itemSearch = ref('');
 
-const filteredModalItems = computed(() => {
-    if (!itemSearch.value) return props.menuItems;
+const filteredCategories = computed(() => {
+    if (!itemSearch.value) return props.menuCategories;
     const q = itemSearch.value.toLowerCase();
-    return props.menuItems.filter(i => 
-        getLocaleName(i.name).toLowerCase().includes(q)
-    );
+    
+    // Return filtered copy of categories containing matching items
+    return props.menuCategories.map((cat: any) => ({
+        ...cat,
+        items: cat.items.filter((i: any) => 
+            getLocaleName(i.name).toLowerCase().includes(q)
+        )
+    })).filter((cat: any) => cat.items.length > 0);
 });
 
 const toggleModalItem = (id: number) => {
-    const index = rewardForm.menu_item_ids.indexOf(id);
-    if (index === -1) {
-        rewardForm.menu_item_ids.push(id);
+    // Single Select Mode
+    if (rewardForm.menu_item_ids.includes(id)) {
+        rewardForm.menu_item_ids = [];
     } else {
-        rewardForm.menu_item_ids.splice(index, 1);
+        rewardForm.menu_item_ids = [id];
     }
 };
 

@@ -389,12 +389,12 @@
                      <div class="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-between border border-blue-100 dark:border-blue-800">
                         <div>
                             <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">{{ $t('menu.total_cost') }}</p>
-                            <p class="text-xl font-black text-blue-700 dark:text-blue-300">{{ totalIngredientCost.toFixed(2) }} <span class="text-sm font-normal">AED</span></p>
+                            <p class="text-xl font-black text-blue-700 dark:text-blue-300">{{ totalIngredientCost.toFixed(2) }} <span class="text-sm font-normal">{{ currency }}</span></p>
                         </div>
                         <div class="text-right">
                              <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">{{ $t('menu.est_profit') }}</p>
                              <p class="text-xl font-black" :class="estimatedProfit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                                 {{ estimatedProfit.toFixed(2) }} <span class="text-sm font-normal">AED</span>
+                                 {{ estimatedProfit.toFixed(2) }} <span class="text-sm font-normal">{{ currency }}</span>
                              </p>
                         </div>
                     </div>
@@ -438,7 +438,7 @@
                                 </div>
                              </div>
                              <div class="flex items-center gap-3">
-                                 <span class="font-bold text-gray-700 dark:text-gray-300">{{ (getIngredient(ing.id)?.cost * ing.quantity).toFixed(2) }} AED</span>
+                                 <span class="font-bold text-gray-700 dark:text-gray-300">{{ (getIngredient(ing.id)?.cost * ing.quantity).toFixed(2) }} {{ currency }}</span>
                                  <button type="button" @click="removeIngredient(index)" class="text-gray-400 hover:text-red-500 p-1">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                  </button>
@@ -499,7 +499,7 @@
 
                             <div class="flex flex-col md:flex-row gap-4 items-end">
                                 <div class="w-full md:w-1/3">
-                                    <Input v-model="extra.price" :label="$t('menu.extra_cost_price')" type="number" step="0.01" prefix="AED" />
+                                    <Input v-model="extra.price" :label="$t('menu.extra_cost_price')" type="number" step="0.01" :prefix="currency" />
                                 </div>
                                 
                                 <!-- Inventory Link -->
@@ -629,6 +629,7 @@ const props = defineProps<{
 }>();
 
 const isRtl = computed(() => page.props.isRtl as boolean);
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 // Category State
 const showCategoryModal = ref(false);
