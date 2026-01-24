@@ -91,4 +91,8 @@ return [
     'example_short' => 'مثال',
     'confirm' => 'هل أنت متأكد؟',
     'table' => 'الطاولة',
+    'loyality' => '4',
+    'loyalty_program' => 'برنامج الولاء',
+    'basic_desc' => 'مثالية للشركات الصغيرة الناشئة.',
+    'basic_name' => 'الباقة الأساسية',
 ];

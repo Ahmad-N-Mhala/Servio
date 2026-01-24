@@ -3,7 +3,7 @@
 return [
     'hero_title' => 'Revolutionize Your Restaurant Management',
     'hero_subtitle' => 'The all-in-one solution for point of sale, kitchen display, delivery management, and customer loyalty.',
-    'get_started' => 'Get Started',
+    'get_started' => 'login',
     'view_pricing' => 'View Pricing',
     'about_us' => 'About Us',
     'our_modules' => 'Our Powerful Modules',
@@ -34,7 +34,9 @@ return [
     'stats_restaurants' => 'Restaurants',
     'stats_orders' => 'Orders',
     'stats_uptime' => 'Uptime',
-    'hero_image_text' => "RESTAURANT\nMANAGEMENT\nREDEFINED",
+    'hero_image_text' => 'RESTAURANT
+MANAGEMENT
+REDEFINED',
     'plan_features' => 'Plan Features',
     'for_plan' => 'For {plan} plan',
     'month' => 'month',
@@ -47,12 +49,15 @@ return [
     'custom_plan_desc' => 'Contact our sales team for enterprise solutions tailored to your needs',
     'contact_sales' => 'Contact Sales',
     'about_title_default' => 'Elevating Every Aspect of Your Restaurant',
-    'about_us_description_default' => "Servio is a comprehensive, cloud-native restaurant operating system engineered to streamline operations for businesses of all sizes—from cozy cafes to multi-location franchises. We unify your entire workflow into one intuitive platform, eliminating the chaos of disjointed systems and manual errors.\n\nMASTER YOUR INVENTORY:\nSay goodbye to food waste and stockouts. Servio provides real-time tracking of every ingredient. Our smart inventory system monitors stock levels as you sell, automatically alerting you when supplies run low. You can manage recipes, track wastage, and generate purchase orders effortlessly, ensuring your kitchen is always stocked and profitable.\n\nBUILD LASTING LOYALTY:\nTurn every customer into a regular with our integrated Loyalty & CRM tools. Create personalized reward programs that engage diverse customer bases. Whether it's points-based systems, tiered rewards, or special promotions, Servio helps you understand buying habits and automate marketing campaigns via SMS and email, driving repeat business and maximizing customer lifetime value.\n\nBeyond this, Servio integrates powerful Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management into a single, seamless ecosystem designed to deliver exceptional dining experiences.",
+    'about_us_description_default' => 'Servio is a comprehensive, cloud-native restaurant operating system engineered to streamline operations for businesses of all sizes—from cozy cafes to multi-location franchises. We unify your entire workflow into one intuitive platform, eliminating the chaos of disjointed systems and manual errors.
+MASTER YOUR INVENTORY:
+Say goodbye to food waste and stockouts. Servio provides real-time tracking of every ingredient. Our smart inventory system monitors stock levels as you sell, automatically alerting you when supplies run low. You can manage recipes, track wastage, and generate purchase orders effortlessly, ensuring your kitchen is always stocked and profitable.
+BUILD LASTING LOYALTY:
+Turn every customer into a regular with our integrated Loyalty & CRM tools. Create personalized reward programs that engage diverse customer bases. Whether it\'s points-based systems, tiered rewards, or special promotions, Servio helps you understand buying habits and automate marketing campaigns via SMS and email, driving repeat business and maximizing customer lifetime value.
+Beyond this, Servio integrates powerful Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management into a single, seamless ecosystem designed to deliver exceptional dining experiences.',
     'owned_by' => 'Owned by KENILDOCK FOR DEVELOPMENT AND INNOVATION IN COMPUTER SYSTEMS AND SOFTWARE',
-    'connect_via_email' => "support{'@'}kenildock.com",
+    'connect_via_email' => 'support{\'@\'}kenildock.com',
     'connect_via_phone' => '+9715049460976',
-
-    // Detailed Features
     'feature_pos_title' => 'Smart Point of Sale',
     'feature_pos_desc' => 'A lightning-fast interface designed for high-volume environments. Handle table service, quick service, and delivery orders from a single screen.',
     'badge_pos' => 'Point of Sale',
@@ -73,8 +78,6 @@ return [
     'badge_loyalty' => 'Loyalty Program',
     'loyalty_bullet_1' => 'Customizable reward tiers',
     'loyalty_bullet_2' => 'Engage customers with SMS',
-
-    // How It Works
     'how_it_works_title' => 'How It Works',
     'step_1_title' => 'Create Account',
     'step_1_desc' => 'Sign up in seconds and set up your restaurant profile.',
@@ -82,8 +85,6 @@ return [
     'step_2_desc' => 'Upload your items, modifiers, and categories easily.',
     'step_3_title' => 'Start Selling',
     'step_3_desc' => 'Download the app or use the web POS to start taking orders.',
-
-    // Feedback Collection
     'feedback_feature' => 'Customer Feedback',
     'feedback_title' => 'Collect Feedback & Boost Your Google Reviews',
     'feedback_desc' => 'Gather valuable customer feedback seamlessly and automatically promote positive experiences to Google Maps.',

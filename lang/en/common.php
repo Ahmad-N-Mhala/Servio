@@ -84,4 +84,8 @@ return [
     'example_short' => 'e.g.',
     'confirm' => 'Are you sure?',
     'table' => 'Table',
+    'loyality' => 'd',
+    'loyalty_program' => 'loyalty program',
+    'basic_desc' => 'Perfect for small businesses starting out.',
+    'basic_name' => 'Basic Plan',
 ];

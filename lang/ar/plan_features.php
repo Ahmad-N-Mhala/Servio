@@ -19,4 +19,5 @@ return [
     'advanced_analytics' => 'تحليلات وتقارير متقدمة',
     'api_access' => 'الوصول إلى API',
     'custom_integrations' => 'تكاملات مخصصة',
+    'loyalty_program' => 'برنامج الولاء',
 ];

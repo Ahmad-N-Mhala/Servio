@@ -1,12 +1,24 @@
 <?php
 
-return [
-    'basic' => 'Basic',
-    'pro' => 'Pro',
-    'enterprise' => 'Enterprise',
-    'max_restaurants' => 'Restaurants',
-    'max_users' => 'Users',
-    'current_plan' => 'Current Plan',
-    'expires_on' => 'Expires on',
-    'days_remaining' => 'days remaining',
-];
+return array (
+  'basic' => 'Basic',
+  'pro' => 'Pro',
+  'enterprise' => 'Enterprise',
+  'max_restaurants' => 'Restaurants',
+  'max_users' => 'Users',
+  'current_plan' => 'Current Plan',
+  'expires_on' => 'Expires on',
+  'days_remaining' => 'days remaining',
+  'basic_name' => 'Basic Plan',
+  'basic_desc' => 'Perfect for small restaurants starting their digital journey. Manage one restaurant with essential tools like menu management, real-time order tracking, QR code ordering, and kitchen display system, backed by advanced analytics and dedicated support.',
+  'basicplan_name' => 'Basic Plan (new)',
+  'basicplan_desc' => 'description',
+  'Standardplan_name' => 'Standard Plan',
+  'Standardplan_desc' => 'Designed for growing restaurants that need more flexibility. Includes all Basic features plus custom integrations and a loyalty program to enhance customer engagement and streamline operations.',
+  'Advanced_name' => 'Advanced Plan',
+  'Advanced_desc' => 'Ideal for restaurant groups and large businesses. Manage unlimited restaurants and staff with powerful tools including advanced menu management, real-time tracking, custom integrations, loyalty programs, and dedicated support.',
+  'Standard_name' => 'Standard',
+  'Standard_desc' => NULL,
+  'Advanced / Multi-Branch_name' => 'Advanced',
+  'Advanced / Multi-Branch_desc' => NULL,
+);

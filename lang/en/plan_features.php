@@ -19,4 +19,5 @@ return [
     'advanced_analytics' => 'Advanced analytics & reports',
     'api_access' => 'API access',
     'custom_integrations' => 'Custom integrations',
+    'loyalty_program' => 'Loyalty program',
 ];
