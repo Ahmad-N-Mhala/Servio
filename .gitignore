@@ -25,3 +25,9 @@ yarn-error.log
 
 # Development tools (not for production)
 dev-tools/
+
+# Laravel cache files
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php
+/bootstrap/cache/config.php
+/bootstrap/cache/routes.php

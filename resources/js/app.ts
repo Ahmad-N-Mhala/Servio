@@ -130,3 +130,16 @@ router.on('error', (event: any) => {
         window.location.reload();
     }
 });
+
+// Update translations on navigation (since setup() only runs on initial load)
+router.on('success', (event: any) => {
+    const backendTranslations = event.detail.page.props.translations as any;
+    if (backendTranslations) {
+        if (backendTranslations.en) {
+            i18n.global.mergeLocaleMessage('en', backendTranslations.en);
+        }
+        if (backendTranslations.ar) {
+            i18n.global.mergeLocaleMessage('ar', backendTranslations.ar);
+        }
+    }
+});

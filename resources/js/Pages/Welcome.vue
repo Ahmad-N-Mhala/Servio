@@ -403,18 +403,15 @@
                             class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2"
                         >
                             {{ $t('landing.yearly') }}
-                            <span :class="billingCycle === 'yearly' ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-700'" class="text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors">
-                                {{ $t('landing.discount_20') }}
-                            </span>
                         </button>
                     </div>
                 </div>
                 
-                <div class="flex flex-wrap justify-center gap-8 items-stretch">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     <div 
                         v-for="plan in plans" 
                         :key="plan.id"
-                        class="p-8 rounded-[2rem] transition-all duration-300 flex flex-col border w-full max-w-md bg-white relative group hover:-translate-y-2"
+                        class="p-8 rounded-[2rem] transition-all duration-300 flex flex-col border w-full bg-white relative group hover:-translate-y-2 h-full"
                         :class="plan.is_featured ? 'border-2 border-emerald-500 shadow-2xl shadow-emerald-500/10 z-10 scale-105 md:scale-105' : 'border-gray-100 shadow-xl shadow-gray-200/50 opacity-90 hover:opacity-100'"
                     >
                         <!-- Featured Badge -->
@@ -423,15 +420,19 @@
                         </div>
 
                         <div class="mb-4">
-                            <h3 class="text-2xl font-black text-gray-900 mb-2">{{ plan.slug ? ($t('plans.' + plan.slug) !== 'plans.' + plan.slug ? $t('plans.' + plan.slug) : plan.name) : plan.name }}</h3>
-                            <p class="text-sm text-gray-500 line-clamp-2 min-h-[2.5rem]">{{ plan.description }}</p>
+                            <h3 class="text-2xl font-black text-gray-900 mb-2">
+                                {{ getPlanName(plan) }}
+                            </h3>
+                            <p class="text-sm text-gray-500">
+                                {{ getPlanDescription(plan) }}
+                            </p>
                         </div>
 
-                        <div class="mb-8 flex items-baseline gap-1">
+                        <div class="mb-8 flex items-baseline gap-1 flex-wrap">
                              <span class="text-5xl font-black text-gray-900 tracking-tight">
                                 {{ plan.currency || $t('landing.currency') }}{{ billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly }}
                              </span>
-                             <span class="text-gray-400 font-medium ml-1">
+                             <span class="text-gray-400 font-medium whitespace-nowrap">
                                 {{ billingCycle === 'monthly' ? $t('landing.per_month') : $t('landing.per_year') }}
                              </span>
                         </div>
@@ -539,7 +540,7 @@
                     </div>
                      <h3 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $t('landing.register_interest') }}</h3>
                      <p class="text-gray-500 font-medium text-lg">
-                        {{ $t('landing.for_plan', { plan: getPlanDisplayName(selectedPlan) }) }}
+                        {{ $t('landing.for_plan', { plan: getPlanName(selectedPlan) }) }}
                      </p>
                 </div>
 
@@ -716,15 +717,28 @@ const getLocaleText = (obj: any) => {
     return obj[locale.value] || obj['en'] || '';
 };
 
-const getPlanDisplayName = (plan: any) => {
+const getPlanName = (plan: any) => {
     if (!plan) return '';
     if (plan.slug) {
-        const localized = t('plans.' + plan.slug);
-        if (localized && localized !== 'plans.' + plan.slug) {
-            return localized;
-        }
+        const key = `plans.${plan.slug}_name`;
+        const translated = t(key);
+        if (translated && translated !== key) return translated;
     }
-    return plan.name || '';
+    // Fallback to t(name) or name
+    const transName = t(plan.name);
+    return transName !== plan.name ? transName : plan.name;
+};
+
+const getPlanDescription = (plan: any) => {
+    if (!plan) return '';
+    if (plan.slug) {
+        const key = `plans.${plan.slug}_desc`;
+        const translated = t(key);
+        if (translated && translated !== key) return translated;
+    }
+    // Fallback
+    const transDesc = t(plan.description || '');
+    return transDesc !== (plan.description || '') ? transDesc : (plan.description || '');
 };
 
 const openRegisterModal = (plan: any) => {
@@ -772,8 +786,8 @@ const submitInterest = async () => {
             const errors = error.response.data.errors;
             if (errors) {
                 // Manually map errors if form.setError expects specific format or loop
-                 Object.keys(errors).forEach(key => {
-                    form.setError(key, errors[key][0]);
+                Object.keys(errors).forEach(key => {
+                    form.setError(key as any, errors[key][0]);
                 });
             }
             console.log("Validation Errors:", errors);

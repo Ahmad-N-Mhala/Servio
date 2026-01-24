@@ -89,7 +89,7 @@
                 <div class="mt-6 text-center">
                     <p class="text-sm text-gray-600">
                         {{ $t('auth.no_account') }} 
-                        <a :href="'/' + $i18n.locale + '/servio/onboard'" class="font-semibold text-primary hover:text-primary-hover transition-colors">{{ $t('auth.get_started') }}</a>
+                        <a :href="'/' + $i18n.locale + '/servio#pricing'" class="font-semibold text-primary hover:text-primary-hover transition-colors">{{ $t('auth.get_started') }}</a>
                     </p>
                 </div>
             </form>

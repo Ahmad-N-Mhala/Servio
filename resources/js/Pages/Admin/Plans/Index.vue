@@ -90,7 +90,7 @@
 
                     <div v-if="selectedPlan.description">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $t('common.description') }}</h3>
-                        <p class="text-gray-600">{{ selectedPlan.description }}</p>
+                        <p class="text-gray-600">{{ $t(selectedPlan.description || '') }}</p>
                     </div>
 
                     <div>

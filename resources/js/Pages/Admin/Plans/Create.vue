@@ -11,22 +11,37 @@
                         <form @submit.prevent="submit" class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
-                                    <input v-model="form.name" type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                    <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
+                                    <label for="name_en" class="block text-sm font-medium text-gray-700">Name (English)</label>
+                                    <input v-model="form.name_en" type="text" id="name_en" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                    <div v-if="form.errors.name_en" class="text-red-500 text-xs mt-1">{{ form.errors.name_en }}</div>
                                 </div>
 
                                 <div>
-                                    <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
-                                    <input v-model="form.slug" type="text" id="slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                    <div v-if="form.errors.slug" class="text-red-500 text-xs mt-1">{{ form.errors.slug }}</div>
+                                    <label for="name_ar" class="block text-sm font-medium text-gray-700">Name (Arabic)</label>
+                                    <input v-model="form.name_ar" type="text" id="name_ar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" dir="rtl" required>
+                                    <div v-if="form.errors.name_ar" class="text-red-500 text-xs mt-1">{{ form.errors.name_ar }}</div>
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700">{{ $t('common.description') }}</label>
-                                <textarea v-model="form.description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-                                <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
+                                <label for="slug" class="block text-sm font-medium text-gray-700">Slug (Unique Key)</label>
+                                <input v-model="form.slug" type="text" id="slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                <p class="text-xs text-gray-500 mt-1">Used for translation keys (e.g. plans.slug_name)</p>
+                                <div v-if="form.errors.slug" class="text-red-500 text-xs mt-1">{{ form.errors.slug }}</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="description_en" class="block text-sm font-medium text-gray-700">Description (English)</label>
+                                    <textarea v-model="form.description_en" id="description_en" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                                    <div v-if="form.errors.description_en" class="text-red-500 text-xs mt-1">{{ form.errors.description_en }}</div>
+                                </div>
+                                
+                                <div>
+                                    <label for="description_ar" class="block text-sm font-medium text-gray-700">Description (Arabic)</label>
+                                    <textarea v-model="form.description_ar" id="description_ar" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" dir="rtl"></textarea>
+                                    <div v-if="form.errors.description_ar" class="text-red-500 text-xs mt-1">{{ form.errors.description_ar }}</div>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -130,9 +145,11 @@ defineProps<{
 }>();
 
 const form = useForm({
-    name: '',
+    name_en: '',
+    name_ar: '',
     slug: '',
-    description: '',
+    description_en: '',
+    description_ar: '',
     price_monthly: 0,
     price_yearly: 0,
     max_restaurants: null,

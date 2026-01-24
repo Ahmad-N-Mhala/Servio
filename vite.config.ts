@@ -18,6 +18,15 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+                chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+                assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`,
+            },
+        },
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./resources/js', import.meta.url)),

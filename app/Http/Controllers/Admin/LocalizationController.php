@@ -199,6 +199,62 @@ class LocalizationController extends Controller
         return redirect()->back()->with('success', 'Translations imported successfully.');
     }
 
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'key' => 'required|string',
+        ]);
+
+        $fullKey = $request->key;
+        $parts = explode('.', $fullKey, 2);
+
+        if (count($parts) === 2) {
+            $file = $parts[0];
+            $key = $parts[1];
+        } else {
+            $file = 'common';
+            $key = $fullKey;
+        }
+
+        // Check for usage in Plans (basic check)
+        $isUsed = \App\Models\Plan::where('name', $key)
+            ->orWhere('description', $key)
+            ->orWhere('name', $fullKey) // Check full key too
+            ->orWhere('description', $fullKey)
+            ->exists();
+
+        if ($isUsed) {
+            return redirect()->back()->with('error', 'This translation key is currently used by a Subscription Plan. Please update the plan first.');
+        }
+
+        // Delete from English
+        $this->deleteKey('en', $file, $key);
+
+        // Delete from Arabic
+        $this->deleteKey('ar', $file, $key);
+
+        return redirect()->back()->with('success', 'Translation deleted successfully.');
+    }
+
+    private function deleteKey($lang, $file, $key)
+    {
+        $path = lang_path($lang . '/' . $file . '.php');
+
+        if (File::exists($path)) {
+            $data = include $path;
+            if (is_array($data) && Arr::has($data, $key)) {
+                Arr::forget($data, $key);
+
+                $content = "<?php\n\nreturn " . $this->varExport($data) . ";\n";
+                File::put($path, $content);
+
+                if (function_exists('opcache_invalidate')) {
+                    opcache_invalidate($path, true);
+                }
+            }
+        }
+    }
+
     private function saveTranslation($lang, $file, $key, $value)
     {
         $path = lang_path($lang . '/' . $file . '.php');

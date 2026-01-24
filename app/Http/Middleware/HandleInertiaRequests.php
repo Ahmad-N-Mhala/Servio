@@ -86,6 +86,7 @@ class HandleInertiaRequests extends Middleware
                         return \App\Models\RestaurantSubscription::where('restaurant_id', $restaurant->id)
                             ->where('status', 'active')
                             ->with('plan')
+                            ->latest()
                             ->first();
                     }
                 }
@@ -96,20 +97,18 @@ class HandleInertiaRequests extends Middleware
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
-            'translations' => function () {
+            'translations' => function () use ($locale) {
                 $langPath = lang_path();
                 $locales = ['en', 'ar'];
                 $data = [];
 
-                foreach ($locales as $locale) {
-                    $path = $langPath . '/' . $locale;
-                    if (\Illuminate\Support\Facades\File::exists($path)) {
-                        $files = \Illuminate\Support\Facades\File::files($path);
-                        foreach ($files as $file) {
-                            $name = $file->getFilenameWithoutExtension();
-                            $content = include $file->getPathname();
-                            $data[$locale][$name] = $content;
-                        }
+                $path = $langPath . '/' . $locale;
+                if (\Illuminate\Support\Facades\File::exists($path)) {
+                    $files = \Illuminate\Support\Facades\File::files($path);
+                    foreach ($files as $file) {
+                        $name = $file->getFilenameWithoutExtension();
+                        $content = include $file->getPathname();
+                        $data[$locale][$name] = $content;
                     }
                 }
                 return $data;

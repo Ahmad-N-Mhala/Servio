@@ -16,6 +16,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
         try {
             if (Schema::hasTable('system_configurations')) {
                 $configs = \App\Models\SystemConfiguration::all()->pluck('value', 'key');
