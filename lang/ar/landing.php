@@ -98,4 +98,6 @@ return [
     'excellent_service' => 'خدمة ممتازة!',
     'posted_to_google' => 'تم النشر على خرائط جوجل',
     'automatically_shared' => 'مشاركة تلقائية مع العملاء المحتملين',
+    'dashboard' => 'لوحة التحكم',
+    'how_it_works_subtitle' => 'خطوات بسيطة وسلسة لتشغيل مطعمك.',
 ];

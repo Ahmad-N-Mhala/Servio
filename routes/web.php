@@ -60,6 +60,11 @@ Route::group([
         Route::get('/order/{token}/{orderNumber}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'getOrderStatus'])->name('order.status');
     });
 
+    // Fun Pages
+    Route::get('/bobo', function () {
+        return \Inertia\Inertia::render('Fun/Bobo');
+    })->name('bobo');
+
     // Authenticated Routes
     Route::middleware(['auth'])->group(function () {
         // Profile Routes (Tenant/User)
@@ -426,7 +431,7 @@ Route::group([
             // Landing Screenshots
             Route::post('landing-page/screenshots', [\App\Http\Controllers\Admin\LandingPageController::class, 'storeScreenshot'])->name('landing.screenshots.store');
             Route::delete('landing-page/screenshots/{landingScreenshot}', [\App\Http\Controllers\Admin\LandingPageController::class, 'destroyScreenshot'])->name('landing.screenshots.destroy');
-
+            Route::post('landing-page/upload-image', [\App\Http\Controllers\Admin\LandingPageController::class, 'uploadImage'])->name('landing.upload-image');
         });
     });
 

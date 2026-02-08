@@ -99,4 +99,6 @@ Beyond this, Servio integrates powerful Point of Sale (POS), Kitchen Display Sys
     'excellent_service' => 'Excellent service!',
     'posted_to_google' => 'Posted to Google Maps',
     'automatically_shared' => 'Automatically shared with potential customers',
+    'dashboard' => 'Dashboard',
+    'how_it_works_subtitle' => 'Seamlessly simple steps to get your restaurant running.',
 ];

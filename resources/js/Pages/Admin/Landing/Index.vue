@@ -42,6 +42,45 @@
                 <div v-show="activeTab === 'settings'" class="bg-white rounded-xl shadow-sm p-6">
                     <form @submit.prevent="saveSettings" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Hero Section -->
+                            <div class="md:col-span-2 border-b pb-6 mb-6">
+                                <h4 class="text-lg font-bold text-gray-900 mb-4">Hero Section</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <Input 
+                                            v-model="settingsForm.settings.hero_title.en"
+                                            label="Hero Title (English)"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <Input 
+                                            v-model="settingsForm.settings.hero_title.ar"
+                                            label="Hero Title (Arabic)"
+                                            dir="rtl"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Hero Subtitle (English)</label>
+                                        <textarea 
+                                            v-model="settingsForm.settings.hero_subtitle.en"
+                                            rows="2"
+                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        ></textarea>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Hero Subtitle (Arabic)</label>
+                                        <textarea 
+                                            v-model="settingsForm.settings.hero_subtitle.ar"
+                                            rows="2"
+                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-right"
+                                            dir="rtl"
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Contact Email -->
                             <div class="md:col-span-2">
                                 <Input 
@@ -126,9 +165,82 @@
                             </div>
                          </div>
 
-                        <!-- Features Section Config -->
-                        <div class="border-t pt-6 mt-6">
-                            <h4 class="text-lg font-bold text-gray-900 mb-4">Features Section Content</h4>
+                            <!-- Dashboard Section -->
+                            <div class="border-t pt-6 mt-6">
+                                <h4 class="text-lg font-bold text-gray-900 mb-4">Dashboard Section</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <Input v-model="settingsForm.settings.dashboard_title.en" label="Section Title (English)" />
+                                    </div>
+                                    <div>
+                                        <Input v-model="settingsForm.settings.dashboard_title.ar" label="Section Title (Arabic)" dir="rtl" />
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <Input v-model="settingsForm.settings.dashboard_desc.en" label="Description (English)" />
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <Input v-model="settingsForm.settings.dashboard_desc.ar" label="Description (Arabic)" dir="rtl" />
+                                    </div>
+                                </div>
+                                
+                                <h5 class="font-bold text-sm text-gray-700 mb-2">Key Points (Bullets)</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input v-model="settingsForm.settings.dashboard_point_1.en" label="Point 1 (EN)" />
+                                    <Input v-model="settingsForm.settings.dashboard_point_1.ar" label="Point 1 (AR)" dir="rtl" />
+                                    
+                                    <Input v-model="settingsForm.settings.dashboard_point_2.en" label="Point 2 (EN)" />
+                                    <Input v-model="settingsForm.settings.dashboard_point_2.ar" label="Point 2 (AR)" dir="rtl" />
+                                    
+                                    <Input v-model="settingsForm.settings.dashboard_point_3.en" label="Point 3 (EN)" />
+                                    <Input v-model="settingsForm.settings.dashboard_point_3.ar" label="Point 3 (AR)" dir="rtl" />
+                                    
+                                    <Input v-model="settingsForm.settings.dashboard_point_4.en" label="Point 4 (EN)" />
+                                    <Input v-model="settingsForm.settings.dashboard_point_4.ar" label="Point 4 (AR)" dir="rtl" />
+                                </div>
+
+                                <h5 class="font-bold text-sm text-gray-700 mt-6 mb-2">Detailed Widget Explanations</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
+                                    <!-- Widget 1 -->
+                                    <div class="col-span-full font-semibold text-gray-800 border-b pb-2">Chart 1: Revenue</div>
+                                    <Input v-model="settingsForm.settings.dash_widget_1_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.dash_widget_1_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <textarea v-model="settingsForm.settings.dash_widget_1_desc.en" rows="4" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Description (EN)"></textarea>
+                                        <textarea v-model="settingsForm.settings.dash_widget_1_desc.ar" rows="4" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Description (AR)" dir="rtl"></textarea>
+                                    </div>
+
+                                    <!-- Widget 2 -->
+                                    <div class="col-span-full font-semibold text-gray-800 border-b pb-2 mt-4">Chart 2: Orders</div>
+                                    <Input v-model="settingsForm.settings.dash_widget_2_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.dash_widget_2_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <textarea v-model="settingsForm.settings.dash_widget_2_desc.en" rows="4" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Description (EN)"></textarea>
+                                        <textarea v-model="settingsForm.settings.dash_widget_2_desc.ar" rows="4" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Description (AR)" dir="rtl"></textarea>
+                                    </div>
+
+                                    <!-- Widget 3 -->
+                                    <div class="col-span-full font-semibold text-gray-800 border-b pb-2 mt-4">Chart 3: Products</div>
+                                    <Input v-model="settingsForm.settings.dash_widget_3_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.dash_widget_3_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <textarea v-model="settingsForm.settings.dash_widget_3_desc.en" rows="4" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Description (EN)"></textarea>
+                                        <textarea v-model="settingsForm.settings.dash_widget_3_desc.ar" rows="4" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Description (AR)" dir="rtl"></textarea>
+                                    </div>
+
+                                    <!-- Widget 4 -->
+                                    <div class="col-span-full font-semibold text-gray-800 border-b pb-2 mt-4">Chart 4: Payments</div>
+                                    <Input v-model="settingsForm.settings.dash_widget_4_title.en" label="Title (EN)" />
+                                    <Input v-model="settingsForm.settings.dash_widget_4_title.ar" label="Title (AR)" dir="rtl" />
+                                    <div class="md:col-span-2">
+                                        <textarea v-model="settingsForm.settings.dash_widget_4_desc.en" rows="4" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Description (EN)"></textarea>
+                                        <textarea v-model="settingsForm.settings.dash_widget_4_desc.ar" rows="4" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Description (AR)" dir="rtl"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Features Section Config -->
+                            <div class="border-t pt-6 mt-6">
+                                <h4 class="text-lg font-bold text-gray-900 mb-4">Features Section Content</h4>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
@@ -578,6 +690,14 @@ const route = (window as any).route;
 const settingsForm = useForm({
     settings: {
         contact_email: props.landingSettings.contact_email || '',
+        hero_title: {
+            en: props.landingSettings.hero_title?.en || '',
+            ar: props.landingSettings.hero_title?.ar || ''
+        },
+        hero_subtitle: {
+            en: props.landingSettings.hero_subtitle?.en || '',
+            ar: props.landingSettings.hero_subtitle?.ar || ''
+        },
         about_us_title: {
             en: props.landingSettings.about_us_title?.en || '',
             ar: props.landingSettings.about_us_title?.ar || ''
@@ -590,6 +710,43 @@ const settingsForm = useForm({
         stats_orders: props.landingSettings.stats_orders || '1M+',
         stats_uptime: props.landingSettings.stats_uptime || '99.9%',
         stats_visible: props.landingSettings.stats_visible !== undefined ? Boolean(props.landingSettings.stats_visible) : true,
+
+        // Dashboard Section
+        dashboard_title: {
+            en: props.landingSettings.dashboard_title?.en || '',
+            ar: props.landingSettings.dashboard_title?.ar || ''
+        },
+        dashboard_desc: {
+            en: props.landingSettings.dashboard_desc?.en || '',
+            ar: props.landingSettings.dashboard_desc?.ar || ''
+        },
+        dashboard_point_1: {
+            en: props.landingSettings.dashboard_point_1?.en || '',
+            ar: props.landingSettings.dashboard_point_1?.ar || ''
+        },
+        dashboard_point_2: {
+            en: props.landingSettings.dashboard_point_2?.en || '',
+            ar: props.landingSettings.dashboard_point_2?.ar || ''
+        },
+        dashboard_point_3: {
+            en: props.landingSettings.dashboard_point_3?.en || '',
+            ar: props.landingSettings.dashboard_point_3?.ar || ''
+        },
+        dashboard_point_4: {
+            en: props.landingSettings.dashboard_point_4?.en || '',
+            ar: props.landingSettings.dashboard_point_4?.ar || ''
+        },
+        dash_widget_1_title: { en: props.landingSettings.dash_widget_1_title?.en || '', ar: props.landingSettings.dash_widget_1_title?.ar || '' },
+        dash_widget_1_desc: { en: props.landingSettings.dash_widget_1_desc?.en || '', ar: props.landingSettings.dash_widget_1_desc?.ar || '' },
+        
+        dash_widget_2_title: { en: props.landingSettings.dash_widget_2_title?.en || '', ar: props.landingSettings.dash_widget_2_title?.ar || '' },
+        dash_widget_2_desc: { en: props.landingSettings.dash_widget_2_desc?.en || '', ar: props.landingSettings.dash_widget_2_desc?.ar || '' },
+        
+        dash_widget_3_title: { en: props.landingSettings.dash_widget_3_title?.en || '', ar: props.landingSettings.dash_widget_3_title?.ar || '' },
+        dash_widget_3_desc: { en: props.landingSettings.dash_widget_3_desc?.en || '', ar: props.landingSettings.dash_widget_3_desc?.ar || '' },
+        
+        dash_widget_4_title: { en: props.landingSettings.dash_widget_4_title?.en || '', ar: props.landingSettings.dash_widget_4_title?.ar || '' },
+        dash_widget_4_desc: { en: props.landingSettings.dash_widget_4_desc?.en || '', ar: props.landingSettings.dash_widget_4_desc?.ar || '' },
 
         // Features Section
         features_title: {

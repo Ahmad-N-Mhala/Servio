@@ -75,12 +75,12 @@
                 
                 <h1 class="text-6xl md:text-8xl font-black text-gray-900 tracking-tight leading-none mb-8 animate-fade-in-up animation-delay-100">
                     <span class="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900">
-                        {{ $t('landing.hero_title') }}
+                        {{ getSetting('hero_title') || $t('landing.hero_title') }}
                     </span>
                 </h1>
                 
                 <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
-                    {{ $t('landing.hero_subtitle') }}
+                    {{ getSetting('hero_subtitle') || $t('landing.hero_subtitle') }}
                 </p>
                 
                 <div class="flex flex-col sm:flex-row justify-center gap-5 animate-fade-in-up animation-delay-300">
@@ -183,8 +183,160 @@
             </div>
         </section>
 
-        <!-- Detailed Features & Modules -->
-        <section id="modules" class="py-24 bg-white relative overflow-hidden">
+        <!-- Dashboard Explanation Section -->
+        <section class="py-24 bg-gray-50 relative overflow-hidden">
+             <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-emerald-50/50 -skew-x-12 transform translate-x-20"></div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <!-- Text Content -->
+                    <div :class="locale === 'ar' ? 'lg:order-1' : ''">
+                        <div class="inline-flex items-center gap-2 mb-6">
+                            <span class="w-8 h-[2px] bg-emerald-600"></span>
+                            <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">{{ $t('landing.dashboard') || 'Dashboard' }}</span>
+                        </div>
+                        
+                        <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                            {{ getSetting('dashboard_title') || 'Comprehensive Restaurant Dashboard' }}
+                        </h2>
+                        
+                        <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+                            {{ getSetting('dashboard_desc') || 'Manage every aspect of your restaurant from a single, intuitive interface.' }}
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Point 1 -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 mb-1">{{ getSetting('dashboard_point_1') || 'Real-time analytics' }}</h4>
+                                </div>
+                            </div>
+                            
+                            <!-- Point 2 -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 mb-1">{{ getSetting('dashboard_point_2') || 'Inventory Management' }}</h4>
+                                </div>
+                            </div>
+
+                            <!-- Point 3 -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 mb-1">{{ getSetting('dashboard_point_3') || 'Staff Management' }}</h4>
+                                </div>
+                            </div>
+
+                            <!-- Point 4 -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 mb-1">{{ getSetting('dashboard_point_4') || 'CRM & Loyalty' }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual -->
+                    <div :class="locale === 'ar' ? 'lg:order-2' : ''" class="relative">
+                         <!-- Decorative blobs -->
+                        <div class="absolute -top-10 -right-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+                        <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+                        
+                        <!-- Dashboard Preview Card -->
+                        <div class="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 transform rotate-2 hover:rotate-0 transition-all duration-500">
+                             <div class="bg-gray-50 border-b border-gray-100 p-4 flex items-center gap-2">
+                                <div class="flex gap-1.5">
+                                    <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                                </div>
+                                <div class="flex-grow text-center text-xs text-gray-400 font-mono">dashboard.servio.app</div>
+                             </div>
+                             <!-- Use existing screenshot if available, else placeholder -->
+                             <div class="aspect-[16/10] bg-gray-50 relative group">
+                                <img v-if="getSetting('dashboard_image')" :src="getSetting('dashboard_image')" class="w-full h-full object-cover">
+                                <img v-else-if="screenshots && screenshots.length > 0" :src="screenshots[0].image_path" class="w-full h-full object-cover">
+                                <div v-else class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                    <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M10 2v20M2 10h20" />
+                                    </svg>
+                                    <span class="text-sm font-medium">Dashboard Preview</span>
+                                </div>
+                                
+                                <!-- Floating Stats Cards (Decoration) -->
+                                <div class="absolute bottom-6 left-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                                    <div class="text-xs text-gray-500 mb-1">Daily Revenue</div>
+                                    <div class="text-lg font-bold text-gray-900">$2,845.00</div>
+                                    <div class="text-xs text-green-500 flex items-center mt-1">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                        +12.5%
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Widget Explanations Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-20 pt-10 border-t border-gray-100">
+                    <!-- Widget 1 -->
+                    <div class="group hover:-translate-y-1 transition-transform duration-300">
+                        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_1_title') || 'Revenue Analytics' }}</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_1_desc') }}</p>
+                    </div>
+
+                    <!-- Widget 2 -->
+                    <div class="group hover:-translate-y-1 transition-transform duration-300">
+                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4 text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_2_title') || 'Live Order Tracking' }}</h3>
+                         <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_2_desc') }}</p>
+                    </div>
+
+                    <!-- Widget 3 -->
+                    <div class="group hover:-translate-y-1 transition-transform duration-300">
+                        <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4 text-purple-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_3_title') || 'Best Sellers' }}</h3>
+                         <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_3_desc') }}</p>
+                    </div>
+
+                    <!-- Widget 4 -->
+                    <div class="group hover:-translate-y-1 transition-transform duration-300">
+                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4 text-orange-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_4_title') || 'Payment Insights' }}</h3>
+                         <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_4_desc') }}</p>
+                    </div>
+                </div>
+            </div>
             <!-- Background Decoration -->
             <div class="absolute inset-0 z-0">
                 <div class="absolute -right-20 top-40 w-[30rem] h-[30rem] bg-emerald-50 rounded-full blur-3xl opacity-60"></div>
@@ -198,7 +350,7 @@
                         <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.how_it_works_title') }}</span>
                     </div>
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ getSetting('how_it_works_title') || $t('landing.how_it_works_title') }}</h2>
-                    <p class="text-xl text-gray-500 max-w-2xl mx-auto">Seamlessly simple steps to get your restaurant running.</p>
+                    <p class="text-xl text-gray-500 max-w-2xl mx-auto">{{ getSetting('how_it_works_subtitle') || $t('landing.how_it_works_subtitle') }}</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 relative">
