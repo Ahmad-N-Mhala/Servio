@@ -19,9 +19,13 @@
                 <span class="text-6xl animate-bounce inline-block">🧸</span>
             </div>
             
-            <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-8 font-serif leading-tight">
+            <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-4 font-serif leading-tight">
                 Will you be my<br/>Valentine?
             </h1>
+            
+            <p class="text-pink-400 font-serif italic text-sm md:text-base font-semibold mb-8 animate-pulse">
+                "Bobos is an idea and the idea will never die"
+            </p>
 
             <div class="flex flex-col md:flex-row items-center justify-center gap-6 h-32">
                 <!-- Yes Button -->
