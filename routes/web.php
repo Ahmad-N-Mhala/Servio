@@ -21,19 +21,17 @@ Route::get('/', function () {
 require base_path('routes/tenant_api.php');
 
 // Main App Routes (Authenticated & Localized)
-foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $properties) {
-    Route::group([
-        'prefix' => $localeCode . '/servio',
-        'middleware' => [
-            'web',
-            'localeSessionRedirect',
-            'localizationRedirect',
-            'localeViewPath',
-        ],
-    ], function () {
-        require base_path('routes/web_localized.php');
-    });
-}
+Route::group([
+    'prefix' => LaravelLocalization::setLocale() . '/servio',
+    'middleware' => [
+        'web',
+        'localeSessionRedirect',
+        'localizationRedirect',
+        'localeViewPath',
+    ],
+], function () {
+    require base_path('routes/web_localized.php');
+});
 
 
 
