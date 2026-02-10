@@ -275,19 +275,20 @@
                      <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-6 transition-all duration-300">
                         <label class="block text-sm font-medium text-blue-900 mb-3">{{ $t('communication.timing_settings') }}</label>
                         <div class="space-y-4">
-                            <!-- Option 1: Immediately -->
-                            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-colors" :class="{'bg-white shadow-sm ring-1 ring-blue-200': feedbackForm.timing_mode === 'immediately'}">
-                                <input type="radio" v-model="feedbackForm.timing_mode" value="immediately" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                <span class="text-gray-900 font-medium">{{ $t('communication.immediately') }}</span>
-                            </label>
-
-                            <!-- Option 2: Custom Delay -->
+                            <!-- Option 1: Immediately (Implicit when checkbox is unchecked) -->
+                            <!-- Checkbox: Delay Sending -->
                             <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white/50 transition-colors" :class="{'bg-white shadow-sm ring-1 ring-blue-200': feedbackForm.timing_mode === 'delay'}">
-                                <input type="radio" v-model="feedbackForm.timing_mode" value="delay" class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 mt-3">
+                                <input 
+                                    type="checkbox" 
+                                    v-model="feedbackForm.timing_mode" 
+                                    true-value="delay" 
+                                    false-value="immediately"
+                                    class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-3"
+                                >
                                 <div class="flex-1">
                                     <span class="block text-gray-900 font-medium mb-2 mt-2">{{ $t('communication.delay_sending') }}</span>
                                     
-                                    <div class="flex flex-wrap items-center gap-2" :class="{'opacity-50 pointer-events-none': feedbackForm.timing_mode !== 'delay'}">
+                                    <div class="flex flex-wrap items-center gap-2 transition-opacity duration-200" :class="feedbackForm.timing_mode === 'delay' ? 'opacity-100' : 'opacity-50 pointer-events-none'">
                                         <span class="text-sm text-gray-600">{{ $t('communication.wait_for') }}</span>
                                         <div class="w-24">
                                             <input 
