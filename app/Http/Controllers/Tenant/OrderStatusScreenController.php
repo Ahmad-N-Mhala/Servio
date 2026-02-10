@@ -56,8 +56,9 @@ class OrderStatusScreenController extends Controller
     private function checkServiceType()
     {
         $restaurantId = session('active_restaurant_id');
-        if (!$restaurantId)
-            return;
+        if (!$restaurantId) {
+            abort(403, 'No active restaurant session');
+        }
 
         $restaurant = \App\Models\Restaurant::find($restaurantId);
         // If table service only, hide the status screen/manager
