@@ -45,13 +45,20 @@ class InventoryController extends Controller
             ->get();
 
         $users = $restaurant->users()->get(['id', 'name', 'email']);
-
         // Identify owner for default selection if needed
         $owner = $restaurant->owner()->first();
 
         // Ensure owner is in the list
-        if ($owner && !$users->contains('id', $owner->id)) {
-            $users->push($owner);
+        if ($owner) {
+            if (!$users->contains('id', $owner->id)) {
+                $users->push($owner);
+            }
+        }
+
+        // Also ensure CURRENT USER is in the list (often the one setting up)
+        $currentUser = $request->user();
+        if ($currentUser && !$users->contains('id', $currentUser->id)) {
+            $users->push($currentUser);
         }
 
         return Inertia::render('Inventory/Index', [
