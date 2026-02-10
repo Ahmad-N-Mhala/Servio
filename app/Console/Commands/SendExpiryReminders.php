@@ -57,18 +57,19 @@ class SendExpiryReminders extends Command
                 $recipient = null;
                 $restaurant = $batch->ingredient->restaurant ?? null;
 
-                // Priority: Restaurant Notification Email
-                if ($restaurant && !empty($restaurant->notification_email)) {
-                    $recipient = $restaurant->notification_email;
-                    $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to Restaurant Email: {$recipient}");
-                }
-                // Fallback: Assigned User
-                elseif ($batch->reminder_user_id) {
+                // Priority: Specific User assigned to Batch
+                if ($batch->reminder_user_id) {
                     $user = User::find($batch->reminder_user_id);
                     if ($user) {
                         $recipient = $user;
                         $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to User: {$user->email}");
                     }
+                }
+
+                // Fallback: Restaurant Notification Email
+                if (!$recipient && $restaurant && !empty($restaurant->notification_email)) {
+                    $recipient = $restaurant->notification_email;
+                    $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to Restaurant Email: {$recipient}");
                 }
 
                 if ($recipient) {

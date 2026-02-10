@@ -104,11 +104,17 @@ class InventoryService
         $recipient = null;
         $restaurant = $ingredient->restaurant;
 
-        // Priority: Restaurant Notification Email
-        if ($restaurant && !empty($restaurant->notification_email)) {
+        // Priority: Specific User assigned to Ingredient (As per user request)
+        if ($ingredient->notification_user_id) {
+            $user = \App\Models\User::find($ingredient->notification_user_id);
+            if ($user) {
+                $recipient = $user;
+            }
+        }
+
+        // Fallback: Restaurant Notification Email
+        if (!$recipient && $restaurant && !empty($restaurant->notification_email)) {
             $recipient = $restaurant->notification_email;
-        } elseif ($ingredient->notification_user_id) {
-            $recipient = \App\Models\User::find($ingredient->notification_user_id);
         }
 
         if ($recipient) {
