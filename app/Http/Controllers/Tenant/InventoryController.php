@@ -49,6 +49,11 @@ class InventoryController extends Controller
         // Identify owner for default selection if needed
         $owner = $restaurant->owner()->first();
 
+        // Ensure owner is in the list
+        if ($owner && !$users->contains('id', $owner->id)) {
+            $users->push($owner);
+        }
+
         return Inertia::render('Inventory/Index', [
             'ingredients' => $ingredients,
             'filters' => $request->only(['search']),
