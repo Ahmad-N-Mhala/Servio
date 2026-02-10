@@ -79,7 +79,16 @@ disableDarkMode();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')) as any,
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue'))
+        .catch((error) => {
+            // Handle chunk load errors (e.g., after deployment when old chunks are deleted)
+            if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('404'))) {
+                console.warn('⚠️ Chunk load failed, reloading page to fetch new version...');
+                window.location.reload();
+                return Promise.reject(error);
+            }
+            throw error;
+        }) as any,
     setup({ el, App, props, plugin }) {
         const app = createApp({ render: () => h(App, props) });
         const pinia = createPinia();
