@@ -7,12 +7,12 @@
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('dashboard.welcome') }}</h1>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">{{ $t('dashboard.subtitle') }}</p>
                 </div>
-                <div class="flex space-x-2">
+                <div class="flex gap-4">
                     <a 
                         :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'excel', tab: currentTab })"
                         target="_blank"
                     >
-                         <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                         <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>{{ $t('inventory.download_excel') }}</Button>
@@ -21,7 +21,7 @@
                         :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf', tab: currentTab })"
                         target="_blank"
                     >
-                        <Button variant="primary" class="bg-primary-600 text-white hover:bg-primary-700">
+                        <Button variant="primary" class="bg-primary-600 text-white hover:bg-primary-700 px-4">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>{{ $t('common.export') }} PDF</Button>

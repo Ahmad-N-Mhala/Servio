@@ -83,7 +83,7 @@
                     {{ getSetting('hero_subtitle') || $t('landing.hero_subtitle') }}
                 </p>
                 
-                <div class="flex flex-col sm:flex-row justify-center gap-5 animate-fade-in-up animation-delay-300">
+                <div class="flex flex-col sm:flex-row justify-center gap-8 animate-fade-in-up animation-delay-300">
                     <a :href="route('login')" class="px-10 py-4.5 rounded-2xl bg-gray-900 text-white font-bold text-lg hover:bg-gray-800 hover:shadow-2xl hover:shadow-gray-900/20 hover:-translate-y-1 transition-all duration-300">
                         {{ $t('landing.get_started') }}
                     </a>
