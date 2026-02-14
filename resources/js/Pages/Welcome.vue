@@ -63,22 +63,8 @@
             </div>
         </nav>
 
-        <!-- Fixed Global Video Background -->
-        <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-            <video 
-                autoplay 
-                loop 
-                muted 
-                playsinline 
-                class="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-10 mix-blend-exclusion"
-                poster="https://cdn.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_1280.jpg"
-            >
-                <!-- Stars / Space Particles -->
-                <source src="https://cdn.pixabay.com/video/2020/06/19/42566-432240960_large.mp4" type="video/mp4">
-            </video>
-            <!-- White Overlay for Readability -->
-            <div class="absolute inset-0 bg-white/90"></div>
-        </div>
+        <!-- Interactive Particle Background -->
+        <ParticlesBackground />
 
         <!-- Hero Section -->
         <section class="relative pt-32 pb-40 overflow-hidden min-h-screen flex items-center z-10">
@@ -772,6 +758,7 @@ import Logo from '@/Components/Logo.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
+import ParticlesBackground from '@/Components/ParticlesBackground.vue';
 
 interface SystemSettings {
     support_email?: string;

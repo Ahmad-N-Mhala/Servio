@@ -1,6 +1,9 @@
 <template>
-    <div class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-gray-50 to-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen relative flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
         
+        <!-- Background -->
+        <ParticlesBackground />
+
         <Toast 
             :message="toastMessage" 
             :title="toastTitle" 
@@ -123,6 +126,7 @@ import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
 import Toast from '@/Components/Toast.vue';
 import Input from '@/Components/Input.vue';
+import ParticlesBackground from '@/Components/ParticlesBackground.vue';
 
 const { t, locale } = useI18n();
 
