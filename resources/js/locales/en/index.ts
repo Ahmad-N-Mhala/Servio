@@ -754,6 +754,12 @@ export default {
         hero_image_text: "RESTAURANT\nMANAGEMENT\nREDEFINED",
         plan_features: 'Plan Features',
         for_plan: 'For {plan} plan',
+        total_visitors: 'Total Visitors',
+        active_restaurants: 'Active Restaurants',
+        countries_served: 'Countries Served',
+        owned_by: 'Owned by KENILDOCK FOR DEVELOPMENT AND INNOVATION IN COMPUTER SYSTEMS AND SOFTWARE',
+        privacy_policy: 'Privacy Policy',
+        terms_of_service: 'Terms of Service',
     },
     plan_features: {
         one_restaurant: '1 Restaurant',

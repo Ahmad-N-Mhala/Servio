@@ -597,60 +597,149 @@
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="bg-black text-white border-t border-gray-800 py-10 relative z-10">
+        <!-- Stats Section -->
+        <section class="relative py-16 z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                    <!-- Brand Section -->
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <Logo class="h-8 w-auto text-white" :show-text="false" />
-                            <span class="text-xl font-bold tracking-tight">Servio</span>
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl shadow-2xl overflow-hidden">
+                    <div class="px-8 py-12 md:px-12 md:py-16">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
+                            <!-- Total Visitors -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                    </svg>
+                                </div>
+                                <p class="text-5xl font-extrabold tracking-tight">{{ visitorCount.toLocaleString() }}</p>
+                                <p class="text-sm font-medium text-emerald-100 uppercase tracking-wider">{{ $t('landing.total_visitors') }}</p>
+                            </div>
+
+                            <!-- Active Users -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                    </svg>
+                                </div>
+                                <p class="text-5xl font-extrabold tracking-tight">{{ activeRestaurants.toLocaleString() }}+</p>
+                                <p class="text-sm font-medium text-emerald-100 uppercase tracking-wider">{{ $t('landing.active_restaurants') }}</p>
+                            </div>
+
+                            <!-- Countries Served -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.546-3.131 1.457-4.341" />
+                                    </svg>
+                                </div>
+                                <p class="text-5xl font-extrabold tracking-tight">15+</p>
+                                <p class="text-sm font-medium text-emerald-100 uppercase tracking-wider">{{ $t('landing.countries_served') }}</p>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-400 max-w-sm leading-relaxed">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="relative z-10 bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
+            <!-- Decorative gradient line -->
+            <div class="h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500"></div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                    <!-- Brand Section -->
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="absolute inset-0 bg-emerald-500 blur-xl opacity-30"></div>
+                                <Logo class="relative h-10 w-auto text-white" :show-text="false" />
+                            </div>
+                            <span class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Servio</span>
+                        </div>
+                        <p class="text-sm text-gray-400 max-w-sm leading-relaxed">
                             {{ $t('landing.hero_subtitle') }}
                         </p>
+                        <!-- Social Links (Optional) -->
+                        <div class="flex gap-3">
+                            <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-emerald-600 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/50">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-emerald-600 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/50">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-emerald-600 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/50">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 16.892c-2.102.144-6.784.144-8.883 0C5.282 16.736 5.017 15.622 5 12c.017-3.629.285-4.736 2.558-4.892 2.099-.144 6.782-.144 8.883 0C18.718 7.264 18.982 8.378 19 12c-.018 3.629-.285 4.736-2.559 4.892zM10 9.658l4.917 2.338L10 14.342V9.658z"/></svg>
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Ownership Section -->
-                    <div class="space-y-4">
-                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('landing.about_us') }}</h4>
-                        <p class="text-xs text-gray-300 leading-relaxed font-medium capitalize">
-                            {{ $t('landing.owned_by') }}
-                        </p>
+                    <div class="space-y-6">
+                        <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                            <div class="w-8 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent"></div>
+                            {{ $t('landing.about_us') }}
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-emerald-500/50 transition-all duration-300">
+                                <p class="text-sm text-gray-300 leading-relaxed font-medium">
+                                    {{ $t('landing.owned_by') }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Contact Section -->
-                    <div class="space-y-4">
-                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('landing.contact_us') }}</h4>
-                        <div class="space-y-3">
-                            <a :href="'mailto:' + (page.props.system_settings?.support_email || 'support@kenildock.com')" class="flex items-center gap-3 text-xs text-gray-300 hover:text-white transition-colors group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 transition-all duration-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                    <div class="space-y-6">
+                        <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                            <div class="w-8 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent"></div>
+                            {{ $t('landing.contact_us') }}
+                        </h4>
+                        <div class="space-y-4">
+                            <a :href="'mailto:' + (page.props.system_settings?.support_email || 'support@kenildock.com')" class="group flex items-center gap-4 p-4 rounded-2xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 hover:border-emerald-500/50 hover:bg-gray-800 transition-all duration-300">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 group-hover:scale-110 transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-white">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                     </svg>
                                 </div>
-                                {{ page.props.system_settings?.support_email || 'support@kenildock.com' }}
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Email</p>
+                                    <p class="text-sm text-gray-200 font-medium truncate group-hover:text-white transition-colors">{{ page.props.system_settings?.support_email || 'support@kenildock.com' }}</p>
+                                </div>
                             </a>
-                            <a :href="'tel:' + (page.props.system_settings?.support_phone || '+9715049460976')" class="flex items-center gap-3 text-xs text-gray-300 hover:text-white transition-colors group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 transition-all duration-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                            
+                            <a :href="'tel:' + (page.props.system_settings?.support_phone || '+9715049460976')" class="group flex items-center gap-4 p-4 rounded-2xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 hover:border-emerald-500/50 hover:bg-gray-800 transition-all duration-300">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 group-hover:scale-110 transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-white">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                                     </svg>
                                 </div>
-                                <span dir="ltr">{{ page.props.system_settings?.support_phone || '+971 50 494 60976' }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Phone</p>
+                                    <p class="text-sm text-gray-200 font-medium group-hover:text-white transition-colors" dir="ltr">{{ page.props.system_settings?.support_phone || '+971 50 494 60976' }}</p>
+                                </div>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex gap-6 text-xs text-gray-300">
-                        <a href="#" class="hover:text-white transition-colors">{{ $t('landing.privacy_policy') }}</a>
-                        <a href="#" class="hover:text-white transition-colors">{{ $t('landing.terms_of_service') }}</a>
-                    </div>
-                    <div class="text-xs text-gray-400">
-                        &copy; {{ new Date().getFullYear() }} Servio. {{ $t('landing.copyright') }}
+                <!-- Bottom Bar -->
+                <div class="pt-8 border-t border-gray-800">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div class="flex flex-wrap justify-center md:justify-start gap-6 text-sm">
+                            <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors duration-300 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                {{ $t('landing.privacy_policy') }}
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors duration-300 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                {{ $t('landing.terms_of_service') }}
+                            </a>
+                        </div>
+                        <div class="text-sm text-gray-500 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            &copy; {{ new Date().getFullYear() }} Servio. {{ $t('landing.copyright') }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -807,14 +896,36 @@ const showRegisterModal = ref(false);
 const selectedPlan = ref<any>(null);
 const successMessage = ref('');
 const currentScreenshotIndex = ref(0);
+const visitorCount = ref(0);
+const activeRestaurants = ref(0);
 let screenshotInterval: any = null;
 
+// Animate visitor count on mount
 onMounted(() => {
     if (props.screenshots && props.screenshots.length > 1) {
         screenshotInterval = setInterval(() => {
             currentScreenshotIndex.value = (currentScreenshotIndex.value + 1) % props.screenshots.length;
         }, 5000);
     }
+    
+    // Animate visitor count
+    const targetVisitors = 12547; // You can make this dynamic from backend
+    const targetRestaurants = 250;
+    const duration = 2000; // 2 seconds
+    const steps = 60;
+    const visitorIncrement = targetVisitors / steps;
+    const restaurantIncrement = targetRestaurants / steps;
+    
+    let currentStep = 0;
+    const counterInterval = setInterval(() => {
+        currentStep++;
+        visitorCount.value = Math.min(Math.floor(visitorIncrement * currentStep), targetVisitors);
+        activeRestaurants.value = Math.min(Math.floor(restaurantIncrement * currentStep), targetRestaurants);
+        
+        if (currentStep >= steps) {
+            clearInterval(counterInterval);
+        }
+    }, duration / steps);
 });
 
 onUnmounted(() => {

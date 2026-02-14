@@ -734,6 +734,12 @@ export default {
         hero_image_text: "إدارة المطاعم\nبمفهوم جديد",
         plan_features: 'ميزات الخطة',
         for_plan: 'للخطة {plan}',
+        total_visitors: 'إجمالي الزوار',
+        active_restaurants: 'المطاعم النشطة',
+        countries_served: 'الدول التي نخدمها',
+        owned_by: 'مملوكة لشركة كينيل دوك للتطوير والابتكار في أنظمة الحاسوب والبرمجيات',
+        privacy_policy: 'سياسة الخصوصية',
+        terms_of_service: 'شروط الخدمة',
     },
     plan_features: {
         one_restaurant: 'مطعم واحد',
