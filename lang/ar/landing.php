@@ -100,4 +100,6 @@ return [
     'automatically_shared' => 'مشاركة تلقائية مع العملاء المحتملين',
     'dashboard' => 'لوحة التحكم',
     'how_it_works_subtitle' => 'خطوات بسيطة وسلسة لتشغيل مطعمك.',
+    'privacy_policy' => 'سياسة الخصوصية',
+    'terms_of_service' => 'شروط الخدمة',
 ];

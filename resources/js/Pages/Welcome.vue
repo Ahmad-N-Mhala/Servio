@@ -1,8 +1,9 @@
 <template>
-    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-50 via-white to-gray-50 font-sans text-gray-900 selection:bg-emerald-500/20 selection:text-emerald-700">
+    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-emerald-500/20 selection:text-emerald-700">
         
         <!-- Navbar -->
-        <nav class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-sm transition-all duration-300">
+        <!-- Navbar (Transparent for video) -->
+        <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20">
                     <!-- Logo -->
@@ -13,15 +14,15 @@
 
                     <!-- Desktop Navigation -->
                     <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-                        <a href="#about" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 transition-colors duration-200">{{ $t('landing.about_us') }}</a>
-                        <a href="#modules" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 transition-colors duration-200">{{ $t('landing.features') }}</a>
-                        <a href="#pricing" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 transition-colors duration-200">{{ $t('landing.plans_pricing') }}</a>
+                        <a href="#about" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.about_us') }}</a>
+                        <a href="#modules" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.features') }}</a>
+                        <a href="#pricing" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.plans_pricing') }}</a>
                         
                         <div class="flex items-center gap-4 border-l border-gray-200 pl-6 rtl:border-r rtl:border-l-0 rtl:pr-6 rtl:pl-0">
                             <!-- Language Switcher -->
                              <button 
                                 @click="toggleLanguage" 
-                                class="p-2 rounded-xl hover:bg-white hover:shadow-md hover:text-emerald-600 transition-all duration-300 flex items-center gap-2 text-sm font-bold text-gray-500"
+                                class="p-2 rounded-xl hover:bg-gray-100 text-gray-600 hover:text-emerald-600 transition-all duration-300 flex items-center gap-2 text-sm font-bold"
                             >
                                 <span class="uppercase">{{ locale }}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -30,8 +31,8 @@
                             </button>
 
                             <!-- Login CTA -->
-                            <a :href="route('login')" class="px-6 py-2.5 rounded-xl bg-gray-900 text-white font-bold text-sm tracking-wide hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 shadow-xl shadow-gray-900/10">
-                                {{ $t('landing.get_started') }}
+                            <a :href="route('login')" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm tracking-wide hover:bg-emerald-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 shadow-xl shadow-emerald-900/20 capitalize">
+                                {{ $t('auth.login') }}
                             </a>
                         </div>
                     </div>
@@ -62,32 +63,43 @@
             </div>
         </nav>
 
+        <!-- Fixed Global Video Background -->
+        <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+            <video 
+                autoplay 
+                loop 
+                muted 
+                playsinline 
+                class="absolute min-w-full min-h-full object-cover w-auto h-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-10 mix-blend-exclusion"
+                poster="https://cdn.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_1280.jpg"
+            >
+                <!-- Stars / Space Particles -->
+                <source src="https://cdn.pixabay.com/video/2020/06/19/42566-432240960_large.mp4" type="video/mp4">
+            </video>
+            <!-- White Overlay for Readability -->
+            <div class="absolute inset-0 bg-white/90"></div>
+        </div>
+
         <!-- Hero Section -->
-        <section class="relative pt-32 pb-40 overflow-hidden">
-             <!-- Background Blobs -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 overflow-hidden pointer-events-none">
-                <div class="absolute top-20 left-10 w-96 h-96 bg-purple-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-                <div class="absolute top-20 right-10 w-96 h-96 bg-emerald-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-                <div class="absolute -bottom-32 left-1/2 w-96 h-96 bg-pink-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-            </div>
+        <section class="relative pt-32 pb-40 overflow-hidden min-h-screen flex items-center z-10">
+             <!-- Video Background -->
+
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 
                 <h1 class="text-6xl md:text-8xl font-black text-gray-900 tracking-tight leading-none mb-8 animate-fade-in-up animation-delay-100">
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900">
-                        {{ getSetting('hero_title') || $t('landing.hero_title') }}
-                    </span>
+                    {{ getSetting('hero_title') || $t('landing.hero_title') }}
                 </h1>
                 
-                <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
+                <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200 font-medium">
                     {{ getSetting('hero_subtitle') || $t('landing.hero_subtitle') }}
                 </p>
                 
-                <div class="flex flex-col sm:flex-row justify-center gap-8 animate-fade-in-up animation-delay-300">
-                    <a :href="route('login')" class="px-10 py-4.5 rounded-2xl bg-gray-900 text-white font-bold text-lg hover:bg-gray-800 hover:shadow-2xl hover:shadow-gray-900/20 hover:-translate-y-1 transition-all duration-300">
-                        {{ $t('landing.get_started') }}
+                <div class="flex flex-col sm:flex-row justify-center gap-5 animate-fade-in-up animation-delay-300">
+                    <a :href="route('login')" class="px-8 py-3.5 rounded-full bg-emerald-600 text-white font-bold text-lg tracking-wide shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 capitalize">
+                        {{ $t('auth.login') }}
                     </a>
-                    <a href="#pricing" class="px-10 py-4.5 rounded-2xl bg-white text-gray-900 border border-gray-200 font-bold text-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300">
+                    <a href="#pricing" class="px-8 py-3.5 rounded-full bg-white text-gray-900 border border-gray-200 font-bold text-lg tracking-wide shadow-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 capitalize">
                         {{ $t('landing.view_pricing') }}
                     </a>
                 </div>
@@ -95,12 +107,10 @@
         </section>
 
         <!-- About Us Section -->
-        <section id="about" class="py-32 relative">
+        <section id="about" class="py-32 relative scroll-mt-24">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                     <div :class="locale === 'ar' ? 'lg:order-2' : ''" class="relative group">
-                        <!-- Decorative Elements -->
-                        <div class="absolute -inset-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-[2.5rem] blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
                         
                         <div class="relative">
                             <div class="absolute inset-0 bg-gray-900 rounded-[2rem] transform rotate-1 transition-transform duration-500 group-hover:rotate-0"></div>
@@ -184,10 +194,8 @@
         </section>
 
         <!-- Dashboard Explanation Section -->
-        <section class="py-24 bg-gray-50 relative overflow-hidden">
-             <!-- Decorative Elements -->
-            <div class="absolute top-0 right-0 w-1/3 h-full bg-emerald-50/50 -skew-x-12 transform translate-x-20"></div>
-            
+        <section class="py-24 relative overflow-hidden z-10">
+             
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <!-- Text Content -->
@@ -258,10 +266,6 @@
 
                     <!-- Visual -->
                     <div :class="locale === 'ar' ? 'lg:order-2' : ''" class="relative">
-                         <!-- Decorative blobs -->
-                        <div class="absolute -top-10 -right-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-                        <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-                        
                         <!-- Dashboard Preview Card -->
                         <div class="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 transform rotate-2 hover:rotate-0 transition-all duration-500">
                              <div class="bg-gray-50 border-b border-gray-100 p-4 flex items-center gap-2">
@@ -337,11 +341,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Background Decoration -->
-            <div class="absolute inset-0 z-0">
-                <div class="absolute -right-20 top-40 w-[30rem] h-[30rem] bg-emerald-50 rounded-full blur-3xl opacity-60"></div>
-                <div class="absolute -left-20 bottom-40 w-[30rem] h-[30rem] bg-purple-50 rounded-full blur-3xl opacity-60"></div>
-            </div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <!-- How It Works Section -->
@@ -386,7 +385,7 @@
                 </div>
 
                 <!-- Modules Grid -->
-                <div v-if="modules && modules.length > 0">
+                <div id="modules" class="scroll-mt-24" v-if="modules && modules.length > 0">
                     <div class="flex items-center gap-4 mb-12">
                          <span class="h-px bg-gray-200 flex-grow"></span>
                          <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ $t('landing.our_modules') }}</span>
@@ -416,17 +415,13 @@
         </section>
 
         <!-- Feedback Collection Section -->
-        <section class="py-24 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
-            <!-- Decorative Elements -->
-            <div class="absolute top-0 left-1/4 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-            <div class="absolute top-0 right-1/4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-            <div class="absolute bottom-0 left-1/2 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+        <section class="py-24 relative overflow-hidden z-10">
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <!-- Content -->
                     <div :class="locale === 'ar' ? 'lg:order-2' : ''">
-                        <div class="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-sm text-green-700 border border-green-200 shadow-sm">
+                        <div class="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-white text-emerald-700 border border-gray-100 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
@@ -486,9 +481,7 @@
 
                     <!-- Visual -->
                     <div :class="locale === 'ar' ? 'lg:order-1' : ''" class="relative group">
-                        <!-- Decorative background -->
-                        <div class="absolute -inset-4 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-[3rem] blur-2xl opacity-20 group-hover:opacity-30 transition-opacity">
-</div>
+                        
                         
                         <!-- Main visual card -->
                         <div class="relative bg-white rounded-[2.5rem] p-8 shadow-2xl border border-gray-100">
@@ -527,13 +520,10 @@
         </section>
 
         <!-- Pricing Section -->
-        <section id="pricing" class="py-24 bg-gray-50 relative overflow-hidden">
-             <!-- Decorative Blobs -->
-            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-50 translate-x-1/2 -translate-y-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-100 rounded-full blur-3xl opacity-50 -translate-x-1/2 translate-y-1/2"></div>
+        <section id="pricing" class="py-24 relative overflow-hidden z-10">
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                  <div class="text-center max-w-3xl mx-auto mb-20">
+                <div class="text-center max-w-3xl mx-auto mb-20">
                      <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-white text-emerald-700 border border-gray-100 shadow-sm">
                         <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.plans_pricing') || 'Flexible Pricing' }}</span>
                     </div>
@@ -582,7 +572,7 @@
 
                         <div class="mb-8 flex items-baseline gap-1 flex-wrap">
                              <span class="text-5xl font-black text-gray-900 tracking-tight">
-                                {{ plan.currency || $t('landing.currency') }}{{ billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly }}
+                                {{ plan.currency || $t('landing.currency') }}{{ formatPrice(billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly) }}
                              </span>
                              <span class="text-gray-400 font-medium whitespace-nowrap">
                                 {{ billingCycle === 'monthly' ? $t('landing.per_month') : $t('landing.per_year') }}
@@ -614,7 +604,7 @@
                 <!-- Custom Plan CTA -->
                  <div class="mt-20 text-center">
                     <p class="text-gray-500 mb-4">{{ $t('landing.custom_plan_desc') }}</p>
-                    <a :href="'mailto:' + ($page.props.system_settings?.support_email || 'sales@kenildock.com')" class="text-emerald-600 font-bold hover:text-emerald-700 hover:underline transition-all">
+                    <a :href="'mailto:' + (page.props.system_settings?.support_email || 'sales@kenildock.com')" class="text-emerald-600 font-bold hover:text-emerald-700 hover:underline transition-all">
                         {{ $t('landing.contact_sales') }} &rarr;
                     </a>
                 </div>
@@ -622,60 +612,59 @@
         </section>
 
         <!-- Footer -->
-        <footer class="bg-gray-900 text-white border-t border-gray-800 pt-20 pb-12">
+        <footer class="bg-black text-white border-t border-gray-800 py-10 relative z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <!-- Brand Section -->
-                    <div class="space-y-6">
+                    <div class="space-y-4">
                         <div class="flex items-center gap-3">
-                            <Logo class="h-10 w-auto text-white" :show-text="false" />
-                            <span class="text-2xl font-bold tracking-tight">Servio</span>
+                            <Logo class="h-8 w-auto text-white" :show-text="false" />
+                            <span class="text-xl font-bold tracking-tight">Servio</span>
                         </div>
-                        <p class="text-sm text-gray-400 max-w-sm leading-relaxed">
+                        <p class="text-xs text-gray-400 max-w-sm leading-relaxed">
                             {{ $t('landing.hero_subtitle') }}
                         </p>
                     </div>
 
                     <!-- Ownership Section -->
-                    <div class="space-y-6">
-                        <h4 class="text-sm font-bold text-white uppercase tracking-wider">{{ $t('landing.about_us') }}</h4>
-                        <p class="text-sm text-gray-400 leading-relaxed font-medium capitalize">
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('landing.about_us') }}</h4>
+                        <p class="text-xs text-gray-300 leading-relaxed font-medium capitalize">
                             {{ $t('landing.owned_by') }}
                         </p>
                     </div>
 
                     <!-- Contact Section -->
-                    <div class="space-y-6">
-                        <h4 class="text-sm font-bold text-white uppercase tracking-wider">{{ $t('landing.contact_us') }}</h4>
-                        <div class="space-y-4">
-                            <a :href="'mailto:' + ($page.props.system_settings?.support_email || 'support@kenildock.com')" class="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-colors group">
-                                <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 transition-all duration-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ $t('landing.contact_us') }}</h4>
+                        <div class="space-y-3">
+                            <a :href="'mailto:' + (page.props.system_settings?.support_email || 'support@kenildock.com')" class="flex items-center gap-3 text-xs text-gray-300 hover:text-white transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                     </svg>
                                 </div>
-                                {{ $page.props.system_settings?.support_email || 'support@kenildock.com' }}
+                                {{ page.props.system_settings?.support_email || 'support@kenildock.com' }}
                             </a>
-                            <a :href="'tel:' + ($page.props.system_settings?.support_phone || '+9715049460976')" class="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-colors group">
-                                <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 transition-all duration-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <a :href="'tel:' + (page.props.system_settings?.support_phone || '+9715049460976')" class="flex items-center gap-3 text-xs text-gray-300 hover:text-white transition-colors group">
+                                <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                                     </svg>
                                 </div>
-                                <span dir="ltr">{{ $page.props.system_settings?.support_phone || '+971 50 494 60976' }}</span>
+                                <span dir="ltr">{{ page.props.system_settings?.support_phone || '+971 50 494 60976' }}</span>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="flex gap-8 text-sm text-gray-400">
-                         <a href="#" class="hover:text-emerald-400 transition-colors">{{ $t('landing.about_us') }}</a>
-                         <a href="#modules" class="hover:text-emerald-400 transition-colors">{{ $t('landing.features') }}</a>
-                         <a href="#pricing" class="hover:text-emerald-400 transition-colors">{{ $t('landing.plans_pricing') }}</a>
+                <div class="pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex gap-6 text-xs text-gray-300">
+                        <a href="#" class="hover:text-white transition-colors">{{ $t('landing.privacy_policy') }}</a>
+                        <a href="#" class="hover:text-white transition-colors">{{ $t('landing.terms_of_service') }}</a>
                     </div>
-                    <div class="text-sm text-gray-500">
-                         &copy; {{ new Date().getFullYear() }} Servio. {{ $t('landing.copyright') }}
+                    <div class="text-xs text-gray-400">
+                        &copy; {{ new Date().getFullYear() }} Servio. {{ $t('landing.copyright') }}
                     </div>
                 </div>
             </div>
@@ -774,8 +763,8 @@
 </template>
 
 <script setup lang="ts">
+import { useForm, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 import axios from 'axios';
@@ -783,6 +772,26 @@ import Logo from '@/Components/Logo.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
+
+interface SystemSettings {
+    support_email?: string;
+    support_phone?: string;
+    [key: string]: any;
+}
+
+interface PageProps {
+    auth: {
+        user: any;
+    };
+    system_settings?: SystemSettings;
+    flash: {
+        success?: string;
+        error?: string;
+    };
+    [key: string]: any;
+}
+
+const page = usePage<PageProps>();
 
 const props = defineProps<{
     plans: any[];
@@ -891,6 +900,10 @@ const getPlanDescription = (plan: any) => {
     // Fallback
     const transDesc = t(plan.description || '');
     return transDesc !== (plan.description || '') ? transDesc : (plan.description || '');
+};
+
+const formatPrice = (price: number | string) => {
+    return Number(price).toFixed(0);
 };
 
 const openRegisterModal = (plan: any) => {

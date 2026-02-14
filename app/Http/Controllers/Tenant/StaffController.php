@@ -16,8 +16,29 @@ use Inertia\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 
+use App\Models\StaffLog;
+
 class StaffController extends Controller
 {
+    public function logs(Request $request, Staff $staff)
+    {
+        $logs = StaffLog::where('user_id', $staff->user_id)
+            ->latest()
+            ->paginate(50)
+            ->through(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'action' => $log->action,
+                    'changes' => $log->changes,
+                    'causer_name' => $log->causer_name ?? 'System',
+                    'date' => $log->created_at->format('Y-m-d H:i:s'),
+                    'ip' => $log->ip_address
+                ];
+            });
+
+        return response()->json($logs);
+    }
+
     public function index(Request $request): Response
     {
         $restaurant = Restaurant::find(session('active_restaurant_id'));
@@ -246,8 +267,25 @@ class StaffController extends Controller
 
         $commService = app(\App\Services\CommunicationService::class);
         $commService->sendNotification('user_registered', $user, [
-            'restaurant_name' => $restaurant->name,
             'link' => $resetUrl
+        ]);
+
+        // Log Staff Creation
+        StaffLog::create([
+            'staff_id' => $staff->id,
+            'user_id' => $user->id,
+            'action' => 'User Created',
+            'changes' => [
+                'name' => ['new' => $validated['name']],
+                'email' => ['new' => $validated['email']],
+                'phone' => ['new' => $validated['phone']],
+                'role' => ['new' => $validated['role']],
+                'is_active' => ['new' => true]
+            ],
+            'causer_id' => auth()->id(),
+            'causer_name' => auth()->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
         ]);
 
         return back()->with('success', 'Staff member added successfully. An invitation email has been sent.');
@@ -274,13 +312,25 @@ class StaffController extends Controller
         $user = $staff->user;
         $oldEmail = $user->email;
 
+
+        // Capture Old Data for Logging
+        $oldUserData = [
+            'name' => $user->name,
+            'phone' => $user->phone,
+        ];
+        $oldStaffData = [
+            'is_active' => $staff->is_active,
+            'role' => $staff->role,
+        ];
+
         // Update User details
         $userUpdateData = [];
-        if (isset($validated['name']))
+        if (isset($validated['name']) && $validated['name'] !== $oldUserData['name'])
             $userUpdateData['name'] = $validated['name'];
-        if (isset($validated['email']))
+        // Email is tricky because we use oldEmail for pivot lookup, but let's check change
+        if (isset($validated['email']) && $validated['email'] !== $oldEmail)
             $userUpdateData['email'] = $validated['email'];
-        if (isset($validated['phone']))
+        if (isset($validated['phone']) && $validated['phone'] !== $oldUserData['phone'])
             $userUpdateData['phone'] = $validated['phone'];
 
         if (!empty($userUpdateData)) {
@@ -288,8 +338,49 @@ class StaffController extends Controller
         }
 
         // Update Staff details
-        if (isset($validated['is_active'])) {
-            $staff->update(['is_active' => $validated['is_active']]);
+        $staffUpdates = [];
+        if (isset($validated['is_active']) && $validated['is_active'] !== $oldStaffData['is_active']) {
+            $staffUpdates['is_active'] = $validated['is_active'];
+        }
+        if (isset($validated['role']) && $validated['role'] !== $oldStaffData['role']) {
+            $staffUpdates['role'] = $validated['role'];
+        }
+
+        if (!empty($staffUpdates)) {
+            $staff->update($staffUpdates);
+        }
+
+        // Log the changes
+        $changes = [];
+
+        // Track User Changes
+        foreach ($userUpdateData as $key => $newValue) {
+            $changes[$key] = [
+                'old' => $key === 'email' ? $oldEmail : ($oldUserData[$key] ?? null),
+                'new' => $newValue
+            ];
+        }
+
+        // Track Staff Changes
+        foreach ($staffUpdates as $key => $newValue) {
+            $changes[$key] = [
+                'old' => $oldStaffData[$key] ?? null,
+                'new' => $newValue
+            ];
+        }
+
+        // Log to StaffLog if there are any changes
+        if (!empty($changes)) {
+            StaffLog::create([
+                'staff_id' => $staff->id,
+                'user_id' => $staff->user_id,
+                'action' => 'User Updated',
+                'changes' => $changes,
+                'causer_id' => auth()->id(),
+                'causer_name' => auth()->user()->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
         }
 
         // Update Pivot Table (Role and Email)

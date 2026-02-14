@@ -225,7 +225,7 @@ class User extends Authenticatable
             }
         }
 
-        return \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL(null, route('profile.edit')); // Ultimate fallback
+        return \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getLocalizedURL(null, route('dashboard')); // Ultimate fallback
     }
 
     /**

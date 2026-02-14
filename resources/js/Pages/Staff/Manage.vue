@@ -62,6 +62,7 @@
                 :pagination="paginationMeta"
                 v-model:search="params.search"
                 :title="$t('staff.title')"
+                :allow-overflow="true"
             >
                 <!-- Header Actions -->
                 <template #header-actions>
@@ -100,29 +101,48 @@
                 </template>
 
                 <!-- Joined Column -->
-                <template #cell-joined_at="{ row }">
-                    <span class="text-sm text-gray-500">{{ row.joined_at || '-' }}</span>
+                <!-- Logs Column -->
+                <template #cell-logs="{ row }">
+                    <button @click="showStaffLogs(row)" class="text-gray-400 hover:text-primary transition-colors" :title="$t('common.history')">
+                        <ClockIcon class="w-5 h-5" />
+                    </button>
                 </template>
 
                 <!-- Actions Column -->
                 <template #actions="{ row }">
-                    <button 
-                        v-if="hasPermission('edit_staff')"
-                        @click="openEditModal(row)"
-                        class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium mr-2"
-                    >{{ $t('common.edit') }}</button>
-                    <button 
-                        v-if="hasPermission('edit_staff')"
-                        @click="toggleActive(row)"
-                        :class="['px-3 py-1.5 rounded-lg text-xs font-medium transition-colors mr-2', row.is_active ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-green-100 text-green-700 hover:bg-green-200']"
-                    >
-                        {{ row.is_active ? $t('common.inactive') : $t('common.active') }}
-                    </button>
-                    <button 
-                        v-if="hasPermission('delete_staff')"
-                        @click="deleteStaff(row.id)"
-                        class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs font-medium"
-                    >{{ $t('common.remove') }}</button>
+                    <Menu as="div" class="relative inline-block text-left">
+                        <div>
+                            <MenuButton class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                {{ $t('common.actions') }}
+                                <ChevronDownIcon class="-mr-1 ml-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+                            </MenuButton>
+                        </div>
+
+                        <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
+                            <MenuItems class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                <div class="py-1">
+                                    <MenuItem v-if="hasPermission('edit_staff')" v-slot="{ active }">
+                                        <button @click="openEditModal(row)" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex w-full items-center px-4 py-2 text-sm']">
+                                            <PencilIcon class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                                            {{ $t('common.edit') }}
+                                        </button>
+                                    </MenuItem>
+                                    <MenuItem v-if="hasPermission('edit_staff')" v-slot="{ active }">
+                                        <button @click="toggleActive(row)" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex w-full items-center px-4 py-2 text-sm']">
+                                            <component :is="row.is_active ? NoSymbolIcon : CheckCircleIcon" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                                            {{ row.is_active ? $t('common.inactive') : $t('common.active') }}
+                                        </button>
+                                    </MenuItem>
+                                    <MenuItem v-if="hasPermission('delete_staff')" v-slot="{ active }">
+                                        <button @click="deleteStaff(row.id)" :class="[active ? 'bg-red-50 text-red-900' : 'text-red-700', 'group flex w-full items-center px-4 py-2 text-sm']">
+                                            <TrashIcon class="mr-3 h-5 w-5 text-red-400 group-hover:text-red-500" aria-hidden="true" />
+                                            {{ $t('common.remove') }}
+                                        </button>
+                                    </MenuItem>
+                                </div>
+                            </MenuItems>
+                        </transition>
+                    </Menu>
                 </template>
             </Table>
         </div>
@@ -185,6 +205,44 @@
                 </Button>
             </template>
         </Modal>
+
+        <!-- Logs Modal -->
+        <Modal :show="showLogsModal" :title="$t('common.history')" size="2xl" @close="showLogsModal = false">
+             <div v-if="logsLoading" class="flex justify-center p-8">
+                <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+             </div>
+             <div v-else-if="logs.length === 0" class="text-center p-8 text-gray-500">
+                Data not available
+             </div>
+             <div v-else class="space-y-4 max-h-[85vh] overflow-y-auto pr-2">
+                <div v-for="log in logs" :key="log.id" class="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gray-900 text-sm">{{ log.action }}</span>
+                            <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{{ log.ip }}</span>
+                        </div>
+                        <span class="text-xs text-gray-500">{{ log.date }}</span>
+                    </div>
+                     <p class="text-xs text-gray-500 mb-2">by <span class="font-medium text-gray-700">{{ log.causer_name }}</span></p>
+                    
+                    <div v-if="log.changes && Object.keys(log.changes).length > 0" class="bg-gray-50 rounded-lg p-3 text-xs space-y-1">
+                        <div v-for="(change, field) in log.changes" :key="field" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <span class="font-medium text-gray-600">{{ formatLogKey(field) }}:</span>
+                            <div class="text-gray-800 break-all">
+                                <span v-if="change.old !== undefined && change.old !== null" class="text-red-500 line-through mr-1">{{ formatLogValue(field, change.old) }}</span>
+                                <span class="text-green-600">{{ formatLogValue(field, change.new) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+             <template #footer>
+                <Button variant="ghost" @click="showLogsModal = false">{{ $t('common.close') }}</Button>
+            </template>
+        </Modal>
     </MainLayout>
 </template>
 
@@ -192,8 +250,11 @@
 import { ref, computed, watch } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 // @ts-ignore
 import debounce from 'lodash/debounce';
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
+import { PencilIcon, TrashIcon, NoSymbolIcon, CheckCircleIcon, ChevronDownIcon, ClockIcon } from '@heroicons/vue/20/solid';
 
 const { t } = useI18n();
 import MainLayout from '@/Layouts/MainLayout.vue';
@@ -264,10 +325,13 @@ const columns = [
     { key: 'phone', label: t('staff.phone') },
     { key: 'role', label: t('staff.role'), sortable: true },
     { key: 'is_active', label: t('common.status'), sortable: true },
-    { key: 'joined_at', label: t('common.date'), sortable: true },
+    { key: 'logs', label: '', sortable: false },
 ];
 
 const showAddModal = ref(false);
+const showLogsModal = ref(false);
+const logs = ref<any[]>([]);
+const logsLoading = ref(false);
 const editingId = ref<number | null>(null);
 
 // Search state managed here for server-side search integration
@@ -444,5 +508,48 @@ const deleteStaff = (id: number) => {
     if (confirm(t('staff.delete_confirm'))) {
         router.delete(route('staff.destroy', id));
     }
+};
+
+const showStaffLogs = async (staff: StaffMember) => {
+    logsLoading.value = true;
+    showLogsModal.value = true;
+    logs.value = [];
+    
+    try {
+        const url = route('staff.logs', staff.id);
+        const response = await axios.get(url);
+        // Response format is likely { data: [...], ... } due to pagination
+        logs.value = response.data.data ? response.data.data : response.data; 
+    } catch (e) {
+        console.error("Failed to fetch logs", e);
+    } finally {
+        logsLoading.value = false;
+    }
+};
+
+const formatLogKey = (key: string | number) => {
+    const k = String(key);
+    switch (k) {
+        case 'name': return t('staff.name');
+        case 'email': return t('staff.email');
+        case 'phone': return t('staff.phone');
+        case 'role': return t('staff.role');
+        case 'is_active': return t('common.status');
+        default: return k;
+    }
+};
+
+const formatLogValue = (key: string | number, value: any) => {
+    const k = String(key);
+    if (k === 'is_active') {
+        const boolVal = value === 1 || value === true || value === 'true';
+        return boolVal ? t('common.active') : t('common.inactive');
+    }
+    if (k === 'role') {
+        // Try to find the label in the props.roles array if available
+         const found = props.roles?.find((r: any) => r.value === value);
+         return found ? found.label : value;
+    }
+    return value;
 };
 </script>

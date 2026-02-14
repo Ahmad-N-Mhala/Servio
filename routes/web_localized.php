@@ -195,6 +195,8 @@ Route::middleware(['auth'])->group(function () {
                 ->middleware('permission:edit_staff');
             Route::delete('/{staff}', [\App\Http\Controllers\Tenant\StaffController::class, 'destroy'])->name('destroy')
                 ->middleware('permission:delete_staff');
+            Route::get('/{staff}/logs', [\App\Http\Controllers\Tenant\StaffController::class, 'logs'])->name('logs')
+                ->middleware('permission:view_staff');
         });
 
         // Kitchen

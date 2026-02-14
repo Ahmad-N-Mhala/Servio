@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100" :class="allowOverflow ? 'overflow-visible' : 'overflow-hidden'">
         <!-- Table Header (Title, Search, Actions) -->
         <div v-if="title || search !== undefined || $slots['header-actions']" class="px-6 py-5 border-b border-gray-200 bg-white">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -32,7 +32,7 @@
         </div>
 
         <!-- Table Container -->
-        <div class="overflow-x-auto">
+        <div :class="allowOverflow ? 'overflow-visible' : 'overflow-x-auto'">
             <table class="min-w-full divide-y divide-gray-200">
                 <!-- Table Head -->
                 <thead class="bg-gray-50">
@@ -174,11 +174,13 @@ const props = withDefaults(defineProps<{
     currency?: string;
     highlightRow?: (row: any) => boolean;
     serverSide?: boolean;
+    allowOverflow?: boolean;
 }>(), {
     emptyMessage: 'No items to display',
     rowKey: 'id',
     currency: 'AED',
-    serverSide: false
+    serverSide: false,
+    allowOverflow: false
 });
 
 const emit = defineEmits<{

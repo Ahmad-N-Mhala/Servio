@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\StaffLog;
 
 class LoginController extends Controller
 {
@@ -90,6 +91,36 @@ class LoginController extends Controller
             // Ensure the redirect URL is localized
             $targetUrl = $user->getLandingRoute();
 
+            // Log Login Action
+            $staff = $user->currentRestaurant() ? \App\Models\Staff::where('user_id', $user->id)
+                ->where('restaurant_id', $user->currentRestaurant()->id)
+                ->first() : null;
+
+            if ($staff) {
+                StaffLog::create([
+                    'staff_id' => $staff->id,
+                    'user_id' => $user->id,
+                    'action' => 'Login',
+                    'changes' => [],
+                    'causer_id' => $user->id,
+                    'causer_name' => $user->name,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
+            } else {
+                // Even if no staff record found for current context (super admin or multi-tenant edge case), we can log with null staff_id
+                StaffLog::create([
+                    'staff_id' => null,
+                    'user_id' => $user->id,
+                    'action' => 'Login',
+                    'changes' => [],
+                    'causer_id' => $user->id,
+                    'causer_name' => $user->name,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
+            }
+
             // getLandingRoute() now returns a fully localized URL (e.g. /en/servio/dashboard),
             // so we don't need to wrap it again.
             return redirect()->intended($targetUrl);
@@ -102,6 +133,25 @@ class LoginController extends Controller
 
     public function destroy(Request $request)
     {
+        $user = Auth::user();
+        if ($user) {
+            // Log Logout
+            $staff = $user->currentRestaurant() ? \App\Models\Staff::where('user_id', $user->id)
+                ->where('restaurant_id', $user->currentRestaurant()->id)
+                ->first() : null;
+
+            StaffLog::create([
+                'staff_id' => $staff ? $staff->id : null,
+                'user_id' => $user->id,
+                'action' => 'Logout',
+                'changes' => [],
+                'causer_id' => $user->id,
+                'causer_name' => $user->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
