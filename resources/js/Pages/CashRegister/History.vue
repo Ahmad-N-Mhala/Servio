@@ -58,8 +58,8 @@
                                 </div>
                                 <p class="text-sm text-gray-500">{{ $t('cash_register.cashier') }}: {{ register.user?.name || 'Unknown' }}</p>
                                 <p class="text-xs text-gray-400">
-                                    {{ $t('cash_register.opened') }}: {{ formatTime(register.opened_at) }}
-                                    <span v-if="register.closed_at"> • {{ $t('cash_register.closed') }}: {{ formatTime(register.closed_at) }}</span>
+                                    {{ $t('cash_register.opened') }}: {{ formatDateTime(register.opened_at) }}
+                                    <span v-if="register.closed_at"> • {{ $t('cash_register.closed') }}: {{ formatDateTime(register.closed_at) }}</span>
                                 </p>
                             </div>
                             <div class="flex items-center gap-2">
@@ -143,7 +143,7 @@
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="transaction in register.transactions" :key="transaction.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                            {{ formatTime(transaction.created_at) }}
+                                            {{ formatDateTime(transaction.created_at) }}
                                         </td>
                                         <td class="px-4 py-3">
                                             <span class="px-2 py-1 rounded-full text-xs font-bold capitalize" :class="{
@@ -222,6 +222,7 @@
 import { ref } from 'vue';
 import { router, Link, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import { formatDate, formatDateTime } from '@/Utils/dateHelper';
 
 const page = usePage();
 const route = (window as any).route;
@@ -265,19 +266,5 @@ const formatCurrency = (value: number) => {
     }).format(value || 0);
 };
 
-const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
-
-const formatTime = (date: string) => {
-    return new Date(date).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
+// format helpers from dateHelper.ts are imported
 </script>

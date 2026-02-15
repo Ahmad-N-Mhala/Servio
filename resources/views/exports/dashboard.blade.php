@@ -167,29 +167,57 @@
     <div class="header">
         <div class="title">{{ $restaurant->name }}</div>
         <div class="meta">
-            Dashboard Report<br>
+            {{ __('reports.dashboard_report') }}<br>
             {{ $startDate->format('M d, Y') }} - {{ $endDate->format('M d, Y') }}
         </div>
     </div>
 
-    <!-- Stats Row 1 -->
+    <!-- New Highlights Row (Matched to UI) -->
+    <div class="section-title" style="margin-top: 10px;">{{ __('dashboard.highlights') }}
+        ({{ __('reports.date_range') }})</div>
     <div class="stats-grid">
         <div class="stat-row">
             <div class="stat-box">
-                <div class="stat-label">Total Orders</div>
+                <div class="stat-label">{{ __('dashboard.sales') }}</div>
+                <div class="stat-value">{{ $currency }} {{ number_format($stats['revenue'], 2) }}</div>
+            </div>
+            <div class="stat-box" style="border-left:none;">
+                <div class="stat-label">{{ __('reports.total_orders') }}</div>
                 <div class="stat-value">{{ $stats['total_orders'] }}</div>
             </div>
             <div class="stat-box" style="border-left:none;">
-                <div class="stat-label">Revenue</div>
-                <div class="stat-value">{{ $currency }} {{ number_format($stats['revenue'], 2) }}</div>
-                <div class="stat-sub">Total Revenue</div>
+                <div class="stat-label">{{ __('dashboard.customers') }}</div>
+                <div class="stat-value">{{ $stats['total_unique_customers'] }}</div>
+                <div class="stat-sub">{{ $stats['new_customers'] }} {{ __('dashboard.new_customers') }} /
+                    {{ $stats['repeat_customers'] }} {{ __('dashboard.repeat_customers') }}</div>
             </div>
             <div class="stat-box" style="border-left:none;">
-                <div class="stat-label">Net Profit</div>
+                <div class="stat-label">{{ __('dashboard.rewards_redeemed') }}</div>
+                <div class="stat-value">{{ $stats['rewards_redeemed'] }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row 1 -->
+    <div class="section-title" style="margin-top: 20px;">{{ __('reports.key_metrics') }}</div>
+    <div class="stats-grid">
+        <div class="stat-row">
+            <div class="stat-box">
+                <div class="stat-label">{{ __('reports.net_profit') }}</div>
                 <div class="stat-value" style="color: {{ $stats['net_profit'] >= 0 ? '#10b981' : '#ef4444' }}">
                     {{ $currency }} {{ number_format($stats['net_profit'], 2) }}
                 </div>
                 <div class="stat-sub">After Expenses & Waste</div>
+            </div>
+            <div class="stat-box" style="border-left:none;">
+                <div class="stat-label">{{ __('reports.total_waste') }}</div>
+                <div class="stat-value" style="color:#ef4444">{{ $currency }}
+                    {{ number_format($stats['total_waste'], 2) }}
+                </div>
+            </div>
+            <div class="stat-box" style="border-left:none;">
+                <div class="stat-label">{{ __('reports.inventory_value') }}</div>
+                <div class="stat-value">{{ $currency }} {{ number_format($stats['inventory_value'], 2) }}</div>
             </div>
             <div class="stat-box" style="border-left:none;">
                 <div class="stat-label">Active Staff</div>
@@ -207,18 +235,17 @@
                 <div class="stat-sub">Items to Reorder</div>
             </div>
             <div class="stat-box" style="border-left:none;">
-                <div class="stat-label">Avg Dining Time</div>
-                <div class="stat-value">{{ $stats['avg_dining_time'] }} min</div>
+                <div class="stat-label">{{ __('dashboard.avg_order_value') }}</div>
+                <div class="stat-value">{{ $currency }}
+                    {{ number_format(($stats['revenue'] / max(1, $stats['total_orders'])), 2) }}</div>
             </div>
             <div class="stat-box" style="border-left:none;">
-                <div class="stat-label">Inventory Value</div>
-                <div class="stat-value">{{ $currency }} {{ number_format($stats['inventory_value'], 2) }}</div>
+                <div class="stat-label">Monthly Expenses</div>
+                <div class="stat-value">{{ $currency }} {{ number_format($stats['monthly_expenses'], 2) }}</div>
             </div>
             <div class="stat-box" style="border-left:none;">
-                <div class="stat-label">Total Waste</div>
-                <div class="stat-value" style="color:#ef4444">{{ $currency }}
-                    {{ number_format($stats['total_waste'], 2) }}
-                </div>
+                <div class="stat-label">Gen. Time</div>
+                <div class="stat-value" style="font-size: 10px;">{{ now()->format('H:i') }}</div>
             </div>
         </div>
     </div>

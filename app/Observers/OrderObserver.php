@@ -11,89 +11,17 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
-        //
+        $this->processTriggers($order, 'order_created');
     }
 
     public function updated(\App\Models\Order $order): void
     {
-        // Check if status changed to 'completed'
-        if ($order->isDirty('status') && $order->status === 'completed' && $order->customer_id) {
-
-            $restaurant = $order->restaurant;
-
-            // Find 'Order Completed' automation rules
-            $rules = \App\Models\CommunicationTemplate::where('restaurant_id', $restaurant->id)
-                ->where('is_active', true)
-                ->whereIn('trigger_event', ['order_completed', 'order_completed_feedback'])
-                ->get();
-
-            foreach ($rules as $rule) {
-                // Check Conditions
-                if (!$this->checkConditions($rule, $order)) {
-                    continue;
-                }
-
-                // Generate Feedback Link
-                $feedbackLink = route('public.feedback.create', [
-                    'identifier' => $restaurant->slug,
-                    'order_id' => $order->id,
-                    'customer_id' => $order->customer_id
-                ]);
-
-                $variables = [
-                    'feedback_link' => $feedbackLink,
-                    'order_number' => $order->order_number,
-                    'customer_name' => $order->customer->name,
-                    'restaurant_name' => $restaurant->name
-                ];
-
-                // Determine Delay and Dispatch
-                if ($rule->timing_type === 'after') {
-                    $days = (int) ($rule->timing_days ?? 0);
-                    $time = $rule->timing_time ?? '12:00';
-
-                    $delay = now()->addDays($days);
-
-                    // Set specific time if provided
-                    $timeParts = explode(':', $time);
-                    if (count($timeParts) === 2) {
-                        $delay->setTime((int) $timeParts[0], (int) $timeParts[1], 0);
-                    }
-
-                    // If the calculated delay is in the past (e.g., today at 09:00 but it's already 14:00), 
-                    // we send it immediately or move to next possible slot?
-                    // Standard automation usually sends immediately if slot is missed.
-                    if ($delay->isPast()) {
-                        $delay = now();
-                    }
-
-                    \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
-
-                } elseif ($rule->timing_type === 'custom_delay' && !empty($rule->conditions['delay_unit'])) {
-                    $delayVal = (int) ($rule->conditions['delay_val'] ?? 1);
-                    $unit = $rule->conditions['delay_unit'];
-                    $delay = now();
-
-                    if ($unit === 'minutes') {
-                        $delay->addMinutes($delayVal);
-                    } elseif ($unit === 'hours') {
-                        $delay->addHours($delayVal);
-                    } elseif ($unit === 'days') {
-                        $delay->addDays($delayVal);
-                    }
-
-                    \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
-
-                } elseif ($rule->timing_type === 'delay_1_hour') {
-                    $delay = now()->addHour();
-                    \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
-                } elseif ($rule->timing_type === 'delay_24_hours') {
-                    $delay = now()->addHours(24);
-                    \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables)->delay($delay);
-                } else {
-                    // Sync/Immediate
-                    \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $order->customer, $variables);
-                }
+        // Check if status changed
+        if ($order->isDirty('status')) {
+            if ($order->status === 'completed') {
+                $this->processTriggers($order, 'order_completed');
+            } elseif ($order->status === 'cancelled') {
+                $this->processTriggers($order, 'order_cancelled');
             }
         }
 
@@ -101,6 +29,84 @@ class OrderObserver
         $isEligible = $order->payment_status === 'paid';
         if ($order->points_earned > 0 && !$isEligible) {
             app(\App\Services\LoyaltyService::class)->revertOrderPoints($order);
+        }
+    }
+
+    private function processTriggers(Order $order, string $event)
+    {
+        if (!$order->customer_id)
+            return;
+
+        $restaurant = $order->restaurant;
+
+        // Find matching automation rules
+        $rules = \App\Models\CommunicationTemplate::where('restaurant_id', $restaurant->id)
+            ->where('is_active', true)
+            ->where('trigger_event', $event)
+            ->get();
+
+        foreach ($rules as $rule) {
+            // Check Conditions
+            if (!$this->checkConditions($rule, $order)) {
+                continue;
+            }
+
+            // Generate Feedback Link (if needed for completion)
+            $feedbackLink = route('public.feedback.create', [
+                'identifier' => $restaurant->slug,
+                'order_id' => $order->id,
+                'customer_id' => $order->customer_id
+            ]);
+
+            $variables = [
+                'feedback_link' => $feedbackLink,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer->name ?? $order->customer_name,
+                'restaurant_name' => $restaurant->name
+            ];
+
+            // Determine Timing and Dispatch
+            $this->dispatchWithTiming($rule, $order->customer, $variables);
+        }
+    }
+
+    private function dispatchWithTiming($rule, $customer, $variables)
+    {
+        $delay = null;
+
+        if ($rule->timing_type === 'after') {
+            $days = (int) ($rule->timing_days ?? 0);
+            $time = $rule->timing_time ?? '12:00';
+
+            $delayDate = now()->addDays($days);
+            $timeParts = explode(':', $time);
+            if (count($timeParts) === 2) {
+                $delayDate->setTime((int) $timeParts[0], (int) $timeParts[1], 0);
+            }
+
+            if ($delayDate->isPast()) {
+                $delayDate = now();
+            }
+            $delay = $delayDate;
+
+        } elseif ($rule->timing_type === 'custom_delay' && !empty($rule->conditions['delay_unit'])) {
+            $delayVal = (int) ($rule->conditions['delay_val'] ?? 1);
+            $unit = $rule->conditions['delay_unit'];
+            $delayDate = now();
+
+            if ($unit === 'minutes') {
+                $delayDate->addMinutes($delayVal);
+            } elseif ($unit === 'hours') {
+                $delayDate->addHours($delayVal);
+            } elseif ($unit === 'days') {
+                $delayDate->addDays($delayVal);
+            }
+            $delay = $delayDate;
+        }
+
+        $job = \App\Jobs\SendCustomerCommunicationJob::dispatch($rule, $customer, $variables);
+        if ($delay) {
+            $job->delay($delay);
         }
     }
 

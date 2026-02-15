@@ -19,5 +19,6 @@ return [
     'order_number' => 'رقم الطلب',
     'no_orders' => 'لا توجد طلبات',
     'details' => 'تفاصيل العميل',
+    'birth_date' => 'تاريخ الميلاد',
     'all_customers' => 'جميع العملاء',
 ];

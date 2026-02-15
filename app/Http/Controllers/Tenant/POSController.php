@@ -157,6 +157,7 @@ class POSController extends Controller
             // Customer details
             'customer_name' => ['sometimes', 'string', 'nullable'],
             'customer_phone' => ['sometimes', 'string', 'nullable'],
+            'customer_birth_date' => ['sometimes', 'date', 'nullable'],
             // Order type and table
             'type' => ['sometimes', 'string', 'in:dine_in,takeaway'],
             'table_id' => ['sometimes', 'string', 'nullable'],
@@ -264,6 +265,24 @@ class POSController extends Controller
         }
         if ($request->has('customer_phone')) {
             $updateData['customer_phone'] = $validated['customer_phone'];
+        }
+
+        // Update Customer Birth Date if provided and Customer exists
+        if ($request->has('customer_birth_date') && $order->customer_id) {
+            $customer = \App\Models\Customer::find($order->customer_id);
+            if ($customer) {
+                $customer->update(['birth_date' => $validated['customer_birth_date']]);
+            }
+        } elseif ($request->has('customer_birth_date') && $request->filled('customer_phone')) {
+            // Try to find customer by phone if not linked
+            $customer = \App\Models\Customer::where('phone', $validated['customer_phone'])->first();
+            if ($customer) {
+                $customer->update(['birth_date' => $validated['customer_birth_date']]);
+                // Optionally link customer to order if not linked
+                if (!$order->customer_id) {
+                    $updateData['customer_id'] = $customer->id;
+                }
+            }
         }
 
         // 9. Update order type if provided

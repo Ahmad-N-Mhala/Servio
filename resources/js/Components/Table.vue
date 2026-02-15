@@ -117,10 +117,10 @@
                                     {{ formatNumber(getCellValue(row, column.key)) }}
                                 </span>
                                 <span v-else-if="column.format === 'date'" class="text-gray-500">
-                                    {{ formatDate(getCellValue(row, column.key)) }}
+                                    {{ formatDateValue(getCellValue(row, column.key)) }}
                                 </span>
                                 <span v-else-if="column.format === 'datetime'" class="text-gray-500">
-                                    {{ formatDateTime(getCellValue(row, column.key)) }}
+                                    {{ formatDateTimeValue(getCellValue(row, column.key)) }}
                                 </span>
                                 <span v-else-if="column.format === 'badge'" :class="getBadgeClass(getCellValue(row, column.key))">
                                     {{ getCellValue(row, column.key) }}
@@ -154,6 +154,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
+import { formatDateTime, formatDate } from '@/Utils/dateHelper';
 
 interface Column {
     key: string;
@@ -226,22 +227,12 @@ const formatNumber = (value: any): string => {
     return Number(value).toFixed(2);
 };
 
-const formatDate = (value: any): string => {
-    if (!value) return '-';
-    const date = new Date(value);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+const formatDateValue = (value: any): string => {
+    return formatDate(value);
 };
 
-const formatDateTime = (value: any): string => {
-    if (!value) return '-';
-    const date = new Date(value);
-    return date.toLocaleString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    });
+const formatDateTimeValue = (value: any): string => {
+    return formatDateTime(value);
 };
 
 const getBadgeClass = (value: string): string => {

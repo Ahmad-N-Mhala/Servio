@@ -18,7 +18,7 @@ class LoyaltyService
 
     public function findOrCreateCustomer(Restaurant $restaurant, string $phone, ?string $name = null, ?string $email = null, ?string $birthDate = null): Customer
     {
-        return Customer::firstOrCreate(
+        $customer = Customer::firstOrCreate(
             [
                 'restaurant_id' => $restaurant->id,
                 'phone' => $phone,
@@ -31,6 +31,22 @@ class LoyaltyService
                 'is_active' => true,
             ]
         );
+
+        if ($customer->wasRecentlyCreated === false) {
+            $updates = [];
+            if ($name && $customer->name !== $name)
+                $updates['name'] = $name;
+            if ($email && $customer->email !== $email)
+                $updates['email'] = $email;
+            if ($birthDate && $customer->birth_date !== $birthDate)
+                $updates['birth_date'] = $birthDate;
+
+            if (!empty($updates)) {
+                $customer->update($updates);
+            }
+        }
+
+        return $customer;
     }
 
     public function processOrderPoints(Order $order): void

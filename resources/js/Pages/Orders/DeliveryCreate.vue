@@ -47,6 +47,17 @@
                                 />
                             </div>
                         </div>
+
+                    </div>
+                     <!-- DOB Field -->
+                    <div class="animate-fade-in-up">
+                         <Input 
+                            v-model="form.customer_birth_date"
+                            type="date"
+                            :label="$t('customers.birth_date') || 'Date of Birth'"
+                            :placeholder="$t('customers.birth_date') || 'Date of Birth'"
+                            class="w-full"
+                        />
                     </div>
 
                     <!-- Order Type & Delivery Info -->
@@ -535,6 +546,7 @@ interface Customer {
     phone: string;
     email: string | null;
     loyalty_points: number;
+    birth_date?: string | null;
 }
 
 interface Reward {
@@ -723,6 +735,7 @@ const lookupCustomer = () => {
     if (customer) {
         selectedCustomer.value = customer;
         form.customer_name = customer.name || '';
+        form.customer_birth_date = customer.birth_date || '';
         form.customer_id = customer.id;
     } else {
         selectedCustomer.value = null;
@@ -934,7 +947,7 @@ const getRewardTypeLabel = (reward: Reward): string => {
     }
 };
 
-const getRewardValue = (reward: Reward): string => getRewardTypeLabel(reward);
+
 
 // Calculations
 const freeItems = computed(() => {

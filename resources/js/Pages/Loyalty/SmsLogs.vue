@@ -96,29 +96,13 @@ import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
+import { formatDateTime } from '@/Utils/dateHelper';
 
 const { locale } = useI18n();
 
 const props = defineProps<{
     logs: any;
 }>();
-
-const formatDateTime = (dateString: string) => {
-    if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleString(locale.value === 'ar' ? 'ar-AE' : 'en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-    } catch (e) {
-        return dateString;
-    }
-};
 
 const route = (window as any).route;
 </script>

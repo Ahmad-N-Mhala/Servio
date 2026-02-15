@@ -13,6 +13,7 @@
                 :reduce="(opt: any) => opt.value"
                 :label="'label'"
                 :placeholder="placeholder"
+                :selectable="(opt: any) => !opt.disabled"
                 :disabled="disabled"
                 :searchable="true"
                 :clearable="!required"

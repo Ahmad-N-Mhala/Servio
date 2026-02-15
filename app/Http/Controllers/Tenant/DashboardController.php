@@ -211,6 +211,22 @@ class DashboardController extends Controller
             ->sum('amount');
         $netProfit = (float) (string) $revenue - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
 
+        // Highlights Data (Selection Stats)
+        $uniqueCustomersSelection = Order::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('customer_id')
+            ->distinct('customer_id')
+            ->count();
+
+        $selectionNewCustomers = \App\Models\Customer::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+        $selectionRepeatCustomers = max(0, $uniqueCustomersSelection - $selectionNewCustomers);
+
+        $rewardsRedeemed = \App\Models\RewardRedemption::where('restaurant_id', $restaurant->id)
+            ->whereBetween('redeemed_at', [$startDate, $endDate])
+            ->count();
+
         $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->with('items')->get();
         $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
             return $order->completed_at->diffInMinutes($order->created_at);
@@ -287,7 +303,7 @@ class DashboardController extends Controller
         // Recent Orders
         // -- Customer Retention (Visits Funnel) --
         $customerVisits = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->whereNotNull('customer_name')
             ->where('customer_name', '!=', 'Guest')
             ->get()
@@ -317,7 +333,7 @@ class DashboardController extends Controller
 
         // Top Customers
         $topCustomers = (clone $baseOrderQuery)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->get()
             ->groupBy('customer_name') // Group by name for now
             ->map(function ($orders, $name) {
@@ -387,7 +403,7 @@ class DashboardController extends Controller
             });
 
         // -- Revenue Chart --
-        $revenueOrders = (clone $baseOrderQuery)->where('status', 'completed')->get();
+        $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->get();
         $revenueChart = $revenueOrders->groupBy(function ($order) {
             return $order->created_at->format('Y-m-d');
         })->map(function ($group, $date) {
@@ -411,7 +427,11 @@ class DashboardController extends Controller
                 'avg_dining_time' => round((float) $avgDiningTime, 0),
                 'low_stock_count' => $lowStockCount,
                 'inventory_value' => (float) $inventoryValue,
-                'monthly_expenses' => (float) (string) $monthlyExpenses
+                'monthly_expenses' => (float) (string) $monthlyExpenses,
+                'new_customers' => $selectionNewCustomers,
+                'repeat_customers' => $selectionRepeatCustomers,
+                'rewards_redeemed' => $rewardsRedeemed,
+                'total_unique_customers' => $uniqueCustomersSelection
             ],
             'topMenuItems' => $topMenuItems,
             'topCategories' => $topCategories,
@@ -449,6 +469,9 @@ class DashboardController extends Controller
                 fputcsv($file, [__('reports.net_profit'), $data['stats']['net_profit']]);
                 fputcsv($file, [__('reports.total_waste'), $data['stats']['total_waste']]);
                 fputcsv($file, [__('reports.inventory_value'), $data['stats']['inventory_value']]);
+                fputcsv($file, [__('dashboard.rewards_redeemed'), $data['stats']['rewards_redeemed']]);
+                fputcsv($file, [__('dashboard.new_customers'), $data['stats']['new_customers']]);
+                fputcsv($file, [__('dashboard.repeat_customers'), $data['stats']['repeat_customers']]);
                 fputcsv($file, []);
 
                 // Top Items
@@ -641,124 +664,269 @@ class DashboardController extends Controller
         }
 
         // -- Base Query --
+        // Dashboard Revamp Logic
+
+        // 1. Highlights for Selection
+        $selectionStats = [
+            'sales' => (float) (string) Order::where('restaurant_id', $restaurant->id)
+                ->where('status', '!=', 'deleted')
+                ->where('status', '!=', 'cancelled')
+                ->where('payment_status', 'paid')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->sum('total'),
+            'orders' => Order::where('restaurant_id', $restaurant->id)
+                ->where('status', '!=', 'deleted')
+                ->where('status', '!=', 'cancelled')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->count(),
+            'customers' => \App\Models\Customer::where('restaurant_id', $restaurant->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->count(),
+            'rewards_redeemed' => \App\Models\RewardRedemption::where('restaurant_id', $restaurant->id)
+                ->whereBetween('redeemed_at', [$startDate, $endDate])
+                ->count(),
+        ];
+
+        // New vs Repeat Customers for Selection
+        $uniqueCustomersSelection = Order::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('customer_id')
+            ->distinct('customer_id')
+            ->count();
+
+        $selectionNewCustomers = \App\Models\Customer::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+        $selectionRepeatCustomers = max(0, $uniqueCustomersSelection - $selectionNewCustomers);
+
+        $selectionStats['new_customers'] = $selectionNewCustomers;
+        $selectionStats['repeat_customers'] = $selectionRepeatCustomers;
+
+        // 2. Statistics for Selected Period (Default 30 days if not set, handled at top)
         $baseOrderQuery = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
             ->where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate]);
 
-        // Stats
-        $totalOrders = (clone $baseOrderQuery)->count();
-
-        $todayOrders = Order::where('restaurant_id', $restaurant->id)
-            ->where('status', '!=', 'deleted')
-            ->whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])
+        $totalSalesPeriod = (float) (string) (clone $baseOrderQuery)->where('payment_status', 'paid')->sum('total');
+        $validOrdersCount = (clone $baseOrderQuery)->count();
+        $cancelledOrdersCount = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', 'cancelled')
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        // -- Delivery Provider Stats --
-        $deliveryProviderStats = (clone $baseOrderQuery)
-            ->where('type', 'delivery')
-            ->whereNotNull('delivery_provider')
-            ->where('delivery_provider', '!=', '')
+        // 3. Visits/Orders Chart
+        $dailyVisits = (clone $baseOrderQuery)
             ->get()
-            ->groupBy('delivery_provider')
-            ->map(function ($group, $provider) {
-                return [
-                    'provider' => $provider, // Will be localized in frontend
-                    'count' => $group->count(),
-                ];
-            })->values();
+            ->groupBy(fn($date) => $date->created_at->format('Y-m-d'))
+            ->map->count();
 
-        $revenue = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->sum('total');
-
-        $activeStaff = Staff::where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
-            ->count();
-
-        // Logged waste
-        $totalWaste = WasteLog::where('restaurant_id', $restaurant->id)
-            ->whereBetween('log_date', [$startDate, $endDate])
-            ->sum('total_loss');
-
-        // Low Stock / Critical
-        $criticalIngredients = $this->getCriticalIngredients($restaurant->id);
-        $lowStockCount = $criticalIngredients->count();
-
-        // Inventory Value (PHP Calculation)
-        $ingredientIds = Ingredient::where('restaurant_id', $restaurant->id)->pluck('id')->toArray();
-        $inventoryValue = DB::table('ingredient_batches')
-            ->whereIn('ingredient_id', $ingredientIds)
-            ->where('quantity_remaining', '>', 0)
-            ->get()
-            ->sum(function ($batch) {
-                // Decimal128 needs string cast first
-                $qty = isset($batch->quantity_remaining) ? (string) $batch->quantity_remaining : 0;
-                $cost = isset($batch->cost_per_unit) ? (string) $batch->cost_per_unit : 0;
-                return (float) $qty * (float) $cost;
-            });
-
-        // -- Recent Orders --
-        // -- Customer Retention --
-        $customerVisits = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->whereNotNull('customer_name')
-            ->where('customer_name', '!=', 'Guest')
-            ->get()
-            ->groupBy('customer_name')
-            ->map(fn($o) => $o->count());
-
-        $totalCustomers = $customerVisits->count();
-        $retentionStats = [];
-
-        for ($i = 1; $i <= 5; $i++) {
-            $labelKey = $i === 5 ? 'visit_5_plus' : "visit_{$i}";
-            // Use translation helper. Since this is an API/Inertia response, we should translate here 
-            // OR send keys to frontend. Sending keys is better for dynamic language switching without reload, 
-            // but the chart library likely needs ready strings or complex callback. 
-            // For now, let's translate here as requested, or assume page reload on lang change.
-            $label = __("charts.{$labelKey}");
-
-            if ($totalCustomers === 0) {
-                $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
-                continue;
-            }
-
-            if ($i === 5) {
-                $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
-            } else {
-                $countAtLeast = $customerVisits->filter(fn($visits) => $visits === $i)->count();
-            }
-
-            $percentage = ($countAtLeast / $totalCustomers) * 100;
-
-            $retentionStats[] = [
-                'label' => $label,
-                'percentage' => round($percentage, 1),
-                'count' => $countAtLeast
+        $visitsChartData = [];
+        $current = clone $startDate;
+        while ($current <= $endDate) {
+            $dateStr = $current->format('Y-m-d');
+            $visitsChartData[] = [
+                'date' => $dateStr,
+                'count' => $dailyVisits[$dateStr] ?? 0,
             ];
+            $current->addDay();
         }
 
-        // -- Revenue Chart --
-        $revenueOrders = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->get(); // Get all to group in memory
+        // 4. Customer Insights (Active vs Inactive)
+        $totalCustomersCount = \App\Models\Customer::where('restaurant_id', $restaurant->id)->count();
+        $activeCustomersCount = Order::where('restaurant_id', $restaurant->id)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->whereNotNull('customer_id')
+            ->distinct('customer_id')
+            ->count();
+        $inactiveCustomersCount = max(0, $totalCustomersCount - $activeCustomersCount);
 
+        // 5. Upcoming Celebrations
+        $upcomingCelebrations = \App\Models\Customer::where('restaurant_id', $restaurant->id)
+            ->whereNotNull('dob')
+            ->get()
+            ->filter(function ($customer) {
+                if (!$customer->dob)
+                    return false;
+                $dob = Carbon::parse($customer->dob)->setYear(now()->year);
+                if ($dob->isPast())
+                    $dob->addYear();
+                return $dob->between(now(), now()->addDays(30));
+            })
+            ->sortBy(function ($customer) {
+                $dob = Carbon::parse($customer->dob)->setYear(now()->year);
+                if ($dob->isPast())
+                    $dob->addYear();
+                return $dob->timestamp;
+            })
+            ->take(5)
+            ->values()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'dob' => $c->dob,
+                'type' => 'Birthday'
+            ]);
+
+        // 6. Top Insights & Pareto
+        $totalLifeTimeRevenue = Order::where('restaurant_id', $restaurant->id)
+            ->where('payment_status', 'paid')
+            ->sum('total');
+        $totalLifeTimeRevenue = (float) (string) $totalLifeTimeRevenue;
+
+        $top20PercentCount = (int) ceil($totalCustomersCount * 0.2);
+        if ($top20PercentCount > 0) {
+            $top20Revenue = Order::where('restaurant_id', $restaurant->id)
+                ->where('payment_status', 'paid')
+                ->whereNotNull('customer_id')
+                ->get()
+                ->groupBy('customer_id')
+                ->map(fn($orders) => $orders->sum(fn($o) => (float) (string) $o->total))
+                ->sortDesc()
+                ->take($top20PercentCount)
+                ->sum();
+
+            $paretoRevenuePercent = $totalLifeTimeRevenue > 0 ? round(($top20Revenue / $totalLifeTimeRevenue) * 100) : 0;
+        } else {
+            $paretoRevenuePercent = 0;
+        }
+
+        // Avg Order Value
+        $totalOrders = (clone $baseOrderQuery)->count();
+        $avgOrderValue = $totalOrders > 0 ? round($totalSalesPeriod / $totalOrders, 2) : 0;
+
+        // Avg Visits Lifetime
+        $avgVisitsPerCustomer = $totalCustomersCount > 0 ? round(Order::where('restaurant_id', $restaurant->id)->count() / $totalCustomersCount, 1) : 0;
+
+        // 7. Popular Times
+        $popularTimes = Order::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get()
+            ->groupBy(function ($order) {
+                return $order->created_at->format('l') . '|' . $order->created_at->format('H');
+            })
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'day' => $first->created_at->format('l'),
+                    'hour' => (int) $first->created_at->format('H'),
+                    'count' => $group->count(),
+                    'revenue' => $group->sum(fn($o) => (float) (string) $o->total)
+                ];
+            })
+            ->sortByDesc('count')
+            ->values();
+
+        $mostPopularTime = $popularTimes->first();
+        $leastPopularTime = $popularTimes->sortBy('count')->first();
+
+        $formatTimePeriod = function ($day, $hour) {
+            if ($day === null)
+                return "Unknown";
+            $dayName = $day;
+            if ($hour >= 5 && $hour < 12)
+                return "$dayName morning";
+            if ($hour >= 12 && $hour < 17)
+                return "$dayName afternoon";
+            if ($hour >= 17 && $hour < 21)
+                return "$dayName evening";
+            return "$dayName night";
+        };
+
+        // 8. Customer Frequency
+        $customerVisitCounts = Order::where('restaurant_id', $restaurant->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('customer_id')
+            ->select('customer_id')
+            ->get()
+            ->groupBy('customer_id')
+            ->map->count();
+
+        $freqStats = [
+            '1' => $customerVisitCounts->filter(fn($c) => $c === 1)->count(),
+            '2' => $customerVisitCounts->filter(fn($c) => $c === 2)->count(),
+            '3-5' => $customerVisitCounts->filter(fn($c) => $c >= 3 && $c <= 5)->count(),
+            '6+' => $customerVisitCounts->filter(fn($c) => $c >= 6)->count(),
+        ];
+
+        // 9. Top Rewards
+        $topRewards = \App\Models\RewardRedemption::where('restaurant_id', $restaurant->id)
+            ->whereBetween('redeemed_at', [$startDate, $endDate])
+            ->with('reward')
+            ->get()
+            ->groupBy('reward_id')
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'name' => $first->reward ? $first->reward->name ?? 'Unknown' : 'Unknown',
+                    'description' => $first->reward ? $first->reward->description : '',
+                    'count' => $group->count()
+                ];
+            })
+            ->sortByDesc('count')
+            ->take(4)
+            ->values();
+
+        // Revenue Chart (Daily Sales)
+        $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->get();
         $revenueChart = $revenueOrders->groupBy(function ($order) {
             return $order->created_at->format('Y-m-d');
         })->map(function ($group, $date) {
             return [
-                'date' => $date,
+                'date' => $date, // Consider fixing timezone if needed
                 'revenue' => (float) (string) $group->sum('total'),
             ];
         })->values()->sortBy('date')->values();
 
-        // -- Average Dining Time --
-        $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
-            return $order->created_at->diffInMinutes($order->completed_at);
-        }) ?? 0;
+        // Top Items & Categories
+        $allItems = [];
+        $categorySales = [];
+        $menuItemIds = [];
+        foreach ($revenueOrders as $order) {
+            if ($order->items) {
+                foreach ($order->items as $item) {
+                    $id = $item->menu_item_id;
+                    $menuItemIds[] = $id;
+                    if (!isset($allItems[$id])) {
+                        $name = $item->name;
+                        if (is_string($name) && str_starts_with($name, '{')) {
+                            $decoded = json_decode($name, true);
+                            $locale = app()->getLocale();
+                            $name = $decoded[$locale] ?? $decoded['en'] ?? 'Unknown';
+                        }
+                        $allItems[$id] = ['name' => $name, 'quantity' => 0];
+                    }
+                    $allItems[$id]['quantity'] += $item->quantity;
+                }
+            }
+        }
+        usort($allItems, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
+        $topMenuItems = array_slice($allItems, 0, 5);
 
-        // -- Status Distribution --
+        $menuItemsWithCategories = \App\Models\MenuItem::whereIn('id', array_unique($menuItemIds))
+            ->with('category')->get()->keyBy('id');
+
+        foreach ($revenueOrders as $order) {
+            if ($order->items) {
+                foreach ($order->items as $item) {
+                    $mItem = $menuItemsWithCategories[$item->menu_item_id] ?? null;
+                    $catName = $mItem && $mItem->category ? $mItem->category->name : 'Uncategorized';
+                    if (is_string($catName) && str_starts_with($catName, '{')) {
+                        $decoded = json_decode($catName, true);
+                        $locale = app()->getLocale();
+                        $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
+                    }
+                    if (!isset($categorySales[$catName]))
+                        $categorySales[$catName] = 0;
+                    $categorySales[$catName] += (float) ($item->total_price ?? 0);
+                }
+            }
+        }
+        $topCategories = collect($categorySales)
+            ->map(fn($v, $k) => ['name' => $k, 'value' => $v])
+            ->sortByDesc('value')->values()->take(5)->toArray();
+
+        // 10. Status Distribution
         $statusDistribution = (clone $baseOrderQuery)
             ->get()
             ->groupBy('status')
@@ -769,7 +937,18 @@ class DashboardController extends Controller
                 ];
             })->values();
 
-        // -- Peak Hours --
+        // 11. Payment Distribution
+        $paymentDistribution = $revenueOrders
+            ->groupBy(fn($o) => strtolower((string) ($o->payment_method ?: 'cash')))
+            ->map(function ($group, $method) {
+                return [
+                    'method' => ucwords(str_replace('_', ' ', (string) $method)),
+                    'value' => (float) (string) $group->sum('total'),
+                    'count' => $group->count()
+                ];
+            })->values();
+
+        // 12. Peak Hours
         $peakHours = (clone $baseOrderQuery)
             ->get()
             ->groupBy(function ($order) {
@@ -781,144 +960,7 @@ class DashboardController extends Controller
                 ];
             })->values()->sortBy('hour')->values();
 
-        // -- Payment Method Distribution --
-        $paymentDistribution = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->get()
-            ->groupBy(function ($order) {
-                return $order->payment_method ?? 'unknown';
-            })
-            ->map(function ($group, $method) {
-                return [
-                    'method' => ucwords(str_replace('_', ' ', $method)),
-                    'count' => $group->count(),
-                    'total' => (float) (string) $group->sum('total'),
-                ];
-            })->values();
-
-        // -- Top Menu Items --
-        // Simplified top items logic
-        $allItems = [];
-        $ordersWithItems = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->with([
-                'items.menuItem' => function ($query) {
-                    $query->withTrashed();
-                }
-            ])
-            ->get();
-
-        foreach ($ordersWithItems as $order) {
-            if ($order->items) {
-                foreach ($order->items as $item) {
-                    $id = $item->menu_item_id; // Assumes OrderItem has this field
-                    if (!isset($allItems[$id])) {
-                        // Priority 1: Fetch from Menu Items table
-                        if ($item->menuItem) {
-                            $name = $item->menuItem->name;
-                        } else {
-                            // Priority 2: Fallback to snapshot
-                            $name = $item->name;
-                        }
-
-                        // Attempt JSON decode for name
-                        if (is_string($name) && str_starts_with($name, '{')) {
-                            $decoded = json_decode($name, true);
-                            $locale = app()->getLocale();
-                            $fallback = config('app.fallback_locale', 'en');
-                            $name = $decoded[$locale] ?? $decoded[$fallback] ?? $decoded['en'] ?? 'Unknown';
-                        }
-
-                        // Check if deleted (Top Menu Items)
-                        // Need to check relationship which is loaded.
-                        // However, loop uses $order->items. $item here is OrderItem.
-                        if ($item->menuItem && $item->menuItem->trashed()) {
-                            $name .= ' (Deleted - ' . $item->menuItem->deleted_at->format('d-m-Y') . ')';
-                        }
-                        $allItems[$id] = ['name' => $name, 'quantity' => 0];
-                    }
-                    $allItems[$id]['quantity'] += $item->quantity;
-                }
-            }
-        }
-
-        // Sort and slice
-        // Sort and slice
-        usort($allItems, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
-        $topMenuItems = array_slice($allItems, 0, 5);
-
-        // -- Top Categories Logic --
-        $categorySales = [];
-        $allIds = [];
-        foreach ($ordersWithItems as $order) {
-            if ($order->items) {
-                foreach ($order->items as $item)
-                    $allIds[] = $item->menu_item_id;
-            }
-        }
-        $menuItemsWithCategories = \App\Models\MenuItem::withTrashed()
-            ->whereIn('id', array_unique($allIds))
-            ->with([
-                'category' => function ($q) {
-                    $q->withTrashed();
-                }
-            ])
-            ->get()
-            ->keyBy('id');
-
-        foreach ($ordersWithItems as $order) {
-            if ($order->items) {
-                foreach ($order->items as $item) {
-                    $mItem = $menuItemsWithCategories[$item->menu_item_id] ?? null;
-                    $catName = $mItem && $mItem->category ? $mItem->category->name : 'Uncategorized';
-
-                    if (is_string($catName) && str_starts_with($catName, '{')) {
-                        $decoded = json_decode($catName, true);
-                        $locale = app()->getLocale();
-                        $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
-                    }
-
-                    if ($mItem && $mItem->category && $mItem->category->trashed()) {
-                        $catName .= ' (Deleted - ' . $mItem->category->deleted_at->format('d-m-Y') . ')';
-                    }
-
-                    if (!isset($categorySales[$catName])) {
-                        $categorySales[$catName] = 0;
-                    }
-                    $itemTotal = (float) ($item->total_price ?? 0);
-                    $categorySales[$catName] += $itemTotal;
-                }
-            }
-        }
-
-        $topCategories = collect($categorySales)
-            ->map(function ($val, $key) {
-                return ['name' => $key, 'value' => $val];
-            })
-            ->sortByDesc('value')
-            ->values()
-            ->take(5)
-            ->toArray();
-
-        // -- Top Customers --
-        $topCustomers = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->get()
-            ->groupBy('customer_name')
-            ->map(function ($orders, $name) {
-                return [
-                    'name' => $name ?: 'Guest',
-                    'count' => $orders->count(),
-                    'total' => (float) (string) $orders->sum('total'),
-                ];
-            })
-            ->sortByDesc('total')
-            ->values()
-            ->take(5)
-            ->values()
-            ->toArray();
-
-        // -- Waste Chart --
+        // 13. Waste Chart
         $wasteChart = WasteLog::where('restaurant_id', $restaurant->id)
             ->whereBetween('log_date', [$startDate, $endDate])
             ->get()
@@ -931,47 +973,124 @@ class DashboardController extends Controller
                 ];
             })->values()->sortBy('date')->values();
 
-        // -- Monthly Expenses (for the date range) --
+        // Extra Stats for robustness
         $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
             ->where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('amount');
+        $monthlyExpenses = (float) (string) $monthlyExpenses;
+        $totalWaste = WasteLog::where('restaurant_id', $restaurant->id)
+            ->whereBetween('log_date', [$startDate, $endDate])
+            ->sum('total_loss');
+        $totalWaste = (float) (string) $totalWaste;
+        $netProfit = (float) (string) $totalSalesPeriod - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
+        // active staff
+        $activeStaff = Staff::where('restaurant_id', $restaurant->id)->where('is_active', true)->count();
+        $lowStockCount = $this->getCriticalIngredients($restaurant->id)->count();
 
-        // -- Net Profit Calculation --
-        // Net Profit = Revenue - (Monthly Expenses + Waste)
-        $netProfit = (float) (string) $revenue - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
+        // Inventory Value
+        $ingredientIds = Ingredient::where('restaurant_id', $restaurant->id)->pluck('id')->toArray();
+        $inventoryValue = DB::table('ingredient_batches')
+            ->whereIn('ingredient_id', $ingredientIds)
+            ->where('quantity_remaining', '>', 0)
+            ->get()
+            ->sum(function ($batch) {
+                $qty = isset($batch->quantity_remaining) ? (string) $batch->quantity_remaining : 0;
+                $cost = isset($batch->cost_per_unit) ? (string) $batch->cost_per_unit : 0;
+                return (float) $qty * (float) $cost;
+            });
+
+        // 14. Retention Stats
+        $customerVisits = (clone $baseOrderQuery)
+            ->where('payment_status', 'paid')
+            ->whereNotNull('customer_id')
+            ->get()
+            ->groupBy('customer_id')
+            ->map(fn($o) => $o->count());
+
+        $totalCustomers = $customerVisits->count();
+        $retentionStats = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i . match ($i) { 2 => 'nd', 3 => 'rd', default => 'th'} . ' Visit');
+            if ($totalCustomers === 0) {
+                $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
+                continue;
+            }
+            $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            $percentage = ($countAtLeast / $totalCustomers) * 100;
+            $retentionStats[] = [
+                'label' => $label,
+                'percentage' => round($percentage, 1),
+                'count' => $countAtLeast
+            ];
+        }
 
         return Inertia::render('Dashboard/Home', [
             'active_tab' => 'overview',
-            'item_sales_data' => null, // Not needed for overview
-            'filters' => [], // Empty logic for now
-            'stats' => [
-                'total_orders' => $totalOrders,
-                'today_orders' => $todayOrders,
-                'revenue' => (float) (string) $revenue,  // Cast Decimal128 to string then float
-                'active_staff' => $activeStaff,
-                'total_waste' => (float) (string) $totalWaste,  // Same for waste
-                'low_stock_count' => $lowStockCount,
-                'inventory_value' => (float) $inventoryValue,
-                'monthly_expenses' => (float) (string) $monthlyExpenses,
-                'net_profit' => $netProfit,
-                'avg_dining_time' => round((float) $avgDiningTime, 0),
-            ],
-            'retention_stats' => $retentionStats,
-            'revenue_chart' => $revenueChart,
-            'waste_chart' => $wasteChart,
-            'status_distribution' => $statusDistribution,
-            'peak_hours' => $peakHours,
-            'top_menu_items' => $topMenuItems,
-            'top_categories' => $topCategories,
-            'top_customers' => $topCustomers,
-            'payment_distribution' => $paymentDistribution,
-            'delivery_provider_stats' => $deliveryProviderStats,
-            // 'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
+            'item_sales_data' => null,
+            'filters' => [],
             'date_range' => [
                 'start_date' => $startDate->format('Y-m-d'),
                 'end_date' => $endDate->format('Y-m-d'),
             ],
+            // New Dashboard Structure
+            'highlights' => $selectionStats,
+            'period_sales' => [
+                'total' => $totalSalesPeriod,
+                'valid_count' => $validOrdersCount,
+                'blocked_count' => $cancelledOrdersCount,
+                'chart' => $revenueChart
+            ],
+            'period_visits' => [
+                'total' => $validOrdersCount,
+                'chart' => $visitsChartData
+            ],
+            'customer_insights' => [
+                'total' => $totalCustomersCount,
+                'active' => $activeCustomersCount,
+                'inactive' => $inactiveCustomersCount
+            ],
+            'upcoming_celebrations' => $upcomingCelebrations,
+            'top_insights' => [
+                'pareto_percent' => $paretoRevenuePercent,
+                'avg_order_value' => $avgOrderValue,
+                'avg_items_per_order' => 0.6, // Placeholder
+                'avg_visits_per_year' => $avgVisitsPerCustomer
+            ],
+            'popular_times' => [
+                'most_popular' => $mostPopularTime ? [
+                    'label' => $formatTimePeriod($mostPopularTime['day'], $mostPopularTime['hour']),
+                    'orders' => $mostPopularTime['count'],
+                    'revenue' => $mostPopularTime['revenue']
+                ] : null,
+                'least_popular' => $leastPopularTime ? [
+                    'label' => $formatTimePeriod($leastPopularTime['day'], $leastPopularTime['hour']),
+                    'orders' => $leastPopularTime['count'],
+                    'revenue' => $leastPopularTime['revenue']
+                ] : null
+            ],
+            'customer_frequency' => $freqStats,
+            'top_rewards' => $topRewards,
+            'top_items' => $topMenuItems,
+            'top_categories' => $topCategories,
+            'retention_stats' => $retentionStats,
+            'status_distribution' => $statusDistribution,
+            'payment_distribution' => $paymentDistribution,
+            'peak_hours' => $peakHours,
+            'waste_chart' => $wasteChart,
+            'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
+
+            // Legacy/Extra fields for completeness
+            'stats' => [ // Minimal legacy stats
+                'revenue' => $totalSalesPeriod,
+                'net_profit' => $netProfit,
+                'total_orders' => $totalOrders,
+                'total_waste' => $totalWaste,
+                'monthly_expenses' => $monthlyExpenses
+            ],
+            'topMenuItems' => $topMenuItems,
+            'topCategories' => $topCategories,
+            'revenueChart' => $revenueChart
         ]);
     }
 
@@ -1084,120 +1203,137 @@ class DashboardController extends Controller
                 });
                 break;
 
+            case 'selection_sales':
             case 'revenue':
                 $title = 'Revenue Details';
                 $columns = [
                     ['key' => 'order_number', 'label' => 'Order #'],
+                    ['key' => 'customer_name', 'label' => 'Customer'],
                     ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
                     ['key' => 'payment_method', 'label' => 'Payment Method'],
                     ['key' => 'created_at', 'label' => 'Date', 'format' => 'datetime'],
                 ];
 
                 $data = Order::where('restaurant_id', $restaurant->id)
-                    ->where('status', 'completed')
+                    ->where('payment_status', 'paid')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('status', '!=', 'deleted')
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->orderByDesc('created_at')
-                    ->limit(50)
+                    ->limit(100)
                     ->get()
                     ->map(function ($order) {
                         return [
                             'order_number' => $order->order_number,
+                            'customer_name' => $order->customer_name ?: 'Guest',
                             'total' => $order->total,
-                            'payment_method' => $order->payment_method ?? 'Cash',
+                            'payment_method' => ucwords($order->payment_method ?? 'Cash'),
                             'created_at' => $order->created_at->toIso8601String(),
                         ];
                     });
                 break;
 
-            case 'active_staff':
-                $title = 'Active Staff Details';
+            case 'new_customers':
+                $title = 'New Customers';
                 $columns = [
                     ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'phone', 'label' => 'Phone'],
                     ['key' => 'email', 'label' => 'Email'],
-                    ['key' => 'role', 'label' => 'Role'],
+                    ['key' => 'joined_at', 'label' => 'Joined Date', 'format' => 'datetime'],
                 ];
 
-                // Staff
-                $staffIds = Staff::where('restaurant_id', $restaurant->id)
-                    ->where('is_active', true)
-                    ->pluck('user_id')
-                    ->toArray();
-
-                $staffUsers = User::whereIn('id', $staffIds)->get()->map(function ($u) {
-                    // Since we don't know exact role from user table alone, we might need to map back to staff.
-                    // Or just fetching staff with user is better.
-                    return [
-                        'name' => $u->name,
-                        'email' => $u->email,
-                        'role' => 'Employee' // Simplified for logic separation, or fetch properly
-                    ];
-                });
-
-                // Owners
-                $ownerEntries = DB::table('restaurant_user')
-                    ->where('restaurant_id', $restaurant->id)
-                    ->where('is_active', true)
-                    ->where('role', 'owner')
-                    ->get();
-
-                $ownerEmails = $ownerEntries->pluck('email')->toArray();
-                $ownerUsers = User::whereIn('email', $ownerEmails)->get();
-
-                $mappedOwners = $ownerUsers->map(function ($u) {
-                    return [
-                        'name' => $u->name,
-                        'email' => $u->email,
-                        'role' => 'Owner'
-                    ];
-                });
-
-                // Better approach: Get Staff with User models
-                $staffModels = Staff::with('user')->where('restaurant_id', $restaurant->id)->where('is_active', true)->get();
-                $mappedStaff = $staffModels->map(function ($s) {
-                    return [
-                        'name' => $s->user->name ?? 'N/A',
-                        'email' => $s->user->email ?? 'N/A',
-                        'role' => ucfirst($s->role ?? 'staff')
-                    ];
-                });
-
-                $data = $mappedOwners->merge($mappedStaff);
-                break;
-
-            case 'revenue_chart_point':
-                $date = $request->input('date');
-                $title = "Revenue for " . $date;
-                $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
-                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
-                ];
-
-                // Filter by string date match or range
-                $startDatePoint = Carbon::parse($date)->startOfDay();
-                $endDatePoint = Carbon::parse($date)->endOfDay();
-
-                $data = Order::where('restaurant_id', $restaurant->id)
-                    ->where('status', 'completed')
-                    ->whereBetween('created_at', [$startDatePoint, $endDatePoint])
+                $data = \App\Models\Customer::where('restaurant_id', $restaurant->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
                     ->orderByDesc('created_at')
                     ->get()
-                    ->map(function ($order) {
+                    ->map(fn($c) => [
+                        'name' => $c->name,
+                        'phone' => $c->phone,
+                        'email' => $c->email,
+                        'joined_at' => $c->created_at->toIso8601String()
+                    ]);
+                break;
+
+            case 'repeat_customers':
+                $title = 'Repeat Customers';
+                $columns = [
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'phone', 'label' => 'Phone'],
+                    ['key' => 'visit_count', 'label' => 'Visits'],
+                    ['key' => 'total_spent', 'label' => 'Total Spent', 'format' => 'currency'],
+                ];
+
+                // Customers who had their first visit BEFORE start date but visited AGAIN in this period
+                $customerIdsWithActivity = Order::where('restaurant_id', $restaurant->id)
+                    ->where('payment_status', 'paid')
+                    ->whereNotNull('customer_id')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->pluck('customer_id')
+                    ->unique()
+                    ->toArray();
+
+                $data = \App\Models\Customer::whereIn('id', $customerIdsWithActivity)
+                    ->get()
+                    ->filter(function ($c) use ($startDate) {
+                        return $c->created_at < $startDate;
+                    })
+                    ->map(function ($c) use ($startDate, $endDate) {
+                        $periodOrders = Order::where('customer_id', $c->id)
+                            ->where('payment_status', 'paid')
+                            ->whereBetween('created_at', [$startDate, $endDate])
+                            ->get();
+
                         return [
-                            'order_number' => $order->order_number,
-                            'total' => $order->total,
-                            'created_at' => $order->created_at->toIso8601String(),
+                            'name' => $c->name,
+                            'phone' => $c->phone,
+                            'visit_count' => $periodOrders->count(),
+                            'total_spent' => (float) $periodOrders->sum('total')
+                        ];
+                    })->values();
+                break;
+
+            case 'rewards_redeemed':
+                $title = 'Rewards Redeemed';
+                $columns = [
+                    ['key' => 'customer_name', 'label' => 'Customer'],
+                    ['key' => 'reward_name', 'label' => 'Reward'],
+                    ['key' => 'points_cost', 'label' => 'Points'],
+                    ['key' => 'redeemed_at', 'label' => 'Date', 'format' => 'datetime'],
+                ];
+
+                $data = DB::table('reward_redemptions')
+                    ->where('restaurant_id', $restaurant->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->orderByDesc('created_at')
+                    ->get()
+                    ->map(function ($r) {
+                        $customer = \App\Models\Customer::find($r->customer_id);
+                        $reward = DB::table('rewards')->where('id', $r->reward_id)->first();
+
+                        $rewardName = $reward ? $reward->name : 'Unknown Reward';
+                        if (is_string($rewardName) && str_starts_with($rewardName, '{')) {
+                            $decoded = json_decode($rewardName, true);
+                            $rewardName = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                        }
+
+                        return [
+                            'customer_name' => $customer ? $customer->name : 'Guest',
+                            'reward_name' => $rewardName,
+                            'points_cost' => $r->points_spent,
+                            'redeemed_at' => Carbon::parse($r->created_at)->toIso8601String()
                         ];
                     });
                 break;
 
             case 'status_slice':
                 $status = $request->input('status');
-                $title = "Orders with status: " . ucfirst($status);
+                $title = "Orders: " . ucfirst($status);
                 $columns = [
                     ['key' => 'order_number', 'label' => 'Order #'],
                     ['key' => 'customer_name', 'label' => 'Customer'],
                     ['key' => 'total', 'label' => 'Total', 'format' => 'currency'],
+                    ['key' => 'status', 'label' => 'Status', 'format' => 'status'],
+                    ['key' => 'payment_status', 'label' => 'Payment'],
                     ['key' => 'created_at', 'label' => 'Date', 'format' => 'datetime'],
                 ];
 
@@ -1205,60 +1341,48 @@ class DashboardController extends Controller
                     ->where('status', $status)
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->orderByDesc('created_at')
-                    ->limit(50)
+                    ->limit(100)
                     ->get()
                     ->map(function ($order) {
                         return [
                             'order_number' => $order->order_number,
-                            'customer_name' => $order->customer_name,
+                            'customer_name' => $order->customer_name ?: 'Guest',
                             'total' => $order->total,
+                            'status' => $order->status,
+                            'payment_status' => ucfirst($order->payment_status ?: 'unpaid'),
                             'created_at' => $order->created_at->toIso8601String(),
                         ];
                     });
                 break;
 
-            case 'inventory_value':
-                $title = 'Inventory Value Details (By Batch)';
+            case 'revenue_chart_point':
+                $date = $request->input('date');
+                $title = "Revenue for " . $date;
                 $columns = [
-                    ['key' => 'ingredient_name', 'label' => 'Ingredient'],
-                    ['key' => 'batch_number', 'label' => 'Batch'],
-                    ['key' => 'quantity_remaining', 'label' => 'Qty Remaining'],
-                    ['key' => 'unit', 'label' => 'Unit'],
-                    ['key' => 'cost_per_unit', 'label' => 'Cost/Unit', 'format' => 'currency'],
-                    ['key' => 'batch_value', 'label' => 'Batch Value', 'format' => 'currency'],
+                    ['key' => 'order_number', 'label' => 'Order #'],
+                    ['key' => 'customer_name', 'label' => 'Customer'],
+                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
+                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
                 ];
 
-                $ingIds = Ingredient::where('restaurant_id', $restaurant->id)->pluck('id')->toArray();
-                $ingredients = Ingredient::whereIn('id', $ingIds)->get()->keyBy('id');
+                $startDatePoint = Carbon::parse($date)->startOfDay();
+                $endDatePoint = Carbon::parse($date)->endOfDay();
 
-                $batches = DB::table('ingredient_batches')
-                    ->whereIn('ingredient_id', $ingIds)
-                    ->where('quantity_remaining', '>', 0)
-                    ->get();
-
-                $data = $batches->map(function ($b) use ($ingredients) {
-                    $ing = $ingredients[$b->ingredient_id] ?? null;
-                    $name = $ing ? $ing->name : 'Unknown';
-                    // Decode name
-                    if (is_string($name) && str_starts_with($name, '{')) {
-                        $decoded = json_decode($name, true);
-                        $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
-                    }
-
-                    // Calculation in map
-                    $qty = isset($b->quantity_remaining) ? (string) $b->quantity_remaining : 0;
-                    $cost = isset($b->cost_per_unit) ? (string) $b->cost_per_unit : 0;
-                    $val = (float) $qty * (float) $cost;
-
-                    return [
-                        'ingredient_name' => $name,
-                        'batch_number' => $b->batch_number ?? '-',
-                        'quantity_remaining' => $b->quantity_remaining,
-                        'unit' => $ing ? $ing->unit : '-',
-                        'cost_per_unit' => $b->cost_per_unit,
-                        'batch_value' => $val
-                    ];
-                })->sortByDesc('batch_value')->values();
+                $data = Order::where('restaurant_id', $restaurant->id)
+                    ->where('payment_status', 'paid')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('status', '!=', 'deleted')
+                    ->whereBetween('created_at', [$startDatePoint, $endDatePoint])
+                    ->orderByDesc('created_at')
+                    ->get()
+                    ->map(function ($order) {
+                        return [
+                            'order_number' => $order->order_number,
+                            'customer_name' => $order->customer_name ?: 'Guest',
+                            'total' => $order->total,
+                            'created_at' => $order->created_at->toIso8601String(),
+                        ];
+                    });
                 break;
 
             case 'low_stock':
@@ -1360,7 +1484,9 @@ class DashboardController extends Controller
                 ];
 
                 $data = Order::where('restaurant_id', $restaurant->id)
-                    ->where('status', 'completed')
+                    ->where('payment_status', 'paid')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('status', '!=', 'deleted')
                     ->where('payment_method', $searchMethod)
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->orderByDesc('created_at')
@@ -1398,6 +1524,7 @@ class DashboardController extends Controller
 
                 $data = Order::where('restaurant_id', $restaurant->id)
                     ->where('status', '!=', 'deleted')
+                    ->where('status', '!=', 'cancelled')
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->get() // Pull into memory (careful with memory)
                     ->filter(function ($order) use ($hour) {
@@ -1459,8 +1586,8 @@ class DashboardController extends Controller
                 break;
 
             case 'retention_bucket':
-                $bucket = (int) $request->input('bucket'); // 1, 2, 3, 4, or 5 (for 5+)
-                $title = ($bucket === 5) ? __('charts.customers_5_plus_visits') : __('charts.customers_with_n_visits', ['count' => $bucket]);
+                $range = $request->input('range'); // '1', '2', '3-5', '6+'
+                $title = "Customers with " . $range . " visit" . ($range === '1' ? '' : 's');
 
                 $columns = [
                     ['key' => 'name', 'label' => __('common.name')],
@@ -1476,11 +1603,20 @@ class DashboardController extends Controller
                     ->with('customer')
                     ->get()
                     ->groupBy('customer_id')
-                    ->map(function ($orders) use ($bucket) {
+                    ->map(function ($orders) use ($range) {
                         $count = $orders->count();
-                        if ($bucket < 5 && $count !== $bucket)
-                            return null;
-                        if ($bucket === 5 && $count < 5)
+
+                        $match = false;
+                        if ($range === '1' && $count === 1)
+                            $match = true;
+                        elseif ($range === '2' && $count === 2)
+                            $match = true;
+                        elseif ($range === '3-5' && $count >= 3 && $count <= 5)
+                            $match = true;
+                        elseif ($range === '6+' && $count >= 6)
+                            $match = true;
+
+                        if (!$match)
                             return null;
 
                         $customer = $orders->first()->customer;
@@ -1492,6 +1628,7 @@ class DashboardController extends Controller
                         ];
                     })
                     ->filter()
+                    ->sortByDesc('visit_count')
                     ->values();
                 break;
         }

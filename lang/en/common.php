@@ -88,4 +88,5 @@ return [
     'loyalty_program' => 'loyalty program',
     'basic_desc' => 'Perfect for small businesses starting out.',
     'basic_name' => 'Basic Plan',
+    'done' => 'Done',
 ];

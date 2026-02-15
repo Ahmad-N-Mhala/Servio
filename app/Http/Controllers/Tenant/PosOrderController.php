@@ -120,6 +120,7 @@ class PosOrderController extends Controller
             'table_id' => ['nullable', 'exists:tables,id'],
             'customer_phone' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
+            'customer_birth_date' => ['nullable', 'date'],
             'type' => ['nullable', 'string', 'in:dine_in,takeaway,delivery'],
             'delivery_provider' => ['nullable', 'required_if:type,delivery', 'string'],
             'delivery_order_id' => ['nullable', 'string'],
@@ -149,7 +150,9 @@ class PosOrderController extends Controller
             $customer = $this->loyaltyService->findOrCreateCustomer(
                 $restaurant,
                 $validated['customer_phone'],
-                $validated['customer_name'] ?? null
+                $validated['customer_name'] ?? null,
+                null, // email
+                $validated['customer_birth_date'] ?? null
             );
         }
 

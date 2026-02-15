@@ -19,5 +19,6 @@ return [
     'order_number' => 'Order #',
     'no_orders' => 'No orders found',
     'details' => 'Customer Details',
+    'birth_date' => 'Date of Birth',
     'all_customers' => 'All Customers',
 ];

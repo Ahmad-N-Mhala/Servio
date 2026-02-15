@@ -17,42 +17,6 @@
                 </div>
             </div>
 
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <!-- SMS Balance -->
-                <div class="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">{{ $t('communication.sms') }}</span>
-                        </div>
-                        <h3 class="text-4xl font-bold mb-1">{{ balances.sms }}</h3>
-                        <p class="text-sm font-medium text-blue-100 opacity-90">{{ $t('communication.sms_credits') }}</p>
-                    </div>
-                </div>
-
-                <!-- Email Balance -->
-                <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">{{ $t('communication.email') }}</span>
-                        </div>
-                        <h3 class="text-4xl font-bold mb-1">{{ balances.email }}</h3>
-                        <p class="text-sm font-medium text-purple-100 opacity-90">{{ $t('communication.email_credits') }}</p>
-                    </div>
-                </div>
-            </div>
 
             <!-- Tabs -->
             <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl w-fit">
@@ -428,23 +392,68 @@
             </div>
 
             <!-- Logs Section -->
-            <div v-if="activeTab === 'logs'" class="glass-card rounded-2xl overflow-hidden animate-fade-in p-6">
-                <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div class="flex-1">
-                        <Input v-model="params.search" :placeholder="$t('communication.search_logs')" type="search" />
+            <div v-if="activeTab === 'logs'" class="space-y-6 animate-fade-in">
+                <!-- Filters Header -->
+                <div class="glass-card rounded-2xl overflow-hidden p-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <Input v-model="params.search" :placeholder="$t('communication.search_logs')" type="search" />
+                        </div>
+                        <div class="w-52">
+                            <Select v-model="params.type" :options="channelOptions" :placeholder="$t('communication.all_channels')" />
+                        </div>
+                        <div class="w-52">
+                            <Select v-model="params.status" :options="statusOptions" :placeholder="$t('communication.all_statuses')" />
+                        </div>
+                        <div class="w-64">
+                             <Select v-model="params.template_id" :options="templateOptions" :placeholder="$t('communication.all_rules')" />
+                        </div>
+                        <DateRangePicker 
+                            :initial-start-date="params.date_from"
+                            :initial-end-date="params.date_to"
+                            @update="onDateRangeUpdate" 
+                        />
                     </div>
-                    <div class="w-40">
-                        <Select v-model="params.type" :options="channelOptions" />
-                    </div>
-                    <div class="w-40">
-                        <Select v-model="params.status" :options="statusOptions" />
-                    </div>
-                    <DateRangePicker 
-                        :initial-start-date="params.date_from"
-                        :initial-end-date="params.date_to"
-                        @update="onDateRangeUpdate" 
-                    />
                 </div>
+
+                <!-- Stats Cards (Inside Logs to reflect filters) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- SMS Sent Count -->
+                    <div class="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">{{ $t('communication.sms') }}</span>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-1">{{ balances.sms_sent || 0 }}</h3>
+                            <p class="text-sm font-medium text-blue-100 opacity-90">{{ $t('communication.total_sms_sent') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Email Sent Count -->
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full uppercase tracking-wider">{{ $t('communication.email') }}</span>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-1">{{ balances.email_sent || 0 }}</h3>
+                            <p class="text-sm font-medium text-purple-100 opacity-90">{{ $t('communication.total_email_sent') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl overflow-hidden p-6">
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-600">
@@ -460,13 +469,27 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             <tr v-for="log in logs.data" :key="log.id" class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-4 py-3">{{ new Date(log.created_at).toLocaleString() }}</td>
+                                <td class="px-4 py-3">{{ formatDateTime(log.created_at) }}</td>
                                 <td class="px-4 py-3">
                                     <span v-if="log.template" class="text-blue-600 font-medium">{{ log.template.name }}</span>
                                     <span v-else class="text-gray-400">-</span>
                                 </td>
                                 <td class="px-4 py-3">{{ log.recipient }}</td>
-                                <td class="px-4 py-3 truncate max-w-xs" :title="log.message">{{ log.message }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="truncate max-w-[150px]" :title="log.message">{{ log.message }}</span>
+                                        <button 
+                                            @click="openLogMessage(log)"
+                                            class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                            :title="$t('communication.view_message')"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
                                 <td class="px-4 py-3 uppercase text-xs font-bold">{{ log.type }}</td>
                                 <td class="px-4 py-3">
                                     <span :class="log.status === 'sent' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'" class="px-2 py-1 rounded-full text-xs">
@@ -484,6 +507,7 @@
                     <Pagination :meta="logs" />
                 </div>
             </div>
+        </div>
 
             <!-- Bundles Section -->
             <div v-if="activeTab === 'bundles'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
@@ -804,6 +828,101 @@
                     </div>
                 </div>
 
+                <!-- Reward Configuration -->
+                <div class="bg-white rounded-xl border border-purple-200 shadow-sm overflow-hidden mb-6">
+                    <div class="bg-purple-50 px-6 py-4 border-b border-purple-100 flex justify-between items-center cursor-pointer" @click="templateForm.include_reward = !templateForm.include_reward">
+                        <h3 class="text-base font-bold text-purple-900 flex items-center gap-2">
+                            <span class="bg-purple-200 p-1.5 rounded-lg">
+                                <svg class="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                                </svg>
+                            </span>
+                            {{ $t('loyalty.reward_configuration') || 'Redemption Method / Reward' }}
+                        </h3>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" v-model="templateForm.include_reward" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer translate-x-0 checked:translate-x-full checked:bg-purple-600"/>
+                            <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+
+                    <div v-if="templateForm.include_reward" class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                v-model="templateForm.reward_config.name.en"
+                                :label="$t('common.name_en')"
+                                required
+                            />
+                            <Input
+                                v-model="templateForm.reward_config.name.ar"
+                                :label="$t('common.name_ar')"
+                            />
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <Select
+                                v-model="templateForm.reward_config.reward_type"
+                                :label="$t('loyalty.reward_type')"
+                                :options="rewardTypes"
+                                required
+                            />
+                             <Input
+                                v-model="templateForm.reward_config.points_required"
+                                :label="$t('loyalty.points_required')"
+                                type="number"
+                                required
+                            />
+                        </div>
+
+                        <div v-if="templateForm.reward_config.reward_type !== 'free_item'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                v-model="templateForm.reward_config.discount_value"
+                                :label="templateForm.reward_config.reward_type === 'discount_percentage' ? $t('loyalty.percentage') : $t('loyalty.amount')"
+                                type="number"
+                                required
+                            />
+                             <Input
+                                v-model="templateForm.reward_config.min_order_value"
+                                :label="$t('loyalty.min_order_value')"
+                                type="number"
+                            />
+                        </div>
+                        
+                         <div v-if="['discount_percentage', 'discount_fixed'].includes(templateForm.reward_config.reward_type)">
+                            <Select
+                                v-model="templateForm.reward_config.apply_on"
+                                :label="$t('loyalty.apply_on')"
+                                :options="[
+                                    { value: 'all', label: $t('loyalty.apply_all') || 'All Items' },
+                                    { value: 'specific', label: $t('loyalty.apply_specific') || 'Specific Items' }
+                                ]"
+                            />
+                        </div>
+
+                        <div v-if="templateForm.reward_config.reward_type === 'free_item' || templateForm.reward_config.apply_on === 'specific'" class="border rounded-lg p-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ templateForm.reward_config.reward_type === 'free_item' ? $t('loyalty.select_free_item') : $t('loyalty.select_discounted_items') }}
+                            </label>
+                            
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                <span v-for="id in templateForm.reward_config.menu_item_ids" :key="id" class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm flex items-center">
+                                     {{ getItemName(id) }}
+                                     <button @click="toggleModalItem(id)" class="ml-1 text-purple-600 hover:text-purple-900">&times;</button>
+                                </span>
+                            </div>
+                            
+                            <Button type="button" variant="secondary" @click="showItemModal = true" class="w-full">
+                                {{ $t('loyalty.select_items') }}
+                            </Button>
+                        </div>
+
+                         <Textarea
+                            v-model="templateForm.reward_config.description"
+                            :label="$t('common.description')"
+                            rows="2"
+                        />
+                    </div>
+                </div>
+
                 <!-- Conditions Area -->
                 <div class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
                     <div class="bg-amber-50 px-6 py-4 border-b border-amber-100">
@@ -899,6 +1018,74 @@
                 </div>
             </form>
         </Modal>
+                <!-- Item Selection Modal (Nested) -->
+                 <Modal :show="showItemModal" @close="showItemModal = false" :title="$t('loyalty.select_items')">
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <Input 
+                                v-model="itemSearch"
+                                :placeholder="$t('common.search')"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <div class="h-96 overflow-y-auto border rounded-lg p-4 space-y-4">
+                           <div v-for="category in filteredCategories" :key="category.id">
+                                <h4 class="font-bold text-gray-700 mb-2">{{ getLocaleName(category.name) }}</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div v-for="item in category.items" :key="item.id" 
+                                        @click="toggleModalItem(item.id)"
+                                        class="p-2 border rounded cursor-pointer flex justify-between items-center hover:bg-gray-50 transition-colors"
+                                        :class="{'bg-purple-50 border-purple-300': templateForm.reward_config.menu_item_ids.includes(item.id)}"
+                                    >
+                                        <span class="text-sm">{{ getLocaleName(item.name) }}</span>
+                                        <span v-if="templateForm.reward_config.menu_item_ids.includes(item.id)" class="text-purple-600">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        </span>
+                                    </div>
+                                </div>
+                           </div>
+                           <div v-if="filteredCategories.length === 0" class="text-center text-gray-500 py-8">
+                                {{ $t('common.no_results') }}
+                           </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end">
+                            <Button @click="showItemModal = false">
+                                {{ $t('common.done') }}
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+
+        <!-- Log Message View Modal -->
+        <Modal :show="showLogMessageModal" @close="showLogMessageModal = false" :title="$t('communication.view_message')" size="4xl">
+            <div class="p-6 space-y-4">
+                <!-- Subject Header (for emails) -->
+                <div v-if="selectedLog.type === 'email'" class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p class="text-sm text-gray-500 uppercase font-bold tracking-wider mb-1">{{ $t('communication.email_subject') }}</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ selectedLog.subject || '(No Subject)' }}</p>
+                </div>
+
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden min-h-[400px]">
+                    <!-- HTML Preview for Emails -->
+                    <iframe 
+                        v-if="selectedLog.type === 'email'" 
+                        :srcdoc="selectedLog.message" 
+                        class="w-full h-[500px] border-none"
+                    ></iframe>
+                    
+                    <!-- Plain Text for SMS/Other -->
+                    <div v-else class="p-4 whitespace-pre-wrap font-sans text-gray-800">
+                        {{ selectedLog.message }}
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <Button @click="showLogMessageModal = false">{{ $t('common.close') }}</Button>
+                </div>
+            </div>
+        </Modal>
     </MainLayout>
 </template>
 
@@ -908,6 +1095,7 @@
 import { ref, watch } from 'vue';
 import { router, useForm, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { formatDateTime } from '@/Utils/dateHelper';
 // @ts-ignore
 import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
@@ -921,7 +1109,7 @@ import { computed } from 'vue';
 import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasFeature } = useFeatures();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 interface TemplateCondition {
     min_order_amount?: number | null;
@@ -984,10 +1172,11 @@ interface LogsPaginator {
 }
 
 const props = defineProps<{
-    balances: { sms: number; email: number };
+    balances: { sms: number; email: number; sms_sent: number; email_sent: number };
     logs: LogsPaginator;
     bundles: Bundle[];
     templates: Template[];
+    menuCategories: any[];
     filters: any;
 }>();
 
@@ -1016,6 +1205,11 @@ const statusOptions = computed(() => [
     { label: t('communication.all_statuses'), value: '' },
     { label: t('common.sent'), value: 'sent' },
     { label: t('common.failed'), value: 'failed' }
+]);
+
+const templateOptions = computed(() => [
+    { label: t('communication.all_rules'), value: '' },
+    ...(props.templates || []).map(t => ({ label: t.name, value: t.id }))
 ]);
 
 const timingUnitOptions = computed(() => [
@@ -1103,7 +1297,18 @@ const templateForm = useForm({
     is_active: true,
     timing_type: 'immediately',
     timing_days: 0,
-    timing_time: '12:00'
+    timing_time: '12:00',
+    include_reward: false,
+    reward_config: {
+        name: { en: '', ar: '' } as any,
+        description: '',
+        points_required: '' as string | number,
+        min_order_value: '' as string | number,
+        reward_type: 'discount_percentage',
+        discount_value: '' as string | number,
+        menu_item_ids: [] as number[],
+        apply_on: 'all'
+    } as any
 });
 
 // --- Feedback Settings ---
@@ -1160,7 +1365,6 @@ watch(() => props.templates, (newTemplates) => {
             feedbackForm.timing_val = 1;
             feedbackForm.timing_unit = 'hours';
         }
-
     } else {
         feedbackForm.channels = ['sms'];
         feedbackForm.message_body = t('communication.message_placeholder');
@@ -1170,6 +1374,19 @@ watch(() => props.templates, (newTemplates) => {
         feedbackForm.feedback_points = null;
     }
 }, { immediate: true });
+
+// --- Log Message Viewer ---
+const showLogMessageModal = ref(false);
+const selectedLog = ref({ type: '', message: '', subject: '' });
+
+const openLogMessage = (log: any) => {
+    selectedLog.value = {
+        type: log.type,
+        message: log.message,
+        subject: log.subject
+    };
+    showLogMessageModal.value = true;
+};
 
 const saveFeedbackSettings = () => {
     // Validate SMS
@@ -1250,36 +1467,64 @@ const saveFeedbackSettings = () => {
 
 const openTemplateModal = (template: Template | null = null) => {
     if (template) {
+        const t = template as any; // Cast to any to avoid type errors
         editingTemplate.value = template;
-        templateForm.name = template.name;
+        templateForm.name = t.name;
         // Fix: backend might send 'channels' or older 'channel' if we didn't migrate old data perfectly.
         // But we did migration.
-        templateForm.channels = template.channels || (template.channel ? [template.channel] : []);
-        templateForm.trigger_event = template.trigger_event;
-        templateForm.subject = template.subject || '';
-        templateForm.content = template.content || '';
-        templateForm.subject_en = template.subject_en || '';
-        templateForm.subject_ar = template.subject_ar || '';
-        templateForm.content_en = template.content_en || '';
-        templateForm.content_ar = template.content_ar || '';
-        templateForm.sms_sender_name = template.sms_sender_name || '';
-        templateForm.sms_content = template.sms_content || '';
-        templateForm.sms_content_en = template.sms_content_en || '';
-        templateForm.sms_content_ar = template.sms_content_ar || '';
-        templateForm.email_header = template.email_header || '';
-        templateForm.email_footer = template.email_footer || '';
+        templateForm.channels = t.channels || (t.channel ? [t.channel] : []);
+        templateForm.trigger_event = t.trigger_event;
+        templateForm.subject = t.subject || '';
+        templateForm.content = t.content || '';
+        templateForm.subject_en = t.subject_en || '';
+        templateForm.subject_ar = t.subject_ar || '';
+        templateForm.content_en = t.content_en || '';
+        templateForm.content_ar = t.content_ar || '';
+        templateForm.sms_sender_name = t.sms_sender_name || '';
+        templateForm.sms_content = t.sms_content || '';
+        templateForm.sms_content_en = t.sms_content_en || '';
+        templateForm.sms_content_ar = t.sms_content_ar || '';
+        templateForm.email_header = t.email_header || '';
+        templateForm.email_footer = t.email_footer || '';
         templateForm.conditions = {
-            min_order_amount: template.conditions?.min_order_amount || null,
-            min_orders_count: template.conditions?.min_orders_count || null,
-            days_since_last_order: template.conditions?.days_since_last_order || null,
-            min_rating: template.conditions?.min_rating || null,
-            max_rating: template.conditions?.max_rating || null,
-            loyalty_tier: template.conditions?.loyalty_tier || ''
+            min_order_amount: t.conditions?.min_order_amount || null,
+            min_orders_count: t.conditions?.min_orders_count || null,
+            days_since_last_order: t.conditions?.days_since_last_order || null,
+            min_rating: t.conditions?.min_rating || null,
+            max_rating: t.conditions?.max_rating || null,
+            loyalty_tier: t.conditions?.loyalty_tier || ''
         };
-       templateForm.is_active = !!template.is_active;
-        templateForm.timing_type = template.timing_type || 'immediately';
-        templateForm.timing_days = template.timing_days || 0;
-        templateForm.timing_time = template.timing_time ? template.timing_time.substring(0, 5) : '12:00'; // Format H:i
+        templateForm.is_active = !!t.is_active;
+        templateForm.timing_type = t.timing_type || 'immediately';
+        templateForm.timing_days = t.timing_days || 0;
+        templateForm.timing_time = t.timing_time ? t.timing_time.substring(0, 5) : '12:00'; // Format H:i
+        
+        // Reward Config
+        if (t.reward_config) {
+            templateForm.include_reward = true;
+            templateForm.reward_config = {
+                name: t.reward_config.name || { en: '', ar: '' },
+                description: t.reward_config.description || '',
+                points_required: t.reward_config.points_required || '',
+                min_order_value: t.reward_config.min_order_value || '',
+                reward_type: t.reward_config.reward_type || 'discount_percentage',
+                discount_value: t.reward_config.discount_value || '',
+                apply_on: t.reward_config.apply_on || 'all',
+                menu_item_ids: t.reward_config.menu_item_ids || []
+            };
+        } else {
+            templateForm.include_reward = false;
+            templateForm.reward_config = {
+                name: { en: '', ar: '' },
+                description: '',
+                points_required: '',
+                min_order_value: '',
+                reward_type: 'discount_percentage',
+                discount_value: '',
+                apply_on: 'all',
+                menu_item_ids: []
+            };
+        }
     } else {
         editingTemplate.value = null;
         templateForm.reset();
@@ -1288,21 +1533,37 @@ const openTemplateModal = (template: Template | null = null) => {
         templateForm.timing_type = 'immediately';
         templateForm.timing_days = 0;
         templateForm.timing_time = '12:00';
+        
+        templateForm.include_reward = false;
+        templateForm.reward_config = {
+            name: { en: '', ar: '' },
+            description: '',
+            points_required: '',
+            min_order_value: '',
+            reward_type: 'discount_percentage',
+            discount_value: '',
+            apply_on: 'all',
+            menu_item_ids: []
+        };
     }
+
     showTemplateModal.value = true;
 };
 
 const closeTemplateModal = () => {
     showTemplateModal.value = false;
     templateForm.reset();
+    templateForm.clearErrors();
     editingTemplate.value = null;
+    templateForm.include_reward = false; // Reset toggle
 };
 
 const submitTemplate = () => {
-    if (templateForm.channels.length === 0) {
-        alert(t('communication.select_one_channel'));
-        return;
+    // If reward is not included, clear the config before submitting to avoid validation errors
+    if (!templateForm.include_reward) {
+        templateForm.reward_config = null;
     }
+
     if (editingTemplate.value) {
         templateForm.put(route('communication.templates.update', editingTemplate.value.id), {
             onSuccess: () => closeTemplateModal()
@@ -1315,10 +1576,60 @@ const submitTemplate = () => {
 };
 
 const deleteTemplate = (template: Template) => {
-    if (confirm(t('communication.delete_rule_confirm'))) {
+    if (confirm(t('communication.confirm_delete_rule'))) {
         router.delete(route('communication.templates.destroy', template.id));
     }
 };
+
+// --- Reward Logic (Copied from Loyalty) ---
+const showItemModal = ref(false);
+const itemSearch = ref('');
+
+const getLocaleName = (name: any) => {
+    if (!name) return t('common.unknown') || 'Unknown';
+    if (typeof name === 'string') return name;
+    return name[locale.value] || Object.values(name)[0] || '';
+};
+
+const getItemName = (id: number) => {
+    for (const cat of props.menuCategories || []) {
+        const item = cat.items.find((i: any) => i.id === id);
+        if (item) return getLocaleName(item.name);
+    }
+    return `Item #${id}`;
+};
+
+const filteredCategories = computed(() => {
+    if (!itemSearch.value) return props.menuCategories || [];
+    const q = itemSearch.value.toLowerCase();
+    
+    // Return filtered copy of categories containing matching items
+    return (props.menuCategories || []).map((cat: any) => ({
+        ...cat,
+        items: cat.items.filter((i: any) => 
+            getLocaleName(i.name).toLowerCase().includes(q)
+        )
+    })).filter((cat: any) => cat.items.length > 0);
+});
+
+const toggleModalItem = (id: number) => {
+    // Single Select Mode or Multi? Loyalty uses array, so assume multi but logic in Loyalty was:
+    // if (rewardForm.menu_item_ids.includes(id)) ...
+    // Let's stick to simple toggle for array
+    const ids = templateForm.reward_config.menu_item_ids;
+    if (ids.includes(id)) {
+         templateForm.reward_config.menu_item_ids = ids.filter((i: number) => i !== id);
+    } else {
+         templateForm.reward_config.menu_item_ids = [id];
+    }
+};
+
+const rewardTypes = computed(() => [
+    { value: 'discount_percentage', label: t('loyalty.discount_percentage') || 'Discount (%)' },
+    { value: 'discount_fixed', label: t('loyalty.discount_fixed') || 'Fixed Amount' },
+    { value: 'free_item', label: t('loyalty.free_item') || 'Free Item' },
+    { value: 'cashback', label: t('loyalty.cashback') || 'Cashback' }
+]);
 
 const showLogs = (template: Template) => {
     // Navigate to index but with template_id filter and active_tab=logs

@@ -16,7 +16,7 @@
                     <div class="hidden sm:block w-px h-8 bg-gray-200 mx-2"></div>
                     <div class="hidden sm:block">
                         <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">{{ $t('pos.opened') }}</p>
-                        <p class="text-sm font-medium text-gray-700 leading-none mt-0.5">{{ formatTime(currentRegister.opened_at) }}</p>
+                        <p class="text-sm font-medium text-gray-700 leading-none mt-0.5">{{ formatDateTime(currentRegister.opened_at) }}</p>
                     </div>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
@@ -554,6 +554,14 @@
                                         :placeholder="$t('common.optional')"
                                     />
                             </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1.5">{{ $t('customers.birth_date') || 'Date of Birth' }}</label>
+                                <input 
+                                    v-model="updateForm.customer_birth_date"
+                                    type="date"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -756,6 +764,7 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 import ReceiptPreview from '@/Components/ReceiptPreview.vue';
 import { printReceiptPreview } from '@/Utils/printReceipt';
+import { formatDateTime } from '@/Utils/dateHelper';
 import PhoneInput from '@/Components/PhoneInput.vue';
 import Select from '@/Components/Select.vue';
 import Input from '@/Components/Input.vue';
@@ -809,6 +818,7 @@ const activeValue = ref(0);
 const updateForm = ref({
     customer_name: '',
     customer_phone: '',
+    customer_birth_date: '',
     type: currentRestaurant.value?.service_type === 'self_service' ? 'takeaway' : 'dine_in',
     table_id: null as number | null
 });
@@ -948,8 +958,9 @@ const resetOrderState = (newOrder: any) => {
         adjustmentMode.value = 'none';
         
         updateForm.value = {
-            customer_name: newOrder.customer_name || '',
-            customer_phone: newOrder.customer_phone || '',
+            customer_name: newOrder.customer_name || (newOrder.customer?.name || ''),
+            customer_phone: newOrder.customer_phone || (newOrder.customer?.phone || ''),
+            customer_birth_date: newOrder.customer?.birth_date || '',
             type: newOrder.type || 'dine_in',
             table_id: newOrder.table_id || null
         };
@@ -1200,6 +1211,7 @@ const saveOrderUpdates = () => {
         // Customer details
         customer_name: updateForm.value.customer_name,
         customer_phone: updateForm.value.customer_phone,
+        customer_birth_date: updateForm.value.customer_birth_date,
         // Order type and table
         type: updateForm.value.type,
         table_id: updateForm.value.table_id
@@ -1371,12 +1383,7 @@ const formatCurrency = (value: number) => {
     }).format(value || 0);
 };
 
-const formatTime = (date: string) => {
-    return new Date(date).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
+// formatDateTime is imported
 
 // Cash Register Forms
 const openForm = ref({

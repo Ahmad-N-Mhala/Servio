@@ -14,6 +14,51 @@ class CustomerCommunicationService
     {
         $channels = $template->channels ?? [];
 
+        // Enrich data with common variables
+        $data = array_merge([
+            'customer_name' => $customer->name,
+            'customer_email' => $customer->email,
+            'customer_phone' => $customer->phone,
+            'restaurant_name' => $template->restaurant->name ?? config('app.name'),
+        ], $data);
+
+        // Enrich data with Reward Configuration if available
+        if (!empty($template->reward_config)) {
+            $config = $template->reward_config;
+            $data['reward_type'] = $config['reward_type'] ?? '';
+            $data['reward_value'] = $config['reward_value'] ?? '';
+            $data['points_required'] = $config['points_required'] ?? '';
+
+            if ($data['reward_type'] === 'discount_percentage') {
+                $data['discount_percentage'] = ($config['reward_value'] ?? 0) . '%';
+            }
+
+            // Reflection of Menu Items
+            if (!empty($config['menu_item_ids'])) {
+                $itemIds = (array) $config['menu_item_ids'];
+                $items = \App\Models\MenuItem::whereIn('id', $itemIds)->get();
+
+                $locale = $template->restaurant->locale ?? 'en';
+                $itemNames = $items->map(function ($item) use ($locale) {
+                    // Safety check if it's not hydrated as an Eloquent model with Translatable trait
+                    if (method_exists($item, 'getTranslation')) {
+                        return $item->getTranslation('name', $locale) ?? $item->name;
+                    }
+                    return is_array($item->name) ? ($item->name[$locale] ?? array_values($item->name)[0]) : $item->name;
+                })->implode(', ');
+
+                $data['reward_item_name'] = $itemNames;
+                $data['selected_items'] = $itemNames;
+            }
+        }
+
+        // Add more Customer specific data
+        $data['loyalty_tier'] = $customer->loyalty_tier ?? 'bronze';
+        $data['current_points'] = $customer->current_points ?? 0;
+
+        $data['birth_date'] = $customer->birth_date ? \Illuminate\Support\Carbon::parse($customer->birth_date)->toDateString() : '';
+        $data['last_order_date'] = $customer->last_order_at ? \Illuminate\Support\Carbon::parse($customer->last_order_at)->toDateString() : '';
+
         foreach ($channels as $channel) {
             if ($channel === 'email') {
                 self::sendEmail($template, $customer, $data);
@@ -29,9 +74,9 @@ class CustomerCommunicationService
             return;
 
         $restaurant = $template->restaurant;
-        if ($restaurant->email_balance <= 0) {
-            Log::warning("Restaurant {$restaurant->id} out of email credits.");
-            self::log($template, $customer, 'email', 'failed', 'Insufficient balance');
+        if (!$restaurant || $restaurant->email_balance <= 0) {
+            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of email credits or not found.");
+            self::log($template, $customer, 'email', 'failed', 'Insufficient balance or restaurant mismatch');
             return;
         }
 
@@ -57,10 +102,10 @@ class CustomerCommunicationService
             Mail::to($customer->email)->send(new \App\Mail\GenericSystemEmail($subject, $content));
 
             $restaurant->decrement('email_balance');
-            self::log($template, $customer, 'email', 'sent', $content);
+            self::log($template, $customer, 'email', 'sent', $content, $subject);
         } catch (\Exception $e) {
             Log::error("Email failed: " . $e->getMessage());
-            self::log($template, $customer, 'email', 'failed', $e->getMessage());
+            self::log($template, $customer, 'email', 'failed', $e->getMessage(), $subject);
         }
     }
 
@@ -70,9 +115,9 @@ class CustomerCommunicationService
             return;
 
         $restaurant = $template->restaurant;
-        if ($restaurant->sms_balance <= 0) {
-            Log::warning("Restaurant {$restaurant->id} out of SMS credits.");
-            self::log($template, $customer, 'sms', 'failed', 'Insufficient balance');
+        if (!$restaurant || $restaurant->sms_balance <= 0) {
+            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of SMS credits or not found.");
+            self::log($template, $customer, 'sms', 'failed', 'Insufficient balance or restaurant mismatch');
             return;
         }
 
@@ -98,27 +143,37 @@ class CustomerCommunicationService
         }
     }
 
-    private static function replaceVariables($text, $data)
+    private static function replaceVariables(?string $text, array $data): string
     {
         if (!$text)
             return '';
 
+        // Add curly braces to keys for replacement
+        $search = [];
+        $replace = [];
         foreach ($data as $key => $value) {
-            $text = str_replace('{{' . $key . '}}', $value, $text);
-            $text = str_replace('{{ ' . $key . ' }}', $value, $text); // handle spaces
+            if (is_array($value) || is_object($value))
+                continue;
+
+            $search[] = '{{' . $key . '}}';
+            $search[] = '{{ ' . $key . ' }}';
+            $replace[] = (string) $value;
+            $replace[] = (string) $value;
         }
-        return $text;
+
+        return str_replace($search, $replace, $text);
     }
 
-    private static function log($template, $customer, $type, $status, $message = null)
+    private static function log($template, $customer, $type, $status, $message = null, $subject = null)
     {
         CommunicationLog::create([
             'restaurant_id' => $template->restaurant_id,
             'communication_template_id' => $template->id,
-            'recipient' => $type === 'email' ? $customer->email : $customer->phone,
+            'recipient' => $type === 'email' ? ($customer->email ?? 'N/A') : ($customer->phone ?? 'N/A'),
             'type' => $type, // sms or email
             'status' => $status,
-            'message' => substr($message, 0, 1000), // truncate if too long
+            'subject' => $subject,
+            'message' => $type === 'email' ? $message : substr($message ?? '', 0, 1000), // truncate only SMS/short logs
             'sent_at' => now(),
         ]);
     }

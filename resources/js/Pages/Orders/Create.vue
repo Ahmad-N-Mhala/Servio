@@ -198,6 +198,16 @@
                             </div>
                         </div>
                     </div>
+                    <!-- DOB Field -->
+                    <div class="animate-fade-in-up">
+                         <Input 
+                            v-model="form.customer_birth_date"
+                            type="date"
+                            :label="$t('customers.birth_date') || 'Date of Birth'"
+                            :placeholder="$t('customers.birth_date') || 'Date of Birth'"
+                            class="w-full"
+                        />
+                    </div>
 
                     <!-- Order Type & Table -->
                     <div class="space-y-2">
@@ -521,6 +531,7 @@ interface Customer {
     phone: string;
     email: string | null;
     loyalty_points: number;
+    birth_date?: string | null;
 }
 
 interface Reward {
@@ -722,6 +733,7 @@ const lookupCustomer = () => {
     if (customer) {
         selectedCustomer.value = customer;
         form.customer_name = customer.name || '';
+        form.customer_birth_date = customer.birth_date || '';
         form.customer_id = customer.id;
     } else {
         selectedCustomer.value = null;
@@ -1043,21 +1055,7 @@ const getRewardTypeLabel = (reward: Reward): string => {
     }
 };
 
-const getRewardValue = (reward: Reward): string => {
-    const value = Math.round(reward.discount_value || 0);
-    switch (reward.reward_type) {
-        case 'discount_percentage':
-            return t('loyalty.discount_percentage_off', { value });
-        case 'discount_fixed':
-            return t('loyalty.discount_fixed_off', { amount: currencyCode.value + ' ' + value });
-        case 'free_item':
-            return t('loyalty.free');
-        case 'cashback':
-            return t('loyalty.cashback_back', { value: currencyCode.value + ' ' + value });
-        default:
-            return '';
-    }
-};
+
 
 // Calculations
 const freeItems = computed(() => {

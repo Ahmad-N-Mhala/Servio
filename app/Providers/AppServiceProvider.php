@@ -246,6 +246,7 @@ class AppServiceProvider extends ServiceProvider
 
         \App\Models\Order::observe(\App\Observers\OrderObserver::class);
         \App\Models\Feedback::observe(\App\Observers\FeedbackObserver::class);
+        \App\Models\Customer::observe(\App\Observers\CustomerObserver::class);
     }
 }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CommunicationBundle;
 use App\Models\CommunicationLog;
 use App\Models\CommunicationTemplate;
+use App\Models\MenuCategory;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -52,6 +53,10 @@ class CommunicationController extends Controller
             $logsQuery->where('communication_template_id', $request->input('template_id'));
         }
 
+        // Calculate sent counts based on the FILTERED query (before pagination)
+        $smsSentCount = (clone $logsQuery)->where('type', 'sms')->where('status', 'sent')->count();
+        $emailSentCount = (clone $logsQuery)->where('type', 'email')->where('status', 'sent')->count();
+
         $logs = $logsQuery->latest()
             ->paginate(10)
             ->withQueryString();
@@ -68,11 +73,21 @@ class CommunicationController extends Controller
 
         $bundles = CommunicationBundle::where('is_active', true)->get();
 
+        $menuCategories = MenuCategory::where('restaurant_id', $restaurant->id)
+            ->where('is_active', true)
+            ->with([
+                'items'
+            ])
+            ->get();
+
         return Inertia::render('Communication/Index', [
             'balances' => [
                 'sms' => $restaurant->sms_balance ?? 0,
                 'email' => $restaurant->email_balance ?? 0,
+                'sms_sent' => $smsSentCount,
+                'email_sent' => $emailSentCount,
             ],
+            'menuCategories' => $menuCategories,
             'logs' => $logs,
             'bundles' => $bundles,
             'templates' => $templates,
@@ -122,6 +137,17 @@ class CommunicationController extends Controller
             'timing_type' => 'required|in:immediately,before,after',
             'timing_days' => 'required_if:timing_type,before,after|integer|min:0',
             'timing_time' => 'required|date_format:H:i',
+            'reward_config' => 'nullable|array',
+            'reward_config.reward_type' => 'required_with:reward_config|in:discount_percentage,discount_fixed,free_item,cashback',
+            'reward_config.points_required' => 'nullable|numeric|min:0',
+            'reward_config.discount_value' => 'nullable|numeric|min:0',
+            'reward_config.min_order_value' => 'nullable|numeric|min:0',
+            'reward_config.apply_on' => 'nullable|string|in:all,specific',
+            'reward_config.menu_item_ids' => 'nullable|array',
+            'reward_config.name' => 'required_with:reward_config|array',
+            'reward_config.name.en' => 'required_with:reward_config|string',
+            'reward_config.name.ar' => 'nullable|string',
+            'reward_config.description' => 'nullable|string',
         ]);
 
         $restaurant = Restaurant::find(session('active_restaurant_id'));
@@ -132,6 +158,7 @@ class CommunicationController extends Controller
             'restaurant_id' => $restaurant->id,
             'conditions' => $validated['conditions'] ?? [],
             'timing_days' => $validated['timing_days'] ?? 0,
+            'reward_config' => $validated['reward_config'] ?? null,
         ]));
 
         return redirect()->back()->with('message', 'Communication rule created successfully.');
@@ -160,10 +187,22 @@ class CommunicationController extends Controller
             'timing_type' => 'required|in:immediately,before,after',
             'timing_days' => 'required_if:timing_type,before,after|integer|min:0',
             'timing_time' => 'required|date_format:H:i',
+            'reward_config' => 'nullable|array',
+            'reward_config.reward_type' => 'required_with:reward_config|in:discount_percentage,discount_fixed,free_item,cashback',
+            'reward_config.points_required' => 'nullable|numeric|min:0',
+            'reward_config.discount_value' => 'nullable|numeric|min:0',
+            'reward_config.min_order_value' => 'nullable|numeric|min:0',
+            'reward_config.apply_on' => 'nullable|string|in:all,specific',
+            'reward_config.menu_item_ids' => 'nullable|array',
+            'reward_config.name' => 'required_with:reward_config|array',
+            'reward_config.name.en' => 'required_with:reward_config|string',
+            'reward_config.name.ar' => 'nullable|string',
+            'reward_config.description' => 'nullable|string',
         ]);
 
         $template->update(array_merge($validated, [
             'timing_days' => $validated['timing_days'] ?? 0,
+            'reward_config' => $validated['reward_config'] ?? null,
         ]));
 
         return redirect()->back()->with('message', 'Communication rule updated successfully.');

@@ -14,6 +14,7 @@ class CommunicationLog extends Model
     protected $fillable = [
         'type',
         'recipient',
+        'subject',
         'message',
         'status',
         'cost',

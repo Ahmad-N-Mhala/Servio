@@ -34,11 +34,13 @@ class CommunicationTemplate extends Model
         'timing_type',
         'timing_days',
         'timing_time',
+        'reward_config',
     ];
 
     protected $casts = [
         'channels' => 'array',
         'conditions' => 'array',
+        'reward_config' => 'array',
         'is_active' => 'boolean',
     ];
 

@@ -308,7 +308,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="log in historyLogs" :key="log.id">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ new Date(log.created_at).toLocaleString() }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ formatDateTime(log.created_at) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 capitalize">{{ log.action.replace('_', ' ') }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold" :class="log.quantity_change > 0 ? 'text-green-600' : 'text-red-600'">
                                     {{ log.quantity_change > 0 ? '+' : '' }}{{ log.quantity_change }}
@@ -392,10 +392,10 @@
                                         {{ formatCurrency(batch.cost_per_unit) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                                        {{ new Date(batch.created_at).toLocaleDateString() }}
+                                        {{ formatDate(batch.created_at) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                                        {{ batch.expiration_date ? new Date(batch.expiration_date).toLocaleDateString() : '-' }}
+                                        {{ batch.expiration_date ? formatDate(batch.expiration_date) : '-' }}
                                     </td>
                                 </tr>
                                 <tr v-if="selectedIngredientBatches.length === 0">
@@ -454,6 +454,7 @@ import Table from '@/Components/Table.vue';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { usePermissions } from '@/Composables/usePermissions';
+import { formatDate, formatDateTime } from '@/Utils/dateHelper';
 
 const { hasPermission } = usePermissions();
 const { locale, t } = useI18n();
