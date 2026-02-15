@@ -670,17 +670,7 @@
 
                 <!-- Bottom Bar -->
                 <div class="pt-8 border-t border-gray-800">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div class="flex flex-wrap justify-center md:justify-start gap-6 text-sm">
-                            <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors duration-300 flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                {{ $t('landing.privacy_policy') }}
-                            </a>
-                            <a href="#" class="text-gray-400 hover:text-emerald-400 transition-colors duration-300 flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                {{ $t('landing.terms_of_service') }}
-                            </a>
-                        </div>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-6">
                         <div class="text-sm text-gray-500 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                             &copy; {{ new Date().getFullYear() }} Servio. {{ $t('landing.copyright') }}
