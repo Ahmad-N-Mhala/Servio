@@ -62,7 +62,7 @@ Access the application at: `http://127.0.0.1:8000`
 
 **Super Admin (Admin Panel)**
 - **URL**: `/login` (redirects to admin dashboard if super admin)
-- **Email**: `superadmin@restofy.com`
+- **Email**: `superadmin@Servio.com`
 - **Password**: `password`
 
 **Restaurant Owner (Tenant Panel)**

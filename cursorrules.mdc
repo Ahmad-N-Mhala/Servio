@@ -98,7 +98,7 @@ You are an expert in Laravel, PHP, and related web development technologies.
 - Containerize with Docker; orchestrate with Kubernetes for high scale; include locale env vars
 - Monitor scalability: Suggest Prometheus/Grafana for metrics, auto-scaling groups for traffic spikes (e.g., dinner rush orders); track locale usage for optimization
 - Backup strategy: Automated database backups, tenant data export features; ensure backups handle Unicode data
-# Cursor Rules for RestoFy
+# Cursor Rules for Servio
 
 ## General Guidelines
 - Be concise and direct - provide actual code snippets, not high-level explanations or pseudocode

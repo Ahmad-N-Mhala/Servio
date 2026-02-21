@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Email Configuration Update Script for RestoFy
+# Email Configuration Update Script for Servio
 # This script helps update the .env file with email settings
 
 echo "================================================"
-echo "RestoFy Email Configuration Setup"
+echo "Servio Email Configuration Setup"
 echo "================================================"
 echo ""
 
@@ -49,7 +49,7 @@ update_env "MAIL_USERNAME" "restaurfydaoudmhala@gmail.com"
 update_env "MAIL_PASSWORD" '"ADMhala@@7@@"'
 update_env "MAIL_ENCRYPTION" "tls"
 update_env "MAIL_FROM_ADDRESS" "restaurfydaoudmhala@gmail.com"
-update_env "MAIL_FROM_NAME" '"RestoFy"'
+update_env "MAIL_FROM_NAME" '"Servio"'
 
 echo ""
 echo "================================================"
@@ -64,7 +64,7 @@ echo "2. Navigate to Security"
 echo "3. Enable 2-Step Verification (if not enabled)"
 echo "4. Under 'Signing in to Google', click 'App passwords'"
 echo "5. Select 'Mail' and 'Other (Custom name)'"
-echo "6. Enter 'RestoFy' as the name"
+echo "6. Enter 'Servio' as the name"
 echo "7. Copy the 16-character password"
 echo "8. Replace the MAIL_PASSWORD value in .env with it"
 echo ""

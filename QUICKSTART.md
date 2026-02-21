@@ -29,7 +29,7 @@ Use this account to access the main dashboard.
 
 ### **Super Admin**
 Use this account for system-wide administration.
-- **Email:** `superadmin@restofy.com`
+- **Email:** `superadmin@servio.com`
 - **Password:** `password`
 
 ### **Demo Staff Accounts**

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# RestoFy Code Cleanup Script
+# Servio Code Cleanup Script
 # This script cleans up temporary files and organizes the project structure
 
-echo "🧹 Starting RestoFy Code Cleanup..."
+echo "🧹 Starting Servio Code Cleanup..."
 echo ""
 
 # Create directories for organization

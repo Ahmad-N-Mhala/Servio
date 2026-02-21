@@ -23,7 +23,7 @@ This is a **multi-tenant Laravel application** using:
 The following super admin account was created and tested:
 
 ```
-Email: superadmin@restofy.com
+Email: superadmin@Servio.com
 Password: password
 ```
 
@@ -88,7 +88,7 @@ php artisan db:seed --class=SuperAdminSeeder
 ```
 
 This creates:
-- **Email**: superadmin@restofy.com
+- **Email**: superadmin@Servio.com
 - **Password**: password (bcrypt hashed)
 - **Role**: Super Admin (is_super_admin = true)
 

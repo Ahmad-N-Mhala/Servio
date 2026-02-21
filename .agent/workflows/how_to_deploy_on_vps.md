@@ -1,5 +1,5 @@
 ---
-description: Comprehensive guide to deploying RestoFy/Servio on a VPS (GoDaddy/Ubuntu)
+description: Comprehensive guide to deploying Servio/Servio on a VPS (GoDaddy/Ubuntu)
 ---
 
 This guide steps you through deploying the application on a fresh Ubuntu VPS (e.g., from GoDaddy).

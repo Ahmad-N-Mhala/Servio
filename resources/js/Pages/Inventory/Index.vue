@@ -56,6 +56,8 @@
                     </span>
                 </template>
 
+
+
                 <!-- Actions Column -->
                 <template #actions="{ row }">
                     <div class="flex items-center justify-end gap-2">
@@ -543,6 +545,12 @@ const getLocaleName = (name: any) => {
         return name[locale.value] || Object.values(name)[0] || '';
     }
     return name;
+};
+
+const getRecipientName = (userId: string | null) => {
+    if (!userId) return t('inventory.no_alert_recipient', 'No notifications needed');
+    const user = props.users?.find(u => u.id === userId);
+    return user ? user.name : '-';
 };
 
 const filteredIngredients = computed(() => {

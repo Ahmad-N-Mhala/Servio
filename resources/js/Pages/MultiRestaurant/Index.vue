@@ -1,5 +1,15 @@
 <template>
-    <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="relative min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Back to System Button -->
+        <div class="absolute top-4 left-4 sm:top-8 sm:left-8">
+            <Link :href="route('dashboard')" class="flex items-center gap-2 text-gray-500 hover:text-gray-900 bg-white shadow-sm border border-gray-200 px-4 py-2 rounded-xl transition-all hover:shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="font-bold text-sm">Back to System</span>
+            </Link>
+        </div>
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <h2 class="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
                 Your Restaurants
@@ -157,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 
 interface Restaurant {

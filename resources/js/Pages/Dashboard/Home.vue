@@ -573,7 +573,23 @@ const initPaymentChart = () => {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+            plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context: any) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.raw !== null && context.raw !== undefined) {
+                                label += formatCurrency(context.raw);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
             onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements.length > 0) {
                     const idx = activeElements[0].index;

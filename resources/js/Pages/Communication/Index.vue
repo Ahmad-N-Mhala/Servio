@@ -193,47 +193,6 @@
                      </div>
                      </transition>
 
-                     <!-- Google Maps Review Link -->
-                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label class="block text-sm font-medium text-gray-700">{{ $t('communication.google_review_link') }}</label>
-                            <div class="relative group">
-                                <svg class="w-4 h-4 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                
-                                <!-- Tooltip -->
-                                <div class="absolute left-0 bottom-full mb-2 w-80 p-4 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                    <div class="font-semibold mb-2">How to get your Google Maps review link:</div>
-                                    <ol class="list-decimal list-inside space-y-1.5">
-                                        <li>Open Google Maps and search for your restaurant</li>
-                                        <li>Click on your restaurant name</li>
-                                        <li>Click the "Share" button</li>
-                                        <li>Copy the link and paste it here</li>
-                                    </ol>
-                                    <div class="mt-3 pt-3 border-t border-gray-700">
-                                        <p class="font-semibold mb-1">Supported formats:</p>
-                                        <ul class="space-y-1 text-gray-300">
-                                            <li>• Short URL: maps.app.goo.gl/...</li>
-                                            <li>• Full URL: google.com/maps/place/...</li>
-                                            <li>• Place ID: ChIJ...</li>
-                                        </ul>
-                                    </div>
-                                    <!-- Arrow -->
-                                    <div class="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <input 
-                            v-model="feedbackForm.google_review_link" 
-                            type="url"
-                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="https://maps.app.goo.gl/... or https://www.google.com/maps/place/..."
-                        >
-                        <p class="mt-2 text-xs text-gray-500">
-                            {{ $t('communication.google_review_help') }}
-                        </p>
-                     </div>
 
                      <!-- Timing and Delay -->
                      <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mb-6 transition-all duration-300">
@@ -394,25 +353,29 @@
             <!-- Logs Section -->
             <div v-if="activeTab === 'logs'" class="space-y-6 animate-fade-in">
                 <!-- Filters Header -->
-                <div class="glass-card rounded-2xl overflow-hidden p-6">
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <div class="flex-1">
-                            <Input v-model="params.search" :placeholder="$t('communication.search_logs')" type="search" />
+                <div class="glass-card rounded-2xl overflow-hidden p-6 border border-gray-100 shadow-sm">
+                    <div class="flex flex-col 2xl:flex-row gap-4 2xl:items-center">
+                        <div class="flex flex-wrap gap-4 flex-1">
+                            <div class="flex-1 min-w-[200px]">
+                                <Input v-model="params.search" :placeholder="$t('communication.search_logs')" type="text" />
+                            </div>
+                            <div class="w-full sm:w-auto min-w-[160px]">
+                                <Select v-model="params.type" :options="channelOptions" :placeholder="$t('communication.all_channels')" />
+                            </div>
+                            <div class="w-full sm:w-auto min-w-[160px]">
+                                <Select v-model="params.status" :options="statusOptions" :placeholder="$t('communication.all_statuses')" />
+                            </div>
+                            <div class="w-full md:w-auto min-w-[200px] flex-1 md:flex-none">
+                                 <Select v-model="params.template_id" :options="templateOptions" :placeholder="$t('communication.all_rules')" />
+                            </div>
                         </div>
-                        <div class="w-52">
-                            <Select v-model="params.type" :options="channelOptions" :placeholder="$t('communication.all_channels')" />
+                        <div class="w-full 2xl:w-auto overflow-x-auto shrink-0 pb-2 2xl:pb-0">
+                            <DateRangePicker 
+                                :initial-start-date="params.date_from"
+                                :initial-end-date="params.date_to"
+                                @update="onDateRangeUpdate" 
+                            />
                         </div>
-                        <div class="w-52">
-                            <Select v-model="params.status" :options="statusOptions" :placeholder="$t('communication.all_statuses')" />
-                        </div>
-                        <div class="w-64">
-                             <Select v-model="params.template_id" :options="templateOptions" :placeholder="$t('communication.all_rules')" />
-                        </div>
-                        <DateRangePicker 
-                            :initial-start-date="params.date_from"
-                            :initial-end-date="params.date_to"
-                            @update="onDateRangeUpdate" 
-                        />
                     </div>
                 </div>
 
@@ -1119,7 +1082,7 @@ interface TemplateCondition {
     max_rating?: number | null;
     loyalty_tier?: string;
     feedback_points?: number | null;
-    google_review_link?: string;
+
     delay_val?: number;
     delay_unit?: string;
 }
@@ -1325,7 +1288,7 @@ const feedbackForm = useForm({
     timing_val: 1,
     timing_unit: 'hours',
     feedback_points: null as number | null,
-    google_review_link: ''
+
 });
 
 // Initialize form from existing template
@@ -1345,7 +1308,7 @@ watch(() => props.templates, (newTemplates) => {
         feedbackForm.min_order_amount = existing.conditions?.min_order_amount || null;
         feedbackForm.min_orders_count = existing.conditions?.min_orders_count || null;
         feedbackForm.feedback_points = existing.conditions?.feedback_points || null;
-        feedbackForm.google_review_link = existing.conditions?.google_review_link || '';
+
 
         // Load Timing
         if (existing.timing_type === 'custom_delay' && existing.conditions?.delay_unit) {
@@ -1442,7 +1405,7 @@ const saveFeedbackSettings = () => {
             feedback_points: feedbackForm.feedback_points,
             delay_val: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_val : null,
             delay_unit: feedbackForm.timing_mode === 'delay' ? feedbackForm.timing_unit : null,
-            google_review_link: feedbackForm.google_review_link
+
         }
     };
 

@@ -90,17 +90,26 @@ class CustomerFeedbackController extends Controller
         $shouldRedirect = false;
         $redirectUrl = null;
 
-        // Get google_review_link from the feedback template
+        // Get feedback template to determine minimum rating requirements
         $feedbackTemplate = \App\Models\CommunicationTemplate::where('restaurant_id', $restaurant->id)
             ->where('trigger_event', 'order_completed_feedback')
             ->first();
 
-        $googleReviewLink = null;
-        if ($feedbackTemplate && isset($feedbackTemplate->conditions['google_review_link'])) {
-            $googleReviewLink = $feedbackTemplate->conditions['google_review_link'];
+        $minRating = 4; // Default
+        if ($feedbackTemplate) {
+            if (isset($feedbackTemplate->conditions['min_rating'])) {
+                $minRating = (int) $feedbackTemplate->conditions['min_rating'];
+            }
         }
 
-        if ($validated['rating'] >= 4 && !empty($googleReviewLink)) {
+        $googleReviewLink = $restaurant->google_map_location;
+
+        // If it's a test form (no order) and no link is configured, supply a generic one so testing works
+        if (empty($googleReviewLink) && !$order) {
+            $googleReviewLink = 'https://maps.google.com/';
+        }
+
+        if ($validated['rating'] >= $minRating && !empty($googleReviewLink)) {
             $shouldRedirect = true;
 
             // Parse Google Maps URL to extract Place ID and generate review URL

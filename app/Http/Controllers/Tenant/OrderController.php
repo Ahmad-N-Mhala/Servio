@@ -328,9 +328,16 @@ class OrderController extends Controller
                 ];
             });
 
+        // Pre-fetch all available batches to prevent N+1 queries
+        $allBatches = \App\Models\IngredientBatch::where('restaurant_id', $restaurant->id)
+            ->where('quantity_remaining', '>', 0)
+            ->get()
+            ->groupBy('ingredient_id')
+            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+
         // Calculate stock availability for each menu item
-        $menuItemStockInfo = [];
-        foreach (\App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get() as $menuItem) {
+        $menuItemsWithIngredients = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get();
+        foreach ($menuItemsWithIngredients as $menuItem) {
             $maxServings = PHP_INT_MAX; // Start with infinite
 
             if ($menuItem->ingredients->isNotEmpty()) {
@@ -342,10 +349,8 @@ class OrderController extends Controller
 
                     $requiredPerServing = $ingredient->pivot->quantity;
 
-                    // Get available stock from batches
-                    $availableStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
-                        ->where('quantity_remaining', '>', 0)
-                        ->sum('quantity_remaining');
+                    // Get available stock from pre-fetched batches
+                    $availableStock = $allBatches[(string) $ingredient->id] ?? 0;
 
                     // Calculate how many servings we can make with this ingredient
                     if ($requiredPerServing > 0) {
@@ -436,8 +441,25 @@ class OrderController extends Controller
 
         // ====== STOCK VALIDATION BEFORE ORDER CREATION ======
         $stockErrors = [];
+        $menuItemIds = collect($validated['items'])->pluck('menu_item_id')->unique()->toArray();
+        $menuItems = \App\Models\MenuItem::with('ingredients')->whereIn('id', $menuItemIds)->get()->keyBy('id');
+
+        $ingredientIds = [];
+        foreach ($menuItems as $item) {
+            if ($item->ingredients->isNotEmpty()) {
+                $ingredientIds = array_merge($ingredientIds, $item->ingredients->pluck('id')->toArray());
+            }
+        }
+        $ingredientIds = array_unique($ingredientIds);
+
+        $allBatches = \App\Models\IngredientBatch::whereIn('ingredient_id', $ingredientIds)
+            ->where('quantity_remaining', '>', 0)
+            ->get()
+            ->groupBy('ingredient_id')
+            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+
         foreach ($validated['items'] as $item) {
-            $menuItem = \App\Models\MenuItem::with('ingredients')->find($item['menu_item_id']);
+            $menuItem = $menuItems[$item['menu_item_id']] ?? null;
 
             if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
                 foreach ($menuItem->ingredients as $ingredient) {
@@ -448,10 +470,8 @@ class OrderController extends Controller
 
                     $neededQty = $ingredient->pivot->quantity * $item['quantity'];
 
-                    // Get available stock from batches
-                    $availableStock = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)
-                        ->where('quantity_remaining', '>', 0)
-                        ->sum('quantity_remaining');
+                    // Get available stock from pre-fetched batches
+                    $availableStock = $allBatches[(string) $ingredient->id] ?? 0;
 
                     if ($availableStock < $neededQty) {
                         // Get menu item name (handle translations)
@@ -525,7 +545,7 @@ class OrderController extends Controller
 
         // Create order items
         foreach ($validated['items'] as $item) {
-            $menuItem = \App\Models\MenuItem::find($item['menu_item_id']);
+            $menuItem = $menuItems[$item['menu_item_id']] ?? null;
             if (!$menuItem)
                 continue; // Should be handled by validation, but safe check
 

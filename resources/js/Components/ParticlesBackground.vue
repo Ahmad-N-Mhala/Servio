@@ -1,6 +1,14 @@
 <template>
-    <div ref="container" class="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-gray-50">
-        <canvas ref="canvas" class="absolute inset-0 w-full h-full"></canvas>
+    <div ref="container" class="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-slate-50">
+        <!-- Modern Mesh Gradient Blobs -->
+        <div class="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full bg-emerald-400/20 blur-[120px] mix-blend-multiply animate-blob transition-all duration-1000"></div>
+        <div class="absolute top-[10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-teal-300/20 blur-[130px] mix-blend-multiply animate-blob animation-delay-2000 transition-all duration-1000"></div>
+        <div class="absolute bottom-[-15%] left-[15%] w-[60%] h-[60%] rounded-full bg-green-200/20 blur-[140px] mix-blend-multiply animate-blob animation-delay-4000 transition-all duration-1000"></div>
+        
+        <!-- Subtle noise/grid pattern -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMmMxLjEgMCAyLS45IDItMnMtLjktMi0yLTItMiAuOS0yIDIgLjkgMiAyIDJ6bTEwIDBjMS4xIDAgMi0uOSAyLTJzLS45LTItMi0yLTIgLjktMiAyIC45IDIgMiAyeiIgZmlsbD0iIzEwYjk4MSIgZmlsbC1vcGFjaXR5PSIwLjA1IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')] opacity-60 mix-blend-overlay"></div>
+
+        <canvas ref="canvas" class="absolute inset-0 w-full h-full opacity-80"></canvas>
     </div>
 </template>
 
@@ -191,3 +199,21 @@ onUnmounted(() => {
     cancelAnimationFrame(animationFrameId);
 });
 </script>
+
+<style scoped>
+@keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-blob {
+    animation: blob 12s infinite alternate ease-in-out;
+}
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+</style>

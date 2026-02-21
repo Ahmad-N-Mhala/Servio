@@ -42,9 +42,13 @@
                 </div>
             </div>
             
-            <!-- Navigation (Scrollable) -->
-            <nav class="flex-1 mt-4 px-2 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 pb-20">
-                <!-- Dashboard -->
+            <!-- Navigation -->
+              <nav 
+                  class="flex-1 px-3 py-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 pb-20"
+                  ref="sidebarNav"
+                  @scroll="onSidebarScroll"
+              >
+                  <!-- Dashboard -->
                 <div>
                     <div class="px-3 mb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider" v-if="!isSidebarCollapsed">
                         {{ $t('nav.general') }}
@@ -923,30 +927,9 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, Transition, onMounted, watch, onUnmounted } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
-import { useI18n } from 'vue-i18n';
-import Logo from '@/Components/Logo.vue';
-import Toast from '@/Components/Toast.vue';
-import { usePermissions } from '@/Composables/usePermissions';
-import { useFeatures } from '@/Composables/useFeatures';
+<script lang="ts">
+import { ref as globalRef } from 'vue';
 
-const { hasPermission, hasAnyPermission } = usePermissions();
-const { hasFeature } = useFeatures();
-
-interface Props {
-    isFullScreen?: boolean;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-    isFullScreen: false,
-});
-
-const isSidebarOpen = ref(false);
-const isSidebarCollapsed = ref(false);
-const userMenuOpen = ref(false);
-const isRestaurantMenuOpen = ref(false);
 const getInitialMenuState = () => {
     const defaults = {
         'management': true,
@@ -972,7 +955,53 @@ const getInitialMenuState = () => {
     return defaults;
 };
 
-const openMenus = ref<Record<string, boolean>>(getInitialMenuState());
+// Global singletons for seamless navigation
+const globalOpenMenus = globalRef<Record<string, boolean>>(getInitialMenuState());
+const globalIsSidebarCollapsed = globalRef(false);
+const globalIsSidebarOpen = globalRef(false);
+const globalUserMenuOpen = globalRef(false);
+const globalIsRestaurantMenuOpen = globalRef(false);
+const globalSidebarScroll = globalRef(0);
+</script>
+
+<script setup lang="ts">
+import { ref, computed, Transition, onMounted, watch, onUnmounted } from 'vue';
+import { Link, usePage, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import Logo from '@/Components/Logo.vue';
+import Toast from '@/Components/Toast.vue';
+import { usePermissions } from '@/Composables/usePermissions';
+import { useFeatures } from '@/Composables/useFeatures';
+
+const { hasPermission, hasAnyPermission } = usePermissions();
+const { hasFeature } = useFeatures();
+
+interface Props {
+    isFullScreen?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    isFullScreen: false,
+});
+
+const isSidebarOpen = globalIsSidebarOpen;
+const isSidebarCollapsed = globalIsSidebarCollapsed;
+const userMenuOpen = globalUserMenuOpen;
+const isRestaurantMenuOpen = globalIsRestaurantMenuOpen;
+const openMenus = globalOpenMenus;
+const sidebarNav = ref<HTMLElement | null>(null);
+
+router.on('start', () => {
+    // Close temporary dropdowns/modals on navigation to maintain clean UI state
+    userMenuOpen.value = false;
+    isRestaurantMenuOpen.value = false;
+    isSidebarOpen.value = false; // Close mobile sidebar
+});
+
+const onSidebarScroll = (e: any) => {
+    globalSidebarScroll.value = e.target.scrollTop;
+};
+
 const page = usePage();
 const route = (window as any).route;
 const { locale } = useI18n();
@@ -1112,6 +1141,10 @@ const daysUntilExpiry = (endDate: string) => {
 
 // Set initial direction based on locale
 onMounted(() => {
+    if (sidebarNav.value) {
+        sidebarNav.value.scrollTop = globalSidebarScroll.value;
+    }
+
     const dir = currentLocale.value === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.setAttribute('dir', dir);
     locale.value = currentLocale.value;

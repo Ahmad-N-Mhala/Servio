@@ -1,5 +1,5 @@
 <template>
-    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-emerald-500/20 selection:text-emerald-700">
+    <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-transparent font-sans text-gray-900 selection:bg-emerald-500/20 selection:text-emerald-700">
         
         <!-- Navbar -->
         <!-- Navbar (Transparent for video) -->
@@ -14,9 +14,9 @@
 
                     <!-- Desktop Navigation -->
                     <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-                        <a href="#about" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.about_us') }}</a>
-                        <a href="#modules" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.features') }}</a>
-                        <a href="#pricing" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.plans_pricing') }}</a>
+                        <button @click="scrollTo('about')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.about_us') }}</button>
+                        <button @click="scrollTo('modules')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.features') }}</button>
+                        <button @click="scrollTo('pricing')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.plans_pricing') }}</button>
                         
                         <div class="flex items-center gap-4 border-l border-gray-200 pl-6 rtl:border-r rtl:border-l-0 rtl:pr-6 rtl:pl-0">
                             <!-- Language Switcher -->
@@ -56,9 +56,9 @@
             
             <!-- Mobile Menu -->
             <div v-if="mobileMenuOpen" class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 p-4 space-y-4 shadow-xl">
-                <a href="#about" class="block text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.about_us') }}</a>
-                <a href="#modules" class="block text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.features') }}</a>
-                <a href="#pricing" class="block text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.plans_pricing') }}</a>
+                <button @click="scrollTo('about')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.about_us') }}</button>
+                <button @click="scrollTo('modules')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.features') }}</button>
+                <button @click="scrollTo('pricing')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.plans_pricing') }}</button>
                 <a :href="route('login')" class="block w-full text-center px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30">{{ $t('landing.get_started') }}</a>
             </div>
         </nav>
@@ -85,9 +85,9 @@
                     <a :href="route('login')" class="px-8 py-3.5 rounded-full bg-emerald-600 text-white font-bold text-lg tracking-wide shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 capitalize">
                         {{ $t('auth.login') }}
                     </a>
-                    <a href="#pricing" class="px-8 py-3.5 rounded-full bg-white text-gray-900 border border-gray-200 font-bold text-lg tracking-wide shadow-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 capitalize">
+                    <button @click="scrollTo('pricing')" class="px-8 py-3.5 rounded-full bg-white text-gray-900 border border-gray-200 font-bold text-lg tracking-wide shadow-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 capitalize">
                         {{ $t('landing.view_pricing') }}
-                    </a>
+                    </button>
                 </div>
             </div>
         </section>
@@ -827,6 +827,14 @@ const getSetting = (key: string) => {
 
 const mobileMenuOpen = ref(false);
 const billingCycle = ref<'monthly' | 'yearly'>('monthly');
+const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        mobileMenuOpen.value = false;
+    }
+};
+
 const showRegisterModal = ref(false);
 const selectedPlan = ref<any>(null);
 const successMessage = ref('');

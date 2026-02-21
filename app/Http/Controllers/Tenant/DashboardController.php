@@ -200,9 +200,12 @@ class DashboardController extends Controller
             ->where('status', '!=', 'deleted')
             ->whereBetween('created_at', [$startDate, $endDate]);
 
+        $allOrdersExport = (clone $baseOrderQuery)->with('items')->get();
+        $revenueOrders = $allOrdersExport->where('payment_status', 'paid');
+
         // Stats
-        $totalOrders = (clone $baseOrderQuery)->count();
-        $revenue = (clone $baseOrderQuery)->where('payment_status', 'paid')->sum('total');
+        $totalOrders = $allOrdersExport->count();
+        $revenue = $revenueOrders->sum('total');
         $activeStaff = Staff::where('restaurant_id', $restaurant->id)->where('is_active', true)->count();
         $totalWaste = WasteLog::where('restaurant_id', $restaurant->id)->whereBetween('log_date', [$startDate, $endDate])->sum('total_loss');
         $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
@@ -227,7 +230,8 @@ class DashboardController extends Controller
             ->whereBetween('redeemed_at', [$startDate, $endDate])
             ->count();
 
-        $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->with('items')->get();
+        // Use the pre-loaded orders and their items
+        // $revenueOrders is already defined and loaded with items
         $avgDiningTime = $revenueOrders->whereNotNull('completed_at')->avg(function ($order) {
             return $order->completed_at->diffInMinutes($order->created_at);
         }) ?? 0;
@@ -302,11 +306,9 @@ class DashboardController extends Controller
 
         // Recent Orders
         // -- Customer Retention (Visits Funnel) --
-        $customerVisits = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
+        $customerVisits = $revenueOrders
             ->whereNotNull('customer_name')
             ->where('customer_name', '!=', 'Guest')
-            ->get()
             ->groupBy('customer_name')
             ->map(fn($o) => $o->count());
 
@@ -332,9 +334,7 @@ class DashboardController extends Controller
         }
 
         // Top Customers
-        $topCustomers = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
-            ->get()
+        $topCustomers = $revenueOrders
             ->groupBy('customer_name') // Group by name for now
             ->map(function ($orders, $name) {
                 return [
@@ -348,8 +348,7 @@ class DashboardController extends Controller
             ->take(5);
 
         // -- Status Distribution --
-        $statusDistribution = (clone $baseOrderQuery)
-            ->get()
+        $statusDistribution = $allOrdersExport
             ->groupBy('status')
             ->map(function ($group, $status) {
                 return [
@@ -359,8 +358,7 @@ class DashboardController extends Controller
             })->values();
 
         // -- Peak Hours --
-        $peakHours = (clone $baseOrderQuery)
-            ->get()
+        $peakHours = $allOrdersExport
             ->groupBy(function ($order) {
                 return $order->created_at->format('H');
             })->map(function ($group, $hour) {
@@ -403,7 +401,7 @@ class DashboardController extends Controller
             });
 
         // -- Revenue Chart --
-        $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->get();
+        // $revenueOrders already configured
         $revenueChart = $revenueOrders->groupBy(function ($order) {
             return $order->created_at->format('Y-m-d');
         })->map(function ($group, $date) {
@@ -708,16 +706,18 @@ class DashboardController extends Controller
             ->where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate]);
 
-        $totalSalesPeriod = (float) (string) (clone $baseOrderQuery)->where('payment_status', 'paid')->sum('total');
-        $validOrdersCount = (clone $baseOrderQuery)->count();
+        $allOrders = (clone $baseOrderQuery)->with('items')->get();
+        $revenueOrders = $allOrders->where('payment_status', 'paid');
+
+        $totalSalesPeriod = (float) $revenueOrders->sum('total');
+        $validOrdersCount = $allOrders->count();
         $cancelledOrdersCount = Order::where('restaurant_id', $restaurant->id)
             ->where('status', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
         // 3. Visits/Orders Chart
-        $dailyVisits = (clone $baseOrderQuery)
-            ->get()
+        $dailyVisits = $allOrders
             ->groupBy(fn($date) => $date->created_at->format('Y-m-d'))
             ->map->count();
 
@@ -792,16 +792,14 @@ class DashboardController extends Controller
         }
 
         // Avg Order Value
-        $totalOrders = (clone $baseOrderQuery)->count();
+        $totalOrders = $allOrders->count();
         $avgOrderValue = $totalOrders > 0 ? round($totalSalesPeriod / $totalOrders, 2) : 0;
 
         // Avg Visits Lifetime
         $avgVisitsPerCustomer = $totalCustomersCount > 0 ? round(Order::where('restaurant_id', $restaurant->id)->count() / $totalCustomersCount, 1) : 0;
 
         // 7. Popular Times
-        $popularTimes = Order::where('restaurant_id', $restaurant->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get()
+        $popularTimes = $allOrders
             ->groupBy(function ($order) {
                 return $order->created_at->format('l') . '|' . $order->created_at->format('H');
             })
@@ -834,11 +832,8 @@ class DashboardController extends Controller
         };
 
         // 8. Customer Frequency
-        $customerVisitCounts = Order::where('restaurant_id', $restaurant->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
+        $customerVisitCounts = $allOrders
             ->whereNotNull('customer_id')
-            ->select('customer_id')
-            ->get()
             ->groupBy('customer_id')
             ->map->count();
 
@@ -868,7 +863,6 @@ class DashboardController extends Controller
             ->values();
 
         // Revenue Chart (Daily Sales)
-        $revenueOrders = (clone $baseOrderQuery)->where('payment_status', 'paid')->get();
         $revenueChart = $revenueOrders->groupBy(function ($order) {
             return $order->created_at->format('Y-m-d');
         })->map(function ($group, $date) {
@@ -927,8 +921,7 @@ class DashboardController extends Controller
             ->sortByDesc('value')->values()->take(5)->toArray();
 
         // 10. Status Distribution
-        $statusDistribution = (clone $baseOrderQuery)
-            ->get()
+        $statusDistribution = $allOrders
             ->groupBy('status')
             ->map(function ($group, $status) {
                 return [
@@ -949,8 +942,7 @@ class DashboardController extends Controller
             })->values();
 
         // 12. Peak Hours
-        $peakHours = (clone $baseOrderQuery)
-            ->get()
+        $peakHours = $allOrders
             ->groupBy(function ($order) {
                 return $order->created_at->format('H');
             })->map(function ($group, $hour) {
@@ -973,38 +965,11 @@ class DashboardController extends Controller
                 ];
             })->values()->sortBy('date')->values();
 
-        // Extra Stats for robustness
-        $monthlyExpenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
-            ->where('payment_status', 'paid')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('amount');
-        $monthlyExpenses = (float) (string) $monthlyExpenses;
-        $totalWaste = WasteLog::where('restaurant_id', $restaurant->id)
-            ->whereBetween('log_date', [$startDate, $endDate])
-            ->sum('total_loss');
-        $totalWaste = (float) (string) $totalWaste;
-        $netProfit = (float) (string) $totalSalesPeriod - (float) (string) $monthlyExpenses - (float) (string) $totalWaste;
-        // active staff
-        $activeStaff = Staff::where('restaurant_id', $restaurant->id)->where('is_active', true)->count();
-        $lowStockCount = $this->getCriticalIngredients($restaurant->id)->count();
-
-        // Inventory Value
-        $ingredientIds = Ingredient::where('restaurant_id', $restaurant->id)->pluck('id')->toArray();
-        $inventoryValue = DB::table('ingredient_batches')
-            ->whereIn('ingredient_id', $ingredientIds)
-            ->where('quantity_remaining', '>', 0)
-            ->get()
-            ->sum(function ($batch) {
-                $qty = isset($batch->quantity_remaining) ? (string) $batch->quantity_remaining : 0;
-                $cost = isset($batch->cost_per_unit) ? (string) $batch->cost_per_unit : 0;
-                return (float) $qty * (float) $cost;
-            });
+        // These unused heavy calculations have been removed to improve speed and memory usage.
 
         // 14. Retention Stats
-        $customerVisits = (clone $baseOrderQuery)
-            ->where('payment_status', 'paid')
+        $customerVisits = $revenueOrders
             ->whereNotNull('customer_id')
-            ->get()
             ->groupBy('customer_id')
             ->map(fn($o) => $o->count());
 
@@ -1080,17 +1045,6 @@ class DashboardController extends Controller
             'waste_chart' => $wasteChart,
             'avg_completion_time' => $this->getAverageCompletionTimeChart($restaurant->id, $startDate, $endDate),
 
-            // Legacy/Extra fields for completeness
-            'stats' => [ // Minimal legacy stats
-                'revenue' => $totalSalesPeriod,
-                'net_profit' => $netProfit,
-                'total_orders' => $totalOrders,
-                'total_waste' => $totalWaste,
-                'monthly_expenses' => $monthlyExpenses
-            ],
-            'topMenuItems' => $topMenuItems,
-            'topCategories' => $topCategories,
-            'revenueChart' => $revenueChart
         ]);
     }
 
