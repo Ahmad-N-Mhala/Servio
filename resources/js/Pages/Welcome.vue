@@ -33,7 +33,7 @@
 
                             <!-- Login CTA -->
                             <a :href="route('login')" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm tracking-wide hover:bg-emerald-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 shadow-xl shadow-emerald-900/20 capitalize">
-                                {{ $t('auth.login') }}
+                                {{ $t('landing.get_started') }}
                             </a>
                         </div>
                     </div>
@@ -85,7 +85,7 @@
                 
                 <div class="flex flex-col sm:flex-row justify-center gap-5 animate-fade-in-up animation-delay-300">
                     <a :href="route('login')" class="px-8 py-3.5 rounded-full bg-emerald-600 text-white font-bold text-lg tracking-wide shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 capitalize">
-                        {{ $t('auth.login') }}
+                        {{ $t('landing.start_free') || 'Start For Free' }}
                     </a>
                     <button @click="scrollTo('pricing')" class="px-8 py-3.5 rounded-full bg-white text-gray-900 border border-gray-200 font-bold text-lg tracking-wide shadow-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 capitalize">
                         {{ $t('landing.view_pricing') }}

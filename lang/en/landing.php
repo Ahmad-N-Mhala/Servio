@@ -1,9 +1,10 @@
 <?php
 
 return [
-    'hero_title' => 'Revolutionize Your Restaurant Management',
-    'hero_subtitle' => 'The all-in-one solution for point of sale, kitchen display, delivery management, and customer loyalty.',
-    'get_started' => 'login',
+    'hero_title' => 'Maximize Kitchen Profit & Master Your Operations',
+    'hero_subtitle' => 'More than just a POS. Control food costs with precision inventory, boost your reputation, and streamline your entire restaurant ecosystem.',
+    'get_started' => 'Get Started',
+    'start_free' => 'Start For Free',
     'view_pricing' => 'View Pricing',
     'about_us' => 'About Us',
     'our_modules' => 'Our Powerful Modules',
@@ -48,10 +49,10 @@ REDEFINED',
     'custom_plan_title' => 'Need a Custom Plan?',
     'custom_plan_desc' => 'Contact our sales team for enterprise solutions tailored to your needs',
     'contact_sales' => 'Contact Sales',
-    'about_title_default' => 'Elevating Every Aspect of Your Restaurant',
-    'about_us_description_default' => 'Servio is a state-of-the-art restaurant management ecosystem designed to empower modern food businesses. We provide comprehensive software solutions and hardware installations to ensure your restaurant operates seamlessly from day one.
+    'about_title_default' => 'Stop Managing Systems. Start Growing Revenue.',
+    'about_us_description_default' => 'Struggling with unexplained food waste, disconnected delivery systems, or staff inefficiencies? Servio is built to solve these exact problems.
 
-Our platform goes beyond simple transactions, offering a seamless integration of Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management. With smart Inventory Management and our advanced Loyalty Program, we help you reduce waste, build lasting customer relationships, and focus on what matters most: delivering exceptional dining experiences.',
+We provide a comprehensive profit-optimization platform that goes beyond basic point-of-sale. By seamlessly integrating POS, Kitchen Displays, real-time FIFO inventory, and automated Google review generation, we empower you to reduce shrinkage, build lasting customer loyalty, and focus on delivering exceptional dining experiences.',
     'owned_by' => 'Owned by KENILDOCK FOR DEVELOPMENT AND INNOVATION IN COMPUTER SYSTEMS AND SOFTWARE',
     'connect_via_email' => 'support{\'@\'}kenildock.com',
     'connect_via_phone' => '+9715049460976',
