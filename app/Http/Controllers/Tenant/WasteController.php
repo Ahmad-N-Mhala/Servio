@@ -44,8 +44,12 @@ class WasteController extends Controller
         }
 
         $summaryQuery = clone $query;
+        $totalLossSum = $summaryQuery->sum('total_loss');
+        // MongoDB driver sometimes returns BSON Decimal128 objects for aggregations
+        $totalLossFloat = (float) (is_object($totalLossSum) && method_exists($totalLossSum, '__toString') ? (string) $totalLossSum : $totalLossSum);
+
         $summary = [
-            'total_loss' => $summaryQuery->sum('total_loss'),
+            'total_loss' => $totalLossFloat,
             'records' => $summaryQuery->count(),
         ];
 
