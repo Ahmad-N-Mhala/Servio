@@ -55,7 +55,7 @@ if (import.meta.env.VITE_PUSHER_APP_KEY) {
     console.info('ℹ️ Laravel Echo not initialized - Pusher credentials not configured. Using fallback polling.');
 }
 
-const appName = import.meta.env.VITE_APP_NAME || 'Servio';
+
 
 const i18n = createI18n({
     legacy: false,
@@ -78,7 +78,7 @@ function disableDarkMode() {
 disableDarkMode();
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: () => `Servio`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue'))
         .catch((error) => {
             // Handle chunk load errors (e.g., after deployment when old chunks are deleted)

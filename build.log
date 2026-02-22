@@ -1,0 +1,144 @@
+
+> build
+> tsc && vite build
+
+vite v5.4.21 building for production...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+transforming...
+✓ 1280 modules transformed.
+rendering chunks...
+computing gzip size...
+public/build/manifest.json                                                                          70.35 kB │ gzip:   4.84 kB
+public/build/assets/Index-UHAUBMoK-1771768724659.css                                                 0.05 kB │ gzip:   0.07 kB
+public/build/assets/Welcome-BECBAis5-1771768724659.css                                               0.05 kB │ gzip:   0.07 kB
+public/build/assets/Receipt-Ck4F-m5M-1771768724659.css                                               0.08 kB │ gzip:   0.08 kB
+public/build/assets/Index-B1ZD2bjB-1771768724659.css                                                 0.12 kB │ gzip:   0.11 kB
+public/build/assets/Bobo-B4J02WoA-1771768724659.css                                                  0.17 kB │ gzip:   0.14 kB
+public/build/assets/Carousel-B7w11-SM-1771768724659.css                                              0.18 kB │ gzip:   0.12 kB
+public/build/assets/System-DFIYOrh7-1771768724659.css                                                0.20 kB │ gzip:   0.16 kB
+public/build/assets/ReceiptTemplate-7y3WYouP-1771768724659.css                                       0.20 kB │ gzip:   0.13 kB
+public/build/assets/ForgotPassword-B1ee1JLz-1771768724659.css                                        0.22 kB │ gzip:   0.15 kB
+public/build/assets/ResetPassword-ktbxQhl0-1771768724659.css                                         0.22 kB │ gzip:   0.16 kB
+public/build/assets/Live-CdfkxAJY-1771768724659.css                                                  0.26 kB │ gzip:   0.19 kB
+public/build/assets/Index-BT84l_1K-1771768724659.css                                                 0.28 kB │ gzip:   0.15 kB
+public/build/assets/Delivery-Du7ogt51-1771768724659.css                                              0.28 kB │ gzip:   0.15 kB
+public/build/assets/FeedbackForm-DFp1mwUa-1771768724659.css                                          0.30 kB │ gzip:   0.19 kB
+public/build/assets/ReceiptPreview-Bl68x_zF-1771768724659.css                                        0.34 kB │ gzip:   0.24 kB
+public/build/assets/ParticlesBackground-V0mIeSAd-1771768724659.css                                   0.40 kB │ gzip:   0.20 kB
+public/build/assets/Login-CGJyBDrV-1771768724659.css                                                 0.40 kB │ gzip:   0.20 kB
+public/build/assets/StatusManager-C21boLvy-1771768724659.css                                         0.49 kB │ gzip:   0.23 kB
+public/build/assets/StatusScreen-CdYxgitI-1771768724659.css                                          0.49 kB │ gzip:   0.23 kB
+public/build/assets/style-D2JBOGWk-1771768724659.css                                                 4.36 kB │ gzip:   0.94 kB
+public/build/assets/Select-2949n__7-1771768724659.css                                                8.39 kB │ gzip:   2.10 kB
+public/build/assets/app-DE-3eTR6-1771768724659.css                                                 148.67 kB │ gzip:  20.92 kB
+public/build/assets/_plugin-vue_export-helper-DlAUqK2U-1771768724659.js                              0.09 kB │ gzip:   0.10 kB
+public/build/assets/Design-0E6FG922-1771768724659.js                                                 0.52 kB │ gzip:   0.23 kB
+public/build/assets/dateHelper-YnoZhRQo-1771768724659.js                                             0.61 kB │ gzip:   0.23 kB
+public/build/assets/Logo.vue_vue_type_script_setup_true_lang-BhQUjFMF-1771768724659.js               0.64 kB │ gzip:   0.42 kB
+public/build/assets/CardDesigner-fhCdVzBy-1771768724659.js                                           0.64 kB │ gzip:   0.27 kB
+public/build/assets/Success-CYSWd4Nv-1771768724659.js                                                1.14 kB │ gzip:   0.72 kB
+public/build/assets/Settings-CdW7VGqg-1771768724659.js                                               1.65 kB │ gzip:   0.73 kB
+public/build/assets/Forbidden-DcqtMbel-1771768724659.js                                              1.97 kB │ gzip:   1.01 kB
+public/build/assets/printReceipt-DlU7biDV-1771768724659.js                                           2.01 kB │ gzip:   0.83 kB
+public/build/assets/PhoneInput.vue_vue_type_script_setup_true_lang-D6ySfI-q-1771768724659.js         2.35 kB │ gzip:   1.24 kB
+public/build/assets/Receipt-Bzs_9XEC-1771768724659.js                                                2.36 kB │ gzip:   1.10 kB
+public/build/assets/debounce-CVfMfrDK-1771768724659.js                                               2.49 kB │ gzip:   1.26 kB
+public/build/assets/Input.vue_vue_type_script_setup_true_lang-CPMYMBSv-1771768724659.js              2.97 kB │ gzip:   1.20 kB
+public/build/assets/DateRangePicker.vue_vue_type_script_setup_true_lang-DAbDkHkV-1771768724659.js    2.98 kB │ gzip:   1.26 kB
+public/build/assets/Index-BbyviJVI-1771768724659.js                                                  3.07 kB │ gzip:   1.29 kB
+public/build/assets/Carousel-D_3qJ54D-1771768724659.js                                               3.07 kB │ gzip:   1.29 kB
+public/build/assets/Button.vue_vue_type_script_setup_true_lang-Ccd1k7gF-1771768724659.js             3.17 kB │ gzip:   1.26 kB
+public/build/assets/Create-zJVXY75Z-1771768724659.js                                                 3.17 kB │ gzip:   1.31 kB
+public/build/assets/Bobo-C_sqm4rL-1771768724659.js                                                   3.19 kB │ gzip:   1.65 kB
+public/build/assets/Modal.vue_vue_type_script_setup_true_lang-DSb-I8bE-1771768724659.js              3.21 kB │ gzip:   1.25 kB
+public/build/assets/Edit-DWDWrOVv-1771768724659.js                                                   3.35 kB │ gzip:   1.35 kB
+public/build/assets/Index-DGGQVLdT-1771768724659.js                                                  3.47 kB │ gzip:   1.55 kB
+public/build/assets/Index-BrWtsQoR-1771768724659.js                                                  3.50 kB │ gzip:   1.55 kB
+public/build/assets/Index-DO6UWoJa-1771768724659.js                                                  3.61 kB │ gzip:   1.56 kB
+public/build/assets/Toast.vue_vue_type_script_setup_true_lang-DBqJkY7V-1771768724659.js              3.72 kB │ gzip:   1.39 kB
+public/build/assets/ParticlesBackground-DFP6oHH1-1771768724659.js                                    3.95 kB │ gzip:   1.84 kB
+public/build/assets/Pagination.vue_vue_type_script_setup_true_lang-DDqRJ8Gp-1771768724659.js         3.99 kB │ gzip:   1.37 kB
+public/build/assets/UnsplashPicker.vue_vue_type_script_setup_true_lang-VBcDoGkO-1771768724659.js     4.28 kB │ gzip:   2.12 kB
+public/build/assets/SubscriptionExpired-mTI0ackA-1771768724659.js                                    4.62 kB │ gzip:   1.90 kB
+public/build/assets/SmsLogs-o0BgrKm2-1771768724659.js                                                4.70 kB │ gzip:   1.91 kB
+public/build/assets/Index-DrIcEb4J-1771768724659.js                                                  4.85 kB │ gzip:   1.87 kB
+public/build/assets/Create-BLdOFnT0-1771768724659.js                                                 5.01 kB │ gzip:   1.91 kB
+public/build/assets/ResetPassword-CprI6zHD-1771768724659.js                                          5.05 kB │ gzip:   2.00 kB
+public/build/assets/Edit-DPCMGkz9-1771768724659.js                                                   5.17 kB │ gzip:   1.92 kB
+public/build/assets/Delivery-Dh01Mqtc-1771768724659.js                                               5.24 kB │ gzip:   2.24 kB
+public/build/assets/Index-BwSU32ap-1771768724659.js                                                  5.30 kB │ gzip:   1.69 kB
+public/build/assets/Reminders-Bdg-b8Ej-1771768724659.js                                              5.41 kB │ gzip:   1.86 kB
+public/build/assets/StatusScreen-DSbptYth-1771768724659.js                                           5.97 kB │ gzip:   2.02 kB
+public/build/assets/Edit-DQ9BS6rl-1771768724659.js                                                   6.14 kB │ gzip:   1.68 kB
+public/build/assets/Show-Dy4-YKUI-1771768724659.js                                                   6.40 kB │ gzip:   2.00 kB
+public/build/assets/Edit-CI1NqYGu-1771768724659.js                                                   6.69 kB │ gzip:   2.09 kB
+public/build/assets/ForgotPassword-nZx9claM-1771768724659.js                                         6.99 kB │ gzip:   2.85 kB
+public/build/assets/Index-BNyOx0vz-1771768724659.js                                                  7.17 kB │ gzip:   2.68 kB
+public/build/assets/Table.vue_vue_type_script_setup_true_lang-CqFGFRw--1771768724659.js              7.17 kB │ gzip:   2.66 kB
+public/build/assets/Index-CtK1ZdSq-1771768724659.js                                                  7.54 kB │ gzip:   2.69 kB
+public/build/assets/StatusManager-2SPoEsVi-1771768724659.js                                          7.64 kB │ gzip:   2.52 kB
+public/build/assets/Login-D7qhnxNS-1771768724659.js                                                  7.70 kB │ gzip:   3.03 kB
+public/build/assets/Index-3tu7f7zp-1771768724659.js                                                  7.81 kB │ gzip:   2.96 kB
+public/build/assets/Index-xSUpSCML-1771768724659.js                                                  8.31 kB │ gzip:   3.08 kB
+public/build/assets/EarningMethods-ChxkZl6t-1771768724659.js                                         9.02 kB │ gzip:   3.37 kB
+public/build/assets/Create-BKYw4si1-1771768724659.js                                                 9.51 kB │ gzip:   2.53 kB
+public/build/assets/FeedbackForm-Dv74aLq2-1771768724659.js                                           9.95 kB │ gzip:   3.70 kB
+public/build/assets/Design.vue_vue_type_script_setup_true_lang-D2IH8D9L-1771768724659.js             9.96 kB │ gzip:   3.47 kB
+public/build/assets/Edit-KO2jReJR-1771768724659.js                                                   9.98 kB │ gzip:   2.60 kB
+public/build/assets/Dashboard-CxcZwzaO-1771768724659.js                                             10.23 kB │ gzip:   2.88 kB
+public/build/assets/History-DkM1uAW0-1771768724659.js                                               10.30 kB │ gzip:   3.13 kB
+public/build/assets/ReceiptPreview.vue_vue_type_style_index_0_lang-kHgT6lhO-1771768724659.js        10.30 kB │ gzip:   3.59 kB
+public/build/assets/Edit-CRJg3Lb4-1771768724659.js                                                  10.61 kB │ gzip:   3.31 kB
+public/build/assets/Index-De3GphLx-1771768724659.js                                                 10.63 kB │ gzip:   3.41 kB
+public/build/assets/Customer-Da836zhr-1771768724659.js                                              11.02 kB │ gzip:   3.80 kB
+public/build/assets/Index-IcJlUO09-1771768724659.js                                                 11.13 kB │ gzip:   3.65 kB
+public/build/assets/Index-D8esdOnq-1771768724659.js                                                 11.79 kB │ gzip:   3.85 kB
+public/build/assets/Index-BCg2i2iM-1771768724659.js                                                 11.90 kB │ gzip:   4.19 kB
+public/build/assets/Index-Br5qaucd-1771768724659.js                                                 12.43 kB │ gzip:   4.10 kB
+public/build/assets/System-BMhuzdFn-1771768724659.js                                                12.51 kB │ gzip:   3.24 kB
+public/build/assets/Index-CqixqLU--1771768724659.js                                                 13.22 kB │ gzip:   4.07 kB
+public/build/assets/Sales-CdDuLDtV-1771768724659.js                                                 13.47 kB │ gzip:   4.34 kB
+public/build/assets/Index-CR_mPx01-1771768724659.js                                                 13.91 kB │ gzip:   4.19 kB
+public/build/assets/Index-B7p0Mfcp-1771768724659.js                                                 14.14 kB │ gzip:   4.05 kB
+public/build/assets/Index-BhpLlnZ1-1771768724659.js                                                 15.05 kB │ gzip:   4.57 kB
+public/build/assets/Create-DBn7Xhqq-1771768724659.js                                                15.19 kB │ gzip:   4.52 kB
+public/build/assets/Live-DSxf6k1e-1771768724659.js                                                  15.65 kB │ gzip:   4.87 kB
+public/build/assets/Index-CIvVznoA-1771768724659.js                                                 17.19 kB │ gzip:   4.25 kB
+public/build/assets/Index-CBBfWZWn-1771768724659.js                                                 18.83 kB │ gzip:   4.84 kB
+public/build/assets/Delivery-BAAOZgB1-1771768724659.js                                              19.17 kB │ gzip:   4.37 kB
+public/build/assets/Edit-BejECnBL-1771768724659.js                                                  19.26 kB │ gzip:   5.25 kB
+public/build/assets/ReceiptTemplate-DskaPqcK-1771768724659.js                                       19.28 kB │ gzip:   4.92 kB
+public/build/assets/Select.vue_vue_type_style_index_0_lang-DTV50el6-1771768724659.js                19.41 kB │ gzip:   6.53 kB
+public/build/assets/Create-CkBRKUGl-1771768724659.js                                                19.69 kB │ gzip:   5.57 kB
+public/build/assets/Create-D6sktxcV-1771768724659.js                                                20.36 kB │ gzip:   4.42 kB
+public/build/assets/Index-CfHw_RtA-1771768724659.js                                                 22.56 kB │ gzip:   6.15 kB
+public/build/assets/purify.es-B9ZVCkUG-1771768724659.js                                             22.64 kB │ gzip:   8.71 kB
+public/build/assets/Edit-BG8Bl-WI-1771768724659.js                                                  24.07 kB │ gzip:   5.29 kB
+public/build/assets/browser-CBFMFOK_-1771768724659.js                                               24.54 kB │ gzip:   9.56 kB
+public/build/assets/Index-CUucKLrY-1771768724659.js                                                 24.81 kB │ gzip:   9.13 kB
+public/build/assets/Index-JlhqC4RX-1771768724659.js                                                 25.38 kB │ gzip:   6.52 kB
+public/build/assets/Index-DK_sd7K--1771768724659.js                                                 25.66 kB │ gzip:   6.90 kB
+public/build/assets/AdminLayout.vue_vue_type_script_setup_true_lang-CqDfa_fD-1771768724659.js       27.27 kB │ gzip:   6.12 kB
+public/build/assets/QrMenu-CKq8jNT_-1771768724659.js                                                28.22 kB │ gzip:   7.97 kB
+public/build/assets/Home-CEcd1UYF-1771768724659.js                                                  29.50 kB │ gzip:   7.99 kB
+public/build/assets/Create-BakKoylg-1771768724659.js                                                32.57 kB │ gzip:   9.83 kB
+public/build/assets/DeliveryCreate-CHEk-vj4-1771768724659.js                                        33.98 kB │ gzip:  10.18 kB
+public/build/assets/Builder-CaiB5JNd-1771768724659.js                                               36.25 kB │ gzip:   9.39 kB
+public/build/assets/Manage-Ya95dBJw-1771768724659.js                                                36.72 kB │ gzip:  12.33 kB
+public/build/assets/MainLayout.vue_vue_type_script_setup_true_lang-DDbOn9Cp-1771768724659.js        51.62 kB │ gzip:  10.46 kB
+public/build/assets/Index-DKkwVyKl-1771768724659.js                                                 52.33 kB │ gzip:  12.95 kB
+public/build/assets/Welcome-C5blCkD8-1771768724659.js                                               56.77 kB │ gzip:  13.60 kB
+public/build/assets/Index-BFFbX1Uw-1771768724659.js                                                 60.44 kB │ gzip:  11.20 kB
+public/build/assets/Index-B-0jIxtn-1771768724659.js                                                 60.61 kB │ gzip:  13.05 kB
+public/build/assets/lodash-BMukVz4l-1771768724659.js                                                71.80 kB │ gzip:  26.50 kB
+public/build/assets/style-XRo1vP3y-1771768724659.js                                                 78.83 kB │ gzip:  20.25 kB
+public/build/assets/index.es-BaN-mOT9-1771768724659.js                                             151.03 kB │ gzip:  51.42 kB
+public/build/assets/chart-ARvZbg54-1771768724659.js                                                207.48 kB │ gzip:  71.05 kB
+public/build/assets/app-CRC67wek-1771768724659.js                                                  420.77 kB │ gzip: 143.68 kB
+public/build/assets/CardDesigner.vue_vue_type_script_setup_true_lang-C98wkluY-1771768724659.js     609.75 kB │ gzip: 179.56 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.59s

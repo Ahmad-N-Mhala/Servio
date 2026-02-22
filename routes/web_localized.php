@@ -31,6 +31,10 @@ Route::prefix('qr')->name('qr.')->group(function () {
     Route::get('/menu/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'showMenu'])->name('menu');
     Route::post('/order/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'placeOrder'])->name('order');
     Route::get('/order/{token}/{orderNumber}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'getOrderStatus'])->name('order.status');
+
+    // Loyalty Routes
+    Route::post('/loyalty/check/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'checkLoyalty'])->name('loyalty.check');
+    Route::post('/loyalty/request-otp/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'requestRedemptionOtp'])->name('loyalty.request-otp');
 });
 
 // Fun Pages

@@ -1,6 +1,6 @@
 <template>
     <Head>
-        <title>Restaurant POS & Profit Optimization System | Servio</title>
+        <title>Servio</title>
         <meta name="description" content="Servio is the all-in-one POS, KDS, and Inventory management platform designed to help restaurants eliminate food waste, control costs, and maximize profit margins." />
     </Head>
     <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-transparent font-sans text-gray-900 selection:bg-emerald-500/20 selection:text-emerald-700">

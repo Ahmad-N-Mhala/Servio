@@ -31,8 +31,8 @@ class KitchenController extends Controller
         $orders = Order::where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'processing', 'ready', 'served'])
             ->where(function ($query) {
-                // Show order if source is NOT 'qr' OR if source is 'qr' AND payment_status is 'paid'
-                $query->where('source', '!=', 'qr')
+                // Show order if source is NOT 'qr_code' OR if source is 'qr_code' AND payment_status is 'paid'
+                $query->where('source', '!=', 'qr_code')
                     ->orWhere('payment_status', 'paid');
             })
             ->with([

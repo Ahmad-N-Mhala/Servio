@@ -327,7 +327,22 @@ class LoyaltyService
             'type' => 'redemption',
         ]);
 
-        // Determine Driver for Logging/Simulation check
+        // Attempt to use Dynamic System/Restaurant Communication Template First
+        $template = \App\Models\CommunicationTemplate::where('trigger_event', 'loyalty_otp')
+            ->where(function ($query) use ($customer) {
+                $query->whereNull('restaurant_id')
+                    ->orWhere('restaurant_id', (string) $customer->restaurant_id);
+            })
+            ->where('is_active', true)
+            ->orderBy('restaurant_id', 'desc') // Prefers restaurant specific over system default
+            ->first();
+
+        if ($template) {
+            \App\Services\CustomerCommunicationService::send($template, $customer, ['otp' => $otpCode]);
+            return true;
+        }
+
+        // Determine Driver for Logging/Simulation check (Fallback hardcoded logic)
         $driver = config('services.sms.driver', 'log');
 
         try {

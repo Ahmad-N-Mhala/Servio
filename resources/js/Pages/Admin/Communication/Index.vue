@@ -37,7 +37,7 @@
                                             <div class="text-xs text-gray-500 font-mono bg-gray-100 inline-block px-1 rounded mt-1">{{ template.trigger_event }}</div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div v-if="template.subject_en || template.subject" class="text-sm font-semibold text-gray-800 mb-1">
+                                            <div v-if="(template.subject_en || template.subject) && type === 'email'" class="text-sm font-semibold text-gray-800 mb-1">
                                                 {{ template.subject_en || template.subject }}
                                             </div>
                                             <div class="text-xs text-gray-500 truncate max-w-xs">
@@ -123,12 +123,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="content_en" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
-                                    Content (English HTML)
+                                    Content (English{{ type === 'email' ? ' HTML' : '' }})
                                 </label>
                                 <textarea 
                                     id="content_en" 
                                     v-model="form.content_en" 
-                                    rows="12" 
+                                    :rows="type === 'email' ? 12 : 5" 
                                     class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all font-mono text-sm"
                                     :class="{'border-rose-300 focus:border-rose-500': form.errors.content_en}"
                                     required
@@ -138,12 +138,12 @@
                             
                             <div>
                                 <label for="content_ar" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1 text-right">
-                                    Content (Arabic HTML)
+                                    Content (Arabic{{ type === 'email' ? ' HTML' : '' }})
                                 </label>
                                 <textarea 
                                     id="content_ar" 
                                     v-model="form.content_ar" 
-                                    rows="12" 
+                                    :rows="type === 'email' ? 12 : 5" 
                                     dir="rtl"
                                     class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all font-mono text-sm"
                                     :class="{'border-rose-300 focus:border-rose-500': form.errors.content_ar}"
@@ -157,10 +157,7 @@
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <p class="text-xs text-gray-500 font-medium mb-2 uppercase tracking-wider">Available Variables</p>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ name }}'"></span>
-                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ email }}'"></span>
-                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ link }}'"></span>
-                            <span class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded" v-text="'{{ restaurant_name }}'"></span>
+                             <span v-for="v in availableVariables" :key="v" class="text-xs font-mono bg-white border px-1.5 py-0.5 rounded text-indigo-600" v-text="'{{ ' + v + ' }}'"></span>
                         </div>
                         <p class="text-[10px] text-gray-400 mt-2 italic">Variables vary depending on the trigger event.</p>
                     </div>
@@ -215,7 +212,7 @@
 
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
@@ -234,6 +231,8 @@ const isEditing = ref(false);
 const customTrigger = ref('');
 
 const triggerOptions = [
+    { label: 'Registration OTP (OTP Only)', value: 'registration_otp' },
+    { label: 'Loyalty OTP (Redemption)', value: 'loyalty_otp' },
     { label: 'User Registered (Standard Welcome)', value: 'user_registered' },
     { label: 'Password Reset Request', value: 'password_reset' },
     { label: 'Subscription Created', value: 'subscription_created' },
@@ -244,6 +243,32 @@ const triggerOptions = [
     { label: 'Inventory Low Stock Warning', value: 'inventory_low_stock_warning' },
     { label: 'Custom (Type manually below)', value: 'custom' },
 ];
+
+const availableVariables = computed(() => {
+    switch(form.trigger_event) {
+        case 'registration_otp':
+        case 'loyalty_otp':
+            return ['otp'];
+        case 'user_registered':
+            return ['name', 'email'];
+        case 'password_reset':
+            return ['link'];
+        case 'subscription_created':
+            return ['plan_name', 'restaurant_name'];
+        case 'subscription_warning':
+            return ['restaurant_name', 'plan_name', 'expiry_date', 'days_remaining', 'link'];
+        case 'subscription_expired':
+            return ['restaurant_name', 'expiry_date', 'link'];
+        case 'restaurant_created':
+            return ['restaurant_name'];
+        case 'inventory_expiry_warning':
+            return ['restaurant_name', 'batch_number', 'ingredient_name_en', 'days_remaining', 'quantity_remaining'];
+        case 'inventory_low_stock_warning':
+            return ['restaurant_name', 'ingredient_name_en', 'current_stock', 'reorder_level'];
+        default:
+            return ['name', 'email', 'link', 'restaurant_name', 'otp'];
+    }
+});
 
 const timingOptions = [
     { label: 'Immediately', value: 'immediately' },

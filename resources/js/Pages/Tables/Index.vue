@@ -370,8 +370,13 @@ const closeQrModal = () => {
 };
 
 const downloadQrCode = () => {
-    if (selectedTable.value) {
-        window.location.href = route('tables.qr-code', selectedTable.value.id);
+    if (selectedTable.value && qrCodeImage.value) {
+        const link = document.createElement('a');
+        link.href = qrCodeImage.value;
+        link.download = `table-${selectedTable.value.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-qr.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 };
 

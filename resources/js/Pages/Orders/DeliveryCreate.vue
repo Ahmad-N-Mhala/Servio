@@ -233,10 +233,13 @@
                      </div>
 
                      <!-- OTP (Compact) -->
-                     <div v-if="selectedReward && !otpVerified" class="mb-4 bg-purple-50 rounded-lg p-2 border border-purple-100 flex gap-2">
-                          <input v-model="otpInput" type="text" maxlength="6" placeholder="OTP" class="w-20 text-center rounded border-gray-200 text-sm p-1 font-mono uppercase focus:ring-purple-500 focus:border-purple-500" :class="{'border-red-500': otpError}">
-                           <Button v-if="(!otpSent && otpTimer === 0) && otpInput.length < 6" size="sm" @click="requestOtp" class="flex-1 text-xs py-1 h-8">{{ $t('loyalty.send_code') }}</Button>
-                           <Button v-else size="sm" @click="verifyOtp" class="flex-1 text-xs py-1 h-8" :disabled="otpInput.length !== 6">{{ $t('common.verify') }}</Button>
+                     <div v-if="selectedReward && !otpVerified" class="mb-4">
+                          <div class="bg-purple-50 rounded-lg p-2 border border-purple-100 flex gap-2">
+                               <input v-model="otpInput" type="text" maxlength="6" placeholder="OTP" class="w-20 text-center rounded border-gray-200 text-sm p-1 font-mono uppercase focus:ring-purple-500 focus:border-purple-500" :class="{'border-red-500': otpError || form.errors.otp}">
+                                <Button v-if="(!otpSent && otpTimer === 0) && otpInput.length < 6" size="sm" @click="requestOtp" class="flex-1 text-xs py-1 h-8">{{ $t('loyalty.send_code') }}</Button>
+                                <Button v-else size="sm" @click="verifyOtp" class="flex-1 text-xs py-1 h-8" :disabled="otpInput.length !== 6">{{ $t('common.verify') }}</Button>
+                          </div>
+                          <p v-if="otpError || form.errors.otp" class="text-red-500 text-xs mt-1 px-1 font-medium">{{ otpError || form.errors.otp }}</p>
                      </div>
 
                      <!-- Submit -->

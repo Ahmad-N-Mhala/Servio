@@ -63,6 +63,11 @@ class CommunicationController extends Controller
             'timing_time' => 'required_if:timing_type,before,after|nullable|date_format:H:i',
         ]);
 
+        if ($validated['type'] === 'sms') {
+            $validated['subject_en'] = null;
+            $validated['subject_ar'] = null;
+        }
+
         CommunicationTemplate::create([
             'restaurant_id' => null, // System Template
             'name' => $validated['name'],
@@ -102,6 +107,11 @@ class CommunicationController extends Controller
             'timing_days' => 'required_if:timing_type,before,after|nullable|integer|min:0',
             'timing_time' => 'required_if:timing_type,before,after|nullable|date_format:H:i',
         ]);
+
+        if (in_array('sms', $template->channels ?? [])) {
+            $validated['subject_en'] = null;
+            $validated['subject_ar'] = null;
+        }
 
         $template->update(array_merge($validated, [
             'timing_days' => $validated['timing_days'] ?? 0,

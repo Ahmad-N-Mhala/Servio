@@ -272,12 +272,63 @@
                                     placeholder="Name"
                                     class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                 />
-                                <input 
-                                    v-model="customerPhone"
-                                    type="tel"
-                                    placeholder="Phone Number"
-                                    class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
-                                />
+                                <div class="flex gap-2">
+                                    <input 
+                                        v-model="customerPhone"
+                                        type="tel"
+                                        placeholder="Phone Number"
+                                        @input="resetLoyalty"
+                                        class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                    />
+                                    <button 
+                                        @click="checkLoyalty" 
+                                        :disabled="!customerPhone || checkingLoyalty" 
+                                        type="button" 
+                                        class="bg-primary/10 text-primary px-4 rounded-xl font-bold hover:bg-primary/20 transition-all disabled:opacity-50 flex items-center justify-center whitespace-nowrap"
+                                    >
+                                        <svg v-if="checkingLoyalty" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span v-else>Check Loyalty</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Loyalty Data -->
+                            <div v-if="loyaltyFound && customerLoyaltyData" class="mt-4 p-4 bg-purple-50 rounded-xl border border-purple-100 transition-all">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-bold text-purple-900">Welcome {{ customerLoyaltyData.name }}!</span>
+                                    <span class="text-sm font-semibold text-purple-700 bg-purple-200 px-3 py-1 rounded-lg">{{ customerLoyaltyData.points }} pts</span>
+                                </div>
+                                
+                                <div v-if="availableRewards.length > 0" class="space-y-2">
+                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Available Rewards</p>
+                                    <div v-for="reward in availableRewards" :key="reward.id" 
+                                        @click="selectedReward = selectedReward?.id === reward.id ? null : reward"
+                                        class="flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all"
+                                        :class="selectedReward?.id === reward.id ? 'border-primary bg-primary/5 shadow-inner' : 'border-purple-200/50 hover:border-primary/30 bg-white shadow-sm'">
+                                        <div>
+                                            <p class="font-bold text-gray-900 text-sm">{{ getTranslatedName(reward.name) }}</p>
+                                            <p class="text-xs text-gray-500 font-medium">{{ reward.points_required }} pts required</p>
+                                        </div>
+                                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                            :class="selectedReward?.id === reward.id ? 'border-primary bg-primary' : 'border-gray-300'">
+                                            <svg v-if="selectedReward?.id === reward.id" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else class="text-sm text-gray-500 italic text-center py-3 bg-white/50 rounded-lg">
+                                    Keep ordering to unlock exciting rewards!
+                                </div>
+                            </div>
+                            <div v-else-if="loyaltyChecked && !loyaltyFound" class="mt-2 text-sm text-gray-500 italic flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                No loyalty account found for this number.
                             </div>
                         </div>
                     </div>
@@ -294,22 +345,27 @@
                             <span>Tax (5%)</span>
                             <span>{{ restaurant.currency }} {{ tax.toFixed(2) }}</span>
                         </div>
+                        <div v-if="selectedReward" class="flex justify-between items-center text-primary text-sm font-bold">
+                            <span>Reward Discount</span>
+                            <span>- {{ restaurant.currency }} {{ calculateDiscount().toFixed(2) }}</span>
+                        </div>
                         <div class="pt-3 flex justify-between items-center border-t border-dashed border-gray-200">
                             <span class="font-bold text-gray-900 text-lg">{{ $t('common.total') }}</span>
-                            <span class="font-bold text-primary text-2xl">{{ restaurant.currency }} {{ total.toFixed(2) }}</span>
+                            <span class="font-bold text-primary text-2xl">{{ restaurant.currency }} {{ finalTotal.toFixed(2) }}</span>
                         </div>
                     </div>
 
                     <button 
-                        @click="placeOrder"
-                        :disabled="placing"
+                        @click="initiateOrder"
+                        :disabled="placing || sendingOtp"
                         class="w-full bg-primary hover:bg-primary-hover disabled:opacity-75 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/30 flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
                     >
-                        <svg v-if="placing" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <svg v-if="placing || sendingOtp" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span v-if="placing">Placing Order...</span>
+                        <span v-if="sendingOtp">Preparing Discount...</span>
+                        <span v-else-if="placing">Placing Order...</span>
                         <div v-else class="flex items-center gap-2">
                             <span>Place Order</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,7 +402,42 @@
         </div>
     </div>
 
+        <!-- Loyalty OTP Verification Modal -->
+        <Modal :show="showOtpModal" @close="closeOtpModal" title="Verify Loyalty Redemption" size="sm">
+            <div class="space-y-6 text-center">
+                <div class="mx-auto w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">Enter Verification Code</h3>
+                    <p class="text-sm text-gray-500">We've sent a 6-digit OTP to <span class="font-bold">{{ customerPhone }}</span></p>
+                </div>
+                
+                <div class="px-4">
+                    <input 
+                        v-model="otpValue"
+                        type="text"
+                        maxlength="6"
+                        placeholder="••••••"
+                        class="w-full text-center text-3xl tracking-widest font-mono py-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    />
+                    <p v-if="otpError" class="text-red-500 text-sm mt-2 font-medium">{{ otpError }}</p>
+                </div>
 
+                <div class="flex gap-3 pt-4">
+                    <button type="button" @click="closeOtpModal" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">Cancel</button>
+                    <button type="button" @click="confirmOtpAndOrder" :disabled="placing || otpValue.length !== 6" class="flex-1 bg-primary disabled:opacity-50 text-white py-3 rounded-xl font-bold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/30 flex justify-center items-center">
+                        <svg v-if="placing" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span v-else>Verify & Place Order</span>
+                    </button>
+                </div>
+            </div>
+        </Modal>
         <!-- Customize Item Modal -->
         <Modal :show="showCustomizeModal" @close="showCustomizeModal = false" :title="customizingItem ? getTranslatedName(customizingItem.name) : 'Customize'" size="md">
             <div v-if="customizingItem" class="space-y-6">
@@ -424,6 +515,19 @@ const showCustomizeModal = ref(false);
 const customizingItem = ref<any>(null);
 const selectedExtras = ref<any[]>([]);
 
+// Loyalty State
+const checkingLoyalty = ref(false);
+const loyaltyChecked = ref(false);
+const loyaltyFound = ref(false);
+const customerLoyaltyData = ref<any>(null);
+const availableRewards = ref<any[]>([]);
+const selectedReward = ref<any>(null);
+
+const showOtpModal = ref(false);
+const otpValue = ref('');
+const otpError = ref('');
+const sendingOtp = ref(false);
+
 const cartItemCount = computed(() => {
     return cart.value.reduce((sum, item) => sum + item.quantity, 0);
 });
@@ -445,8 +549,26 @@ const tax = computed(() => {
     return subtotal.value * 0.05; // 5% tax
 });
 
+const calculateDiscount = () => {
+    if (!selectedReward.value) return 0;
+    
+    const sType = selectedReward.value.reward_type;
+    const sVal = Number(selectedReward.value.discount_value) || 0;
+    
+    if (sType === 'percentage') {
+        return subtotal.value * (sVal / 100);
+    } else if (sType === 'fixed') {
+        return Math.min(subtotal.value, sVal); 
+    }
+    return 0; // cashback doesn't alter subtotal on checkout directly
+};
+
 const total = computed(() => {
     return subtotal.value + tax.value;
+});
+
+const finalTotal = computed(() => {
+    return Math.max(0, total.value - calculateDiscount());
 });
 
 const getTranslatedName = (name: any) => {
@@ -559,28 +681,76 @@ const decrementQuantity = (index: number) => {
     }
 };
 
+const initiateOrder = async () => {
+    if (cart.value.length === 0) return;
+    
+    if (selectedReward.value) {
+        // Request OTP First
+        sendingOtp.value = true;
+        
+        try {
+            const response = await fetch((window as any).route('qr.loyalty.request-otp', props.table.token), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    phone: customerPhone.value,
+                    reward_id: selectedReward.value.id
+                })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                showOtpModal.value = true;
+                otpValue.value = '';
+                otpError.value = '';
+            } else {
+                alert(data.message || 'Failed to send OTP. Please try again.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error connecting to the server while requesting OTP.');
+        } finally {
+            sendingOtp.value = false;
+        }
+    } else {
+        // Proceed normally without reward
+        placeOrder();
+    }
+};
+
 const placeOrder = async () => {
     if (cart.value.length === 0) return;
 
     placing.value = true;
+    otpError.value = '';
 
     try {
+        const payload: any = {
+            items: cart.value.map(item => ({
+                id: item.id,
+                quantity: item.quantity,
+                notes: item.notes || null,
+                extras: item.extras ? item.extras.map((e:any) => ({ id: e.id, quantity: e.quantity || 1 })) : []
+            })),
+            customer_name: customerName.value || null,
+            customer_phone: customerPhone.value || null,
+        };
+
+        if (selectedReward.value && otpValue.value) {
+            payload.reward_id = selectedReward.value.id;
+            payload.otp = otpValue.value;
+        }
+
         const response = await fetch((window as any).route('qr.order', props.table.token), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
             },
-            body: JSON.stringify({
-                items: cart.value.map(item => ({
-                    id: item.id,
-                    quantity: item.quantity,
-                    notes: item.notes || null,
-                    extras: item.extras ? item.extras.map((e:any) => ({ id: e.id, quantity: e.quantity || 1 })) : []
-                })),
-                customer_name: customerName.value || null,
-                customer_phone: customerPhone.value || null,
-            }),
+            body: JSON.stringify(payload),
         });
 
         const data = await response.json();
@@ -592,14 +762,73 @@ const placeOrder = async () => {
             cart.value = [];
             customerName.value = '';
             customerPhone.value = '';
+            resetLoyalty();
+            showOtpModal.value = false;
         } else {
-            alert('Failed to place order. Please try again.');
+            if (payload.otp) otpError.value = data.message || 'Invalid OTP';
+            else alert(data.message || 'Failed to place order. Please try again.');
         }
     } catch (error) {
         console.error('Error placing order:', error);
         alert('An error occurred. Please try again.');
     } finally {
         placing.value = false;
+    }
+};
+
+const confirmOtpAndOrder = () => {
+    if (otpValue.value.length === 6) {
+        placeOrder();
+    }
+};
+
+const closeOtpModal = () => {
+    showOtpModal.value = false;
+    otpValue.value = '';
+    otpError.value = '';
+};
+
+const resetLoyalty = () => {
+    loyaltyChecked.value = false;
+    loyaltyFound.value = false;
+    customerLoyaltyData.value = null;
+    availableRewards.value = [];
+    selectedReward.value = null;
+};
+
+const checkLoyalty = async () => {
+    if (!customerPhone.value) return;
+    
+    checkingLoyalty.value = true;
+    loyaltyChecked.value = true;
+    
+    try {
+        const response = await fetch((window as any).route('qr.loyalty.check', props.table.token), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+            body: JSON.stringify({
+                phone: customerPhone.value,
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.found) {
+            loyaltyFound.value = true;
+            customerLoyaltyData.value = data.customer;
+            availableRewards.value = data.rewards || [];
+        } else {
+            loyaltyFound.value = false;
+            customerLoyaltyData.value = null;
+            availableRewards.value = [];
+        }
+    } catch (e) {
+        console.error('Error checking loyalty', e);
+    } finally {
+        checkingLoyalty.value = false;
     }
 };
 

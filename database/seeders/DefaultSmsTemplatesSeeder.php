@@ -41,8 +41,8 @@ class DefaultSmsTemplatesSeeder extends Seeder
             [
                 'name' => 'Subscription Warning (Expiry)',
                 'trigger_event' => 'subscription_warning',
-                'content_en' => 'Warning: Your Servio subscription will expire in {{ days }} days. Please renew to avoid service interruption.',
-                'content_ar' => 'تحذير: سينتهي اشتراكك في سيرفيو خلال {{ days }} أيام. يرجى التجديد لتجنب انقطاع الخدمة.',
+                'content_en' => 'Warning: Your Servio subscription will expire in {{ days_remaining }} days. Please renew to avoid service interruption.',
+                'content_ar' => 'تحذير: سينتهي اشتراكك في سيرفيو خلال {{ days_remaining }} أيام. يرجى التجديد لتجنب انقطاع الخدمة.',
             ],
             [
                 'name' => 'Subscription Expired',

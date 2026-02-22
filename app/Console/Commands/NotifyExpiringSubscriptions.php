@@ -111,6 +111,7 @@ class NotifyExpiringSubscriptions extends Command
             'restaurant_name' => $restaurant->name,
             'expiry_date' => $subscription->ends_at ? $subscription->ends_at->format('Y-m-d') : 'N/A',
             'plan_name' => $subscription->plan->name ?? 'Plan',
+            'days_remaining' => $template->timing_days,
             'link' => route('plans.index'),
         ]);
     }

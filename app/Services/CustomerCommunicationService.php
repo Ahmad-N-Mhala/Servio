@@ -14,12 +14,15 @@ class CustomerCommunicationService
     {
         $channels = $template->channels ?? [];
 
+        // Ensure we find the right restaurant (System templates may have null restaurant_id)
+        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
+
         // Enrich data with common variables
         $data = array_merge([
             'customer_name' => $customer->name,
             'customer_email' => $customer->email,
             'customer_phone' => $customer->phone,
-            'restaurant_name' => $template->restaurant->name ?? config('app.name'),
+            'restaurant_name' => $restaurant->name ?? config('app.name'),
         ], $data);
 
         // Enrich data with Reward Configuration if available
@@ -73,10 +76,12 @@ class CustomerCommunicationService
         if (!$customer->email)
             return;
 
-        $restaurant = $template->restaurant;
+        // Ensure we find the right restaurant (System templates may have null restaurant_id)
+        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
+
         if (!$restaurant || $restaurant->email_balance <= 0) {
             Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of email credits or not found.");
-            self::log($template, $customer, 'email', 'failed', 'Insufficient balance or restaurant mismatch');
+            self::log($template, $customer, 'email', 'failed', 'Insufficient balance or restaurant mismatch', null, $restaurant->id ?? null);
             return;
         }
 
@@ -102,10 +107,10 @@ class CustomerCommunicationService
             Mail::to($customer->email)->send(new \App\Mail\GenericSystemEmail($subject, $content));
 
             $restaurant->decrement('email_balance');
-            self::log($template, $customer, 'email', 'sent', $content, $subject);
+            self::log($template, $customer, 'email', 'sent', $content, $subject, $restaurant->id ?? null);
         } catch (\Exception $e) {
             Log::error("Email failed: " . $e->getMessage());
-            self::log($template, $customer, 'email', 'failed', $e->getMessage(), $subject);
+            self::log($template, $customer, 'email', 'failed', $e->getMessage(), $subject, $restaurant->id ?? null);
         }
     }
 
@@ -114,10 +119,12 @@ class CustomerCommunicationService
         if (!$customer->phone)
             return;
 
-        $restaurant = $template->restaurant;
+        // Ensure we find the right restaurant (System templates may have null restaurant_id)
+        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
+
         if (!$restaurant || $restaurant->sms_balance <= 0) {
             Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of SMS credits or not found.");
-            self::log($template, $customer, 'sms', 'failed', 'Insufficient balance or restaurant mismatch');
+            self::log($template, $customer, 'sms', 'failed', 'Insufficient balance or restaurant mismatch', null, $restaurant->id ?? null);
             return;
         }
 
@@ -136,10 +143,10 @@ class CustomerCommunicationService
             app(\App\Services\SmsService::class)->send($customer->phone, $content);
 
             $restaurant->decrement('sms_balance');
-            self::log($template, $customer, 'sms', 'sent', $content);
+            self::log($template, $customer, 'sms', 'sent', $content, null, $restaurant->id ?? null);
         } catch (\Exception $e) {
             Log::error("SMS failed: " . $e->getMessage());
-            self::log($template, $customer, 'sms', 'failed', $e->getMessage());
+            self::log($template, $customer, 'sms', 'failed', $e->getMessage(), null, $restaurant->id ?? null);
         }
     }
 
@@ -164,10 +171,10 @@ class CustomerCommunicationService
         return str_replace($search, $replace, $text);
     }
 
-    private static function log($template, $customer, $type, $status, $message = null, $subject = null)
+    private static function log($template, $customer, $type, $status, $message = null, $subject = null, $forceRestaurantId = null)
     {
         CommunicationLog::create([
-            'restaurant_id' => $template->restaurant_id,
+            'restaurant_id' => $forceRestaurantId ?? $template->restaurant_id ?? $customer->restaurant_id,
             'communication_template_id' => $template->id,
             'recipient' => $type === 'email' ? ($customer->email ?? 'N/A') : ($customer->phone ?? 'N/A'),
             'type' => $type, // sms or email

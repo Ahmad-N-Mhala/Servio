@@ -11,12 +11,18 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Restaurant;
 use App\Models\Table;
+use App\Models\Customer;
+use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class QrOrderController extends Controller
 {
+    public function __construct(protected LoyaltyService $loyaltyService)
+    {
+    }
+
     /**
      * Show the public menu for QR code ordering
      */
@@ -102,6 +108,8 @@ class QrOrderController extends Controller
             'items.*.notes' => ['nullable', 'string', 'max:500'],
             'customer_name' => ['nullable', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:20'],
+            'reward_id' => ['nullable', 'string', 'exists:rewards,id'],
+            'otp' => ['nullable', 'string', 'size:6'],
         ]);
 
         $table = Table::where('qr_code_token', $token)->firstOrFail();
@@ -192,6 +200,52 @@ class QrOrderController extends Controller
             ];
         }
 
+        // Check for Loyalty Redemption
+        $discountAmount = 0;
+        $discountType = null;
+        $discountValue = null;
+        $redemptionRecord = null;
+        $customerObj = null;
+
+        if (!empty($validated['customer_phone'])) {
+            $customerObj = Customer::where('restaurant_id', $restaurant->id)
+                ->where('phone', $validated['customer_phone'])
+                ->first();
+        }
+
+        if (!empty($validated['reward_id']) && !empty($validated['otp'])) {
+            if (!$customerObj) {
+                return response()->json(['message' => 'Customer not found for the provided phone number. Loyalty redemption failed.'], 404);
+            }
+
+            if (!$this->loyaltyService->verifyOtp($customerObj, $validated['otp'])) {
+                return response()->json(['message' => 'Invalid or expired OTP.'], 422);
+            }
+
+            try {
+                // Redeem reward deducts points
+                $redemptionRecord = $this->loyaltyService->redeemReward($customerObj, $validated['reward_id']);
+                $reward = $redemptionRecord->reward;
+
+                $discountType = $reward->reward_type;
+                $discountValue = $reward->discount_value;
+
+                if ($discountType === 'percentage') {
+                    $discountAmount = $subtotal * ($discountValue / 100);
+                } elseif ($discountType === 'fixed') {
+                    $discountAmount = (float) $discountValue;
+                }
+
+                // Ensure discount doesn't exceed subtotal
+                if ($discountAmount > $subtotal) {
+                    $discountAmount = $subtotal;
+                }
+
+            } catch (\Exception $e) {
+                return response()->json(['message' => $e->getMessage()], 400);
+            }
+        }
+
         // Generate Sequential Order Number
         $nextNumber = $restaurant->next_order_number ?? 1;
         try {
@@ -202,16 +256,23 @@ class QrOrderController extends Controller
             $restaurant->update(['next_order_number' => (int) $nextNumber + 1]);
         }
 
+        $tax = $subtotal * 0.05; // 5% tax
+        $total = max(0, $subtotal + $tax - $discountAmount);
+
         // Create order
         $order = Order::create([
             'restaurant_id' => $restaurant->id,
             'table_id' => $table->id,
+            'customer_id' => $customerObj ? $customerObj->id : null,
             'order_number' => 'QR-' . $nextNumber,
             'type' => 'dine_in',
             'status' => 'pending',
             'subtotal' => $subtotal,
-            'tax' => $subtotal * 0.05, // 5% tax
-            'total' => $subtotal * 1.05,
+            'tax' => $tax,
+            'discount_amount' => $discountAmount,
+            'discount_type' => ($discountAmount > 0) ? $discountType : null,
+            'discount_value' => ($discountAmount > 0) ? $discountValue : null,
+            'total' => $total,
             'payment_status' => 'unpaid', // Changed from 'pending' to 'unpaid' to show in POS
             'payment_method' => 'cash', // Default to cash, can be changed
             'customer_name' => $validated['customer_name'] ?? 'QR Order',
@@ -219,6 +280,11 @@ class QrOrderController extends Controller
             'source' => 'qr_code',
             'ordered_at' => now(),
         ]);
+
+        if ($redemptionRecord) {
+            // Assign this exact order_id to the generic redemption record created
+            $redemptionRecord->update(['order_id' => $order->id, 'status' => 'applied']);
+        }
 
         // Create order items
         foreach ($orderItems as $itemData) {
@@ -281,5 +347,78 @@ class QrOrderController extends Controller
                 'created_at' => $order->created_at,
             ],
         ]);
+    }
+
+    /**
+     * Check Loyalty points and available rewards for a phone number
+     */
+    public function checkLoyalty(Request $request, string $token)
+    {
+        $validated = $request->validate([
+            'phone' => ['required', 'string', 'max:20'],
+        ]);
+
+        $table = Table::where('qr_code_token', $token)->firstOrFail();
+        $restaurant = $table->restaurant;
+
+        if (!$restaurant->hasFeature('loyalty')) {
+            return response()->json(['success' => false, 'message' => 'Loyalty not active']);
+        }
+
+        $customer = Customer::where('restaurant_id', $restaurant->id)
+            ->where('phone', $validated['phone'])
+            ->with(['loyaltyPoints'])
+            ->first();
+
+        if (!$customer) {
+            return response()->json(['success' => true, 'found' => false]);
+        }
+
+        $points = $customer->loyaltyPoints->balance ?? 0;
+
+        $availableRewards = \App\Models\Reward::where('restaurant_id', $restaurant->id)
+            ->where('is_active', true)
+            ->where('points_required', '<=', $points)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'found' => true,
+            'customer' => [
+                'name' => $customer->name,
+                'points' => $points,
+                'tier' => $customer->loyalty_tier
+            ],
+            'rewards' => $availableRewards
+        ]);
+    }
+
+    /**
+     * Send OTP to customer to redeem a selected reward on QR Menu
+     */
+    public function requestRedemptionOtp(Request $request, string $token)
+    {
+        $validated = $request->validate([
+            'phone' => ['required', 'string', 'max:20'],
+            'reward_id' => ['required', 'string', 'exists:rewards,id'],
+        ]);
+
+        $table = Table::where('qr_code_token', $token)->firstOrFail();
+
+        $customer = Customer::where('restaurant_id', $table->restaurant_id)
+            ->where('phone', $validated['phone'])
+            ->first();
+
+        if (!$customer) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
+
+        $sent = $this->loyaltyService->sendRedemptionOtp($customer);
+
+        if ($sent) {
+            return response()->json(['success' => true, 'message' => 'OTP sent successfully']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Failed to send OTP.'], 503);
     }
 }

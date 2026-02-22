@@ -123,24 +123,6 @@ class TableController extends Controller
     }
 
     /**
-     * Download QR code for a table
-     */
-    public function downloadQrCode(Table $table)
-    {
-        \Illuminate\Support\Facades\Gate::authorize('view_tables');
-
-        $qrCode = QrCode::format('png')
-            ->size(300)
-            ->margin(2)
-            ->errorCorrection('H')
-            ->generate($table->qr_code_url);
-
-        return response($qrCode)
-            ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'attachment; filename="table-' . $table->name . '-qr.png"');
-    }
-
-    /**
      * Regenerate QR code for a table
      */
     public function regenerateQrCode(Table $table)
