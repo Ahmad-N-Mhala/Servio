@@ -22,18 +22,33 @@
                 :title="$t('waste.tracking_title')"
             >
                 <template #header-actions>
-                    <div class="flex items-center gap-4">
-                        <Input 
-                            type="date" 
-                            v-model="params.date"
-                            placeholder="Select date"
-                        />
-                        <Button @click="openAddModal" variant="primary">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-2 pr-4 border-r border-gray-200">
+                             <Input type="date" v-model="filterParams.start_date" :label="$t('reports.start_date') || 'From'" />
+                             <span class="text-gray-400 mt-6">-</span>
+                             <Input type="date" v-model="filterParams.end_date" :label="$t('reports.end_date') || 'To'" />
+                        </div>
+                        
+                        <Button @click="exportExcel" variant="secondary" class="font-semibold flex items-center gap-2 mt-6">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            {{ $t('waste.log_waste') }}
+                            Export
                         </Button>
+
+                        <div class="flex items-center gap-2 ml-auto mt-6">
+                            <Input 
+                                type="date" 
+                                v-model="addWasteDate"
+                                title="Date for new waste"
+                            />
+                            <Button @click="openAddModal" variant="primary">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                {{ $t('waste.log_waste') }}
+                            </Button>
+                        </div>
                     </div>
                 </template>
 
@@ -210,14 +225,25 @@ const formatCurrency = (amount: any) => {
 };
 
 // State
-const params = ref({
-    date: props.filters.date || new Date().toISOString().split('T')[0]
+const filterParams = ref({
+    start_date: props.filters.start_date || '',
+    end_date: props.filters.end_date || ''
 });
 
+const addWasteDate = ref(new Date().toISOString().split('T')[0]);
+
 // Watch Date
-watch(() => params.value.date, (newDate) => {
-    router.get(route('waste.index'), { date: newDate }, { preserveState: true });
-});
+watch(filterParams, (newFilters) => {
+    router.get(route('waste.index'), newFilters, { preserveState: true, preserveScroll: true, replace: true });
+}, { deep: true });
+
+const exportExcel = () => {
+    window.location.href = route('waste.index', { 
+        start_date: filterParams.value.start_date,
+        end_date: filterParams.value.end_date,
+        export: 'excel'
+    });
+};
 
 const logsList = computed(() => props.logs.data || []);
 const totalLoss = computed(() => logsList.value.reduce((sum: number, log: any) => sum + Number(log.total_loss), 0));
@@ -239,7 +265,7 @@ const addForm = useForm({
     ingredient_batch_id: '', 
     waste_amount: '',
     notes: '',
-    log_date: params.value.date
+    log_date: addWasteDate.value
 });
 
 const availableBatches = computed(() => {
@@ -266,7 +292,7 @@ const batchOptions = computed(() => {
 
 const openAddModal = () => {
     addForm.reset();
-    addForm.log_date = params.value.date;
+    addForm.log_date = addWasteDate.value;
     showAddModal.value = true;
 };
     

@@ -31,8 +31,12 @@ class WasteController extends Controller
             ->where('restaurant_id', $restaurant->id)
             ->with(['ingredient']);
 
-        if ($request->filled('date')) {
-            $query->whereDate('log_date', $request->date);
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('log_date', [$request->start_date, $request->end_date]);
+        }
+
+        if ($request->has('export') && $request->export === 'excel') {
+            return $this->exportToExcel($query->get());
         }
 
         $logs = $query->orderBy('log_date', 'desc')->paginate(20);
@@ -78,8 +82,44 @@ class WasteController extends Controller
             'logs' => $logs,
             'wasteActivityLogs' => $wasteActivityLogs,
             'ingredients' => $ingredientsData,
-            'filters' => $request->only(['date'])
+            'filters' => $request->only(['start_date', 'end_date'])
         ]);
+    }
+
+    private function exportToExcel($logs)
+    {
+        $csvData = [];
+        $csvData[] = ['Date', 'Staff', 'Ingredient', 'Stock Before', 'Quantity Wasted', 'Stock After', 'Total Loss', 'Status'];
+
+        foreach ($logs as $log) {
+            $ingredientName = $log->ingredient ? (is_array($log->ingredient->name) ? ($log->ingredient->name['en'] ?? '') : $log->ingredient->name) : 'Unknown';
+            $staffName = $log->user ? $log->user->name : '-';
+            $status = $log->deleted_at ? 'Deleted' : 'Active';
+
+            $csvData[] = [
+                $log->log_date ? \Carbon\Carbon::parse($log->log_date)->format('Y-m-d') : '-',
+                $staffName,
+                $ingredientName,
+                $log->stock_before,
+                $log->waste_amount,
+                $log->stock_after,
+                $log->total_loss,
+                $status
+            ];
+        }
+
+        $filename = "waste_report_" . date('Y_m_d_H_i_s') . ".csv";
+        $handle = fopen('php://temp', 'r+');
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($content)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"$filename\"");
     }
 
     // ... (store and update methods remain same) ...
