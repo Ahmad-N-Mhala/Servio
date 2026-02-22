@@ -32,11 +32,11 @@ class WasteController extends Controller
             ->with(['ingredient']);
 
         if ($request->filled('start_date')) {
-            $query->where('log_date', '>=', $request->start_date);
+            $query->where('log_date', '>=', \Carbon\Carbon::parse($request->start_date)->startOfDay());
         }
 
         if ($request->filled('end_date')) {
-            $query->where('log_date', '<=', $request->end_date);
+            $query->where('log_date', '<=', \Carbon\Carbon::parse($request->end_date)->endOfDay());
         }
 
         if ($request->has('export') && $request->export === 'excel') {
@@ -199,7 +199,7 @@ class WasteController extends Controller
             }
 
             // Check stock in batch
-            if ($batch->quantity_remaining < $validated['waste_amount']) {
+            if ((float) $batch->quantity_remaining < (float) $validated['waste_amount']) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
                     'waste_amount' => "Insufficient stock in selected batch. Available: {$batch->quantity_remaining}"
                 ]);
@@ -244,6 +244,8 @@ class WasteController extends Controller
                 'new_stock_level' => $ingredient->fresh()->current_stock,
                 'notes' => "Waste logged from Batch #{$batch->batch_number}: " . ($validated['notes'] ?? ''),
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             \Log::error('Waste log creation failed', [
                 'error' => $e->getMessage(),

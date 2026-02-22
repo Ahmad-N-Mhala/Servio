@@ -104,12 +104,16 @@
         <!-- Add Waste Modal -->
         <Modal :show="showAddModal" @close="closeAddModal" :title="$t('waste.log_ingredient_waste')">
             <form @submit.prevent="submitAdd" class="space-y-4">
+                <div v-if="page.props.errors.error" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
+                    {{ page.props.errors.error }}
+                </div>
                 <Select
                     v-model="addForm.ingredient_id"
                     @update:modelValue="addForm.ingredient_batch_id = ''"
                     :label="$t('waste.select_ingredient')"
                     :placeholder="$t('waste.select_ingredient')"
                     :options="ingredientOptions"
+                    :error="addForm.errors.ingredient_id"
                     required
                 />
                 <p v-if="ingredients.length === 0" class="mt-2 text-sm text-red-600">
@@ -126,6 +130,7 @@
                         :label="$t('waste.select_batch')"
                         :placeholder="$t('waste.select_batch') + ' (FIFO)'"
                         :options="batchOptions"
+                        :error="addForm.errors.ingredient_batch_id"
                         required
                     />
                     <p v-if="availableBatches.length === 0" class="text-xs text-red-500 mt-1">No active batches available for this ingredient.</p>
@@ -137,6 +142,7 @@
                     type="number"
                     min="0.01"
                     step="0.01"
+                    :error="addForm.errors.waste_amount"
                     required
                 />
                 <Input
@@ -144,6 +150,7 @@
                     :label="$t('inventory.notes_optional')"
                     type="textarea"
                     rows="2"
+                    :error="addForm.errors.notes"
                 />
                 <div class="flex justify-end gap-3 mt-6">
                     <Button type="button" variant="secondary" @click="closeAddModal">{{ $t('common.cancel') }}</Button>
@@ -166,6 +173,7 @@
                     type="number"
                     min="0.01"
                     step="0.01"
+                    :error="updateForm.errors.waste_amount"
                     required
                 />
 
