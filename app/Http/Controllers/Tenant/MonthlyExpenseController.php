@@ -12,7 +12,7 @@ use Inertia\Response;
 
 class MonthlyExpenseController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
         $restaurant = $request->user()->currentRestaurant();
 
@@ -25,37 +25,13 @@ class MonthlyExpenseController extends Controller
             abort(404, 'Restaurant context not found');
         }
 
-        // Get selected month or default to current month
-        $selectedMonth = $request->input('month', now()->format('Y-m'));
-
-        // Get all expenses for the selected month
-        $expenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
-            ->where('month', $selectedMonth)
-            ->orderBy('category')
-            ->get()
-            ->map(function ($expense) {
-                return [
-                    'id' => $expense->id,
-                    'category' => $expense->category,
-                    'description' => $expense->description,
-                    'amount' => (float) (string) $expense->amount,
-                    'payment_status' => $expense->payment_status,
-                    'paid_at' => $expense->paid_at?->format('Y-m-d'),
-                    'notes' => $expense->notes,
-                ];
-            });
-
-        // Calculate totals
-        $totalExpenses = $expenses->sum('amount');
-        $paidExpenses = $expenses->where('payment_status', 'paid')->sum('amount');
-        $pendingExpenses = $expenses->where('payment_status', 'pending')->sum('amount');
+        // Get selected month and year, default to current
+        $selectedMonthStr = $request->input('month', now()->format('Y-m'));
 
         // Calculate Inventory Purchases for the month
-        // Get the start and end of the selected month
-        $monthStart = \Carbon\Carbon::parse($selectedMonth . '-01')->startOfMonth();
-        $monthEnd = \Carbon\Carbon::parse($selectedMonth . '-01')->endOfMonth();
+        $monthStart = \Carbon\Carbon::parse($selectedMonthStr . '-01')->startOfMonth();
+        $monthEnd = \Carbon\Carbon::parse($selectedMonthStr . '-01')->endOfMonth();
 
-        // Approach 1: Sum from ingredient_batches created in this month
         $inventoryPurchases = \Illuminate\Support\Facades\DB::table('ingredient_batches')
             ->join('ingredients', 'ingredient_batches.ingredient_id', '=', 'ingredients.id')
             ->where('ingredients.restaurant_id', $restaurant->id)
@@ -67,7 +43,6 @@ class MonthlyExpenseController extends Controller
                 return $qty * $cost;
             });
 
-        // Fallback: If no batches, try to calculate from ingredients added this month
         if ($inventoryPurchases == 0) {
             $inventoryPurchases = \App\Models\Ingredient::where('restaurant_id', $restaurant->id)
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
@@ -79,20 +54,36 @@ class MonthlyExpenseController extends Controller
                 });
         }
 
-        // Get available months (3 future months + current + 12 past months)
-        $availableMonths = collect();
-        for ($i = 3; $i >= -12; $i--) {
-            $date = now()->addMonths($i);
-            $availableMonths->push([
-                'value' => $date->format('Y-m'),
-                'label' => $date->format('F Y'),
-            ]);
+        // Get all expenses for the selected month
+        $expenses = MonthlyExpense::where('restaurant_id', $restaurant->id)
+            ->where('month', $selectedMonthStr)
+            ->orderBy('category')
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'id' => $expense->id,
+                    'category' => $expense->category,
+                    'description' => $expense->description,
+                    'amount' => (float) (string) $expense->amount,
+                    'payment_status' => $expense->payment_status,
+                    'paid_at' => $expense->paid_at?->format('Y-m-d'),
+                    'notes' => $expense->notes,
+                    'evidence_files' => $expense->evidence_files ?? [],
+                ];
+            });
+
+        // Calculate totals including inventory purchases
+        $totalExpenses = $expenses->sum('amount') + $inventoryPurchases;
+        $paidExpenses = $expenses->where('payment_status', 'paid')->sum('amount') + $inventoryPurchases;
+        $pendingExpenses = $expenses->where('payment_status', 'pending')->sum('amount');
+
+        if ($request->has('export') && $request->export === 'excel') {
+            return $this->exportToExcel($expenses, $inventoryPurchases, $selectedMonthStr);
         }
 
         return Inertia::render('MonthlyExpenses/Index', [
             'expenses' => $expenses,
-            'selectedMonth' => $selectedMonth,
-            'availableMonths' => $availableMonths,
+            'selectedMonth' => $selectedMonthStr,
             'summary' => [
                 'total' => $totalExpenses,
                 'paid' => $paidExpenses,
@@ -101,6 +92,48 @@ class MonthlyExpenseController extends Controller
             'inventoryPurchases' => $inventoryPurchases,
             'categories' => $this->getExpenseCategories(),
         ]);
+    }
+
+    private function exportToExcel($expenses, $inventoryPurchases, $month)
+    {
+        $csvData = [];
+        $csvData[] = ['Category', 'Description', 'Amount', 'Status', 'Paid Date', 'Notes'];
+
+        // Add inventory purchases as first row
+        if ($inventoryPurchases > 0) {
+            $csvData[] = [
+                'Inventory Purchases (Auto-calculated)',
+                'Automated sum of received purchase orders and ingredient stocks.',
+                round($inventoryPurchases, 2),
+                'paid',
+                '-',
+                ''
+            ];
+        }
+
+        foreach ($expenses as $exp) {
+            $csvData[] = [
+                $exp['category'],
+                $exp['description'] ?? '',
+                round($exp['amount'], 2),
+                $exp['payment_status'],
+                $exp['paid_at'] ?? '-',
+                $exp['notes'] ?? '',
+            ];
+        }
+
+        $filename = "monthly_expenses_{$month}.csv";
+        $handle = fopen('php://temp', 'r+');
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($content)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"$filename\"");
     }
 
     public function store(Request $request)
@@ -115,10 +148,24 @@ class MonthlyExpenseController extends Controller
             'payment_status' => ['required', 'in:pending,paid'],
             'paid_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
+            'evidence_files' => ['nullable', 'array'],
+            'evidence_files.*' => ['file', 'max:5120'], // 5MB
         ]);
 
         $validated['restaurant_id'] = $restaurant->id;
         $validated['created_by'] = $request->user()->id;
+
+        $evidencePaths = [];
+        if ($request->hasFile('evidence_files')) {
+            foreach ($request->file('evidence_files') as $file) {
+                $path = $file->store('monthly_expenses', 'public');
+                $evidencePaths[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'url' => '/storage/' . $path
+                ];
+            }
+        }
+        $validated['evidence_files'] = $evidencePaths;
 
         MonthlyExpense::create($validated);
 
@@ -134,7 +181,24 @@ class MonthlyExpenseController extends Controller
             'payment_status' => ['required', 'in:pending,paid'],
             'paid_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
+            'evidence_files' => ['nullable', 'array'],
+            'evidence_files.*' => ['file', 'max:5120'],
         ]);
+
+        if ($request->hasFile('evidence_files')) {
+            $evidencePaths = [];
+            foreach ($request->file('evidence_files') as $file) {
+                $path = $file->store('monthly_expenses', 'public');
+                $evidencePaths[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'url' => '/storage/' . $path
+                ];
+            }
+            $existing = $monthlyExpense->evidence_files ?? [];
+            $validated['evidence_files'] = array_merge($existing, $evidencePaths);
+        } else {
+            unset($validated['evidence_files']);
+        }
 
         $monthlyExpense->update($validated);
 

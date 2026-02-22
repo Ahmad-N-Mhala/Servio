@@ -15,6 +15,7 @@
                     <!-- Desktop Navigation -->
                     <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
                         <button @click="scrollTo('about')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.about_us') }}</button>
+                        <button @click="scrollTo('services')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ getSetting('services_title') || $t('landing.our_services_title') || 'Our Services' }}</button>
                         <button @click="scrollTo('modules')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.features') }}</button>
                         <button @click="scrollTo('pricing')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.plans_pricing') }}</button>
                         
@@ -57,6 +58,7 @@
             <!-- Mobile Menu -->
             <div v-if="mobileMenuOpen" class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 p-4 space-y-4 shadow-xl">
                 <button @click="scrollTo('about')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.about_us') }}</button>
+                <button @click="scrollTo('services')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ getSetting('services_title') || $t('landing.our_services_title') || 'Our Services' }}</button>
                 <button @click="scrollTo('modules')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.features') }}</button>
                 <button @click="scrollTo('pricing')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.plans_pricing') }}</button>
                 <a :href="route('login')" class="block w-full text-center px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30">{{ $t('landing.get_started') }}</a>
@@ -174,6 +176,51 @@
                                 {{ getLocaleText(landingSettings?.about_us_description) || $t('landing.about_us_description_default') }}
                             </p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Services Section -->
+        <section id="services" class="py-24 relative overflow-hidden z-10 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex justify-center items-center gap-2 mb-4">
+                        <span class="w-8 h-[2px] bg-emerald-600"></span>
+                        <span class="text-emerald-600 font-bold tracking-widest uppercase text-sm">{{ getSetting('services_title') || $t('landing.our_services_title') || 'Our Services' }}</span>
+                        <span class="w-8 h-[2px] bg-emerald-600"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <!-- Software Solutions Card -->
+                    <div class="bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 border border-gray-100 group">
+                        <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                            {{ getSetting('software_services_title') || $t('landing.software_services_title') || 'Software Solutions' }}
+                        </h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            {{ getSetting('software_services_desc') || $t('landing.software_services_desc') || 'Our POS software solutions provide comprehensive system management tools, advanced reporting features, seamless integrations, and reliable ongoing support services.' }}
+                        </p>
+                    </div>
+
+                    <!-- Hardware Installation Card -->
+                    <div class="bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 border border-gray-100 group">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-8 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                            {{ getSetting('hardware_services_title') || $t('landing.hardware_services_title') || 'Hardware Installation' }}
+                        </h3>
+                        <p class="text-gray-600 leading-relaxed">
+                            {{ getSetting('hardware_services_desc') || $t('landing.hardware_services_desc') || 'We install and configure POS machines, bill printers, tablets, cash drawers, barcode scanners, and all required hardware to ensure a complete and ready-to-use setup.' }}
+                        </p>
                     </div>
                 </div>
             </div>

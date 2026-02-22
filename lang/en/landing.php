@@ -49,15 +49,20 @@ REDEFINED',
     'custom_plan_desc' => 'Contact our sales team for enterprise solutions tailored to your needs',
     'contact_sales' => 'Contact Sales',
     'about_title_default' => 'Elevating Every Aspect of Your Restaurant',
-    'about_us_description_default' => 'Servio is a comprehensive, cloud-native restaurant operating system engineered to streamline operations for businesses of all sizes—from cozy cafes to multi-location franchises. We unify your entire workflow into one intuitive platform, eliminating the chaos of disjointed systems and manual errors.
-MASTER YOUR INVENTORY:
-Say goodbye to food waste and stockouts. Servio provides real-time tracking of every ingredient. Our smart inventory system monitors stock levels as you sell, automatically alerting you when supplies run low. You can manage recipes, track wastage, and generate purchase orders effortlessly, ensuring your kitchen is always stocked and profitable.
-BUILD LASTING LOYALTY:
-Turn every customer into a regular with our integrated Loyalty & CRM tools. Create personalized reward programs that engage diverse customer bases. Whether it\'s points-based systems, tiered rewards, or special promotions, Servio helps you understand buying habits and automate marketing campaigns via SMS and email, driving repeat business and maximizing customer lifetime value.
-Beyond this, Servio integrates powerful Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management into a single, seamless ecosystem designed to deliver exceptional dining experiences.',
+    'about_us_description_default' => 'Servio is a state-of-the-art restaurant management ecosystem designed to empower modern food businesses. We provide comprehensive software solutions and hardware installations to ensure your restaurant operates seamlessly from day one.
+
+Our platform goes beyond simple transactions, offering a seamless integration of Point of Sale (POS), Kitchen Display Systems (KDS), and Multi-Channel Delivery Management. With smart Inventory Management and our advanced Loyalty Program, we help you reduce waste, build lasting customer relationships, and focus on what matters most: delivering exceptional dining experiences.',
     'owned_by' => 'Owned by KENILDOCK FOR DEVELOPMENT AND INNOVATION IN COMPUTER SYSTEMS AND SOFTWARE',
     'connect_via_email' => 'support{\'@\'}kenildock.com',
     'connect_via_phone' => '+9715049460976',
+
+    // Services Section
+    'our_services_title' => 'Our Services',
+    'software_services_title' => 'Software Solutions',
+    'software_services_desc' => 'Our POS software solutions provide comprehensive system management tools, advanced reporting features, seamless integrations, and reliable ongoing support services.',
+    'hardware_services_title' => 'Hardware Installation',
+    'hardware_services_desc' => 'We install and configure POS machines, bill printers, tablets, cash drawers, barcode scanners, and all required hardware to ensure a complete and ready-to-use setup.',
+
     'feature_pos_title' => 'Smart Point of Sale',
     'feature_pos_desc' => 'A lightning-fast interface designed for high-volume environments. Handle table service, quick service, and delivery orders from a single screen.',
     'badge_pos' => 'Point of Sale',

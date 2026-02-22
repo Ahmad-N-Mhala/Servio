@@ -52,6 +52,13 @@ class LandingPageController extends Controller
             'dashboard_point_3' => ['en' => 'Staff performance monitoring', 'ar' => 'مراقبة أداء الموظفين'],
             'dashboard_point_4' => ['en' => 'Customer relationship management (CRM)', 'ar' => 'إدارة علاقات العملاء (CRM)'],
 
+            'services_title' => ['en' => __('landing.our_services_title', [], 'en'), 'ar' => __('landing.our_services_title', [], 'ar')],
+            'services_subtitle' => ['en' => 'Comprehensive solutions for your restaurant', 'ar' => 'حلول شاملة لمطعمك'],
+            'software_services_title' => ['en' => __('landing.software_services_title', [], 'en'), 'ar' => __('landing.software_services_title', [], 'ar')],
+            'software_services_desc' => ['en' => __('landing.software_services_desc', [], 'en'), 'ar' => __('landing.software_services_desc', [], 'ar')],
+            'hardware_services_title' => ['en' => __('landing.hardware_services_title', [], 'en'), 'ar' => __('landing.hardware_services_title', [], 'ar')],
+            'hardware_services_desc' => ['en' => __('landing.hardware_services_desc', [], 'en'), 'ar' => __('landing.hardware_services_desc', [], 'ar')],
+
             // Dashboard Widgets Details
             'dash_widget_1_title' => ['en' => '360° Financial Analytics', 'ar' => 'تحليلات مالية شاملة 360 درجة'],
             'dash_widget_1_desc' => [

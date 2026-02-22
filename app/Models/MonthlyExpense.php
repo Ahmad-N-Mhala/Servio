@@ -22,11 +22,13 @@ class MonthlyExpense extends Model
         'paid_at',
         'notes',
         'created_by',
+        'evidence_files',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'date',
+        'evidence_files' => 'array',
     ];
 
     public function restaurant(): BelongsTo

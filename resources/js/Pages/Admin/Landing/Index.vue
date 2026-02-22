@@ -516,6 +516,53 @@
                             </div>
                         </div>
 
+                        <!-- Our Services Section -->
+                        <div class="border-t pt-8 mt-8">
+                            <h4 class="text-xl font-bold mb-4">Our Services Section</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <Input v-model="settingsForm.settings.services_title.en" label="Main Section Title (EN)" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.services_title.ar" label="Main Section Title (AR)" dir="rtl" />
+                                </div>
+
+                                <!-- Software Services -->
+                                <div class="col-span-1 md:col-span-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                    <h5 class="font-bold mb-4 text-gray-800">Software Solutions Card</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input v-model="settingsForm.settings.software_services_title.en" label="Title (EN)" />
+                                        <Input v-model="settingsForm.settings.software_services_title.ar" label="Title (AR)" dir="rtl" />
+                                        <div class="col-span-1 md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Description (EN)</label>
+                                            <textarea v-model="settingsForm.settings.software_services_desc.en" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></textarea>
+                                        </div>
+                                        <div class="col-span-1 md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1 text-right">Description (AR)</label>
+                                            <textarea v-model="settingsForm.settings.software_services_desc.ar" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm text-right" dir="rtl"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Hardware Services -->
+                                <div class="col-span-1 md:col-span-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                    <h5 class="font-bold mb-4 text-gray-800">Hardware Installation Card</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input v-model="settingsForm.settings.hardware_services_title.en" label="Title (EN)" />
+                                        <Input v-model="settingsForm.settings.hardware_services_title.ar" label="Title (AR)" dir="rtl" />
+                                        <div class="col-span-1 md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Description (EN)</label>
+                                            <textarea v-model="settingsForm.settings.hardware_services_desc.en" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"></textarea>
+                                        </div>
+                                        <div class="col-span-1 md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1 text-right">Description (AR)</label>
+                                            <textarea v-model="settingsForm.settings.hardware_services_desc.ar" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm text-right" dir="rtl"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex justify-end pt-4 border-t mt-6">
                             <Button type="submit" :loading="settingsForm.processing">Save Settings</Button>
                         </div>
@@ -862,6 +909,28 @@ const settingsForm = useForm({
         feedback_feature_3_desc: {
             en: props.landingSettings.feedback_feature_3_desc?.en || 'Lower ratings provide valuable feedback to improve your service, while high ratings boost your visibility.',
             ar: props.landingSettings.feedback_feature_3_desc?.ar || 'التقييمات المنخفضة توفر ملاحظات قيمة لتحسين خدمتك، بينما التقييمات العالية تعزز ظهورك.'
+        },
+
+        // Our Services Section
+        services_title: {
+            en: props.landingSettings.services_title?.en || 'Our Services',
+            ar: props.landingSettings.services_title?.ar || 'خدماتنا'
+        },
+        software_services_title: {
+            en: props.landingSettings.software_services_title?.en || 'Software Solutions',
+            ar: props.landingSettings.software_services_title?.ar || 'حلول البرمجيات'
+        },
+        software_services_desc: {
+            en: props.landingSettings.software_services_desc?.en || 'Our POS software solutions provide comprehensive system management tools, advanced reporting features, seamless integrations, and reliable ongoing support services.',
+            ar: props.landingSettings.software_services_desc?.ar || 'توفر حلول برمجيات نقاط البيع لدينا أدوات إدارة نظام شاملة، وميزات تقارير متقدمة، وتكاملات سلسة، وخدمات دعم مستمرة وموثوقة.'
+        },
+        hardware_services_title: {
+            en: props.landingSettings.hardware_services_title?.en || 'Hardware Installation',
+            ar: props.landingSettings.hardware_services_title?.ar || 'تركيب الأجهزة'
+        },
+        hardware_services_desc: {
+            en: props.landingSettings.hardware_services_desc?.en || 'We install and configure POS machines, bill printers, tablets, cash drawers, barcode scanners, and all required hardware to ensure a complete and ready-to-use setup.',
+            ar: props.landingSettings.hardware_services_desc?.ar || 'نقوم بتركيب وتكوين أجهزة نقاط البيع، طابعات الفواتير، الأجهزة اللوحية، أدراج النقود، ماسحات الباركود، وجميع الأجهزة المطلوبة لضمان إعداد كامل وجاهز للاستخدام.'
         },
 
         // Images
