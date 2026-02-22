@@ -23,10 +23,10 @@ let particles: Particle[] = [];
 let mouse = { x: -1000, y: -1000 };
 
 // Configuration for "Pro" feel
-const PARTICLE_COUNT = 140; // Increased for denser background
-const CONNECTION_DISTANCE = 140; // Distance to draw lines
-const MOUSE_RADIUS = 250; // Larger influence radius
-const MOUSE_FORCE = 0.1; // Stronger magnetic pull
+const PARTICLE_COUNT = 80; // Optimized count
+const CONNECTION_DISTANCE = 0; // Disabled lines for performance
+const MOUSE_RADIUS = 200; // Snappier interaction
+const MOUSE_FORCE = 0.08; 
 
 class Particle {
     x: number;
@@ -132,27 +132,6 @@ const animate = () => {
     for (let i = 0; i < particles.length; i++) {
         particles[i].update();
         particles[i].draw();
-
-        // Draw Constellation Connections
-        // We only check particles[j] where j > i to avoid duplicate lines and self-checks
-        for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < CONNECTION_DISTANCE) {
-                // Calculate opacity based on distance (closer = more opaque)
-                const opacity = 1 - (distance / CONNECTION_DISTANCE);
-                // Use a subtle emerald/gray mix for lines
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(16, 185, 129, ${opacity * 0.15})`; // Very subtle line
-                ctx.lineWidth = 0.5;
-                ctx.moveTo(particles[i].x, particles[i].y);
-                ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.stroke();
-                ctx.closePath();
-            }
-        }
     }
     
     animationFrameId = requestAnimationFrame(animate);

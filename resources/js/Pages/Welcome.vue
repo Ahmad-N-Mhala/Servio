@@ -1,4 +1,8 @@
 <template>
+    <Head>
+        <title>Restaurant POS & Profit Optimization System | Servio</title>
+        <meta name="description" content="Servio is the all-in-one POS, KDS, and Inventory management platform designed to help restaurants eliminate food waste, control costs, and maximize profit margins." />
+    </Head>
     <div :dir="locale === 'ar' ? 'rtl' : 'ltr'" class="min-h-screen bg-transparent font-sans text-gray-900 selection:bg-emerald-500/20 selection:text-emerald-700">
         
         <!-- Navbar -->
@@ -31,10 +35,13 @@
                                 </svg>
                             </button>
 
-                            <!-- Login CTA -->
-                            <a :href="route('login')" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm tracking-wide hover:bg-emerald-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 shadow-xl shadow-emerald-900/20 capitalize">
-                                {{ $t('landing.get_started') }}
+                            <a :href="route('login')" class="text-sm font-bold text-gray-700 hover:text-emerald-600 transition-colors px-2">
+                                {{ $t('landing.login') || 'Log in' }}
                             </a>
+                            <!-- Register CTA -->
+                            <button @click.prevent="openRegisterModal()" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm tracking-wide hover:bg-emerald-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 shadow-xl shadow-emerald-900/20 capitalize">
+                                {{ $t('landing.get_started') }}
+                            </button>
                         </div>
                     </div>
                     
@@ -61,7 +68,10 @@
                 <button @click="scrollTo('services')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ getSetting('services_title') || $t('landing.our_services_title') || 'Our Services' }}</button>
                 <button @click="scrollTo('modules')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.features') }}</button>
                 <button @click="scrollTo('pricing')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.plans_pricing') }}</button>
-                <a :href="route('login')" class="block w-full text-center px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30">{{ $t('landing.get_started') }}</a>
+                <div class="pt-2 border-t border-gray-100 flex flex-col gap-3">
+                    <a :href="route('login')" class="block w-full text-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 border border-gray-200 font-bold rounded-xl transition-colors">{{ $t('landing.login') || 'Log in' }}</a>
+                    <button @click.prevent="openRegisterModal()" class="block w-full text-center px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30">{{ $t('landing.get_started') }}</button>
+                </div>
             </div>
         </nav>
 
@@ -83,16 +93,21 @@
                     {{ getSetting('hero_subtitle') || $t('landing.hero_subtitle') }}
                 </p>
                 
-                <div class="flex flex-col sm:flex-row justify-center gap-5 animate-fade-in-up animation-delay-300">
-                    <a :href="route('login')" class="px-8 py-3.5 rounded-full bg-emerald-600 text-white font-bold text-lg tracking-wide shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 capitalize">
-                        {{ $t('landing.start_free') || 'Start For Free' }}
-                    </a>
-                    <button @click="scrollTo('pricing')" class="px-8 py-3.5 rounded-full bg-white text-gray-900 border border-gray-200 font-bold text-lg tracking-wide shadow-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 capitalize">
-                        {{ $t('landing.view_pricing') }}
-                    </button>
+                <div class="flex flex-col items-center animate-fade-in-up animation-delay-300">
+                    <div class="flex flex-col sm:flex-row justify-center gap-5 mb-4">
+                        <button @click.prevent="openRegisterModal()" class="px-8 py-3.5 rounded-full bg-emerald-600 text-white font-bold text-lg tracking-wide shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 capitalize">
+                            {{ $t('landing.start_free') || 'Start For Free' }}
+                        </button>
+                        <button @click="scrollTo('pricing')" class="px-8 py-3.5 rounded-full bg-white text-gray-900 border border-gray-200 font-bold text-lg tracking-wide shadow-lg hover:bg-gray-50 hover:border-gray-300 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 capitalize">
+                            {{ $t('landing.view_pricing') }}
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium">{{ $t('landing.no_credit_card') }}</p>
                 </div>
             </div>
         </section>
+
+
 
         <!-- About Us Section -->
         <section id="about" class="py-32 relative scroll-mt-24">
@@ -377,7 +392,7 @@
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <!-- How It Works Section -->
-                <div class="text-center mb-20">
+                <div class="text-center mb-20 mt-32">
                      <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
                         <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.how_it_works_title') }}</span>
                     </div>
@@ -737,6 +752,8 @@
         </section>
 
 
+
+
         <!-- Footer -->
         <footer class="relative z-10 bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
             <!-- Decorative gradient line -->
@@ -820,70 +837,82 @@
         </footer>
 
         <!-- Registration Modal -->
-        <Modal :show="showRegisterModal" @close="showRegisterModal = false">
-             <div class="p-8">
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mx-auto mb-6 shadow-sm border border-emerald-100">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Modal :show="showRegisterModal" @close="showRegisterModal = false" maxWidth="md">
+             <div class="px-6 py-8 sm:p-10 relative overflow-hidden bg-white">
+                <!-- Background Decoration -->
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-emerald-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+
+                <div class="text-center mb-8 relative z-10">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mx-auto mb-6 shadow-sm border border-emerald-100 transform rotate-3 hover:rotate-0 transition-all duration-300">
+                        <svg v-if="selectedPlan" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
+                        <svg v-else class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
                     </div>
-                     <h3 class="text-3xl font-extrabold text-gray-900 mb-2">{{ $t('landing.register_interest') }}</h3>
-                     <p class="text-gray-500 font-medium text-lg">
-                        {{ $t('landing.for_plan', { plan: getPlanName(selectedPlan) }) }}
+                     <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
+                         {{ selectedPlan ? $t('landing.register_interest') : ($t('landing.start_free_modal_title') || 'Start Your Free Trial') }}
+                     </h3>
+                     <p class="text-gray-500 font-medium text-base">
+                        {{ selectedPlan ? $t('landing.for_plan', { plan: getPlanName(selectedPlan) }) : ($t('landing.start_free_modal_desc') || 'Enter your details and we will set up your trial immediately, no commitments.') }}
                      </p>
                 </div>
 
-                <form @submit.prevent="submitInterest" class="space-y-4">
-                     <div>
-                        <Input 
-                            v-model="form.name"
-                            :label="$t('landing.full_name')"
-                            required
-                            :error="form.errors.name"
-                        />
-                    </div>
-                     <div>
-                        <Input 
-                            v-model="form.email"
-                            :label="$t('landing.email_address')"
-                            type="email"
-                            required
-                            :error="form.errors.email"
-                        />
-                    </div>
+                <form @submit.prevent="submitInterest" class="space-y-4 relative z-10">
+                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                         <div class="sm:col-span-2">
+                            <Input 
+                                v-model="form.name"
+                                :label="$t('landing.full_name')"
+                                required
+                                :error="form.errors.name"
+                                class="bg-gray-50/50"
+                            />
+                        </div>
+                         <div class="sm:col-span-2">
+                            <Input 
+                                v-model="form.email"
+                                :label="$t('landing.email_address')"
+                                type="email"
+                                required
+                                :error="form.errors.email"
+                                class="bg-gray-50/50"
+                            />
+                        </div>
+                        <div class="sm:col-span-1">
+                            <Input 
+                                v-model="form.phone"
+                                :label="$t('landing.phone_number')"
+                                type="tel"
+                                required
+                                :error="form.errors.phone"
+                                class="bg-gray-50/50"
+                            />
+                        </div>
+                         <div class="sm:col-span-1">
+                            <Input 
+                                v-model="form.restaurant_name"
+                                :label="$t('landing.restaurant_name')"
+                                required
+                                :error="form.errors.restaurant_name"
+                                class="bg-gray-50/50"
+                            />
+                        </div>
+                     </div>
                     <div>
-                        <Input 
-                            v-model="form.phone"
-                            :label="$t('landing.phone_number')"
-                            type="tel"
-                            required
-                            :error="form.errors.phone"
-                        />
-                    </div>
-                     <div>
-                        <Input 
-                            v-model="form.restaurant_name"
-                            :label="$t('landing.restaurant_name')"
-                            required
-                            :error="form.errors.restaurant_name"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('landing.message') }}</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">{{ $t('landing.message') }}</label>
                         <textarea 
                             v-model="form.message"
-                            rows="3"
-                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                            rows="2"
+                            class="w-full rounded-xl border-gray-200 bg-gray-50/50 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 resize-none transition-colors"
                         ></textarea>
                     </div>
 
                     <div class="pt-4">
-                    <div class="pt-4">
-                         <Button type="submit" @click.prevent="submitInterest" class="w-full justify-center py-3 text-lg" :loading="form.processing">
+                         <Button type="submit" class="w-full justify-center py-3.5 text-lg shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 font-bold tracking-wide" :loading="form.processing">
                             {{ $t('landing.submit') }}
                         </Button>
-                    </div>
                     </div>
                 </form>
              </div>
@@ -912,8 +941,8 @@
 </template>
 
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { useForm, usePage, Head } from '@inertiajs/vue3';
+import { defineAsyncComponent, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import axios from 'axios';
@@ -921,7 +950,9 @@ import Logo from '@/Components/Logo.vue';
 import Modal from '@/Components/Modal.vue';
 import Input from '@/Components/Input.vue';
 import Button from '@/Components/Button.vue';
-import ParticlesBackground from '@/Components/ParticlesBackground.vue';
+
+// Lazy load heavy background for better LCP
+const ParticlesBackground = defineAsyncComponent(() => import('@/Components/ParticlesBackground.vue'));
 
 interface SystemSettings {
     support_email?: string;
@@ -1086,10 +1117,10 @@ const formatPrice = (price: number | string) => {
     return Number(price).toFixed(0);
 };
 
-const openRegisterModal = (plan: any) => {
-    selectedPlan.value = plan;
-    form.plan_id = plan.id;
-    form.plan_name = plan.name;
+const openRegisterModal = (plan?: any) => {
+    selectedPlan.value = plan || null;
+    form.plan_id = plan ? plan.id : null;
+    form.plan_name = plan ? plan.name : '';
     showRegisterModal.value = true;
 };
 
