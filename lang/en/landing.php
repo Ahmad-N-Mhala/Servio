@@ -108,4 +108,13 @@ Our platform goes beyond simple transactions, offering a seamless integration of
     'how_it_works_subtitle' => 'Seamlessly simple steps to get your restaurant running.',
     'privacy_policy' => 'Privacy Policy',
     'terms_of_service' => 'Terms of Service',
+
+    // Inventory & Waste
+    'inventory_control' => 'Inventory & Waste Control',
+    'inventory_title' => 'Automated Inventory Sync',
+    'inventory_desc' => 'Monitor your kitchen\'s heartbeat in real-time. Our intelligent sync perfectly couples your active inventory batches with waste tracking, automatically applying FIFO deductions and precise cost baselines. Stop guessing your losses and start maximizing yield with pinpoint financial accuracy.',
+    'automated_fifo' => 'Automated FIFO Depletion',
+    'automated_fifo_desc' => 'The system knows precisely which batch corresponds to waste entries, ensuring cost models reflect literal shelf reality.',
+    'precise_loss' => 'Precise Total Loss Tracking',
+    'precise_loss_desc' => 'Identify leakage trends immediately. Total financial losses are mathematically locked to the exact unit cost of the ruined ingredient.',
 ];
