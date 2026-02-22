@@ -447,6 +447,98 @@
             </div>
         </section>
 
+        <!-- Waste & Inventory Synchronization Section -->
+        <section class="py-24 relative bg-gray-50 border-y border-gray-100 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                    <!-- Text Content -->
+                    <div :class="locale === 'ar' ? 'lg:order-2' : 'lg:order-1'" class="order-2 relative group">
+                        <div class="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-orange-50 text-orange-700 border border-orange-100">
+                            <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.inventory_control') || 'Inventory & Waste Control' }}</span>
+                        </div>
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-6">
+                            {{ $t('landing.inventory_title') || 'Automated Inventory Sync' }}
+                        </h2>
+                        <p class="text-lg text-gray-600 leading-relaxed mb-8">
+                            {{ $t('landing.inventory_desc') || 'Monitor your kitchen\'s heartbeat in real-time. Our intelligent sync perfectly couples your active inventory batches with waste tracking, automatically applying FIFO deductions and precise cost baselines. Stop guessing your losses and start maximizing yield with pinpoint financial accuracy.' }}
+                        </p>
+                        
+                        <div class="space-y-6">
+                            <!-- Feature 1 -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-900 mb-1">{{ $t('landing.automated_fifo') || 'Automated FIFO Depletion' }}</h4>
+                                    <p class="text-gray-500 text-sm leading-relaxed">{{ $t('landing.automated_fifo_desc') || 'The system knows precisely which batch corresponds to waste entries, ensuring cost models reflect literal shelf reality.' }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Feature 2 -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-900 mb-1">{{ $t('landing.precise_loss') || 'Precise Total Loss Tracking' }}</h4>
+                                    <p class="text-gray-500 text-sm leading-relaxed">{{ $t('landing.precise_loss_desc') || 'Identify leakage trends immediately. Total financial losses are mathematically locked to the exact unit cost of the ruined ingredient.' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Side -->
+                    <div :class="locale === 'ar' ? 'lg:order-1' : 'lg:order-2'" class="order-1 relative group">
+                        <!-- Abstract Visual Graphic -->
+                        <div class="relative w-full aspect-square max-w-md mx-auto">
+                            <!-- Background shapes -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-orange-200 to-green-200 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            
+                            <div class="relative z-10 w-full h-full bg-white rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 flex flex-col items-center justify-center transform group-hover:scale-105 transition-transform duration-500">
+                                <!-- Mock UI of Waste/Inventory -->
+                                <div class="w-full space-y-4">
+                                    <!-- Stock bar -->
+                                    <div class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                                        <div class="flex justify-between items-end mb-2">
+                                            <div class="text-sm font-bold text-gray-900 font-mono">Tomato (kg) <span class="text-gray-400 font-normal ml-2">FIFO Batch #102</span></div>
+                                            <div class="text-xs text-green-600 font-bold">24.00 kg</div>
+                                        </div>
+                                        <div class="h-2 rounded-full bg-green-100 overflow-hidden"><div class="h-full bg-green-500 w-3/4"></div></div>
+                                    </div>
+                                    
+                                    <!-- Sync Arrow -->
+                                    <div class="flex justify-center -my-2 relative z-20">
+                                        <div class="bg-white p-2 border border-gray-100 rounded-full shadow-sm text-gray-400">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Waste bar -->
+                                    <div class="w-full p-4 rounded-2xl bg-red-50 border border-red-100">
+                                        <div class="flex justify-between items-end mb-2">
+                                            <div class="text-sm font-bold text-red-900">Waste Log</div>
+                                            <div class="text-xs text-red-600 font-bold">-2.00 kg</div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs text-gray-500">
+                                            <span>Loss Deduction</span>
+                                            <span class="font-bold font-mono text-gray-900">AED 10.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Floating Tag -->
+                            <div class="absolute -bottom-6 -right-6 bg-white py-3 px-6 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100 z-20">
+                                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                                <span class="font-bold text-gray-900 tracking-wide text-sm">Live Automated Sync</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Feedback Collection Section -->
         <section class="py-24 relative overflow-hidden z-10">
 
