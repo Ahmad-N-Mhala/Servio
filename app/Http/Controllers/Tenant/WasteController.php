@@ -31,13 +31,23 @@ class WasteController extends Controller
             ->where('restaurant_id', $restaurant->id)
             ->with(['ingredient']);
 
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('log_date', [$request->start_date, $request->end_date]);
+        if ($request->filled('start_date')) {
+            $query->where('log_date', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->where('log_date', '<=', $request->end_date);
         }
 
         if ($request->has('export') && $request->export === 'excel') {
             return $this->exportToExcel($query->get());
         }
+
+        $summaryQuery = clone $query;
+        $summary = [
+            'total_loss' => $summaryQuery->sum('total_loss'),
+            'records' => $summaryQuery->count(),
+        ];
 
         $logs = $query->orderBy('log_date', 'desc')->paginate(20);
 
@@ -82,7 +92,8 @@ class WasteController extends Controller
             'logs' => $logs,
             'wasteActivityLogs' => $wasteActivityLogs,
             'ingredients' => $ingredientsData,
-            'filters' => $request->only(['start_date', 'end_date'])
+            'filters' => $request->only(['start_date', 'end_date']),
+            'summary' => $summary
         ]);
     }
 

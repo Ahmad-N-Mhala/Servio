@@ -5,11 +5,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div class="glass-card rounded-2xl p-6 card-hover">
                      <p class="text-sm font-medium text-gray-500">{{ $t('waste.loss_today') }}</p>
-                     <p class="text-2xl font-bold text-red-600 mt-1">{{ formatCurrency(totalLoss) }}</p>
+                     <p class="text-2xl font-bold text-red-600 mt-1">{{ formatCurrency(props.summary.total_loss) }}</p>
                  </div>
                  <div class="glass-card rounded-2xl p-6 card-hover">
                      <p class="text-sm font-medium text-gray-500">{{ $t('waste.records') }}</p>
-                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ logsList.length }}</p>
+                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ props.summary.records }}</p>
                  </div>
             </div>
 
@@ -193,6 +193,7 @@ const props = defineProps<{
     logs: any;
     ingredients: any[];
     filters: any;
+    summary: { total_loss: number, records: number };
 }>();
 
 const { locale, t } = useI18n();
@@ -246,7 +247,6 @@ const exportExcel = () => {
 };
 
 const logsList = computed(() => props.logs.data || []);
-const totalLoss = computed(() => logsList.value.reduce((sum: number, log: any) => sum + Number(log.total_loss), 0));
 
 const filteredLogs = computed(() => {
     if (!search.value) return logsList.value;
