@@ -36,12 +36,14 @@
                             @update:modelValue="filterByDate"
                             :label="$t('expenses.month') || 'Month'"
                             :options="monthOptions"
+                            :clearable="false"
                         />
                         <Select
                             v-model="selectedYear"
                             @update:modelValue="filterByDate"
                             :label="$t('expenses.year') || 'Year'"
                             :options="yearOptions"
+                            :clearable="false"
                         />
                     </div>
                 </div>

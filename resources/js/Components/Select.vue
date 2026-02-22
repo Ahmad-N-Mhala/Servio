@@ -16,7 +16,7 @@
                 :selectable="(opt: any) => !opt.disabled"
                 :disabled="disabled"
                 :searchable="true"
-                :clearable="!required"
+                :clearable="clearable !== undefined ? clearable : !required"
                 class="style-chooser"
                 :class="{'has-error': error}"
             >
@@ -65,12 +65,14 @@ const props = withDefaults(defineProps<{
     hint?: string;
     disabled?: boolean;
     required?: boolean;
+    clearable?: boolean;
     size?: 'sm' | 'md' | 'lg';
     icon?: 'search' | 'dropdown' | null;
 }>(), {
     size: 'md',
     icon: null,
-    options: () => []
+    options: () => [],
+    clearable: undefined
 });
 
 const emit = defineEmits<{
