@@ -37,6 +37,7 @@
                 :title="$t('orders.title')"
                 :empty-message="$t('orders.no_orders')"
                 @sort="handleSort"
+                allow-overflow
             >
                 <!-- Order Number & Delivery Provider -->
                 <template #cell-order_number="{ row }">
@@ -129,8 +130,8 @@
                             v-if="openDropdown === row.id"
                             @click.stop
                             :class="[
-                                'absolute end-0 w-48 rounded-xl shadow-xl bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-10 z-50 overflow-hidden transform transition-all',
-                                (index !== undefined && ordersList && index >= ordersList.length - 2) ? 'bottom-full mb-2 ltr:origin-bottom-right rtl:origin-bottom-left' : 'mt-2 ltr:origin-top-right rtl:origin-top-left'
+                                'fixed lg:absolute end-0 w-48 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-10 z-[100] transform transition-all',
+                                (index !== undefined && ordersList && index >= ordersList.length - 2) ? 'bottom-full mb-2 ltr:origin-bottom-right rtl:origin-bottom-left lg:translate-y-0 lg:-translate-x-0 -translate-x-[75%]' : 'mt-2 ltr:origin-top-right rtl:origin-top-left lg:translate-y-0 lg:-translate-x-0 -translate-x-[75%]'
                             ]"
                         >
                             <div class="py-1">
