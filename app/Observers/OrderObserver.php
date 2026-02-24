@@ -17,7 +17,7 @@ class OrderObserver
     public function updated(\App\Models\Order $order): void
     {
         // Check if status changed
-        if ($order->isDirty('status')) {
+        if ($order->wasChanged('status')) {
             if ($order->status === 'completed') {
                 $this->processTriggers($order, 'order_completed');
             } elseif ($order->status === 'cancelled') {
