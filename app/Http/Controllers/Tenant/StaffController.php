@@ -41,7 +41,7 @@ class StaffController extends Controller
 
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
 
         if (!$restaurant) {
             abort(404, 'Restaurant context not found');
@@ -223,7 +223,7 @@ class StaffController extends Controller
             ],
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant) {
             abort(404, 'Restaurant context not found');
         }

@@ -12,7 +12,7 @@ class DeliveryIntegrationController extends Controller
 {
     public function index()
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -90,7 +90,7 @@ class DeliveryIntegrationController extends Controller
             }
         }
 
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -141,7 +141,7 @@ class DeliveryIntegrationController extends Controller
 
     public function destroy(Request $request, $provider)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -158,7 +158,7 @@ class DeliveryIntegrationController extends Controller
     }
     public function pushMenu(Request $request, $provider)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 

@@ -22,7 +22,7 @@ class InventoryController extends Controller
         if (!$restaurant && $request->user()->is_super_admin) {
             // Check if there's a session ID first (fallback to manual lookup if helper fails)
             if (session('active_restaurant_id')) {
-                $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+                $restaurant = auth()->user()->currentRestaurant();
             }
         }
 
@@ -75,7 +75,7 @@ class InventoryController extends Controller
 
         // Enforce strict context - removed implicit fallback for super admin
         if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
-            $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+            $restaurant = auth()->user()->currentRestaurant();
         }
 
         if (!$restaurant) {
@@ -356,7 +356,7 @@ class InventoryController extends Controller
         $restaurant = $request->user()->currentRestaurant();
         if (!$restaurant && $request->user()->is_super_admin) {
             if (session('active_restaurant_id')) {
-                $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+                $restaurant = auth()->user()->currentRestaurant();
             }
         }
 

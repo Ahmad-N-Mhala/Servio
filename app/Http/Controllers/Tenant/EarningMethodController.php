@@ -14,7 +14,7 @@ class EarningMethodController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = auth()->user()->currentRestaurant() ?? \App\Models\Restaurant::first();
 
         $query = EarningMethod::where('restaurant_id', $restaurant->id);
 
@@ -70,7 +70,7 @@ class EarningMethodController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id')) ?? \App\Models\Restaurant::first();
+        $restaurant = auth()->user()->currentRestaurant() ?? \App\Models\Restaurant::first();
 
         // Enforce single earning method
         if (EarningMethod::where('restaurant_id', $restaurant->id)->exists()) {

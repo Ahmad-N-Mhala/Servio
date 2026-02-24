@@ -23,7 +23,7 @@ class DashboardController extends Controller
 {
     public function export(Request $request)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = auth()->user()->currentRestaurant() ?? Restaurant::first();
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
         $format = $request->input('format', 'pdf');
@@ -508,7 +508,7 @@ class DashboardController extends Controller
 
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = auth()->user()->currentRestaurant() ?? Restaurant::first();
 
         // Get date range from request or default to last 7 days
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
@@ -1110,7 +1110,7 @@ class DashboardController extends Controller
 
     public function getDetails(Request $request)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id')) ?? Restaurant::first();
+        $restaurant = auth()->user()->currentRestaurant() ?? Restaurant::first();
         $type = $request->input('type');
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());

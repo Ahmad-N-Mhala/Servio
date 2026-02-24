@@ -29,7 +29,7 @@ class PosOrderController extends Controller
         // Since we are using Spatie permissions via middleware, we might not need Gate::authorize unless we registered a gate.
         // The middleware 'permission:create_delivery_order' handles it.
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -137,7 +137,7 @@ class PosOrderController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant) {
             abort(404, 'Restaurant context not found');
         }

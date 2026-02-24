@@ -19,7 +19,7 @@ class WasteController extends Controller
 
         // Enforce strict context - removed implicit fallback for super admin
         if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
-            $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+            $restaurant = auth()->user()->currentRestaurant();
         }
 
         if (!$restaurant) {
@@ -184,7 +184,7 @@ class WasteController extends Controller
 
         // Enforce strict context - removed implicit fallback for super admin
         if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
-            $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+            $restaurant = auth()->user()->currentRestaurant();
         }
 
         if (!$restaurant) {

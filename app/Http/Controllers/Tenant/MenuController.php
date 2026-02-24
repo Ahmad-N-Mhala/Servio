@@ -19,7 +19,7 @@ class MenuController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_menu');
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -59,7 +59,7 @@ class MenuController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -173,7 +173,7 @@ class MenuController extends Controller
             'sku' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 

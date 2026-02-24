@@ -22,7 +22,7 @@ class KitchenController extends Controller
 
     public function index(): Response
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 

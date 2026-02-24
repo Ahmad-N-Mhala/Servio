@@ -14,7 +14,7 @@ class ReceiptTemplateController extends Controller
 {
     public function index(): Response
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
 
         if (!$restaurant) {
             abort(404, 'Restaurant not found');
@@ -38,7 +38,7 @@ class ReceiptTemplateController extends Controller
 
     public function store(Request $request)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
 
         if (!$restaurant) {
             abort(404, 'Restaurant not found');

@@ -15,7 +15,7 @@ class TableController extends Controller
     public function index()
     {
         \Illuminate\Support\Facades\Gate::authorize('view_tables');
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -50,7 +50,7 @@ class TableController extends Controller
             'zone_id' => 'nullable|exists:zones,id',
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -89,7 +89,7 @@ class TableController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
 
         Zone::create([
             'restaurant_id' => $restaurant->id,

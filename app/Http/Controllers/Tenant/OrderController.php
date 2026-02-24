@@ -26,7 +26,7 @@ class OrderController extends Controller
 
     public function index(Request $request): Response
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -100,7 +100,7 @@ class OrderController extends Controller
 
     public function export(Request $request)
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -207,7 +207,7 @@ class OrderController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('pos_system');
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -410,7 +410,7 @@ class OrderController extends Controller
             'delivery_provider' => ['nullable', 'string', 'required_if:type,delivery'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 

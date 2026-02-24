@@ -18,7 +18,7 @@ class CommunicationController extends Controller
 {
     public function index(Request $request): Response
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -97,7 +97,7 @@ class CommunicationController extends Controller
 
     public function purchaseBundle(Request $request, CommunicationBundle $bundle)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -150,7 +150,7 @@ class CommunicationController extends Controller
             'reward_config.description' => 'nullable|string',
         ]);
 
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -166,7 +166,7 @@ class CommunicationController extends Controller
 
     public function updateTemplate(Request $request, CommunicationTemplate $template)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant || $template->restaurant_id !== $restaurant->id) {
             abort(403, 'Unauthorized action.');
         }
@@ -210,7 +210,7 @@ class CommunicationController extends Controller
 
     public function destroyTemplate(CommunicationTemplate $template)
     {
-        $restaurant = Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant || $template->restaurant_id !== $restaurant->id) {
             abort(403, 'Unauthorized action.');
         }

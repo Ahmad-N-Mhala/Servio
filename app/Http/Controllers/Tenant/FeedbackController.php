@@ -77,7 +77,7 @@ class FeedbackController extends Controller
             'reset_logo' => ['nullable', 'boolean'],
         ]);
 
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404);
 

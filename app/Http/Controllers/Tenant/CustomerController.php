@@ -13,7 +13,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        $restaurant = \App\Models\Restaurant::find(session('active_restaurant_id'));
+        $restaurant = auth()->user()->currentRestaurant();
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
