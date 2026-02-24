@@ -461,7 +461,7 @@ class LoyaltyController extends Controller
 
         $restaurant = auth()->user()->currentRestaurant();
 
-        $logs = \App\Models\CommunicationLog::where('restaurant_id', $restaurant->id)
+        $logs = \App\Models\CommunicationLog::where('restaurant_id', (string) $restaurant->id)
             ->where('type', 'sms')
             ->orderBy('created_at', 'desc')
             ->paginate(20);

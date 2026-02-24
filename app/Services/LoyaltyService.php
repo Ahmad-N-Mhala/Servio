@@ -351,7 +351,7 @@ class LoyaltyService
                 \Illuminate\Support\Facades\Log::info("SIMULATED SMS to {$customer->phone}: OTP {$otpCode}");
 
                 \App\Models\CommunicationLog::create([
-                    'restaurant_id' => $customer->restaurant_id,
+                    'restaurant_id' => (string) $customer->restaurant_id,
                     'recipient' => $customer->phone,
                     'type' => 'sms',
                     'status' => 'sent',
@@ -370,7 +370,7 @@ class LoyaltyService
             if ($restaurant && $restaurant->sms_balance <= 0) {
                 \Illuminate\Support\Facades\Log::warning("Restaurant {$restaurant->id} out of SMS credits.");
                 \App\Models\CommunicationLog::create([
-                    'restaurant_id' => $customer->restaurant_id,
+                    'restaurant_id' => (string) $customer->restaurant_id,
                     'recipient' => $customer->phone,
                     'type' => 'sms',
                     'status' => 'failed',
@@ -390,7 +390,7 @@ class LoyaltyService
 
             // Log Success
             \App\Models\CommunicationLog::create([
-                'restaurant_id' => $customer->restaurant_id,
+                'restaurant_id' => (string) $customer->restaurant_id,
                 'recipient' => $customer->phone,
                 'type' => 'sms',
                 'status' => 'sent',
@@ -403,7 +403,7 @@ class LoyaltyService
         } catch (\Exception $e) {
             // Log Failure
             \App\Models\CommunicationLog::create([
-                'restaurant_id' => $customer->restaurant_id,
+                'restaurant_id' => (string) $customer->restaurant_id,
                 'recipient' => $customer->phone,
                 'type' => 'sms',
                 'status' => 'failed',

@@ -28,7 +28,7 @@ class CheckFeatureAccess
 
         $restaurant = auth()->user()->currentRestaurant();
 
-        if (!$restaurant || $restaurant->id !== $restaurantId) {
+        if (!$restaurant || (string) $restaurant->id !== (string) $restaurantId) {
             return redirect()->route('restaurants.index')
                 ->with('error', 'Restaurant not found.');
         }
