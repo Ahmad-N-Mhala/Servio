@@ -52,6 +52,7 @@ class HandleInertiaRequests extends Middleware
                     $ids = \Illuminate\Support\Facades\DB::table('restaurant_user')
                         ->where('email', $request->user()->email)
                         ->pluck('restaurant_id')
+                        ->map(fn($id) => (string) $id)
                         ->toArray();
                     return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name', 'logo'])->get();
                 }

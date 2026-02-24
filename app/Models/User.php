@@ -75,6 +75,7 @@ class User extends Authenticatable
             ->table('restaurant_user')
             ->where('email', $this->email)
             ->pluck('restaurant_id')
+            ->map(fn($id) => (string) $id)
             ->toArray();
 
         // Check active session

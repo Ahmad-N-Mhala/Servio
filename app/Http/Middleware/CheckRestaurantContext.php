@@ -65,6 +65,7 @@ class CheckRestaurantContext
                 ->table('restaurant_user')
                 ->where('email', $request->user()->email)
                 ->pluck('restaurant_id')
+                ->map(fn($id) => (string) $id)
                 ->toArray();
         });
 
