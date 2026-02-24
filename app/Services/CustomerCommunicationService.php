@@ -79,12 +79,6 @@ class CustomerCommunicationService
         // Ensure we find the right restaurant (System templates may have null restaurant_id)
         $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
 
-        if (!$restaurant || $restaurant->email_balance <= 0) {
-            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of email credits or not found.");
-            self::log($template, $customer, 'email', 'failed', 'Insufficient balance or restaurant mismatch', null, $restaurant->id ?? null);
-            return;
-        }
-
         $locale = $restaurant->locale ?? 'en';
 
         // Pick Subject
@@ -102,6 +96,12 @@ class CustomerCommunicationService
         $subject = self::replaceVariables($subject, $data);
         $content = self::replaceVariables($content, $data);
 
+        if (!$restaurant || $restaurant->email_balance <= 0) {
+            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of email credits or not found.");
+            self::log($template, $customer, 'email', 'failed', $content, $subject, $restaurant->id ?? null, 'Insufficient balance or restaurant mismatch');
+            return;
+        }
+
         try {
             // Real Email Integration
             Mail::to($customer->email)->send(new \App\Mail\GenericSystemEmail($subject, $content));
@@ -110,7 +110,7 @@ class CustomerCommunicationService
             self::log($template, $customer, 'email', 'sent', $content, $subject, $restaurant->id ?? null);
         } catch (\Exception $e) {
             Log::error("Email failed: " . $e->getMessage());
-            self::log($template, $customer, 'email', 'failed', $e->getMessage(), $subject, $restaurant->id ?? null);
+            self::log($template, $customer, 'email', 'failed', $content, $subject, $restaurant->id ?? null, $e->getMessage());
         }
     }
 
@@ -122,12 +122,6 @@ class CustomerCommunicationService
         // Ensure we find the right restaurant (System templates may have null restaurant_id)
         $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
 
-        if (!$restaurant || $restaurant->sms_balance <= 0) {
-            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of SMS credits or not found.");
-            self::log($template, $customer, 'sms', 'failed', 'Insufficient balance or restaurant mismatch', null, $restaurant->id ?? null);
-            return;
-        }
-
         $locale = $restaurant->locale ?? 'en';
 
         // Pick SMS Content
@@ -138,6 +132,12 @@ class CustomerCommunicationService
 
         $content = self::replaceVariables($content, $data);
 
+        if (!$restaurant || $restaurant->sms_balance <= 0) {
+            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of SMS credits or not found.");
+            self::log($template, $customer, 'sms', 'failed', $content, null, $restaurant->id ?? null, 'Insufficient balance or restaurant mismatch');
+            return;
+        }
+
         try {
             // Use Centralized SmsService
             app(\App\Services\SmsService::class)->send($customer->phone, $content);
@@ -146,7 +146,7 @@ class CustomerCommunicationService
             self::log($template, $customer, 'sms', 'sent', $content, null, $restaurant->id ?? null);
         } catch (\Exception $e) {
             Log::error("SMS failed: " . $e->getMessage());
-            self::log($template, $customer, 'sms', 'failed', $e->getMessage(), null, $restaurant->id ?? null);
+            self::log($template, $customer, 'sms', 'failed', $content, null, $restaurant->id ?? null, $e->getMessage());
         }
     }
 
@@ -171,7 +171,7 @@ class CustomerCommunicationService
         return str_replace($search, $replace, $text);
     }
 
-    private static function log($template, $customer, $type, $status, $message = null, $subject = null, $forceRestaurantId = null)
+    private static function log($template, $customer, $type, $status, $message = null, $subject = null, $forceRestaurantId = null, $errorMessage = null)
     {
         CommunicationLog::create([
             'restaurant_id' => $forceRestaurantId ?? $template->restaurant_id ?? $customer->restaurant_id,
@@ -181,6 +181,7 @@ class CustomerCommunicationService
             'status' => $status,
             'subject' => $subject,
             'message' => $type === 'email' ? $message : substr($message ?? '', 0, 1000), // truncate only SMS/short logs
+            'error_message' => $errorMessage,
             'sent_at' => now(),
         ]);
     }

@@ -130,6 +130,7 @@ class CommunicationService
                 'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'failed',
+                'message' => substr($content, 0, 1000),
                 'error_message' => $e->getMessage(),
                 'sent_at' => now(),
             ]);
