@@ -28,7 +28,7 @@ class CommunicationController extends Controller
         }
 
         // --- Logs Query ---
-        $logsQuery = CommunicationLog::query()->where('restaurant_id', $restaurant->id)->with('template');
+        $logsQuery = CommunicationLog::query()->where('restaurant_id', (string) $restaurant->id)->with('template');
 
         if ($request->filled('type')) {
             $logsQuery->where('type', $request->input('type'));
@@ -67,7 +67,7 @@ class CommunicationController extends Controller
             ->get()
             ->map(function ($template) {
                 // Manually count logs to avoid MongoDB withCount limitations
-                $template->logs_count = CommunicationLog::where('communication_template_id', $template->id)->count();
+                $template->logs_count = CommunicationLog::where('communication_template_id', (string) $template->id)->count();
                 return $template;
             });
 

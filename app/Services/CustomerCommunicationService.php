@@ -174,8 +174,8 @@ class CustomerCommunicationService
     private static function log($template, $customer, $type, $status, $message = null, $subject = null, $forceRestaurantId = null, $errorMessage = null)
     {
         CommunicationLog::create([
-            'restaurant_id' => $forceRestaurantId ?? $template->restaurant_id ?? $customer->restaurant_id,
-            'communication_template_id' => $template->id,
+            'restaurant_id' => (string) ($forceRestaurantId ?? $template->restaurant_id ?? $customer->restaurant_id),
+            'communication_template_id' => $template ? (string) $template->id : null,
             'recipient' => $type === 'email' ? ($customer->email ?? 'N/A') : ($customer->phone ?? 'N/A'),
             'type' => $type, // sms or email
             'status' => $status,

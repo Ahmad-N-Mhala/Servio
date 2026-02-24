@@ -111,8 +111,8 @@ class CommunicationService
 
             // Log the communication
             \App\Models\CommunicationLog::create([
-                'restaurant_id' => $restaurant ? $restaurant->id : null,
-                'communication_template_id' => $template->id,
+                'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
+                'communication_template_id' => (string) $template->id,
                 'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'sent',
@@ -125,8 +125,8 @@ class CommunicationService
             \Illuminate\Support\Facades\Log::error("System Email failed: " . $e->getMessage());
 
             \App\Models\CommunicationLog::create([
-                'restaurant_id' => $restaurant ? $restaurant->id : null,
-                'communication_template_id' => $template->id,
+                'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
+                'communication_template_id' => (string) $template->id,
                 'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'failed',

@@ -124,7 +124,7 @@ class CheckCommunicationTriggers extends Command
     private function dispatchCommunication($template, $customer)
     {
         // Avoid sending the same template to the same customer on the same day
-        $alreadySent = \App\Models\CommunicationLog::where('communication_template_id', $template->id)
+        $alreadySent = \App\Models\CommunicationLog::where('communication_template_id', (string) $template->id)
             ->where('recipient', $customer->email ?? $customer->phone)
             ->whereDate('sent_at', now()->toDateString())
             ->exists();
