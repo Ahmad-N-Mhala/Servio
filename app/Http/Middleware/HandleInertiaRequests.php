@@ -98,29 +98,29 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'translations' => function () use ($locale) {
-                $langPath = lang_path();
-                $locales = ['en', 'ar'];
-                $data = [];
+                return \Illuminate\Support\Facades\Cache::remember("translations_{$locale}", 86400, function () use ($locale) {
+                    $langPath = lang_path();
+                    $data = [];
 
-                $path = $langPath . '/' . $locale;
-                if (\Illuminate\Support\Facades\File::exists($path)) {
-                    $files = \Illuminate\Support\Facades\File::files($path);
-                    foreach ($files as $file) {
-                        $name = $file->getFilenameWithoutExtension();
-                        $content = include $file->getPathname();
-                        $data[$locale][$name] = $content;
+                    $path = $langPath . '/' . $locale;
+                    if (\Illuminate\Support\Facades\File::exists($path)) {
+                        $files = \Illuminate\Support\Facades\File::files($path);
+                        foreach ($files as $file) {
+                            $name = $file->getFilenameWithoutExtension();
+                            $content = include $file->getPathname();
+                            $data[$locale][$name] = $content;
+                        }
                     }
-                }
-                return $data;
+                    return $data;
+                });
             },
             'system_settings' => function () {
-                // Fetch cached settings or DB
-                // Since this runs on every request, we should ideally cache this if using SQL/Mongo
-                // For now, simple fetch
-                return [
-                    'support_email' => \App\Models\SystemConfiguration::get('support_email') ?? 'support@kenildock.com',
-                    'support_phone' => \App\Models\SystemConfiguration::get('support_phone') ?? '+9715049460976',
-                ];
+                return \Illuminate\Support\Facades\Cache::remember('system_settings', 86400, function () {
+                    return [
+                        'support_email' => \App\Models\SystemConfiguration::get('support_email') ?? 'support@kenildock.com',
+                        'support_phone' => \App\Models\SystemConfiguration::get('support_phone') ?? '+9715049460976',
+                    ];
+                });
             }
         ]);
     }
