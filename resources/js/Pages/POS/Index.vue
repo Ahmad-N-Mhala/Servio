@@ -1,5 +1,11 @@
 <template>
     <MainLayout>
+        <Toast 
+            :message="toastMessage" 
+            :title="toastTitle" 
+            :type="toastType" 
+            :trigger="toastTrigger" 
+        />
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Cash Register Status Bar -->
             <div v-if="currentRegister" class="mb-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -761,6 +767,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { router, usePage, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import Toast from '@/Components/Toast.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 import ReceiptPreview from '@/Components/ReceiptPreview.vue';
 import { printReceiptPreview } from '@/Utils/printReceipt';
@@ -770,6 +777,18 @@ import Select from '@/Components/Select.vue';
 import Input from '@/Components/Input.vue';
 
 const { t } = useI18n();
+
+const toastMessage = ref('');
+const toastTitle = ref('');
+const toastType = ref<'success' | 'error' | 'info' | 'warning'>('info');
+const toastTrigger = ref(0);
+
+const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', title?: string) => {
+    toastMessage.value = message;
+    toastTitle.value = title || (type === 'error' ? t('common.error', 'Error') : t('common.notification', 'Notification'));
+    toastType.value = type;
+    toastTrigger.value++;
+};
 
 const page = usePage();
 const currentCurrency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
@@ -1286,7 +1305,7 @@ const updateOrder = () => {
 
 const selectPaymentMethod = (method: string) => {
     if (method === 'cash' && !props.currentRegister) {
-        // Don't allow selecting cash if register is not open
+        showToast(t('pos.register_not_open_error', 'Please open the cash register first to process cash payments.'), 'error');
         return;
     }
     paymentMethod.value = method;
@@ -1303,7 +1322,10 @@ const settleBill = () => {
         return;
     }
 
-
+    if (paymentMethod.value === 'cash' && !props.currentRegister) {
+        showToast(t('pos.register_not_open_error', 'Please open the cash register first to process cash payments.'), 'error');
+        return;
+    }
 
     processing.value = true;
     router.post(route('pos.settle', selectedOrder.value.id), {
@@ -1525,11 +1547,11 @@ const tableOptions = computed(() => {
     return list;
 });
 
-// Auto-refresh every 2 seconds to sync with kitchen
+// Auto-refresh every 10 seconds to sync with kitchen
 let refreshInterval: any;
 
 onMounted(() => {
-    // Refresh POS data every 2 seconds
+    // Refresh POS data every 10 seconds
     refreshInterval = setInterval(() => {
         // Don't refresh if any confirmed modal is open to avoid disrupting user
         if (!showUpdateOrderModal.value && !showOpenModal.value && !showCloseModal.value && 
@@ -1544,9 +1566,9 @@ onMounted(() => {
             // Include 'flash' to ensure we clear any stale success messages from session
             router.reload({ only: ['orders', 'currentRegister', 'currentBalance', 'flash'] });
         }
-    }, 2000); // 2 seconds
+    }, 10000); // 10 seconds
     
-    console.log('✅ POS auto-refresh enabled (2 seconds)');
+    console.log('✅ POS auto-refresh enabled (10 seconds)');
 });
 
 onUnmounted(() => {

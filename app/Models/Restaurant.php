@@ -136,33 +136,43 @@ class Restaurant extends Model
         return $this->users()->wherePivot('role', 'owner');
     }
 
+    protected $_enabledFeaturesCache = null;
+
     /**
      * Check if a specific feature is enabled for this restaurant
      */
     public function hasFeature(string $feature): bool
     {
-        // 1. Check Plan Features
+        // 1. Check Restaurant Settings Overrides FIRST (no DB query needed)
+        $settings = is_array($this->settings) ? $this->settings : [];
+        $enabledFeatures = $settings['enabled_features'] ?? [];
+
+        if (in_array($feature, $enabledFeatures)) {
+            return true;
+        }
+
+        // 2. Use Memoized Plan Features if available
+        if (is_array($this->_enabledFeaturesCache)) {
+            return in_array($feature, $this->_enabledFeaturesCache);
+        }
+
+        // 3. Load from Subscription Plan and Memoize
         $subscription = $this->subscription;
+        $planFeatures = [];
+
         if ($subscription && $subscription->plan) {
             $rawFeatures = $subscription->plan->enabled_features;
-            $planFeatures = [];
 
             if (is_array($rawFeatures)) {
                 $planFeatures = $rawFeatures;
             } elseif (is_string($rawFeatures)) {
                 $planFeatures = json_decode($rawFeatures, true) ?? [];
             }
-
-            if (in_array($feature, $planFeatures)) {
-                return true;
-            }
         }
 
-        // 2. Check Restaurant Settings Overrides
-        $settings = is_array($this->settings) ? $this->settings : [];
-        $enabledFeatures = $settings['enabled_features'] ?? [];
+        $this->_enabledFeaturesCache = $planFeatures;
 
-        return in_array($feature, $enabledFeatures);
+        return in_array($feature, $this->_enabledFeaturesCache);
     }
 
     /**

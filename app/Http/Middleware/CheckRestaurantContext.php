@@ -59,12 +59,14 @@ class CheckRestaurantContext
         // If restaurant is already in session, validate user still has access
         // Direct query to pivot collection works fine in Mongo for simple where
         // If restaurant is already in session, validate user still has access
-        // FIX: Use manual query
-        $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
-            ->table('restaurant_user')
-            ->where('email', $request->user()->email)
-            ->pluck('restaurant_id')
-            ->toArray();
+        $cacheKey = 'user_restaurants_' . $request->user()->id;
+        $pivotIds = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($request) {
+            return \Illuminate\Support\Facades\DB::connection('mongodb')
+                ->table('restaurant_user')
+                ->where('email', $request->user()->email)
+                ->pluck('restaurant_id')
+                ->toArray();
+        });
 
         $hasAccess = in_array($restaurantId, $pivotIds);
 
@@ -91,30 +93,30 @@ class CheckRestaurantContext
         // config(['app.active_restaurant_id' => $restaurantId]); 
 
         // Validated Access - Now Check Subscription Status
-        $restaurant = \App\Models\Restaurant::find($restaurantId);
+        $isExpired = \Illuminate\Support\Facades\Cache::remember("restaurant_{$restaurantId}_is_expired", 60, function () use ($restaurantId) {
+            $restaurant = \App\Models\Restaurant::find($restaurantId);
+            if (!$restaurant)
+                return true;
 
-        if ($restaurant) {
             $subscription = $restaurant->subscription; // HasOne relationship
 
             // Check if subscription exists and is valid
             // You can adjust these rules (e.g., allow grace period)
-            $isExpired = false;
+            if (!$subscription)
+                return true;
+            if ($subscription->status !== 'active')
+                return true;
+            if ($subscription->ends_at && $subscription->ends_at->isPast())
+                return true;
 
-            if (!$subscription) {
-                // If missing, we treat as expired
-                $isExpired = true;
-            } elseif ($subscription->status !== 'active') {
-                $isExpired = true;
-            } elseif ($subscription->ends_at && $subscription->ends_at->isPast()) {
-                $isExpired = true;
-            }
+            return false;
+        });
 
-            if ($isExpired) {
-                // Return Inertia response directly (interrupting the request)
-                return Inertia::render('Error/SubscriptionExpired')
-                    ->toResponse($request)
-                    ->setStatusCode(403);
-            }
+        if ($isExpired) {
+            // Return Inertia response directly (interrupting the request)
+            return Inertia::render('Error/SubscriptionExpired')
+                ->toResponse($request)
+                ->setStatusCode(403);
         }
 
         return $next($request);

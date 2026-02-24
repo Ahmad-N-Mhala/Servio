@@ -26,9 +26,9 @@ class CheckFeatureAccess
                 ->with('error', 'Please select a restaurant first.');
         }
 
-        $restaurant = \App\Models\Restaurant::find($restaurantId);
+        $restaurant = auth()->user()->currentRestaurant();
 
-        if (!$restaurant) {
+        if (!$restaurant || $restaurant->id !== $restaurantId) {
             return redirect()->route('restaurants.index')
                 ->with('error', 'Restaurant not found.');
         }

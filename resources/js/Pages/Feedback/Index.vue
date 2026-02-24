@@ -46,27 +46,33 @@
 
                 <!-- Tab Content -->
                 <div v-if="currentTab === 'list'">
-                    <!-- Filters -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <div class="flex-1">
+                    <!-- Date Range Filter -->
+                    <DateRangePicker 
+                        :initial-start-date="filters.date_from"
+                        :initial-end-date="filters.date_to"
+                        @update="onDateRangeUpdate"
+                    />
+
+                    <!-- Other Filters -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                        <div class="flex flex-col sm:flex-row gap-4 items-center">
+                            <div class="flex-1 w-full">
                                 <Input 
                                     v-model="filters.search" 
                                     :placeholder="$t('feedback.search_placeholder') || 'Search by customer name, comment, or order number...'" 
                                     type="search"
-                                />
+                                >
+                                    <template #prefix>
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </template>
+                                </Input>
                             </div>
                             <div class="w-full sm:w-60">
                                 <Select 
                                     v-model="filters.rating" 
                                     :options="ratingOptions"
-                                />
-                            </div>
-                            <div class="w-full sm:w-auto">
-                                <DateRangePicker 
-                                    :initial-start-date="filters.date_from"
-                                    :initial-end-date="filters.date_to"
-                                    @update="onDateRangeUpdate"
                                 />
                             </div>
                         </div>

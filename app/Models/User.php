@@ -51,21 +51,26 @@ class User extends Authenticatable
             ->withPivot('role');
     }
 
+    protected $_currentRestaurantCache = false;
+    protected $_permissionsCache = false;
+    protected $_restaurantRoleCache = false;
+
     public function currentRestaurant()
     {
+        if ($this->_currentRestaurantCache !== false) {
+            return $this->_currentRestaurantCache;
+        }
+
         // If super admin, use the active_restaurant_id from session
         if ($this->is_super_admin) {
             $restaurantId = session('active_restaurant_id');
             if ($restaurantId) {
-                return Restaurant::find($restaurantId);
+                return $this->_currentRestaurantCache = Restaurant::find($restaurantId);
             }
-            return null;
+            return $this->_currentRestaurantCache = null;
         }
 
-        //TODO: 
         // For regular users, find restaurants via the pivot collection 'restaurant_user'
-        // Get all restaurant IDs for this user email
-        // FIX: Use manual query because the relationship is broken
         $allowedRestaurantIds = \Illuminate\Support\Facades\DB::connection('mongodb')
             ->table('restaurant_user')
             ->where('email', $this->email)
@@ -76,26 +81,30 @@ class User extends Authenticatable
         $activeId = (string) session('active_restaurant_id');
 
         if ($activeId && in_array($activeId, $allowedRestaurantIds)) {
-            return Restaurant::find($activeId);
+            return $this->_currentRestaurantCache = Restaurant::find($activeId);
         }
 
         // Fallback to first allowed restaurant
         if (!empty($allowedRestaurantIds)) {
-            return Restaurant::whereIn('id', $allowedRestaurantIds)->orderBy('id')->first();
+            return $this->_currentRestaurantCache = Restaurant::whereIn('id', $allowedRestaurantIds)->orderBy('id')->first();
         }
 
-        return null;
+        return $this->_currentRestaurantCache = null;
     }
 
     public function getPermissionsForCurrentRestaurant()
     {
+        if ($this->_permissionsCache !== false) {
+            return $this->_permissionsCache;
+        }
+
         if ($this->is_super_admin) {
-            return \App\Models\Permission::pluck('name');
+            return $this->_permissionsCache = \App\Models\Permission::pluck('name');
         }
 
         $restaurant = $this->currentRestaurant();
         if (!$restaurant) {
-            return collect([]);
+            return $this->_permissionsCache = collect([]);
         }
 
         // 1. Get User's Role Permissions in this Restaurant
@@ -106,7 +115,7 @@ class User extends Authenticatable
             ->first();
 
         if (!$pivot || !isset($pivot->role)) {
-            return collect([]);
+            return $this->_permissionsCache = collect([]);
         }
 
         $role = \App\Models\Role::findByName($pivot->role, 'web');
@@ -164,18 +173,22 @@ class User extends Authenticatable
         }
 
         // 5. Intersect: User can only do what BOTH their Role AND their Plan allow
-        return $rolePermissions->intersect($allowedActions->unique())->values();
+        return $this->_permissionsCache = $rolePermissions->intersect($allowedActions->unique())->values();
     }
 
     public function getRestaurantRole()
     {
+        if ($this->_restaurantRoleCache !== false) {
+            return $this->_restaurantRoleCache;
+        }
+
         if ($this->is_super_admin) {
-            return 'Super Admin';
+            return $this->_restaurantRoleCache = 'Super Admin';
         }
 
         $restaurant = $this->currentRestaurant();
         if (!$restaurant) {
-            return 'User';
+            return $this->_restaurantRoleCache = 'User';
         }
 
         $pivot = \Illuminate\Support\Facades\DB::connection('mongodb')
@@ -184,7 +197,7 @@ class User extends Authenticatable
             ->where('restaurant_id', (string) $restaurant->id)
             ->first();
 
-        return $pivot && isset($pivot->role) ? $pivot->role : 'User';
+        return $this->_restaurantRoleCache = $pivot && isset($pivot->role) ? $pivot->role : 'User';
     }
 
     public function getLandingRoute()

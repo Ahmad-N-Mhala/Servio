@@ -27,35 +27,46 @@ class HandleInertiaRequests extends Middleware
             'locale' => $locale,
             'isRtl' => $isRtl,
             'supportedLocales' => array_keys($supportedLocales),
-            'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'permissions' => $request->user()->getPermissionsForCurrentRestaurant(),
-                    'role' => $request->user()->getRestaurantRole(),
-                    'roles' => $request->user()->getRoleNames(),
-                ] : null,
-            ],
-            'flash' => [
-                'message' => $request->session()->get('message'),
-                'error' => $request->session()->get('error'),
-                'success' => $request->session()->get('success'),
-            ],
+            'auth' => function () use ($request) {
+                return [
+                    'user' => $request->user() ? [
+                        'id' => $request->user()->id,
+                        'name' => $request->user()->name,
+                        'email' => $request->user()->email,
+                        'permissions' => $request->user()->getPermissionsForCurrentRestaurant(),
+                        'role' => $request->user()->getRestaurantRole(),
+                        'roles' => $request->user()->getRoleNames(),
+                    ] : null,
+                ];
+            },
+            'flash' => function () use ($request) {
+                return [
+                    'message' => $request->session()->get('message'),
+                    'error' => $request->session()->get('error'),
+                    'success' => $request->session()->get('success'),
+                ];
+            },
             // Share user's restaurants for restaurant switcher (regular users)
-            'user_restaurants' => $request->user() && !$request->user()->is_super_admin ? (function () use ($request) {
-                $ids = \Illuminate\Support\Facades\DB::table('restaurant_user')
-                    ->where('email', $request->user()->email)
-                    ->pluck('restaurant_id')
-                    ->toArray();
-                return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name', 'logo'])->get();
-            })() : [],
-            'active_restaurant_id' => $request->session()->get('active_restaurant_id'),
+            'user_restaurants' => function () use ($request) {
+                if ($request->user() && !$request->user()->is_super_admin) {
+                    $ids = \Illuminate\Support\Facades\DB::table('restaurant_user')
+                        ->where('email', $request->user()->email)
+                        ->pluck('restaurant_id')
+                        ->toArray();
+                    return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name', 'logo'])->get();
+                }
+                return [];
+            },
+            'active_restaurant_id' => function () use ($request) {
+                return $request->session()->get('active_restaurant_id');
+            },
 
             // Share ALL restaurants for super admin
-            'all_restaurants' => $request->user() && $request->user()->is_super_admin
-                ? \App\Models\Restaurant::select(['id', 'name'])->get()
-                : [],
+            'all_restaurants' => function () use ($request) {
+                return $request->user() && $request->user()->is_super_admin
+                    ? \App\Models\Restaurant::select(['id', 'name'])->get()
+                    : [];
+            },
             'current_restaurant' => function () use ($request) {
                 if ($request->user()) {
                     $restaurant = $request->user()->currentRestaurant();
@@ -79,7 +90,7 @@ class HandleInertiaRequests extends Middleware
             },
 
             // Share current subscription for the active restaurant
-            'current_subscription' => (function () use ($request) {
+            'current_subscription' => function () use ($request) {
                 if ($request->user()) {
                     $restaurant = $request->user()->currentRestaurant();
                     if ($restaurant) {
@@ -91,7 +102,7 @@ class HandleInertiaRequests extends Middleware
                     }
                 }
                 return null;
-            })(),
+            },
 
             'ziggy' => fn() => [
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
