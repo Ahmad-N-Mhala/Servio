@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 
 \Illuminate\Support\Facades\Schedule::command('inventory:check-expiry')->daily();
 \Illuminate\Support\Facades\Schedule::command('subscription:check-expiry')->daily();
-\Illuminate\Support\Facades\Schedule::command('app:check-communication-triggers')->dailyTime('09:00');
+\Illuminate\Support\Facades\Schedule::command('app:check-communication-triggers')->dailyAt('09:00');
