@@ -220,8 +220,14 @@
                             </label>
                             <label class="flex-1 cursor-pointer">
                                 <input type="radio" v-model="form.type" value="takeaway" class="sr-only peer">
-                                <div class="text-center py-2 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm transition-all">
+                                <div class="text-center py-2 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm transition-all whitespace-nowrap">
                                     {{ $t('kitchen.takeaway') }}
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" v-model="form.type" value="delivery" class="sr-only peer">
+                                <div class="text-center py-2 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-white peer-checked:text-primary peer-checked:shadow-sm transition-all whitespace-nowrap">
+                                    {{ $t('orders.delivery') }}
                                 </div>
                             </label>
                         </div>
@@ -231,6 +237,16 @@
                                 v-model="form.table_id"
                                 :options="tableOptions"
                                 :placeholder="$t('orders.no_table_assigned')"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <div v-if="form.type === 'delivery'" class="space-y-3 animate-fade-in-up">
+                            <Select
+                                v-model="form.delivery_provider"
+                                :label="$t('orders.delivery_provider_label')"
+                                :options="deliveryProviderOptions"
+                                placeholder="Select Provider"
                                 class="w-full"
                             />
                         </div>
@@ -466,6 +482,20 @@
                 </div>
             </div>
         </Modal>
+        
+        <!-- Order Success Modal -->
+        <Modal :show="showOrderSuccessModal" @close="showOrderSuccessModal = false" :title="$t('common.success') || 'Success'" size="sm">
+            <div class="text-center space-y-4 py-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 text-green-600">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">{{ successMessage }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('orders.ready_for_next') || 'System is ready for the next order.' }}</p>
+                <Button @click="showOrderSuccessModal = false" class="w-full mt-4">{{ $t('common.ok') || 'OK' }}</Button>
+            </div>
+        </Modal>
 
         <!-- Mobile Cart Summary (Fixed Bottom) -->
         <div v-if="cart.length > 0" class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 safe-area-bottom">
@@ -481,7 +511,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useForm, Link, usePage } from '@inertiajs/vue3';
+import { useForm, Link, usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
@@ -490,6 +520,7 @@ import Carousel from '@/Components/Carousel.vue';
 import Modal from '@/Components/Modal.vue';
 import Select from '@/Components/Select.vue';
 import PhoneInput from '@/Components/PhoneInput.vue';
+import axios from 'axios';
 
 interface MenuItem {
     id: number;
@@ -567,6 +598,7 @@ const props = withDefaults(defineProps<{
     stockAvailability?: Record<number, { max_quantity: number; available: boolean; is_tracked?: boolean }>;
     ingredientStocks?: Record<string, { current_stock: number; name: string }>;
     google_map_location?: string;
+    deliveryProviders?: any[];
 }>(), {
     menuCategories: () => [],
     customers: () => [],
@@ -574,7 +606,8 @@ const props = withDefaults(defineProps<{
     tables: () => [],
     currency: 'AED',
     stockAvailability: () => ({}),
-    ingredientStocks: () => ({})
+    ingredientStocks: () => ({}),
+    deliveryProviders: () => []
 });
 
 const { locale, t } = useI18n();
@@ -628,6 +661,13 @@ const tableOptions = computed(() => {
     return opts;
 });
 
+const deliveryProviderOptions = computed(() => {
+    return (props.deliveryProviders || []).map(p => ({
+        label: p.name,
+        value: p.slug
+    }));
+});
+
 // State
 const cart = ref<CartItem[]>([]);
 const selectedCustomer = ref<Customer | null>(null);
@@ -639,6 +679,8 @@ const tempNotes = ref('');
 const showCustomizeModal = ref(false);
 const customizingItem = ref<MenuItem | null>(null);
 const selectedExtras = ref<any[]>([]); // Track selected extras IDs/Objects
+const showOrderSuccessModal = ref(false);
+const successMessage = ref('');
 
 
 // Form
@@ -677,7 +719,7 @@ const requestOtp = async () => {
     
     try {
         otpError.value = '';
-        await (window as any).axios.post(route('loyalty.customers.request-otp', selectedCustomer.value.id));
+        await axios.post(route('loyalty.customers.request-otp', selectedCustomer.value.id));
         otpSent.value = true;
         startOtpTimer();
     } catch (error: any) {
@@ -693,7 +735,7 @@ const verifyOtp = async () => {
     
     try {
         otpError.value = '';
-        await (window as any).axios.post(route('loyalty.customers.verify-otp-only', selectedCustomer.value.id), {
+        await axios.post(route('loyalty.customers.verify-otp-only', selectedCustomer.value.id), {
             otp: otpInput.value
         });
         otpVerified.value = true;
@@ -1166,27 +1208,26 @@ const submitOrder = () => {
     }
 
     form.post(route('orders.store'), {
-        onSuccess: async () => {
-             // Retrieve the newly created order from the response (assuming it's passed as flash or prop)
-             // Since Inertia reload might clear props, we rely on the server returning the order object via flash session or redirect props.
-             // If the server redirects back, we can access the latest order if we modify the controller to pass it.
-             // HOWEVER, simpler approach: The server likely redirects to 'back' with a success message.
-             // Can we get the Order ID? 
-             // Ideally we should print the receipt. 
-             // Let's check props.orders? No, that's a list.
-             // Modify Controller to return the Order? 
-             // For now, let's just clear the cart. Printing usually happens on the order listing or via a separate action.
-             // BUT, if the user WANTS it...
-             // Let's assume the user might want a print dialog.
+        onSuccess: () => {
+            // Get success message from flash or fallback
+            const flash = (page.props as any).flash;
+            successMessage.value = flash?.message || 'Order Created Successfully';
+            console.log('Order created successfully, showing modal.');
+            showOrderSuccessModal.value = true;
+
+            // Reset state to stay on the same page and allow for the next order
             cart.value = [];
-            selectedReward.value = null;
             selectedCustomer.value = null;
-            // phoneInput reset not needed as form.reset handles it
-            otpInput.value = '';
-            otpSent.value = false;
+            selectedReward.value = null;
             otpVerified.value = false;
-            otpError.value = '';
+            otpSent.value = false;
+            otpInput.value = '';
             form.reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        onError: () => {
+            // Errors are automatically bound to form.errors, just scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
 };

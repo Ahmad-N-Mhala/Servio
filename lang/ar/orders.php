@@ -74,5 +74,7 @@ return [
     'delivery_provider_label' => 'شركة التوصيل (مثل: أوبر إيتس، طلبات)',
     'external_order_id' => 'معرف الطلب الخارجي (اختياري)',
     'waiter' => 'النادل',
+    'order_created_with_points' => 'تم إنشاء الطلب #:order بنجاح. +:points نقاط ولاء مكتسبة!',
+    'order_created_successfully' => 'تم إنشاء الطلب #:order بنجاح.',
 ];
 

@@ -488,6 +488,22 @@
             </div>
         </Modal>
 
+        <!-- Order Success Modal -->
+        <Modal :show="showOrderSuccessModal" @close="showOrderSuccessModal = false" :title="$t('common.success') || 'Success'" size="sm">
+            <div class="text-center space-y-4 py-4">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 text-green-600">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">{{ successMessage }}</h3>
+                <p class="text-sm text-gray-500">{{ $t('orders.ready_for_next') || 'System is ready for the next order.' }}</p>
+                <div class="pt-4">
+                    <Button @click="showOrderSuccessModal = false" class="w-full">{{ $t('common.ok') || 'OK' }}</Button>
+                </div>
+            </div>
+        </Modal>
+
         <!-- Mobile Cart Summary (Fixed Bottom) -->
         <div v-if="cart.length > 0" class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 safe-area-bottom">
             <button @click="scrollToCart" class="w-full bg-primary text-white font-bold py-3 rounded-xl flex justify-between px-6 shadow-lg active:scale-95 transition-transform">
@@ -502,7 +518,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useForm, Link, usePage } from '@inertiajs/vue3';
+import { useForm, Link, usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
@@ -511,6 +527,7 @@ import Carousel from '@/Components/Carousel.vue';
 import Modal from '@/Components/Modal.vue';
 import Select from '@/Components/Select.vue';
 import PhoneInput from '@/Components/PhoneInput.vue';
+import axios from 'axios';
 
 interface MenuItem {
     id: number;
@@ -663,6 +680,8 @@ const tempNotes = ref('');
 const showCustomizeModal = ref(false);
 const customizingItem = ref<MenuItem | null>(null);
 const selectedExtras = ref<any[]>([]);
+const showOrderSuccessModal = ref(false);
+const successMessage = ref('');
 
 // Form
 const form = useForm({
@@ -696,7 +715,7 @@ const requestOtp = async () => {
     if (!selectedCustomer.value) return;
     try {
         otpError.value = '';
-        await (window as any).axios.post(route('loyalty.customers.request-otp', selectedCustomer.value.id));
+        await axios.post(route('loyalty.customers.request-otp', selectedCustomer.value.id));
         otpSent.value = true;
         startOtpTimer();
     } catch (error: any) {
@@ -709,7 +728,7 @@ const verifyOtp = async () => {
     if (!selectedCustomer.value || otpInput.value.length !== 6) return;
     try {
         otpError.value = '';
-        await (window as any).axios.post(route('loyalty.customers.verify-otp-only', selectedCustomer.value.id), { otp: otpInput.value });
+        await axios.post(route('loyalty.customers.verify-otp-only', selectedCustomer.value.id), { otp: otpInput.value });
         otpVerified.value = true;
         form.otp = otpInput.value;
     } catch (error: any) {
@@ -1033,13 +1052,23 @@ const submitOrder = () => {
 
     form.post(route('pos-orders.store'), {
         onSuccess: () => {
+             // Get success message from flash or fallback
+            const flash = (page.props as any).flash;
+            successMessage.value = flash?.message || 'Order Created Successfully';
+            console.log('Delivery order created successfully, showing modal.');
+            showOrderSuccessModal.value = true;
+
+            // Reset state to stay on the same page and allow for the next order
             cart.value = [];
-            selectedReward.value = null;
             selectedCustomer.value = null;
-            otpInput.value = '';
-            otpSent.value = false;
+            selectedReward.value = null;
             otpVerified.value = false;
+            otpSent.value = false;
+            otpInput.value = '';
             form.reset();
+        },
+        onError: () => {
+            // Errors are automatically bound to form.errors
         }
     });
 };

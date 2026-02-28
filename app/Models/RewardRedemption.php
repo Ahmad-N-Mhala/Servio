@@ -58,7 +58,7 @@ class RewardRedemption extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function markAsUsed(?int $orderId = null): void
+    public function markAsUsed(?string $orderId = null): void
     {
         $this->update([
             'status' => 'applied',

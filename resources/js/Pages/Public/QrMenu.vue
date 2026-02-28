@@ -83,6 +83,9 @@
                                 <p class="text-sm font-medium text-primary mt-1">
                                     {{ restaurant.currency }} {{ item.price.toFixed(2) }}
                                 </p>
+                                <p v-if="getStockLabel(item.id)" class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full w-fit mt-1 uppercase tracking-wider">
+                                    {{ getStockLabel(item.id) }}
+                                </p>
                                 <p v-if="item.description" class="text-xs text-gray-500 mt-1 line-clamp-2" :title="item.description">
                                     {{ item.description }}
                                 </p>
@@ -90,33 +93,38 @@
 
                             <!-- Controls -->
                             <div class="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-gray-100">
-                                <button 
-                                    type="button"
-                                    @click="removeItem(item)"
-                                    :disabled="!getQty(item.id)"
-                                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
-                                    :class="getQty(item.id) 
-                                        ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95' 
-                                        : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                                    </svg>
-                                </button>
-                                
-                                <span class="font-bold text-gray-900 min-w-[1.5rem] text-center">
-                                    {{ getQty(item.id) > 0 ? getQty(item.id) : 0 }}
-                                </span>
+                                <template v-if="isItemAvailable(item.id)">
+                                    <button 
+                                        type="button"
+                                        @click="removeItem(item)"
+                                        :disabled="!getQty(item.id)"
+                                        class="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                                        :class="getQty(item.id) 
+                                            ? 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95' 
+                                            : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                        </svg>
+                                    </button>
+                                    
+                                    <span class="font-bold text-gray-900 min-w-[1.5rem] text-center">
+                                        {{ getQty(item.id) > 0 ? getQty(item.id) : 0 }}
+                                    </span>
 
-                                <button 
-                                    type="button"
-                                    @click="addItem(item)"
-                                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-all bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:scale-105 active:scale-95"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </button>
+                                    <button 
+                                        type="button"
+                                        @click="addItem(item)"
+                                        class="w-8 h-8 flex items-center justify-center rounded-xl transition-all bg-primary text-white hover:bg-primary-hover shadow-md shadow-primary/20 hover:scale-105 active:scale-95"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                </template>
+                                <div v-else class="flex-1 text-center py-2 bg-gray-100 rounded-xl text-gray-400 font-bold text-sm">
+                                    {{ $t('common.sold_out') || 'Sold Out' }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -198,8 +206,8 @@
                                         <h3 class="font-bold text-gray-900 text-lg mb-0.5">{{ item.name }}</h3>
                                         <!-- Show extras if any -->
                                         <div v-if="item.extras && item.extras.length > 0" class="text-xs text-blue-600 mb-1">
-                                             <span v-for="(ex, i) in item.extras" :key="i">
-                                                 + {{ ex.name }} ({{ restaurant.currency }} {{ Number(ex.price).toFixed(2) }})<span v-if="i < (item.extras.length - 1)">, </span>
+                                             <span v-for="(ex, idx) in item.extras" :key="idx">
+                                                 + {{ ex.name }} ({{ restaurant.currency }} {{ Number(ex.price).toFixed(2) }})<span v-if="(idx as any) < (item.extras.length - 1)">, </span>
                                              </span>
                                         </div>
                                         <p class="text-primary font-bold">{{ restaurant.currency }} {{ ((Number(item.price) + (item.extras || []).reduce((s: number, e: any) => s + Number(e.price), 0)) * item.quantity).toFixed(2) }}</p>
@@ -386,8 +394,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">Order Placed!</h2>
-                <p class="text-gray-600 mb-6">Your order has been sent to the kitchen.</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('orders.order_placed') }}</h2>
+                <p class="text-gray-600 mb-6">{{ $t('orders.order_sent_to_kitchen') }}</p>
                 <div class="bg-gradient-to-r from-primary/10 to-purple-100 rounded-xl p-6 mb-6">
                     <p class="text-sm text-gray-600 mb-1">Order Number</p>
                     <p class="text-3xl font-bold text-primary">{{ orderNumber }}</p>
@@ -396,7 +404,7 @@
                     @click="closeConfirmation"
                     class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/30"
                 >
-                    Continue Browsing
+                    {{ $t('orders.continue_browsing') }}
                 </button>
             </div>
         </div>
@@ -502,6 +510,8 @@ const props = defineProps<{
         locale: string;
     };
     categories: any[];
+    stockAvailability?: Record<number, { max_quantity: number; available: boolean; is_tracked?: boolean }>;
+    ingredientStocks?: Record<string, { current_stock: number; name: string }>;
 }>();
 
 const cart = ref<any[]>([]);
@@ -582,6 +592,20 @@ const getQty = (itemId: string) => {
     return cart.value
         .filter(i => i.id === itemId)
         .reduce((sum, i) => sum + i.quantity, 0);
+};
+
+const isItemAvailable = (itemId: number) => {
+    const stockInfo = props.stockAvailability?.[itemId];
+    if (!stockInfo) return true;
+    return stockInfo.available;
+};
+
+const getStockLabel = (itemId: number) => {
+    const stockInfo = props.stockAvailability?.[itemId];
+    if (!stockInfo || !stockInfo.is_tracked) return null;
+    if (!stockInfo.available) return 'Sold Out';
+    if (stockInfo.max_quantity < 10) return `Only ${stockInfo.max_quantity} left`;
+    return null;
 };
 
 const addItem = (item: any) => {

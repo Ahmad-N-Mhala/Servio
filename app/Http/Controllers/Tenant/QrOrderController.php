@@ -35,10 +35,31 @@ class QrOrderController extends Controller
             abort(403, 'QR Ordering is not enabled for this restaurant.');
         }
 
+        // Get raw ingredient stocks for frontend validation
+        $ingredientStocks = \App\Models\Ingredient::where('restaurant_id', $restaurant->id)
+            ->get(['id', 'current_stock', 'name'])
+            ->mapWithKeys(function ($ing) {
+                return [
+                    (string) $ing->id => [
+                        'current_stock' => (float) $ing->current_stock,
+                        'name' => $ing->name
+                    ]
+                ];
+            });
+
+        // Pre-fetch all available batches
+        $allBatches = \App\Models\IngredientBatch::where('restaurant_id', $restaurant->id)
+            ->where('quantity_remaining', '>', 0)
+            ->get()
+            ->groupBy('ingredient_id')
+            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+
+        $menuItemStockInfo = [];
+
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->with([
                 'items' => function ($query) {
-                    $query->with('extras')
+                    $query->with(['ingredients', 'extras', 'bundles.childItem'])
                         ->orderBy('sort_order');
                 }
             ])
@@ -48,22 +69,39 @@ class QrOrderController extends Controller
                 return (bool) $category->is_active;
             })
             ->values()
-            ->map(function ($category) {
+            ->map(function ($category) use ($allBatches, &$menuItemStockInfo) {
                 return [
                     'id' => $category->id,
                     'name' => $category->name,
                     'description' => $category->description,
-                    'items' => $category->items->filter(fn($item) => (bool) $item->is_available)->map(function ($item) {
-                        // Fix image URL - prepend /storage/ if image exists
+                    'items' => $category->items->filter(fn($item) => (bool) $item->is_available)->map(function ($item) use ($allBatches, &$menuItemStockInfo) {
+                        // Calculate stock
+                        $maxServings = PHP_INT_MAX;
+                        if ($item->ingredients->isNotEmpty()) {
+                            foreach ($item->ingredients as $ingredient) {
+                                if (!$ingredient->pivot || !isset($ingredient->pivot->quantity))
+                                    continue;
+                                $required = $ingredient->pivot->quantity;
+                                $available = $allBatches[(string) $ingredient->id] ?? 0;
+                                if ($required > 0) {
+                                    $maxServings = min($maxServings, floor((float) $available / (float) $required));
+                                }
+                            }
+                        }
+                        if ($maxServings === PHP_INT_MAX)
+                            $maxServings = 999;
+                        $menuItemStockInfo[$item->id] = [
+                            'max_quantity' => (int) $maxServings,
+                            'available' => $maxServings > 0,
+                            'is_tracked' => $item->ingredients->isNotEmpty(),
+                        ];
+
+                        $item->append('inventory_status');
+
+                        // Fix image URL
                         $imageUrl = null;
                         if ($item->image) {
-                            // If image already has full URL, use it
-                            if (str_starts_with($item->image, 'http')) {
-                                $imageUrl = $item->image;
-                            } else {
-                                // Otherwise, prepend /storage/
-                                $imageUrl = asset('storage/' . $item->image);
-                            }
+                            $imageUrl = str_starts_with($item->image, 'http') ? $item->image : asset('storage/' . $item->image);
                         }
 
                         return [
@@ -72,9 +110,15 @@ class QrOrderController extends Controller
                             'description' => $item->description,
                             'price' => (float) $item->price,
                             'image' => $imageUrl,
-                            'images' => $item->images, // Pass generic images array
+                            'images' => $item->images,
                             'currency' => $item->currency ?? 'AED',
                             'extras' => $item->extras,
+                            'inventory_status' => $item->inventory_status,
+                            'type' => $item->type ?? 'item',
+                            'bundles' => $item->bundles,
+                            'recipe' => $item->recipe ?? $item->ingredients->map(function ($i) {
+                                return ['ingredient_id' => $i->id, 'quantity' => $i->pivot->quantity];
+                            })->all(),
                         ];
                     })->values()->toArray(),
                 ];
@@ -91,8 +135,11 @@ class QrOrderController extends Controller
                 'name' => $restaurant->name,
                 'currency' => $restaurant->currency ?? 'AED',
                 'locale' => $restaurant->locale ?? 'en',
+                'google_map_location' => $restaurant->google_map_location,
             ],
             'categories' => $categories,
+            'stockAvailability' => $menuItemStockInfo,
+            'ingredientStocks' => $ingredientStocks,
         ]);
     }
 
@@ -106,6 +153,7 @@ class QrOrderController extends Controller
             'items.*.id' => ['required', 'exists:menu_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.notes' => ['nullable', 'string', 'max:500'],
+            'items.*.extras' => ['nullable', 'array'],
             'customer_name' => ['nullable', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:20'],
             'reward_id' => ['nullable', 'string', 'exists:rewards,id'],
@@ -115,204 +163,191 @@ class QrOrderController extends Controller
         $table = Table::where('qr_code_token', $token)->firstOrFail();
         $restaurant = $table->restaurant;
 
-        // Calculate total
-        $subtotal = 0;
-        $orderItems = [];
+        // Find or create customer
+        $customerObj = null;
+        if (!empty($validated['customer_phone'])) {
+            $customerObj = $this->loyaltyService->findOrCreateCustomer(
+                $restaurant,
+                $validated['customer_phone'],
+                $validated['customer_name'] ?? 'QR Guest'
+            );
+        }
+
+        // ====== STOCK VALIDATION ======
+        $stockErrors = [];
+        $menuItemIds = collect($validated['items'])->pluck('id')->unique()->toArray();
+        $menuItems = MenuItem::with('ingredients')->whereIn('id', $menuItemIds)->get()->keyBy('id');
+
+        $ingredientIds = [];
+        foreach ($menuItems as $item) {
+            if ($item->ingredients->isNotEmpty()) {
+                $ingredientIds = array_merge($ingredientIds, $item->ingredients->pluck('id')->toArray());
+            }
+        }
+        $ingredientIds = array_unique($ingredientIds);
+
+        $allBatches = \App\Models\IngredientBatch::whereIn('ingredient_id', $ingredientIds)
+            ->where('quantity_remaining', '>', 0)
+            ->get()
+            ->groupBy('ingredient_id')
+            ->map(fn($batches) => $batches->sum('quantity_remaining'));
 
         foreach ($validated['items'] as $item) {
-            $menuItem = MenuItem::findOrFail($item['id']);
+            $menuItem = $menuItems[$item['id']] ?? null;
+            if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
+                foreach ($menuItem->ingredients as $ingredient) {
+                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity))
+                        continue;
+                    $neededQty = $ingredient->pivot->quantity * $item['quantity'];
+                    $availableStock = $allBatches[(string) $ingredient->id] ?? 0;
 
-            $itemExtrasPrice = 0;
-            $itemsExtrasData = [];
+                    if ($availableStock < $neededQty) {
+                        $menuItemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
+                        $stockErrors[] = "{$menuItemName} - Insufficient stock for '{$ingredient->name}'";
+                    }
+                }
+            }
+        }
+        if (!empty($stockErrors)) {
+            return response()->json(['success' => false, 'message' => implode('. ', $stockErrors)], 422);
+        }
+        // ====== END STOCK VALIDATION ======
 
-            if (isset($item['extras']) && is_array($item['extras'])) {
-                foreach ($item['extras'] as $extraItem) {
-                    $extraId = $extraItem['id'];
-                    $extraQty = $extraItem['quantity'] ?? 1;
+        // Calculate Totals and Prepare Items
+        $subtotal = 0;
+        $orderItemsData = [];
 
-                    // Verify extra belongs to item and get price
-                    $extraModel = \App\Models\MenuItemExtra::where('id', $extraId)
-                        ->where('menu_item_id', $menuItem->id)
-                        ->first();
+        foreach ($validated['items'] as $item) {
+            $menuItem = $menuItems[$item['id']] ?? null;
+            if (!$menuItem)
+                continue;
 
-                    if ($extraModel) {
-                        $extraTotal = $extraModel->price * $extraQty; // Typically extras are qty 1 per item unit, but if array supports qty
-                        $itemExtrasPrice += $extraTotal;
-                        $itemsExtrasData[] = [
+            $extrasCost = 0;
+            $itemExtrasNormalized = [];
+            if (!empty($item['extras'])) {
+                foreach ($item['extras'] as $extra) {
+                    $extraModel = \App\Models\MenuItemExtra::find($extra['id']);
+                    if ($extraModel && (string) $extraModel->menu_item_id === (string) $menuItem->id) {
+                        $extrasCost += (float) $extraModel->price;
+                        $itemExtrasNormalized[] = [
                             'id' => $extraModel->id,
                             'name' => $extraModel->name,
-                            'price' => $extraModel->price,
-                            'quantity' => $extraQty
+                            'price' => (float) $extraModel->price,
+                            'ingredient_id' => $extraModel->ingredient_id
                         ];
                     }
                 }
             }
 
-            $unitPrice = $menuItem->price + $itemExtrasPrice; // Base price + extras price (per unit)
-            // Wait, logic check: usually extra price is per unit of item. 
-            // If I order 2 Burgers, and 1 extra Cheese. Does Cheese apply to both?
-            // In QrMenu.vue: "extras: item.extras ? item.extras.map((e:any) => ({ id: e.id, quantity: e.quantity || 1 })) : []"
-            // The cart item has a quantity (e.g. 2 Burgers).
-            // The extra has a quantity (e.g. 1 Cheese). 
-            // Usually in this UI, 1 "Burger + Cheese" Item means (Burger Price + Cheese Price) * Quantity.
-            // Let's check QrMenu.vue addToCart.
-            // "addToCart(customizingItem.value, extrasToAdd);"
-            // It creates a single cart item. If I increase quantity of that cart item, I increase quantity of burgers AND cheese.
-            // So: Total Price = (Base Price + Sum(Extra Price * Extra Qty)) * Item Quantity.
-
-            // Re-calculating correctly:
-            $singleItemTotalExtras = 0;
-            if (isset($item['extras']) && is_array($item['extras'])) {
-                foreach ($item['extras'] as $extraItem) {
-                    $extraId = $extraItem['id'];
-                    // In the current UI, e.quantity seems to be 1 usually, but let's support passed quantity
-                    $extraQty = $extraItem['quantity'] ?? 1;
-
-                    $extraModel = \App\Models\MenuItemExtra::where('id', $extraId)
-                        ->where('menu_item_id', $menuItem->id)
-                        ->first();
-
-                    if ($extraModel) {
-                        $singleItemTotalExtras += ($extraModel->price * $extraQty);
-                        // Store normalized structure
-                        $itemsExtrasData[] = [
-                            'id' => $extraModel->id,
-                            'name' => $extraModel->getTranslation('name', 'en') ?: $extraModel->name,
-                            'price' => $extraModel->price
-                        ];
-                    }
-                }
-            }
-
-            $lineUnitTotal = $menuItem->price + $singleItemTotalExtras;
-            $lineTotal = $lineUnitTotal * $item['quantity'];
-
+            $lineUnitPrice = (float) $menuItem->price;
+            $lineTotal = ($lineUnitPrice + $extrasCost) * $item['quantity'];
             $subtotal += $lineTotal;
 
-            $orderItems[] = [
+            $itemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
+
+            $orderItemsData[] = [
                 'menu_item_id' => $menuItem->id,
-                'name' => $menuItem->name,
+                'name' => $itemName,
                 'quantity' => $item['quantity'],
-                'unit_price' => $menuItem->price, // Base unit price
+                'unit_price' => $lineUnitPrice,
                 'total_price' => $lineTotal,
                 'notes' => $item['notes'] ?? null,
-                'extras' => $itemsExtrasData // Store extras
+                'extras' => $itemExtrasNormalized
             ];
         }
 
-        // Check for Loyalty Redemption
+        // Handle Reward Redemption
         $discountAmount = 0;
-        $discountType = null;
-        $discountValue = null;
         $redemptionRecord = null;
-        $customerObj = null;
+        if (!empty($validated['reward_id']) && $customerObj) {
+            $reward = \App\Models\Reward::find($validated['reward_id']);
+            if (!$reward) {
+                return response()->json(['message' => 'Reward not found.'], 404);
+            }
 
-        if (!empty($validated['customer_phone'])) {
-            $customerObj = Customer::where('restaurant_id', $restaurant->id)
-                ->where('phone', $validated['customer_phone'])
-                ->first();
-        }
+            if ($reward->min_order_value > 0 && $subtotal < $reward->min_order_value) {
+                return response()->json(['message' => "Minimum order value of " . (string) $reward->min_order_value . " required for this reward."], 422);
+            }
 
-        if (!empty($validated['reward_id']) && !empty($validated['otp'])) {
-            if (!$customerObj) {
-                return response()->json(['message' => 'Customer not found for the provided phone number. Loyalty redemption failed.'], 404);
+            if (empty($validated['otp'])) {
+                return response()->json(['message' => 'OTP is required for redemption.'], 422);
             }
 
             if (!$this->loyaltyService->verifyOtp($customerObj, $validated['otp'])) {
                 return response()->json(['message' => 'Invalid or expired OTP.'], 422);
             }
 
+            $redemptionRecord = $this->loyaltyService->redeemReward($customerObj, (string) $validated['reward_id']);
+
+            if ($reward->reward_type === 'percentage') {
+                $discountAmount = $subtotal * ($reward->discount_value / 100);
+            } elseif ($reward->reward_type === 'fixed') {
+                $discountAmount = (float) $reward->discount_value;
+            }
+            $discountAmount = min($discountAmount, $subtotal);
+        }
+
+        // Generate Order Number with Retries
+        $order = null;
+        $maxRetries = 5;
+        for ($i = 0; $i < $maxRetries; $i++) {
+            $nextNumber = $restaurant->next_order_number ?? 1;
+            $orderNumber = 'QR-' . $nextNumber;
+
             try {
-                // Redeem reward deducts points
-                $redemptionRecord = $this->loyaltyService->redeemReward($customerObj, $validated['reward_id']);
-                $reward = $redemptionRecord->reward;
+                $tax = ($subtotal - $discountAmount) * 0.05; // 5% tax on net
+                $total = max(0, $subtotal - $discountAmount + $tax);
 
-                $discountType = $reward->reward_type;
-                $discountValue = $reward->discount_value;
+                $order = Order::create([
+                    'restaurant_id' => $restaurant->id,
+                    'table_id' => $table->id,
+                    'customer_id' => $customerObj ? $customerObj->id : null,
+                    'order_number' => $orderNumber,
+                    'transaction_number' => (string) $nextNumber,
+                    'type' => 'dine_in',
+                    'status' => 'pending',
+                    'subtotal' => $subtotal,
+                    'tax' => $tax,
+                    'discount_amount' => $discountAmount,
+                    'total' => $total,
+                    'payment_status' => 'unpaid',
+                    'payment_method' => 'cash',
+                    'customer_name' => $validated['customer_name'] ?? ($customerObj ? $customerObj->name : 'QR Guest'),
+                    'customer_phone' => $validated['customer_phone'] ?? null,
+                    'source' => 'qr_code',
+                    'ordered_at' => now(),
+                    'currency' => $restaurant->currency ?? 'AED',
+                ]);
 
-                if ($discountType === 'percentage') {
-                    $discountAmount = $subtotal * ($discountValue / 100);
-                } elseif ($discountType === 'fixed') {
-                    $discountAmount = (float) $discountValue;
-                }
-
-                // Ensure discount doesn't exceed subtotal
-                if ($discountAmount > $subtotal) {
-                    $discountAmount = $subtotal;
-                }
-
+                $restaurant->increment('next_order_number');
+                break;
             } catch (\Exception $e) {
-                return response()->json(['message' => $e->getMessage()], 400);
+                if (str_contains($e->getMessage(), 'E11000 duplicate key error')) {
+                    $restaurant->increment('next_order_number');
+                    $restaurant->refresh();
+                    continue;
+                }
+                throw $e;
             }
         }
 
-        // Generate Sequential Order Number
-        $nextNumber = $restaurant->next_order_number ?? 1;
-        try {
-            // Atomically increment the order number to prevent race conditions
-            $restaurant->increment('next_order_number');
-        } catch (\Exception $e) {
-            // Handle legacy cases where next_order_number might be stored as string
-            $restaurant->update(['next_order_number' => (int) $nextNumber + 1]);
-        }
-
-        $tax = $subtotal * 0.05; // 5% tax
-        $total = max(0, $subtotal + $tax - $discountAmount);
-
-        // Create order
-        $order = Order::create([
-            'restaurant_id' => $restaurant->id,
-            'table_id' => $table->id,
-            'customer_id' => $customerObj ? $customerObj->id : null,
-            'order_number' => 'QR-' . $nextNumber,
-            'type' => 'dine_in',
-            'status' => 'pending',
-            'subtotal' => $subtotal,
-            'tax' => $tax,
-            'discount_amount' => $discountAmount,
-            'discount_type' => ($discountAmount > 0) ? $discountType : null,
-            'discount_value' => ($discountAmount > 0) ? $discountValue : null,
-            'total' => $total,
-            'payment_status' => 'unpaid', // Changed from 'pending' to 'unpaid' to show in POS
-            'payment_method' => 'cash', // Default to cash, can be changed
-            'customer_name' => $validated['customer_name'] ?? 'QR Order',
-            'customer_phone' => $validated['customer_phone'] ?? null,
-            'source' => 'qr_code',
-            'ordered_at' => now(),
-        ]);
+        if (!$order)
+            throw new \Exception("Failed to generate order number.");
 
         if ($redemptionRecord) {
-            // Assign this exact order_id to the generic redemption record created
-            $redemptionRecord->update(['order_id' => $order->id, 'status' => 'applied']);
+            $redemptionRecord->markAsUsed((string) $order->id);
         }
 
-        // Create order items
-        foreach ($orderItems as $itemData) {
-            $orderItem = new OrderItem([
-                'order_id' => $order->id,
-                'menu_item_id' => $itemData['menu_item_id'],
-                'quantity' => $itemData['quantity'],
-                'unit_price' => $itemData['unit_price'],
-                'total_price' => $itemData['total_price'],
-                'notes' => $itemData['notes'],
-                'name' => $itemData['name'],
-                'extras' => $itemData['extras'],
-            ]);
-
-            $orderItem->save();
+        // Create Order Items
+        foreach ($orderItemsData as $itemData) {
+            $order->items()->create($itemData);
         }
 
         // Update table status
         $table->update(['status' => 'occupied']);
 
-        // Broadcast order created event to POS
-        broadcast(new \App\Events\OrderUpdated($order->load([
-            'items.menuItem' => function ($q) {
-                $q->withTrashed();
-            },
-            'customer',
-            'table'
-        ]), 'created'))->toOthers();
+        // Broadcast
+        broadcast(new \App\Events\OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
 
         return response()->json([
             'success' => true,
@@ -322,6 +357,7 @@ class QrOrderController extends Controller
                 'order_number' => $order->order_number,
                 'total' => $order->total,
                 'table_name' => $table->name,
+                'points_earned' => $order->points_earned
             ],
         ]);
     }
@@ -410,15 +446,17 @@ class QrOrderController extends Controller
             ->first();
 
         if (!$customer) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            return response()->json(['message' => __('loyalty.customer_not_found')], 404);
         }
 
-        $sent = $this->loyaltyService->sendRedemptionOtp($customer);
-
-        if ($sent) {
-            return response()->json(['success' => true, 'message' => 'OTP sent successfully']);
+        try {
+            $sent = $this->loyaltyService->sendRedemptionOtp($customer);
+            if ($sent) {
+                return response()->json(['success' => true, 'message' => __('loyalty.otp_send_success')]);
+            }
+            return response()->json(['success' => false, 'message' => __('loyalty.otp_send_failed')], 503);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
-
-        return response()->json(['success' => false, 'message' => 'Failed to send OTP.'], 503);
     }
 }

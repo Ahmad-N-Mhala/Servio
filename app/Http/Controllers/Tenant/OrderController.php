@@ -372,6 +372,11 @@ class OrderController extends Controller
             ];
         }
 
+        // 7. Delivery Providers
+        $deliveryProviders = \App\Models\DeliveryProvider::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['name', 'slug', 'logo_url']);
+
         return Inertia::render('Orders/Create', [
             'menuCategories' => $menuCategories,
             'customers' => $customers,
@@ -381,6 +386,7 @@ class OrderController extends Controller
             'stockAvailability' => $menuItemStockInfo,
             'ingredientStocks' => $ingredientStocks,
             'google_map_location' => $restaurant->google_map_location,
+            'deliveryProviders' => $deliveryProviders,
         ]);
     }
 
@@ -426,6 +432,44 @@ class OrderController extends Controller
                 $table->update(['status' => 'occupied']);
             }
         }
+
+        // ====== PRE-VALIDATE REWARD ======
+        $customer = null;
+        if ($validated['customer_phone']) {
+            $customer = \App\Models\Customer::where('restaurant_id', $restaurant->id)
+                ->where('phone', $validated['customer_phone'])
+                ->first();
+        }
+
+        if (!empty($validated['reward_id']) && $customer) {
+            \Illuminate\Support\Facades\Log::info("OrderController: Reward ID provided, starting reward pre-validation.");
+            $reward = \App\Models\Reward::find($validated['reward_id']);
+
+            if ($reward) {
+                if ($reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'reward_id' => [__('loyalty.min_order', ['amount' => (float) $reward->min_order_value])]
+                    ]);
+                }
+
+                // Verify OTP early
+                if (empty($validated['otp'])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'otp' => [__('loyalty.verify_otp_required')]
+                    ]);
+                }
+
+                if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'otp' => [__('loyalty.invalid_otp')]
+                    ]);
+                }
+                \Illuminate\Support\Facades\Log::info("OrderController: Reward pre-validation successful.");
+            } else {
+                \Illuminate\Support\Facades\Log::warning("OrderController: Reward ID {$validated['reward_id']} not found during pre-validation.");
+            }
+        }
+        \Illuminate\Support\Facades\Log::info("OrderController: Initial validation and setup complete.");
 
         // Find or create customer ONLY if phone is provided
         $customer = null;
@@ -499,49 +543,58 @@ class OrderController extends Controller
         }
         // ====== END STOCK VALIDATION ======
 
-        // Generate Transaction Number (Sequential)
-        $transactionNumber = $restaurant->next_order_number ?? 1;
+        // Generate Order Number with Fallback/Retry Logic
+        $maxRetries = 5;
+        $order = null;
 
-        try {
-            $restaurant->increment('next_order_number');
-        } catch (\Exception $e) {
-            // Handle case where next_order_number is stored as string in MongoDB (Cannot apply $inc)
-            // We fix the type by saving it as integer and retry. This self-heals any bad data.
-            if (str_contains($e->getMessage(), 'non-numeric type') || str_contains($e->getMessage(), 'Apply $inc to a value of non-numeric type')) {
-                $restaurant->next_order_number = (int) ($restaurant->next_order_number ?? 1);
-                $restaurant->save();
+        for ($i = 0; $i < $maxRetries; $i++) {
+            $transactionNumber = $restaurant->next_order_number ?? 1;
+            $orderNumber = 'ORD-' . $transactionNumber;
+
+            try {
+                // Create order
+                $order = Order::create([
+                    'restaurant_id' => $restaurant->id,
+                    'customer_id' => $customer ? $customer->id : null,
+                    'order_number' => $orderNumber,
+                    'transaction_number' => $transactionNumber,
+                    'status' => 'pending',
+                    'type' => $validated['type'],
+                    'table_id' => $validated['table_id'] ?? null,
+                    'subtotal' => $validated['subtotal'],
+                    'tax' => $validated['tax'] ?? 0,
+                    'discount_amount' => $validated['discount_amount'] ?? 0,
+                    'total' => $validated['total'],
+                    'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
+                    'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
+                    'customer_phone' => $validated['customer_phone'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                    'waiter_id' => auth()->id(),
+                    'delivery_provider' => $validated['delivery_provider'] ?? null,
+                    'payment_method' => $validated['type'] === 'delivery' ? 'online' : null,
+                    'payment_status' => $validated['type'] === 'delivery' ? 'paid' : 'pending',
+                ]);
+
+                // If creation succeeded, increment for NEXT order and break
                 $restaurant->increment('next_order_number');
-            } else {
-                throw $e;
+                \Illuminate\Support\Facades\Log::info("Order created successfully: {$orderNumber}");
+                break;
+
+            } catch (\Exception $e) {
+                // If it's a duplicate key error, increment $restaurant->next_order_number and retry
+                if (str_contains($e->getMessage(), 'E11000 duplicate key error') || str_contains($e->getMessage(), 'duplicate key error')) {
+                    \Illuminate\Support\Facades\Log::warning("Duplicate order number detected: {$orderNumber}. Incrementing and retrying...");
+                    $restaurant->increment('next_order_number');
+                    $restaurant->refresh();
+                    continue;
+                }
+                throw $e; // Rethrow other exceptions
             }
         }
 
-        // Generate Order Number
-        // We use the sequential transaction number (per-restaurant) as the order number
-        $orderNumber = 'ORD-' . $transactionNumber;
-
-        // Create order
-        $order = Order::create([
-            'restaurant_id' => $restaurant->id,
-            'customer_id' => $customer ? $customer->id : null,
-            'order_number' => $orderNumber,
-            'transaction_number' => $transactionNumber,
-            'status' => 'pending',
-            'type' => $validated['type'],
-            'table_id' => $validated['table_id'] ?? null,
-            'subtotal' => $validated['subtotal'],
-            'tax' => $validated['tax'] ?? 0,
-            'discount_amount' => $validated['discount_amount'] ?? 0,
-            'total' => $validated['total'],
-            'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
-            'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
-            'customer_phone' => $validated['customer_phone'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-            'waiter_id' => auth()->id(),
-            'delivery_provider' => $validated['delivery_provider'] ?? null,
-            'payment_method' => $validated['type'] === 'delivery' ? 'online' : null,
-            'payment_status' => $validated['type'] === 'delivery' ? 'paid' : 'pending',
-        ]);
+        if (!$order) {
+            throw new \Exception("Failed to generate a unique order number after {$maxRetries} attempts.");
+        }
 
         // Create order items
         foreach ($validated['items'] as $item) {
@@ -571,32 +624,14 @@ class OrderController extends Controller
         }
 
 
-        // Handle Reward Redemption
+        // Handle Reward Redemption (Actual Deduction)
         if (!empty($validated['reward_id']) && $customer) {
             $reward = \App\Models\Reward::find($validated['reward_id']);
-
-            if ($reward && $reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'reward_id' => ["Minimum order value of " . (float) $reward->min_order_value . " required for this reward."]
-                ]);
-            }
-
             if ($reward) {
-                // Verify OTP
-                if (empty($validated['otp'])) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'otp' => ['OTP is required for reward redemption.']
-                    ]);
-                }
-
-                if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'otp' => ['Invalid or expired OTP.']
-                    ]);
-                }
-
+                \Illuminate\Support\Facades\Log::info("OrderController: Processing reward redemption for Reward: " . $reward->id);
                 $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
-                $redemption->markAsUsed($order->id);
+                $redemption->markAsUsed((string) $order->id);
+                \Illuminate\Support\Facades\Log::info("OrderController: Reward " . $reward->id . " marked as used for order " . $order->id);
             }
         }
 
@@ -612,12 +647,13 @@ class OrderController extends Controller
         // Refresh to check for points
         $order->refresh();
 
-        $message = "Order #{$order->order_number} Created Successfully.";
         if ($order->points_earned > 0) {
-            $message .= " +{$order->points_earned} Loyalty Points Earned!";
+            $message = __('orders.order_created_with_points', ['order' => $order->order_number, 'points' => $order->points_earned]);
+        } else {
+            $message = __('orders.order_created_successfully', ['order' => $order->order_number]);
         }
 
-        return redirect()->back()->with('message', $message);
+        return back()->with('message', $message);
     }
 
     public function updateStatus(Request $request, Order $order)

@@ -75,5 +75,7 @@ return [
     'delivery_provider_label' => 'Delivery Provider (e.g. Uber Eats, Talabat)',
     'external_order_id' => 'External Order ID (Optional)',
     'waiter' => 'Waiter',
+    'order_created_with_points' => 'Order #:order Created Successfully. +:points Loyalty Points Earned!',
+    'order_created_successfully' => 'Order #:order Created Successfully.',
 ];
 
