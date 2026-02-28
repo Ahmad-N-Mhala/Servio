@@ -90,4 +90,13 @@ return [
     'basic_name' => 'Basic Plan',
     'done' => 'Done',
     'server_error' => 'An internal server error occurred. Please try again later.',
+    'served' => 'Served',
+    'ready' => 'Ready',
+    'completed' => 'Completed',
+    'pending' => 'Pending',
+    'Pending' => 'Pending',
+    'cancelled' => 'Cancelled',
+    'deleted' => 'Deleted',
+    'processing' => 'Processing',
+    'in_progress' => 'In Progress',
 ];

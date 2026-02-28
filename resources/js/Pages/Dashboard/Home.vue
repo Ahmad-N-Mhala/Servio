@@ -199,7 +199,7 @@
                              </div>
                              <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.top_insights') }}</h3>
                          </div>
-                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                              <!-- Pareto -->
                              <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
                                  <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.revenue_distribution') }}</p>
@@ -217,11 +217,6 @@
                              <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
                                  <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.avg_items_per_order') }}</p>
                                  <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ topInsights.avg_items_per_order }}</div>
-                             </div>
-                             <!-- Avg Visits -->
-                             <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
-                                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.avg_visits_per_year') }}</p>
-                                 <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ topInsights.avg_visits_per_year }}</div>
                              </div>
                          </div>
                     </div>
@@ -475,7 +470,7 @@ const periodSales = computed(() => page.props.period_sales as any || { total: 0,
 const periodVisits = computed(() => page.props.period_visits as any || { total: 0, chart: [] });
 const customerInsights = computed(() => page.props.customer_insights as any || { total: 0, active: 0, inactive: 0 });
 
-const topInsights = computed(() => page.props.top_insights as any || { pareto_percent: 0, avg_order_value: 0, avg_items_per_order: 0, avg_visits_per_year: 0 });
+const topInsights = computed(() => page.props.top_insights as any || { pareto_percent: 0, avg_order_value: 0, avg_items_per_order: 0, avg_visits_per_year: 0, total_customer_orders: 0, unique_customers_in_period: 0, days_in_period: 1, years_in_period: 0 });
 const popularTimes = computed(() => page.props.popular_times as any || {});
 const customerFrequency = computed(() => page.props.customer_frequency as any || {});
 const topRewards = computed(() => page.props.top_rewards as any[] || []);

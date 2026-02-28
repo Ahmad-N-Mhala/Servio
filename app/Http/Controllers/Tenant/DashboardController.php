@@ -795,18 +795,6 @@ class DashboardController extends Controller
         $totalItemsCount = $allOrders->sum(fn($o) => $o->items ? $o->items->sum('quantity') : 0);
         $avgItemsPerOrder = $totalOrdersCount > 0 ? round($totalItemsCount / $totalOrdersCount, 1) : 0;
 
-        // Avg Visits/Year (Annualized based on period activity)
-        $daysInPeriod = max(1, $startDate->diffInDays($endDate) + 1);
-        $uniqueCustomersInPeriod = $allOrders->whereNotNull('customer_id')->pluck('customer_id')->unique()->count();
-        if ($uniqueCustomersInPeriod > 0) {
-            $avgVisitsPerCustomerInPeriod = $totalOrdersCount / $uniqueCustomersInPeriod;
-            $avgVisitsPerYear = round(($avgVisitsPerCustomerInPeriod / $daysInPeriod) * 365, 1);
-        } else {
-            $avgVisitsPerYear = 0;
-        }
-
-        $avgVisitsPerCustomer = $avgVisitsPerYear; // Using annualized visits for the "Avg Visits/Year" label
-
         // 7. Popular Times
         $popularTimes = $allOrders
             ->groupBy(function ($order) {
@@ -1035,7 +1023,6 @@ class DashboardController extends Controller
                 'pareto_percent' => $paretoRevenuePercent,
                 'avg_order_value' => $avgOrderValue,
                 'avg_items_per_order' => $avgItemsPerOrder,
-                'avg_visits_per_year' => $avgVisitsPerCustomer
             ],
             'popular_times' => [
                 'most_popular' => $mostPopularTime ? array_merge(
@@ -1262,32 +1249,28 @@ class DashboardController extends Controller
             case 'rewards_redeemed':
                 $title = 'Rewards Redeemed';
                 $columns = [
+                    ['key' => 'order_number', 'label' => 'Order #'],
                     ['key' => 'customer_name', 'label' => 'Customer'],
                     ['key' => 'reward_name', 'label' => 'Reward'],
                     ['key' => 'points_cost', 'label' => 'Points'],
                     ['key' => 'redeemed_at', 'label' => 'Date', 'format' => 'datetime'],
                 ];
 
-                $data = DB::table('reward_redemptions')
+                $data = \App\Models\RewardRedemption::with(['customer', 'reward', 'order'])
                     ->where('restaurant_id', $restaurant->id)
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->orderByDesc('created_at')
                     ->get()
-                    ->map(function ($r) {
-                        $customer = \App\Models\Customer::find($r->customer_id);
-                        $reward = DB::table('rewards')->where('id', $r->reward_id)->first();
-
-                        $rewardName = $reward ? $reward->name : 'Unknown Reward';
-                        if (is_string($rewardName) && str_starts_with($rewardName, '{')) {
-                            $decoded = json_decode($rewardName, true);
-                            $rewardName = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
-                        }
+                    ->map(function ($redemption) {
+                        $customerName = $redemption->customer ? $redemption->customer->name : 'Guest';
+                        $rewardName = $redemption->reward ? ($redemption->reward->name ?? 'Unknown Reward') : 'Unknown Reward';
 
                         return [
-                            'customer_name' => $customer ? $customer->name : 'Guest',
+                            'order_number' => $redemption->order ? $redemption->order->order_number : '-',
+                            'customer_name' => $customerName,
                             'reward_name' => $rewardName,
-                            'points_cost' => $r->points_spent,
-                            'redeemed_at' => Carbon::parse($r->created_at)->toIso8601String()
+                            'points_cost' => $redemption->points_used,
+                            'redeemed_at' => \Carbon\Carbon::parse($redemption->created_at)->toIso8601String()
                         ];
                     });
                 break;
