@@ -285,7 +285,8 @@ class LoyaltyService
 
         // Note: MongoDB transactions require replica sets, executing without transaction
         // Deduct points
-        $rewardName = $reward->name[app()->getLocale()] ?? $reward->name['en'] ?? 'Unknown Reward';
+        // Deduct points
+        $rewardName = $reward->name ?? 'Unknown Reward';
         $transaction = $loyaltyPoints->redeemPoints(
             $reward->points_required,
             "Redeemed reward: {$rewardName}",
@@ -295,6 +296,7 @@ class LoyaltyService
         // Create redemption
         $redemption = \App\Models\RewardRedemption::create([
             'customer_id' => $customer->id,
+            'restaurant_id' => $customer->restaurant_id,
             'reward_id' => $reward->id,
             'points_used' => $reward->points_required,
             'status' => 'pending',

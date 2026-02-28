@@ -15,6 +15,7 @@ class RewardRedemption extends Model
 
     protected $fillable = [
         'customer_id',
+        'restaurant_id',
         'reward_id',
         'order_id',
         'points_used',
