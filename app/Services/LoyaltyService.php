@@ -411,7 +411,7 @@ class LoyaltyService
         }
     }
 
-    public function verifyOtp(Customer $customer, string $otp): bool
+    public function verifyOtp(Customer $customer, string $otp, bool $markAsUsed = true): bool
     {
         $validOtp = \App\Models\CustomerOtp::where('customer_id', $customer->id)
             ->where('otp', $otp)
@@ -421,8 +421,10 @@ class LoyaltyService
             ->first();
 
         if ($validOtp) {
-            $validOtp->is_used = true;
-            $validOtp->save();
+            if ($markAsUsed) {
+                $validOtp->is_used = true;
+                $validOtp->save();
+            }
             return true;
         }
 

@@ -471,7 +471,7 @@ class LoyaltyController extends Controller
             'otp' => 'required|string|size:6',
         ]);
 
-        if ($this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+        if ($this->loyaltyService->verifyOtp($customer, $validated['otp'], false)) {
             return response()->json(['message' => __('loyalty.otp_verified')]);
         }
 

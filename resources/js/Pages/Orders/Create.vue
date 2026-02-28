@@ -1226,8 +1226,15 @@ const submitOrder = () => {
             form.reset();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         },
-        onError: () => {
-            // Errors are automatically bound to form.errors, just scroll to top
+        onError: (errors) => {
+            // Errors are automatically bound to form.errors
+            console.error('Order creation failed with errors:', errors);
+            form.processing = false;
+            
+            // Show a toast or generic error message so it doesn't fail silently
+            const errorMessage = Object.values(errors)[0] || 'Validation failed. Please check the form.';
+            alert(errorMessage); // Simple alert fallback. In production, consider a toast notification system.
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });

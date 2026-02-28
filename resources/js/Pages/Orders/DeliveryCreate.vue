@@ -1068,8 +1068,14 @@ const submitOrder = () => {
             otpInput.value = '';
             form.reset();
         },
-        onError: () => {
-            // Errors are automatically bound to form.errors
+        onError: (errors) => {
+            console.error('Delivery order creation failed with errors:', errors);
+            form.processing = false;
+            
+            const errorMessage = Object.values(errors)[0] || 'Validation failed. Please check the form.';
+            alert(errorMessage);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
 };

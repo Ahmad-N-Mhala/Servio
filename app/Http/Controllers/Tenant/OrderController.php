@@ -491,9 +491,8 @@ class OrderController extends Controller
         }
         \Illuminate\Support\Facades\Log::info("OrderController: Initial validation and setup complete.");
 
-        // Find or create customer ONLY if phone is provided
-        $customer = null;
-        if (!empty($validated['customer_phone'])) {
+        // Find or create customer ONLY if not already found and phone is provided
+        if (!$customer && !empty($validated['customer_phone'])) {
             $customer = $this->loyaltyService->findOrCreateCustomer(
                 $restaurant,
                 $validated['customer_phone'],
