@@ -92,12 +92,33 @@ class SendExpiryReminders extends Command
                             $emailTarget = ($recipient instanceof User) ? $recipient->email : $recipient;
                             // Fallback to hardcoded Mailable
                             Mail::to($emailTarget)->send(new ExpiryWarningMail($batch, $batch->reminder_days_before));
+
+                            // MANUAL LOG
+                            \App\Services\CommunicationService::log([
+                                'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
+                                'recipient' => $emailTarget,
+                                'type' => 'email',
+                                'status' => 'sent',
+                                'subject' => 'Inventory Expiry Warning',
+                                'message' => "Batch {$batch->batch_number} for {$batch->ingredient->name['en']} is expiring soon.",
+                            ]);
                         }
 
                         $count++;
                     } catch (\Exception $e) {
                         $emailTarget = ($recipient instanceof User) ? $recipient->email : $recipient;
                         $this->error("Failed to mail {$emailTarget}: " . $e->getMessage());
+
+                        // Log Failure
+                        \App\Services\CommunicationService::log([
+                            'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
+                            'recipient' => $emailTarget,
+                            'type' => 'email',
+                            'status' => 'failed',
+                            'subject' => 'Inventory Expiry Warning',
+                            'message' => "Batch {$batch->batch_number} for {$batch->ingredient->name['en']} is expiring soon.",
+                            'error_message' => $e->getMessage(),
+                        ]);
                     }
                 } else {
                     $this->warn("No recipient found (User or Restaurant Email) for Batch {$batch->batch_number}");

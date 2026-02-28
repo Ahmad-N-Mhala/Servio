@@ -368,33 +368,7 @@
                 </div>
 
                 <div class="flex items-center ml-auto gap-3" :class="currentLocale === 'ar' ? 'space-x-reverse space-x-3' : 'space-x-3'">
-                    <!-- Restaurant Switcher (Super Admin Only) -->
-                    <div class="relative group" v-if="allRestaurants && allRestaurants.length > 0">
-                        <button
-                            @click="isRestaurantMenuOpen = !isRestaurantMenuOpen"
-                            class="flex items-center space-x-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
-                        >
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                            <span>{{ selectedRestaurant?.name || 'Select Restaurant' }}</span>
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        
-                        <!-- Dropdown -->
-                        <div v-if="isRestaurantMenuOpen" class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 max-h-96 overflow-y-auto">
-                            <div class="px-4 py-2 border-b border-gray-50">
-                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Switch Context</p>
-                            </div>
-                            <button
-                                v-for="restaurant in allRestaurants"
-                                :key="restaurant.id"
-                                @click="switchRestaurant(restaurant)"
-                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors flex items-center justify-between group"
-                            >
-                                <span>{{ restaurant.name }}</span>
-                                <svg v-if="selectedRestaurant?.id === restaurant.id" class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            </button>
-                        </div>
-                    </div>
+
                     <!-- Language Toggle -->
                     <button 
                         @click="toggleLanguage" 
@@ -523,7 +497,6 @@ const globalOpenMenus = globalRef<Record<string, boolean>>(getInitialMenuState()
 const globalIsSidebarCollapsed = globalRef(false);
 const globalIsSidebarOpen = globalRef(false);
 const globalUserMenuOpen = globalRef(false);
-const globalIsRestaurantMenuOpen = globalRef(false);
 const globalSidebarScroll = globalRef(0);
 </script>
 
@@ -542,14 +515,12 @@ const { locale } = useI18n();
 // State
 const isSidebarCollapsed = globalIsSidebarCollapsed;
 const isSidebarOpen = globalIsSidebarOpen;
-const isRestaurantMenuOpen = globalIsRestaurantMenuOpen;
 const userMenuOpen = globalUserMenuOpen;
 const openMenus = globalOpenMenus;
 const sidebarNav = ref<HTMLElement | null>(null);
 
 router.on('start', () => {
     userMenuOpen.value = false;
-    isRestaurantMenuOpen.value = false;
     isSidebarOpen.value = false;
 });
 
@@ -557,10 +528,8 @@ const onSidebarScroll = (e: any) => {
     globalSidebarScroll.value = e.target.scrollTop;
 };
 
-const selectedRestaurant = ref<any>((page.props as any).current_restaurant || null);
-
 // Props
-const allRestaurants = (page.props as any).all_restaurants || [];
+const userName = computed(() => (page.props.auth as any)?.user?.name || 'User');
 
 const toggleMenu = (key: string) => {
     openMenus.value[key] = !openMenus.value[key];
@@ -568,8 +537,6 @@ const toggleMenu = (key: string) => {
         localStorage.setItem('adminSidebarMenuState', JSON.stringify(openMenus.value));
     }
 };
-
-const userName = computed(() => (page.props.auth as any)?.user?.name || 'User');
 const userEmail = computed(() => (page.props.auth as any)?.user?.email || 'user@example.com');
 const userAvatarUrl = computed(() => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=4F46E5&color=fff&bold=true`;
@@ -580,23 +547,6 @@ const toastMessage = ref('');
 const toastTitle = ref('');
 const toastType = ref('info');
 const toastTrigger = ref(0);
-
-// Switch Restaurant
-const switchRestaurant = (restaurant: any) => {
-    selectedRestaurant.value = restaurant;
-    isRestaurantMenuOpen.value = false;
-    
-    // Show success toast
-    toastMessage.value = `Switched context to ${restaurant.name}`;
-    toastTitle.value = 'Success';
-    toastType.value = 'success';
-    toastTrigger.value++;
-    
-    router.get(route('admin.dashboard'), { restaurant_id: restaurant.id }, {
-        preserveState: false, // We want to reload stats
-        preserveScroll: true
-    });
-};
 
 // Watch for flash messages
 watch(() => page.props.flash, (flash: any) => {

@@ -333,7 +333,7 @@ class OrderController extends Controller
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+            ->map(fn($batches) => collect($batches)->sum('quantity_remaining'));
 
         // Calculate stock availability for each menu item
         $menuItemsWithIngredients = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get();
@@ -396,6 +396,7 @@ class OrderController extends Controller
 
         $validated = $request->validate([
             'customer_phone' => ['nullable', 'string'],
+            'customer_id' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
             'customer_birth_date' => ['nullable', 'date'],
             'type' => ['required', 'in:dine_in,takeaway,delivery'],
@@ -435,10 +436,20 @@ class OrderController extends Controller
 
         // ====== PRE-VALIDATE REWARD ======
         $customer = null;
-        if ($validated['customer_phone']) {
+        if (!empty($validated['customer_id'])) {
+            $customer = \App\Models\Customer::find($validated['customer_id']);
+        }
+
+        if (!$customer && !empty($validated['customer_phone'])) {
+            $phone = $validated['customer_phone'];
+            // Basic normalization for UAE if needed, but search both
             $customer = \App\Models\Customer::where('restaurant_id', $restaurant->id)
-                ->where('phone', $validated['customer_phone'])
-                ->first();
+                ->where(function ($q) use ($phone) {
+                    $q->where('phone', $phone)
+                        ->orWhere('phone', '+' . ltrim($phone, '+'))
+                        ->orWhere('phone', str_replace('+971', '', $phone))
+                        ->orWhere('phone', '+971' . ltrim($phone, '0'));
+                })->first();
         }
 
         if (!empty($validated['reward_id']) && $customer) {
@@ -464,7 +475,16 @@ class OrderController extends Controller
                         'otp' => [__('loyalty.invalid_otp')]
                     ]);
                 }
-                \Illuminate\Support\Facades\Log::info("OrderController: Reward pre-validation successful.");
+
+                // Check points balance
+                $lp = $customer->loyaltyPoints;
+                if (!$lp || $lp->balance < $reward->points_required) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'reward_id' => [__('loyalty.insufficient_points')]
+                    ]);
+                }
+
+                \Illuminate\Support\Facades\Log::info("OrderController: Reward pre-validation successful for Customer: " . $customer->id);
             } else {
                 \Illuminate\Support\Facades\Log::warning("OrderController: Reward ID {$validated['reward_id']} not found during pre-validation.");
             }
@@ -500,7 +520,7 @@ class OrderController extends Controller
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+            ->map(fn($batches) => collect($batches)->sum('quantity_remaining'));
 
         foreach ($validated['items'] as $item) {
             $menuItem = $menuItems[$item['menu_item_id']] ?? null;
@@ -566,8 +586,8 @@ class OrderController extends Controller
                     'discount_amount' => $validated['discount_amount'] ?? 0,
                     'total' => $validated['total'],
                     'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
-                    'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
-                    'customer_phone' => $validated['customer_phone'] ?? null,
+                    'customer_name' => $customer ? $customer->name : ($validated['customer_name'] ?? 'Guest'),
+                    'customer_phone' => $customer ? $customer->phone : ($validated['customer_phone'] ?? null),
                     'notes' => $validated['notes'] ?? null,
                     'waiter_id' => auth()->id(),
                     'delivery_provider' => $validated['delivery_provider'] ?? null,
@@ -628,23 +648,36 @@ class OrderController extends Controller
         if (!empty($validated['reward_id']) && $customer) {
             $reward = \App\Models\Reward::find($validated['reward_id']);
             if ($reward) {
-                \Illuminate\Support\Facades\Log::info("OrderController: Processing reward redemption for Reward: " . $reward->id);
-                $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
-                $redemption->markAsUsed((string) $order->id);
-                \Illuminate\Support\Facades\Log::info("OrderController: Reward " . $reward->id . " marked as used for order " . $order->id);
+                try {
+                    \Illuminate\Support\Facades\Log::info("OrderController: Processing reward redemption for Reward: " . $reward->id);
+                    $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
+                    $redemption->markAsUsed((string) $order->id);
+                    \Illuminate\Support\Facades\Log::info("OrderController: Reward " . $reward->id . " marked as used for order " . $order->id);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("OrderController: Reward redemption FAILED: " . $e->getMessage());
+                    // We don't throw here to avoid breaking the order flow if it's already created, 
+                }
             }
         }
 
-        // Broadcast order created event for real-time updates
-        broadcast(new OrderUpdated($order->load([
-            'items.menuItem' => function ($q) {
-                $q->withTrashed();
-            },
-            'customer',
-            'table'
-        ]), 'created'))->toOthers();
+        // Broadcast order created event with safety wrapper
+        try {
+            broadcast(new OrderUpdated($order->load([
+                'items.menuItem' => function ($q) {
+                    $q->select(['id', 'name', 'images', 'price', 'restaurant_id', 'menu_category_id']);
+                },
+                'customer' => function ($q) {
+                    $q->select(['id', 'name', 'phone']);
+                },
+                'table' => function ($q) {
+                    $q->select(['id', 'name', 'restaurant_id']);
+                }
+            ]), 'created'))->toOthers();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("OrderController: Broadcasting failed: " . $e->getMessage());
+        }
 
-        // Refresh to check for points
+        // Refresh to check for points (if points_earned is calculated after order creation)
         $order->refresh();
 
         if ($order->points_earned > 0) {

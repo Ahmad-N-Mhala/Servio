@@ -2,29 +2,35 @@
     <MainLayout>
         <div class="max-w-7xl mx-auto" :dir="isRtl ? 'rtl' : 'ltr'">
             <!-- Header -->
-            <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('dashboard.welcome') }}</h1>
-                    <p class="mt-2 text-gray-600 dark:text-gray-400">{{ $t('dashboard.subtitle') }}</p>
+            <div class="mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                <div class="space-y-1">
+                    <h1 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ $t('dashboard.welcome') }}</h1>
+                    <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('dashboard.subtitle') }}</p>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex items-center gap-3 w-full lg:w-auto">
                     <a 
                         :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'excel', tab: currentTab })"
                         target="_blank"
+                        class="flex-1 lg:flex-none"
                     >
-                         <Button variant="secondary" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4">
+                         <Button variant="secondary" class="w-full bg-white/80 backdrop-blur-md border border-gray-200 text-gray-700 hover:bg-gray-50 px-5 py-2.5 shadow-sm rounded-xl">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>{{ $t('inventory.download_excel') }}</Button>
+                            </svg>
+                            <span class="font-bold">{{ $t('inventory.download_excel') }}</span>
+                         </Button>
                     </a>
                     <a 
                         :href="route('dashboard.export', { start_date: dateRange.start_date, end_date: dateRange.end_date, format: 'pdf', tab: currentTab })"
                         target="_blank"
+                        class="flex-1 lg:flex-none"
                     >
-                        <Button variant="primary" class="bg-primary-600 text-white hover:bg-primary-700 px-4">
+                        <Button variant="primary" class="w-full bg-primary text-white hover:bg-primary-hover px-5 py-2.5 shadow-lg shadow-primary/20 rounded-xl">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>{{ $t('common.export') }} PDF</Button>
+                            </svg>
+                            <span class="font-bold">{{ $t('common.export') }} PDF</span>
+                        </Button>
                     </a>
                 </div>
             </div>
@@ -69,12 +75,12 @@
             <div v-if="currentTab === 'overview'" class="space-y-8">
                 
                 <!-- 1. Highlights Section -->
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div class="flex items-center justify-between">
-                         <h2 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <span class="w-1 h-6 bg-primary-500 rounded-full"></span>
-                            {{ $t('dashboard.highlights') }}
-                         </h2>
+                         <div class="flex items-center gap-2">
+                             <div class="w-1 h-6 bg-primary rounded-full"></div>
+                             <h2 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.highlights') }}</h2>
+                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <StatsCard
@@ -83,7 +89,7 @@
                             icon="revenue"
                             color="green"
                             @click="fetchDetails('selection_sales')"
-                            class="cursor-pointer hover:shadow-md transition-shadow"
+                            class="cursor-pointer"
                         />
                         <StatsCard
                             :title="$t('dashboard.total_orders')"
@@ -91,16 +97,16 @@
                             icon="orders"
                             color="blue"
                             @click="fetchDetails('total_orders')"
-                            class="cursor-pointer hover:shadow-md transition-shadow"
+                            class="cursor-pointer"
                         />
                          <StatsCard
                             :title="$t('dashboard.customers')"
                             :value="highlights.customers"
-                            :subtitle="`${highlights.new_customers} ${$t('dashboard.new_customers')} / ${highlights.repeat_customers} ${$t('dashboard.repeat_customers')}`"
+                            :subtitle="`${highlights.new_customers} new / ${highlights.repeat_customers} repeat`"
                             icon="customers"
                             color="purple"
                             @click="fetchDetails('new_customers')"
-                            class="cursor-pointer hover:shadow-md transition-shadow"
+                            class="cursor-pointer"
                         />
                          <StatsCard
                             :title="$t('dashboard.rewards_redeemed')"
@@ -108,38 +114,73 @@
                             icon="gift"
                             color="yellow"
                             @click="fetchDetails('rewards_redeemed')"
-                            class="cursor-pointer hover:shadow-md transition-shadow"
+                            class="cursor-pointer"
                         />
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <ChartCard :title="$t('dashboard.period_sales')" :subtitle="formatCurrency(periodSales.total)" height="300px">
-                         <canvas ref="revenueChartCanvas"></canvas>
+                    <ChartCard :title="$t('dashboard.period_sales')" :subtitle="formatCurrency(periodSales.total)" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </template>
+                        <canvas ref="revenueChartCanvas"></canvas>
                     </ChartCard>
-                    <ChartCard :title="$t('dashboard.period_visits')" :subtitle="periodVisits.total.toString()" height="300px">
-                         <canvas ref="visitsChartCanvas"></canvas>
+                    <ChartCard :title="$t('dashboard.period_visits')" :subtitle="periodVisits.total.toString()" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </template>
+                        <canvas ref="visitsChartCanvas"></canvas>
                     </ChartCard>
                 </div>
 
                 <!-- 3. Distribution & Trends -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ChartCard :title="$t('dashboard.payment_methods')" height="300px">
+                    <ChartCard :title="$t('dashboard.payment_methods')" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        </template>
                         <canvas ref="paymentChartCanvas"></canvas>
                     </ChartCard>
-                    <ChartCard :title="$t('dashboard.order_status')" height="300px">
-                        <canvas ref="statusChartCanvas"></canvas>
+                    <ChartCard :title="$t('dashboard.order_status')" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </template>
+                         <canvas ref="statusChartCanvas"></canvas>
                     </ChartCard>
-                     <ChartCard :title="$t('dashboard.waste_trend')" height="300px">
+                     <ChartCard :title="$t('dashboard.waste_trend')" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </template>
                         <canvas ref="wasteChartCanvas"></canvas>
                     </ChartCard>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ChartCard :title="$t('dashboard.peak_hours')" height="300px">
+                    <ChartCard :title="$t('dashboard.peak_hours')" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </template>
                         <canvas ref="peakHoursChartCanvas"></canvas>
                     </ChartCard>
-                    <ChartCard :title="$t('dashboard.avg_completion_time')" height="300px">
+                    <ChartCard :title="$t('dashboard.avg_completion_time')" height="350px">
+                        <template #icon>
+                            <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </template>
                         <canvas ref="completionTimeChartCanvas"></canvas>
                     </ChartCard>
                 </div>
@@ -149,56 +190,76 @@
                 <!-- 4. Top Insights & Popular Times -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Top Insights Grid -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 lg:col-span-2">
-                         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.top_insights') }}</h3>
-                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="glass-card rounded-2xl p-8 lg:col-span-2 shadow-xl border border-white/20">
+                         <div class="flex items-center gap-3 mb-8">
+                             <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                                 <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                 </svg>
+                             </div>
+                             <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.top_insights') }}</h3>
+                         </div>
+                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                              <!-- Pareto -->
-                             <div class="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                                 <p class="text-sm text-gray-500 mb-1">{{ $t('dashboard.revenue_distribution') }}</p>
-                                 <div class="flex items-end gap-2">
-                                     <span class="text-3xl font-bold text-primary-600">{{ topInsights.pareto_percent }}%</span>
-                                     <span class="text-xs text-gray-400 mb-1">from top 20% customers</span>
+                             <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
+                                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.revenue_distribution') }}</p>
+                                 <div class="flex items-end gap-3">
+                                     <span class="text-4xl font-black text-emerald-600 tracking-tighter">{{ topInsights.pareto_percent }}%</span>
+                                     <span class="text-xs text-gray-400 font-medium mb-1.5 uppercase tracking-tighter">{{ $t('dashboard.from_top_20_percent') }}</span>
                                  </div>
                              </div>
                              <!-- AOV -->
-                             <div class="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                                 <p class="text-sm text-gray-500 mb-1">{{ $t('dashboard.avg_order_value') }}</p>
-                                 <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(topInsights.avg_order_value) }}</div>
+                             <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
+                                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.avg_order_value') }}</p>
+                                 <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ formatCurrency(topInsights.avg_order_value) }}</div>
                              </div>
                              <!-- Avg Items -->
-                             <div class="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                                 <p class="text-sm text-gray-500 mb-1">{{ $t('dashboard.avg_items_per_order') }}</p>
-                                 <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ topInsights.avg_items_per_order }}</div>
+                             <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
+                                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.avg_items_per_order') }}</p>
+                                 <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ topInsights.avg_items_per_order }}</div>
                              </div>
                              <!-- Avg Visits -->
-                             <div class="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                                 <p class="text-sm text-gray-500 mb-1">{{ $t('dashboard.avg_visits_per_year') }}</p>
-                                 <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ topInsights.avg_visits_per_year }}</div>
+                             <div class="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-700/30 border border-gray-100 transition-all hover:bg-white hover:shadow-lg">
+                                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{{ $t('dashboard.avg_visits_per_year') }}</p>
+                                 <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ topInsights.avg_visits_per_year }}</div>
                              </div>
                          </div>
                     </div>
 
                     <!-- Popular Times -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.popular_times') }}</h3>
+                    <div class="glass-card rounded-2xl p-8 shadow-xl border border-white/20">
+                        <div class="flex items-center gap-3 mb-8">
+                             <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                                 <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                 </svg>
+                             </div>
+                             <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.popular_times') }}</h3>
+                         </div>
                         <div class="space-y-6">
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                                <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-2">{{ $t('dashboard.most_popular') }}</p>
-                                <p v-if="popularTimes.most_popular" class="text-lg font-bold text-gray-900 dark:text-white">
-                                    {{ popularTimes.most_popular.label }}
+                            <div class="p-5 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100/50 transition-all hover:shadow-md">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{{ $t('dashboard.most_popular') }}</p>
+                                </div>
+                                <p v-if="popularTimes.most_popular" class="text-xl font-black text-gray-900 dark:text-white">
+                                    {{ $t('dashboard.day_' + popularTimes.most_popular.day) }} {{ $t('dashboard.period_' + popularTimes.most_popular.period) }}
                                 </p>
-                                <p v-if="popularTimes.most_popular" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    {{ popularTimes.most_popular.orders }} orders
+                                <p v-if="popularTimes.most_popular" class="text-xs font-bold text-emerald-600/70 mt-1 uppercase">
+                                    {{ popularTimes.most_popular.orders }} {{ $t('dashboard.orders_total') }}
                                 </p>
                                 <p v-else class="text-sm text-gray-500">N/A</p>
                             </div>
-                            <div class="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
-                                <p class="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-2">{{ $t('dashboard.least_popular') }}</p>
-                                <p v-if="popularTimes.least_popular" class="text-lg font-bold text-gray-900 dark:text-white">
-                                    {{ popularTimes.least_popular.label }}
+                            <div class="p-5 bg-rose-50 dark:bg-rose-900/20 rounded-2xl border border-rose-100/50 transition-all hover:shadow-md">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    <p class="text-[10px] font-black text-rose-600 uppercase tracking-widest">{{ $t('dashboard.least_popular') }}</p>
+                                </div>
+                                <p v-if="popularTimes.least_popular" class="text-xl font-black text-gray-900 dark:text-white">
+                                    {{ $t('dashboard.day_' + popularTimes.least_popular.day) }} {{ $t('dashboard.period_' + popularTimes.least_popular.period) }}
                                 </p>
-                                <p v-if="popularTimes.least_popular" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    {{ popularTimes.least_popular.orders }} orders
+                                <p v-if="popularTimes.least_popular" class="text-xs font-bold text-rose-600/70 mt-1 uppercase">
+                                    {{ popularTimes.least_popular.orders }} {{ $t('dashboard.orders_total') }}
                                 </p>
                                 <p v-else class="text-sm text-gray-500">N/A</p>
                             </div>
@@ -209,50 +270,77 @@
                 <!-- 5. Lists: Customer Frequency, Rewards, Top Items -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Customer Frequency -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.customer_frequency') }}</h3>
-                        <div class="space-y-4">
+                    <div class="glass-card rounded-2xl p-8 shadow-xl border border-white/20">
+                         <div class="flex items-center gap-3 mb-8">
+                             <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center">
+                                 <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                 </svg>
+                             </div>
+                             <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.customer_frequency') }}</h3>
+                         </div>
+                        <div class="space-y-5">
                              <div v-for="(count, label) in customerFrequency" :key="label" 
-                                class="flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded transition-colors"
+                                class="flex items-center justify-between cursor-pointer group p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
                                 @click="fetchDetails('retention_bucket', { range: String(label) })"
                              >
-                                 <span class="text-sm text-gray-600 dark:text-gray-400">{{ $t('dashboard.visit_' + String(label).replace('+', '_plus').replace('-', '_')) }}</span>
-                                 <div class="flex items-center gap-3">
-                                     <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                         <div class="h-full bg-primary-500" :style="`width: ${Math.min(100, (count / (customerInsights.total || 1)) * 100)}%`"></div>
+                                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider group-hover:text-primary transition-colors">{{ $t('dashboard.visit_' + String(label).replace('+', '_plus').replace('-', '_')) }}</span>
+                                 <div class="flex items-center gap-4">
+                                     <div class="w-24 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+                                         <div class="h-full bg-primary transition-all duration-1000 group-hover:scale-x-105 origin-left" :style="`width: ${Math.min(100, (count / (customerInsights.total || 1)) * 100)}%`"></div>
                                      </div>
-                                     <span class="text-sm font-bold text-gray-900 dark:text-white w-8 text-right">{{ count }}</span>
+                                     <span class="text-sm font-black text-gray-900 dark:text-white w-8 text-right">{{ count }}</span>
                                  </div>
                              </div>
                         </div>
                     </div>
 
                     <!-- Top Rewards -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.top_rewards') }}</h3>
+                    <div class="glass-card rounded-2xl p-8 shadow-xl border border-white/20">
+                        <div class="flex items-center gap-3 mb-8">
+                             <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                                 <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c.57.201 1 .761 1 1.403V19a2 2 0 01-2 2h-1v-4.546M21 15.546c-.57-.201-1.393-.546-2.103-.921a.5.5 0 00-.459.89c.729.387 1.558.732 2.126.931m0-2.4c-.035-.012-.07-.024-.103-.037M5 20l-3-1v-2.339c0-.6.39-.41-1.455.51a.5.5 0 01.444.894C2.445 15.454 4 15.85 5 16.205V20zm0 0V4a2 2 0 012-2h7a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2z" />
+                                 </svg>
+                             </div>
+                             <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.top_rewards') }}</h3>
+                         </div>
                         <div v-if="topRewards.length > 0" class="space-y-4">
-                            <div v-for="(reward, idx) in topRewards" :key="idx" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
-                                <span class="w-6 h-6 flex items-center justify-center bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">{{ idx + 1 }}</span>
+                            <div v-for="(reward, idx) in topRewards" :key="idx" class="flex items-center gap-4 p-3 hover:bg-white hover:shadow-lg rounded-2xl border border-transparent transition-all group">
+                                <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-amber-50 text-amber-600 rounded-xl text-xs font-black group-hover:bg-amber-100 transition-colors">{{ idx + 1 }}</span>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ reward.name }}</p>
-                                    <p class="text-xs text-gray-500 truncate">{{ reward.description }}</p>
+                                    <p class="text-sm font-black text-gray-900 truncate uppercase tracking-tight">{{ reward.name }}</p>
+                                    <p class="text-[10px] font-bold text-gray-400 truncate uppercase mt-0.5">{{ reward.description }}</p>
                                 </div>
-                                <span class="text-sm font-bold text-gray-700">{{ reward.count }}</span>
+                                <div class="text-right">
+                                    <span class="text-sm font-black text-gray-700">{{ reward.count }}</span>
+                                    <p class="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">{{ $t('dashboard.used') }}</p>
+                                </div>
                             </div>
                         </div>
                          <p v-else class="text-sm text-gray-500 text-center py-4">{{ $t('common.no_results') }}</p>
                     </div>
 
                     <!-- Top Items -->
-                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.top_menu_items') }}</h3>
+                     <div class="glass-card rounded-2xl p-8 shadow-xl border border-white/20">
+                        <div class="flex items-center gap-3 mb-8">
+                             <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                 </svg>
+                             </div>
+                             <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ $t('dashboard.top_menu_items') }}</h3>
+                         </div>
                         <div v-if="topItems.length > 0" class="space-y-4">
-                             <div v-for="(item, idx) in topItems" :key="idx" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
-                                <span class="w-6 h-6 flex items-center justify-center bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{{ idx + 1 }}</span>
+                             <div v-for="(item, idx) in topItems" :key="idx" class="flex items-center gap-4 p-3 hover:bg-white hover:shadow-lg rounded-2xl border border-transparent transition-all group">
+                                <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl text-xs font-black group-hover:bg-blue-100 transition-colors">{{ idx + 1 }}</span>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ item.name }}</p>
+                                    <p class="text-sm font-black text-gray-900 truncate uppercase tracking-tight">{{ item.name }}</p>
                                 </div>
-                                <span class="text-sm font-bold text-gray-700">{{ item.quantity }} sold</span>
+                                <div class="text-right">
+                                    <span class="text-sm font-black text-gray-700">{{ item.quantity }}</span>
+                                    <p class="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">{{ $t('dashboard.sold') }}</p>
+                                </div>
                             </div>
                         </div>
                          <p v-else class="text-sm text-gray-500 text-center py-4">{{ $t('common.no_results') }}</p>
@@ -477,9 +565,12 @@ const initRevenueChart = () => {
     if (revenueChartInstance) revenueChartInstance.destroy();
     
     const chartData = periodSales.value.chart || [];
-    
     const ctx = revenueChartCanvas.value.getContext('2d');
     if (!ctx) return;
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
     
     revenueChartInstance = new Chart(ctx, {
         type: 'line',
@@ -488,19 +579,48 @@ const initRevenueChart = () => {
             datasets: [{
                 label: t('dashboard.sales'),
                 data: chartData.map((d: any) => d.revenue),
-                borderColor: 'rgb(16, 185, 129)', // Green
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderColor: '#10B981',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#10B981',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
                 tension: 0.4,
-                fill: true
+                fill: true,
+                backgroundColor: gradient
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            interaction: { intersect: false, mode: 'index' },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    borderColor: '#e5e7eb',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    callbacks: {
+                        label: (context) => ` ${t('dashboard.sales')}: ${formatCurrency(context.raw as number)}`
+                    }
+                }
+            },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: (val) => formatCurrency(val as number) } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 10, weight: 'bold' as any }, callback: (val) => formatCurrency(val as number) } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: 'bold' as any } }
+                }
             },
             onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements && activeElements.length > 0) {
@@ -520,12 +640,16 @@ const initRevenueChart = () => {
 };
 
 const initVisitsChart = () => {
-    // ... existing initVisitsChart ...
     if (!visitsChartCanvas.value) return;
     if (visitsChartInstance) visitsChartInstance.destroy();
     const chartData = periodVisits.value.chart || [];
     const ctx = visitsChartCanvas.value.getContext('2d');
     if (!ctx) return;
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+
     visitsChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -533,17 +657,35 @@ const initVisitsChart = () => {
             datasets: [{
                 label: t('dashboard.period_visits'),
                 data: chartData.map((d: any) => d.count),
-                backgroundColor: 'rgb(59, 130, 246)', // Blue
-                borderRadius: 4
+                backgroundColor: gradient,
+                borderRadius: 8,
+                hoverBackgroundColor: 'rgb(59, 130, 246)'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    borderColor: '#e5e7eb',
+                    borderWidth: 1,
+                    padding: 12
+                }
+            },
             scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 10, weight: 'bold' as any }, precision: 0 } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: 'bold' as any } }
+                }
             }
         }
     });
@@ -567,24 +709,26 @@ const initPaymentChart = () => {
                     'rgba(245, 158, 11, 0.7)',
                     'rgba(139, 92, 246, 0.7)',
                     'rgba(239, 68, 68, 0.7)'
-                ]
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' as any }, padding: 20 } },
                 tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    padding: 12,
                     callbacks: {
                         label: function(context: any) {
                             let label = context.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.raw !== null && context.raw !== undefined) {
-                                label += formatCurrency(context.raw);
-                            }
+                            if (label) label += ': ';
+                            if (context.raw !== null) label += formatCurrency(context.raw);
                             return label;
                         }
                     }
@@ -613,18 +757,30 @@ const initStatusChart = () => {
             datasets: [{
                 data: statusDistribution.value.map(d => d.count),
                 backgroundColor: [
-                    'rgba(16, 185, 129, 0.7)', // completed
-                    'rgba(245, 158, 11, 0.7)', // pending
-                    'rgba(59, 130, 246, 0.7)', // preparing
-                    'rgba(239, 68, 68, 0.7)',  // cancelled
-                    'rgba(107, 114, 128, 0.7)' // deleted
-                ]
+                    '#10B981', // completed
+                    '#F59E0B', // pending
+                    '#3B82F6', // preparing
+                    '#EF4444', // cancelled
+                    '#6B7280'  // deleted
+                ],
+                borderWidth: 5,
+                borderColor: '#fff',
+                hoverOffset: 15
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+            cutout: '70%',
+            plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' as any }, padding: 20 } },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    padding: 12
+                }
+            },
             onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements.length > 0) {
                     const idx = activeElements[0].index;
@@ -641,6 +797,10 @@ const initPeakHoursChart = () => {
     const ctx = peakHoursChartCanvas.value.getContext('2d');
     if (!ctx) return;
 
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(139, 92, 246, 0.8)');
+    gradient.addColorStop(1, 'rgba(139, 92, 246, 0.2)');
+
     peakHoursChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -648,18 +808,33 @@ const initPeakHoursChart = () => {
             datasets: [{
                 label: t('dashboard.orders'),
                 data: peakHours.value.map(d => d.count),
-                backgroundColor: 'rgba(139, 92, 246, 0.6)',
-                borderColor: 'rgb(139, 92, 246)',
-                borderWidth: 1
+                backgroundColor: gradient,
+                borderRadius: 8,
+                hoverBackgroundColor: 'rgb(139, 92, 246)'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    padding: 12
+                }
+            },
             scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 10, weight: 'bold' as any }, precision: 0 } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: 'bold' as any } }
+                }
             },
             onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements.length > 0) {
@@ -672,11 +847,15 @@ const initPeakHoursChart = () => {
 };
 
 const initWasteChart = () => {
-    // ... existing initWasteChart ...
     if (!wasteChartCanvas.value) return;
     if (wasteChartInstance) wasteChartInstance.destroy();
     const ctx = wasteChartCanvas.value.getContext('2d');
     if (!ctx) return;
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+    gradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+
     wasteChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -684,18 +863,38 @@ const initWasteChart = () => {
             datasets: [{
                 label: t('dashboard.waste_loss'),
                 data: wasteTrend.value.map(d => d.loss),
-                borderColor: 'rgb(239, 68, 68)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderColor: '#EF4444',
+                borderWidth: 3,
+                backgroundColor: gradient,
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 6
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            responsive: true, 
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    padding: 12
+                }
+            },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: (val) => formatCurrency(val as number) } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 10, weight: 'bold' as any }, callback: (val) => formatCurrency(val as number) } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: 'bold' as any } }
+                }
             },
             onClick: (_e: any, activeElements: any[]) => {
                 if (activeElements.length > 0) {
@@ -713,6 +912,10 @@ const initCompletionTimeChart = () => {
     const ctx = completionTimeChartCanvas.value.getContext('2d');
     if (!ctx) return;
 
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(14, 165, 233, 0.4)');
+    gradient.addColorStop(1, 'rgba(14, 165, 233, 0.0)');
+
     completionTimeChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -720,19 +923,39 @@ const initCompletionTimeChart = () => {
             datasets: [{
                 label: t('dashboard.minutes'),
                 data: completionTimeTrend.value.map(d => d.minutes),
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderColor: '#0EA5E9',
+                borderWidth: 3,
+                backgroundColor: gradient,
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            interaction: { intersect: false, mode: 'index' },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    padding: 12
+                }
+            },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: t('dashboard.minutes') } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { font: { size: 10, weight: 'bold' as any } },
+                    title: { display: true, text: t('dashboard.minutes'), font: { size: 10, weight: 'bold' as any } } 
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: 'bold' as any } }
+                }
             }
         }
     });

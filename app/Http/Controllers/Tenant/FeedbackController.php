@@ -60,12 +60,6 @@ class FeedbackController extends Controller
 
     public function updateSettings(Request $request)
     {
-        \Log::info('updateSettings called', [
-            'url' => $request->fullUrl(),
-            'method' => $request->method(),
-            'path' => $request->path(),
-        ]);
-
         $validated = $request->validate([
             'page_title' => ['nullable', 'string', 'max:50'],
             'welcome_message' => ['nullable', 'string', 'max:100'],

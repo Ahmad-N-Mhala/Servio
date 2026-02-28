@@ -42,6 +42,9 @@ class StaffController extends Controller
     public function index(Request $request): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
+        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
+        }
 
         if (!$restaurant) {
             abort(404, 'Restaurant context not found');
@@ -224,6 +227,10 @@ class StaffController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
+        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
+        }
+
         if (!$restaurant) {
             abort(404, 'Restaurant context not found');
         }

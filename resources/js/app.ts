@@ -33,6 +33,7 @@ declare global {
 }
 
 window.Pusher = Pusher;
+(window as any).axios = axios;
 
 // Only initialize Echo if Pusher credentials are configured
 if (import.meta.env.VITE_PUSHER_APP_KEY) {

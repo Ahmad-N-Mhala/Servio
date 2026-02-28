@@ -110,33 +110,43 @@ class CommunicationService
             Mail::to($recipientEmail)->send(new \App\Mail\GenericSystemEmail($subject, $content));
 
             // Log the communication
-            \App\Models\CommunicationLog::create([
+            self::log([
                 'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
-                'communication_template_id' => (string) $template->id,
+                'communication_template_id' => $template ? (string) $template->id : null,
                 'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'sent',
+                'subject' => $subject,
                 'message' => substr($content, 0, 1000),
-                'sent_at' => now(),
             ]);
 
             return true;
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("System Email failed: " . $e->getMessage());
 
-            \App\Models\CommunicationLog::create([
+            self::log([
                 'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
-                'communication_template_id' => (string) $template->id,
+                'communication_template_id' => $template ? (string) $template->id : null,
                 'recipient' => $recipientEmail,
                 'type' => 'email',
                 'status' => 'failed',
+                'subject' => $subject,
                 'message' => substr($content, 0, 1000),
                 'error_message' => $e->getMessage(),
-                'sent_at' => now(),
             ]);
 
             return false;
         }
+    }
+
+    /**
+     * Log a communication manually.
+     */
+    public static function log(array $params): void
+    {
+        \App\Models\CommunicationLog::create(array_merge([
+            'sent_at' => now(),
+        ], $params));
     }
 
     protected function replaceVariables(string $text, User|string $recipient, array $data): string

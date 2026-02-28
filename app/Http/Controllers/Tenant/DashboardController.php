@@ -218,7 +218,8 @@ class DashboardController extends Controller
         $uniqueCustomersSelection = Order::where('restaurant_id', $restaurant->id)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('customer_id')
-            ->distinct('customer_id')
+            ->groupBy('customer_id')
+            ->get()
             ->count();
 
         $selectionNewCustomers = \App\Models\Customer::where('restaurant_id', $restaurant->id)
@@ -227,7 +228,7 @@ class DashboardController extends Controller
         $selectionRepeatCustomers = max(0, $uniqueCustomersSelection - $selectionNewCustomers);
 
         $rewardsRedeemed = \App\Models\RewardRedemption::where('restaurant_id', $restaurant->id)
-            ->whereBetween('redeemed_at', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
         // Use the pre-loaded orders and their items
@@ -677,20 +678,19 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count(),
-            'customers' => \App\Models\Customer::where('restaurant_id', $restaurant->id)
+            'customers' => Order::where('restaurant_id', $restaurant->id)
                 ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereNotNull('customer_id')
+                ->groupBy('customer_id')
+                ->get()
                 ->count(),
             'rewards_redeemed' => \App\Models\RewardRedemption::where('restaurant_id', $restaurant->id)
-                ->whereBetween('redeemed_at', [$startDate, $endDate])
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->count(),
         ];
 
         // New vs Repeat Customers for Selection
-        $uniqueCustomersSelection = Order::where('restaurant_id', $restaurant->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereNotNull('customer_id')
-            ->distinct('customer_id')
-            ->count();
+        $uniqueCustomersSelection = $selectionStats['customers'];
 
         $selectionNewCustomers = \App\Models\Customer::where('restaurant_id', $restaurant->id)
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -737,7 +737,8 @@ class DashboardController extends Controller
         $activeCustomersCount = Order::where('restaurant_id', $restaurant->id)
             ->where('created_at', '>=', now()->subDays(30))
             ->whereNotNull('customer_id')
-            ->distinct('customer_id')
+            ->groupBy('customer_id')
+            ->get()
             ->count();
         $inactiveCustomersCount = max(0, $totalCustomersCount - $activeCustomersCount);
 
@@ -768,35 +769,43 @@ class DashboardController extends Controller
                 'type' => 'Birthday'
             ]);
 
-        // 6. Top Insights & Pareto
-        $totalLifeTimeRevenue = Order::where('restaurant_id', $restaurant->id)
-            ->where('payment_status', 'paid')
-            ->sum('total');
-        $totalLifeTimeRevenue = (float) (string) $totalLifeTimeRevenue;
+        // 6. Top Insights & Pareto (Period-Based)
+        $periodRevenue = (float) $revenueOrders->sum('total');
+        $periodCustomerVisits = $revenueOrders->whereNotNull('customer_id')->groupBy('customer_id');
+        $periodCustomerCount = $periodCustomerVisits->count();
+        $top20PercentCount = (int) ceil($periodCustomerCount * 0.2);
 
-        $top20PercentCount = (int) ceil($totalCustomersCount * 0.2);
         if ($top20PercentCount > 0) {
-            $top20Revenue = Order::where('restaurant_id', $restaurant->id)
-                ->where('payment_status', 'paid')
-                ->whereNotNull('customer_id')
-                ->get()
-                ->groupBy('customer_id')
-                ->map(fn($orders) => $orders->sum(fn($o) => (float) (string) $o->total))
+            $top20Revenue = $periodCustomerVisits
+                ->map(fn($orders) => collect($orders)->sum(fn($o) => (float) (string) $o->total))
                 ->sortDesc()
                 ->take($top20PercentCount)
                 ->sum();
 
-            $paretoRevenuePercent = $totalLifeTimeRevenue > 0 ? round(($top20Revenue / $totalLifeTimeRevenue) * 100) : 0;
+            $paretoRevenuePercent = $periodRevenue > 0 ? round(($top20Revenue / $periodRevenue) * 100) : 0;
         } else {
             $paretoRevenuePercent = 0;
         }
 
-        // Avg Order Value
-        $totalOrders = $allOrders->count();
-        $avgOrderValue = $totalOrders > 0 ? round($totalSalesPeriod / $totalOrders, 2) : 0;
+        // Avg Order Value (Period)
+        $totalOrdersCount = $allOrders->count();
+        $avgOrderValue = $totalOrdersCount > 0 ? round($periodRevenue / $totalOrdersCount, 2) : 0;
 
-        // Avg Visits Lifetime
-        $avgVisitsPerCustomer = $totalCustomersCount > 0 ? round(Order::where('restaurant_id', $restaurant->id)->count() / $totalCustomersCount, 1) : 0;
+        // Avg Items Per Order (Period)
+        $totalItemsCount = $allOrders->sum(fn($o) => $o->items ? $o->items->sum('quantity') : 0);
+        $avgItemsPerOrder = $totalOrdersCount > 0 ? round($totalItemsCount / $totalOrdersCount, 1) : 0;
+
+        // Avg Visits/Year (Annualized based on period activity)
+        $daysInPeriod = max(1, $startDate->diffInDays($endDate) + 1);
+        $uniqueCustomersInPeriod = $allOrders->whereNotNull('customer_id')->pluck('customer_id')->unique()->count();
+        if ($uniqueCustomersInPeriod > 0) {
+            $avgVisitsPerCustomerInPeriod = $totalOrdersCount / $uniqueCustomersInPeriod;
+            $avgVisitsPerYear = round(($avgVisitsPerCustomerInPeriod / $daysInPeriod) * 365, 1);
+        } else {
+            $avgVisitsPerYear = 0;
+        }
+
+        $avgVisitsPerCustomer = $avgVisitsPerYear; // Using annualized visits for the "Avg Visits/Year" label
 
         // 7. Popular Times
         $popularTimes = $allOrders
@@ -820,15 +829,17 @@ class DashboardController extends Controller
 
         $formatTimePeriod = function ($day, $hour) {
             if ($day === null)
-                return "Unknown";
-            $dayName = $day;
+                return ['day' => 'unknown', 'period' => 'unknown'];
+            $dayKey = strtolower($day); // e.g. "monday", "tuesday"
             if ($hour >= 5 && $hour < 12)
-                return "$dayName morning";
-            if ($hour >= 12 && $hour < 17)
-                return "$dayName afternoon";
-            if ($hour >= 17 && $hour < 21)
-                return "$dayName evening";
-            return "$dayName night";
+                $period = 'morning';
+            elseif ($hour >= 12 && $hour < 17)
+                $period = 'afternoon';
+            elseif ($hour >= 17 && $hour < 21)
+                $period = 'evening';
+            else
+                $period = 'night';
+            return ['day' => $dayKey, 'period' => $period];
         };
 
         // 8. Customer Frequency
@@ -846,14 +857,18 @@ class DashboardController extends Controller
 
         // 9. Top Rewards
         $topRewards = \App\Models\RewardRedemption::where('restaurant_id', $restaurant->id)
-            ->whereBetween('redeemed_at', [$startDate, $endDate])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->with('reward')
             ->get()
             ->groupBy('reward_id')
             ->map(function ($group) {
                 $first = $group->first();
+                $name = $first->reward ? ($first->reward->getTranslation('name', app()->getLocale()) ?? $first->reward->name) : 'Unknown';
+                if (is_array($name)) {
+                    $name = $name[app()->getLocale()] ?? $name['en'] ?? $name['ar'] ?? 'Unknown';
+                }
                 return [
-                    'name' => $first->reward ? $first->reward->name ?? 'Unknown' : 'Unknown',
+                    'name' => $name,
                     'description' => $first->reward ? $first->reward->description : '',
                     'count' => $group->count()
                 ];
@@ -1019,20 +1034,18 @@ class DashboardController extends Controller
             'top_insights' => [
                 'pareto_percent' => $paretoRevenuePercent,
                 'avg_order_value' => $avgOrderValue,
-                'avg_items_per_order' => 0.6, // Placeholder
+                'avg_items_per_order' => $avgItemsPerOrder,
                 'avg_visits_per_year' => $avgVisitsPerCustomer
             ],
             'popular_times' => [
-                'most_popular' => $mostPopularTime ? [
-                    'label' => $formatTimePeriod($mostPopularTime['day'], $mostPopularTime['hour']),
-                    'orders' => $mostPopularTime['count'],
-                    'revenue' => $mostPopularTime['revenue']
-                ] : null,
-                'least_popular' => $leastPopularTime ? [
-                    'label' => $formatTimePeriod($leastPopularTime['day'], $leastPopularTime['hour']),
-                    'orders' => $leastPopularTime['count'],
-                    'revenue' => $leastPopularTime['revenue']
-                ] : null
+                'most_popular' => $mostPopularTime ? array_merge(
+                    $formatTimePeriod($mostPopularTime['day'], $mostPopularTime['hour']),
+                    ['orders' => $mostPopularTime['count'], 'revenue' => $mostPopularTime['revenue']]
+                ) : null,
+                'least_popular' => $leastPopularTime ? array_merge(
+                    $formatTimePeriod($leastPopularTime['day'], $leastPopularTime['hour']),
+                    ['orders' => $leastPopularTime['count'], 'revenue' => $leastPopularTime['revenue']]
+                ) : null
             ],
             'customer_frequency' => $freqStats,
             'top_rewards' => $topRewards,

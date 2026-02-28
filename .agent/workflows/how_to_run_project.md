@@ -42,7 +42,14 @@ php artisan db:seed --class=DashboardDemoSeeder
 
 # 3. Running the Application
 
-You need two terminal windows running simultaneously:
+**Option 1: Unified Start (Recommended)**
+Run all services (Backend, Frontend, and Queue) with one command:
+```bash
+./run_dev.sh
+```
+
+**Option 2: Manual Start**
+You need three terminal windows running simultaneously:
 
 **Terminal 1 (Backend):**
 ```bash
@@ -54,6 +61,12 @@ php artisan serve
 ```bash
 // turbo
 npm run dev
+```
+
+**Terminal 3 (Queue Worker - REQUIRED for SMS/Email):**
+```bash
+// turbo
+php artisan queue:work
 ```
 
 Access the application at: `http://127.0.0.1:8000`

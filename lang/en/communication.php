@@ -101,6 +101,8 @@ return [
     'trigger_birthday' => 'Customer Birthday',
     'trigger_churn_risk' => 'Churn Risk (Inactive)',
     'trigger_feedback_received' => 'Feedback Received',
+    'trigger_loyalty_points_earned' => 'Loyalty Points Earned',
+    'trigger_loyalty_tier_upgraded' => 'Loyalty Tier Upgraded',
     'trigger_when_hint' => 'When should this message be sent?',
     'rule_name_placeholder' => 'e.g. Welcome Message, Order Confirmation, Birthday Greetings',
     'sender_name_placeholder' => 'e.g. Servio, YourBrand',

@@ -10,7 +10,6 @@ use App\Models\Table;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\DB;
 
 class POSController extends Controller
 {
@@ -20,13 +19,10 @@ class POSController extends Controller
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
-        \Log::info('POS Index - Restaurant ID: ' . $restaurant->id);
-
         $orders = Order::with([
             'items.menuItem' => function ($query) {
                 $query->withTrashed();
             },
-            'customer',
             'customer',
             'table',
             'waiter'
@@ -35,13 +31,10 @@ class POSController extends Controller
             ->whereIn('status', ['pending', 'pending_approval', 'completed', 'processing', 'ready', 'served'])
             ->where(function ($query) {
                 $query->whereIn('payment_status', ['unpaid', 'pending'])
-                    ->orWhereNull('payment_status');  // Include orders without payment_status field
+                    ->orWhereNull('payment_status');
             })
             ->orderBy('created_at', 'desc')
             ->get();
-
-        \Log::info('POS Index - Orders count: ' . $orders->count());
-        \Log::info('POS Index - Total orders for restaurant: ' . Order::where('restaurant_id', $restaurant->id)->count());
 
         $tables = Table::where('restaurant_id', $restaurant->id)->get();
 

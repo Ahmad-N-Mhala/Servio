@@ -46,9 +46,9 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
-        // Ensure customer belongs to tenant
+        // Ensure customer belongs to tenant (Bypass for Super Admin)
         $restaurantId = session('active_restaurant_id');
-        if ((string) $customer->restaurant_id !== (string) $restaurantId) {
+        if (!auth()->user()->is_super_admin && (string) $customer->restaurant_id !== (string) $restaurantId) {
             abort(403);
         }
 

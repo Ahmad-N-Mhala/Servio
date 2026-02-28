@@ -455,8 +455,20 @@
                                 </td>
                                 <td class="px-4 py-3 uppercase text-xs font-bold">{{ log.type }}</td>
                                 <td class="px-4 py-3">
-                                    <span :class="log.status === 'sent' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'" class="px-2 py-1 rounded-full text-xs">
+                                    <span 
+                                        :class="{
+                                            'text-green-600 bg-green-50': log.status === 'sent',
+                                            'text-red-600 bg-red-50': log.status === 'failed',
+                                            'text-blue-600 bg-blue-50': log.status === 'simulated'
+                                        }" 
+                                        class="px-2 py-1 rounded-full text-xs cursor-help relative group/tooltip"
+                                    >
                                         {{ log.status }}
+                                        <div v-if="log.status === 'failed' && log.error_message" 
+                                             class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg hidden group-hover/tooltip:block z-50 text-center whitespace-normal normal-case font-normal shadow-xl border border-gray-700">
+                                            {{ log.error_message }}
+                                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
                                     </span>
                                 </td>
                             </tr>
@@ -472,27 +484,7 @@
             </div>
         </div>
 
-            <!-- Bundles Section -->
-            <div v-if="activeTab === 'bundles'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
-                <div v-for="bundle in bundles" :key="bundle.id" class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all text-center">
-                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-if="bundle.type === 'sms'">
-                            <!-- SMS Icon -->
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                        </svg>
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-else>
-                            <!-- Email Icon -->
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900">{{ bundle.name }}</h3>
-                    <div class="my-4">
-                        <span class="text-3xl font-bold text-gray-900">{{ bundle.currency }} {{ bundle.price }}</span>
-                    </div>
-                    <p class="text-gray-500 mb-6">{{ bundle.quantity }} {{ bundle.type.toUpperCase() }} {{ $t('communication.credits') }}</p>
-                    <Button @click="purchase(bundle)" class="w-full justify-center">{{ $t('communication.purchase') }}</Button>
-                </div>
-            </div>
+
 
         <!-- Create/Edit Template Modal -->
         <Modal :show="showTemplateModal" @close="closeTemplateModal" :title="editingTemplate ? $t('communication.edit_rule') : $t('communication.new_rule')" size="4xl">
@@ -591,10 +583,10 @@
                                 class="max-w-md"
                             />
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        {{ $t('communication.sms_message') }} (EN) <span class="text-red-500">*</span>
+                                        {{ $t('communication.sms_message') }} <span class="text-red-500">*</span>
                                     </label>
                                     <textarea 
                                         v-model="templateForm.sms_content_en"
@@ -608,26 +600,6 @@
                                         <p class="text-xs text-gray-500">{{ $t('communication.sms_length_hint') }}</p>
                                         <p class="text-xs font-bold font-mono" :class="(templateForm.sms_content_en?.length || 0) > 160 ? 'text-red-600' : 'text-gray-400'">
                                             {{ templateForm.sms_content_en?.length || 0 }}/160
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1 text-right">
-                                        {{ $t('communication.sms_message') }} (AR) <span class="text-red-500">*</span>
-                                    </label>
-                                    <textarea 
-                                        v-model="templateForm.sms_content_ar"
-                                        rows="5"
-                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm text-right leading-relaxed"
-                                        dir="rtl"
-                                        :placeholder="$t('communication.sms_message_placeholder')"
-                                        :required="templateForm.channels.includes('sms')"
-                                        maxlength="160"
-                                    ></textarea>
-                                    <div class="flex justify-between mt-1.5">
-                                        <p class="text-xs text-gray-500">{{ $t('communication.sms_length_hint') }}</p>
-                                        <p class="text-xs font-bold font-mono" :class="(templateForm.sms_content_ar?.length || 0) > 160 ? 'text-red-600' : 'text-gray-400'">
-                                            {{ templateForm.sms_content_ar?.length || 0 }}/160
                                         </p>
                                     </div>
                                 </div>
@@ -659,23 +631,13 @@
 
                         <div class="p-6 space-y-6">
                             <!-- Email Subject -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Input 
-                                    v-model="templateForm.subject_en"
-                                    :label="$t('communication.email_subject') + ' (EN)'"
-                                    :placeholder="$t('communication.email_subject_placeholder')"
-                                    :required="templateForm.channels.includes('email')"
-                                    :error="templateForm.errors.subject_en"
-                                />
-                                <Input 
-                                    v-model="templateForm.subject_ar"
-                                    :label="$t('communication.email_subject') + ' (AR)'"
-                                    :placeholder="$t('communication.email_subject_placeholder')"
-                                    :required="templateForm.channels.includes('email')"
-                                    :error="templateForm.errors.subject_ar"
-                                    dir="rtl"
-                                />
-                            </div>
+                            <Input 
+                                v-model="templateForm.subject_en"
+                                :label="$t('communication.email_subject')"
+                                :placeholder="$t('communication.email_subject_placeholder')"
+                                :required="templateForm.channels.includes('email')"
+                                :error="templateForm.errors.subject_en"
+                            />
 
                             <div class="border-t border-gray-100 pt-2"></div>
 
@@ -689,32 +651,17 @@
                             />
 
                             <!-- Email Content -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        {{ $t('communication.email_body') }} (EN) <span class="text-red-500">*</span>
-                                    </label>
-                                    <textarea 
-                                        v-model="templateForm.content_en"
-                                        rows="10"
-                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 leading-relaxed p-4"
-                                        :placeholder="$t('communication.email_body_placeholder')"
-                                        :required="templateForm.channels.includes('email')"
-                                    ></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2 text-right">
-                                        {{ $t('communication.email_body') }} (AR) <span class="text-red-500">*</span>
-                                    </label>
-                                    <textarea 
-                                        v-model="templateForm.content_ar"
-                                        rows="10"
-                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-right leading-relaxed p-4"
-                                        dir="rtl"
-                                        :placeholder="$t('communication.email_body_placeholder')"
-                                        :required="templateForm.channels.includes('email')"
-                                    ></textarea>
-                                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ $t('communication.email_body') }} <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="templateForm.content_en"
+                                    rows="10"
+                                    class="w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 leading-relaxed p-4"
+                                    :placeholder="$t('communication.email_body_placeholder')"
+                                    :required="templateForm.channels.includes('email')"
+                                ></textarea>
                             </div>
                             <p class="text-xs text-gray-500 italic bg-gray-50 p-2 rounded-lg border border-gray-100">
                                 💡 {{ $t('communication.email_body_hint') }}
@@ -1025,6 +972,16 @@
         <Modal :show="showLogMessageModal" @close="showLogMessageModal = false" :title="$t('communication.view_message')" size="4xl">
             <div class="p-6 space-y-4">
                 <!-- Subject Header (for emails) -->
+                <div v-if="selectedLog.error_message" class="bg-red-50 p-4 rounded-xl border border-red-200">
+                    <p class="text-xs text-red-500 uppercase font-bold tracking-wider mb-1 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ $t('common.error') || 'Error Message' }}
+                    </p>
+                    <p class="text-sm font-medium text-red-700">{{ selectedLog.error_message }}</p>
+                </div>
+
                 <div v-if="selectedLog.type === 'email'" class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <p class="text-sm text-gray-500 uppercase font-bold tracking-wider mb-1">{{ $t('communication.email_subject') }}</p>
                     <p class="text-lg font-semibold text-gray-900">{{ selectedLog.subject || '(No Subject)' }}</p>
@@ -1113,14 +1070,7 @@ interface Template {
     logs_count?: number;
 }
 
-interface Bundle {
-    id: string;
-    name: string;
-    type: string;
-    currency: string;
-    price: string;
-    quantity: number;
-}
+
 
 // Logs from Laravel Paginator match PaginationMeta structure + data array
 interface LogsPaginator {
@@ -1135,9 +1085,8 @@ interface LogsPaginator {
 }
 
 const props = defineProps<{
-    balances: { sms: number; email: number; sms_sent: number; email_sent: number };
+    balances: { sms_sent: number; email_sent: number };
     logs: LogsPaginator;
-    bundles: Bundle[];
     templates: Template[];
     menuCategories: any[];
     filters: any;
@@ -1192,6 +1141,8 @@ const triggerEventOptions = computed(() => [
     { label: '🛒 ' + t('communication.trigger_order_created'), value: 'order_created' },
     { label: '✅ ' + t('communication.trigger_order_completed'), value: 'order_completed' },
     { label: '❌ ' + t('communication.trigger_order_cancelled'), value: 'order_cancelled' },
+    { label: '💰 ' + t('communication.trigger_loyalty_points_earned'), value: 'loyalty_points_earned' },
+    { label: '🏆 ' + t('communication.trigger_loyalty_tier_upgraded'), value: 'loyalty_tier_upgraded' },
     { label: '🎂 ' + t('communication.trigger_birthday'), value: 'birthday' },
     { label: '⚠️ ' + t('communication.trigger_churn_risk'), value: 'churn_risk' },
     { label: '⭐ ' + t('communication.trigger_feedback_received'), value: 'feedback_received' }
@@ -1222,12 +1173,7 @@ watch(activeTab, (val) => {
     }
 });
 
-// --- Bundles ---
-const purchase = (bundle: Bundle) => {
-    if (confirm(t('communication.confirm_purchase_bundle', { name: bundle.name, currency: bundle.currency, price: bundle.price }))) {
-        router.post(route('communication.bundles.purchase', bundle.id));
-    }
-};
+
 
 // --- Templates ---
 const showTemplateModal = ref(false);
@@ -1340,13 +1286,14 @@ watch(() => props.templates, (newTemplates) => {
 
 // --- Log Message Viewer ---
 const showLogMessageModal = ref(false);
-const selectedLog = ref({ type: '', message: '', subject: '' });
+const selectedLog = ref({ type: '', message: '', subject: '', error_message: '' as string | undefined });
 
 const openLogMessage = (log: any) => {
     selectedLog.value = {
         type: log.type,
         message: log.message,
-        subject: log.subject
+        subject: log.subject,
+        error_message: log.error_message
     };
     showLogMessageModal.value = true;
 };
@@ -1526,6 +1473,11 @@ const submitTemplate = () => {
     if (!templateForm.include_reward) {
         templateForm.reward_config = null;
     }
+
+    // Auto-copy EN content to AR fields (Arabic fields are hidden from UI)
+    templateForm.sms_content_ar = templateForm.sms_content_en;
+    templateForm.subject_ar = templateForm.subject_en;
+    templateForm.content_ar = templateForm.content_en;
 
     if (editingTemplate.value) {
         templateForm.put(route('communication.templates.update', editingTemplate.value.id), {

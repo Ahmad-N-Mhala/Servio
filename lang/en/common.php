@@ -89,4 +89,5 @@ return [
     'basic_desc' => 'Perfect for small businesses starting out.',
     'basic_name' => 'Basic Plan',
     'done' => 'Done',
+    'server_error' => 'An internal server error occurred. Please try again later.',
 ];

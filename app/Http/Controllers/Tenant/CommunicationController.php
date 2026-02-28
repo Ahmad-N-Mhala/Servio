@@ -19,6 +19,10 @@ class CommunicationController extends Controller
     public function index(Request $request): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
+        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
+        }
+
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
@@ -54,8 +58,8 @@ class CommunicationController extends Controller
         }
 
         // Calculate sent counts based on the FILTERED query (before pagination)
-        $smsSentCount = (clone $logsQuery)->where('type', 'sms')->where('status', 'sent')->count();
-        $emailSentCount = (clone $logsQuery)->where('type', 'email')->where('status', 'sent')->count();
+        $smsSentCount = (clone $logsQuery)->where('type', 'sms')->whereIn('status', ['sent', 'simulated'])->count();
+        $emailSentCount = (clone $logsQuery)->where('type', 'email')->whereIn('status', ['sent', 'simulated'])->count();
 
         $logs = $logsQuery->latest()
             ->paginate(10)
@@ -82,8 +86,6 @@ class CommunicationController extends Controller
 
         return Inertia::render('Communication/Index', [
             'balances' => [
-                'sms' => $restaurant->sms_balance ?? 0,
-                'email' => $restaurant->email_balance ?? 0,
                 'sms_sent' => $smsSentCount,
                 'email_sent' => $emailSentCount,
             ],
@@ -98,16 +100,21 @@ class CommunicationController extends Controller
     public function purchaseBundle(Request $request, CommunicationBundle $bundle)
     {
         $restaurant = auth()->user()->currentRestaurant();
+        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
+        }
+
         if (!$restaurant)
             abort(404, 'Restaurant context not found');
 
-        if ($bundle->type === 'sms') {
-            $restaurant->increment('sms_balance', $bundle->quantity);
-        } else {
-            $restaurant->increment('email_balance', $bundle->quantity);
-        }
+        // Balances are now unlimited and not tracked per restaurant.
+        // if ($bundle->type === 'sms') {
+        //     $restaurant->increment('sms_balance', $bundle->quantity);
+        // } else {
+        //     $restaurant->increment('email_balance', $bundle->quantity);
+        // }
 
-        return redirect()->back()->with('message', "Purchased {$bundle->name} successfully! Added {$bundle->quantity} {$bundle->type} credits.");
+        return redirect()->back()->with('message', "Purchased {$bundle->name} successfully! (Unlimited Model)");
     }
 
     public function showTemplateLogs(Request $request, CommunicationTemplate $template)
@@ -121,6 +128,14 @@ class CommunicationController extends Controller
 
     public function storeTemplate(Request $request)
     {
+        $restaurant = auth()->user()->currentRestaurant();
+        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+            $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
+        }
+
+        if (!$restaurant)
+            abort(404, 'Restaurant context not found');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'channels' => 'required|array',
@@ -150,10 +165,6 @@ class CommunicationController extends Controller
             'reward_config.description' => 'nullable|string',
         ]);
 
-        $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
-            abort(404, 'Restaurant context not found');
-
         CommunicationTemplate::create(array_merge($validated, [
             'restaurant_id' => $restaurant->id,
             'conditions' => $validated['conditions'] ?? [],
@@ -167,7 +178,11 @@ class CommunicationController extends Controller
     public function updateTemplate(Request $request, CommunicationTemplate $template)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant || $template->restaurant_id !== $restaurant->id) {
+        if (!$restaurant && auth()->user()->is_super_admin) {
+            $restaurant = \App\Models\Restaurant::find($template->restaurant_id);
+        }
+
+        if (!$restaurant || (!auth()->user()->is_super_admin && $template->restaurant_id !== $restaurant->id)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -211,7 +226,11 @@ class CommunicationController extends Controller
     public function destroyTemplate(CommunicationTemplate $template)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant || $template->restaurant_id !== $restaurant->id) {
+        if (!$restaurant && auth()->user()->is_super_admin) {
+            $restaurant = \App\Models\Restaurant::find($template->restaurant_id);
+        }
+
+        if (!$restaurant || (!auth()->user()->is_super_admin && $template->restaurant_id !== $restaurant->id)) {
             abort(403, 'Unauthorized action.');
         }
 

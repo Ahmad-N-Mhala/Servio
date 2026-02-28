@@ -12,30 +12,48 @@ class SmsService
      *
      * @param string $to Recipient phone number
      * @param string $message Message content
-     * @return void
-     * @throws \Exception
+     * @return array Standardized result [success, status, error]
      */
-    public function send(string $to, string $message): void
+    public function send(string $to, string $message): array
     {
         $driver = config('services.sms.driver', 'log');
 
-        switch ($driver) {
-            case 'twilio':
-                $this->sendViaTwilio($to, $message);
-                break;
-            case 'nexmo':
-                $this->sendViaNexmo($to, $message);
-                break;
-            case 'unifonic':
-                $this->sendViaUnifonic($to, $message);
-                break;
-            case 'sms_ae':
-                $this->sendViaSmsAe($to, $message);
-                break;
-            default:
-                // Fallback to log
-                Log::info("SMS (Log Driver) to {$to}: {$message}");
-                break;
+        try {
+            switch ($driver) {
+                case 'twilio':
+                    $this->sendViaTwilio($to, $message);
+                    break;
+                case 'nexmo':
+                    $this->sendViaNexmo($to, $message);
+                    break;
+                case 'unifonic':
+                    $this->sendViaUnifonic($to, $message);
+                    break;
+                case 'sms_ae':
+                    $this->sendViaSmsAe($to, $message);
+                    break;
+                default:
+                    // Fallback to log
+                    Log::info("SMS (Log Driver) to {$to}: {$message}");
+                    return [
+                        'success' => true,
+                        'status' => 'simulated',
+                        'error' => null
+                    ];
+            }
+
+            return [
+                'success' => true,
+                'status' => 'sent',
+                'error' => null
+            ];
+        } catch (\Exception $e) {
+            Log::error("SmsService Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'status' => 'failed',
+                'error' => $e->getMessage()
+            ];
         }
     }
 

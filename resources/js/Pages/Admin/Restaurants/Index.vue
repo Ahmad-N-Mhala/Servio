@@ -24,14 +24,7 @@
                             />
                         </div>
                         
-                        <div class="w-48">
-                            <Select
-                                v-model="selectedRestaurant"
-                                :options="restaurantFilterOptions"
-                                placeholder="Restaurant"
-                                class="text-sm"
-                            />
-                        </div>
+
                         
                         <Link :href="route('admin.restaurants.create')" class="bg-primary text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/30 text-center whitespace-nowrap flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -369,7 +362,7 @@
                 </div>
 
                 <div v-else class="relative border-l-2 border-indigo-100 ml-3 space-y-8 py-4">
-                    <div v-for="(log, index) in subscriptionLogs" :key="log.id" class="relative pl-8">
+                    <div v-for="log in subscriptionLogs" :key="log.id" class="relative pl-8">
                         <!-- Timeline Dot -->
                         <span 
                             class="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white shadow-sm"
@@ -475,37 +468,26 @@ const props = defineProps<{
     };
     filters: {
         search?: string;
-        restaurant_id?: string;
         status?: string;
     };
-    restaurantOptions: Array<{ id: number; name: string }>;
     plans: Array<any>;
 }>();
-
-const restaurantFilterOptions = computed(() => {
-    return [
-        { label: 'All Restaurants', value: '' },
-        ...props.restaurantOptions.map(r => ({ label: r.name, value: r.id }))
-    ];
-});
 
 const planOptions = computed(() => {
     return props.plans.map(p => ({ label: p.name, value: p.id }));
 });
 
 const search = ref(props.filters.search || '');
-const selectedRestaurant = ref(props.filters.restaurant_id || '');
 const statusFilter = ref(props.filters.status || '');
 
 const handleSearch = debounce(() => {
     router.get(route('admin.restaurants.index'), { 
         search: search.value,
-        restaurant_id: selectedRestaurant.value,
         status: statusFilter.value
     }, { preserveState: true, replace: true });
 }, 300);
 
-watch([search, selectedRestaurant, statusFilter], handleSearch);
+watch([search, statusFilter], handleSearch);
 
 const showOwnerModal = ref(false);
 const selectedOwner = ref<any>(null);

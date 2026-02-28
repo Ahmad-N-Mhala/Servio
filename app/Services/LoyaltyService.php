@@ -233,6 +233,7 @@ class LoyaltyService
         // Revert Redemptions if any (give points back on cancel/delete)
         $redemptions = \App\Models\RewardRedemption::where('order_id', $order->id)->get();
         foreach ($redemptions as $redemption) {
+            /** @var \App\Models\RewardRedemption $redemption */
             $lp = $customer->loyaltyPoints;
             if ($lp && $redemption->status === 'applied') {
                 $lp->increment('balance', (int) $redemption->points_used);
@@ -249,7 +250,8 @@ class LoyaltyService
                     'balance_after' => $lp->balance,
                 ]);
             }
-            $redemption->update(['status' => 'cancelled']);
+            $redemption->status = 'cancelled';
+            $redemption->save();
         }
 
         // Recalculate stats to be 100% accurate
@@ -300,7 +302,9 @@ class LoyaltyService
         ]);
 
         // Link transaction to redemption
-        $transaction->update(['reward_redemption_id' => $redemption->id]);
+        /** @var \App\Models\PointTransaction $transaction */
+        $transaction->reward_redemption_id = $redemption->id;
+        $transaction->save();
 
         // Update reward redemption count
         $reward->increment('redemptions_count');
@@ -310,110 +314,100 @@ class LoyaltyService
 
     public function sendRedemptionOtp(Customer $customer): bool
     {
-        if (!$customer->phone) {
-            return false;
-        }
+        $customerId = (string) $customer->id;
+        $restaurantId = (string) $customer->restaurant_id;
 
-        // Generate 6-digit OTP
-        $otpCode = (string) rand(100000, 999999);
-
-        // Store OTP
-        \App\Models\CustomerOtp::create([
-            'customer_id' => $customer->id,
-            'phone' => $customer->phone,
-            'otp' => $otpCode,
-            'expires_at' => now()->addMinutes(10),
-            'is_used' => false,
-            'type' => 'redemption',
-        ]);
-
-        // Attempt to use Dynamic System/Restaurant Communication Template First
-        $template = \App\Models\CommunicationTemplate::where('trigger_event', 'loyalty_otp')
-            ->where(function ($query) use ($customer) {
-                $query->whereNull('restaurant_id')
-                    ->orWhere('restaurant_id', (string) $customer->restaurant_id);
-            })
-            ->where('is_active', true)
-            ->orderBy('restaurant_id', 'desc') // Prefers restaurant specific over system default
-            ->first();
-
-        if ($template) {
-            \App\Services\CustomerCommunicationService::send($template, $customer, ['otp' => $otpCode]);
-            return true;
-        }
-
-        // Determine Driver for Logging/Simulation check (Fallback hardcoded logic)
-        $driver = config('services.sms.driver', 'log');
+        \Illuminate\Support\Facades\Log::info("LoyaltyService: sendRedemptionOtp called for Customer: " . $customerId);
 
         try {
-            // If driver is 'log', we simulate success (Demo Mode) and explicitly log the OTP
-            if ($driver === 'log') {
-                \Illuminate\Support\Facades\Log::info("SIMULATED SMS to {$customer->phone}: OTP {$otpCode}");
+            if (!$customer->phone) {
+                \Illuminate\Support\Facades\Log::warning("LoyaltyService: Customer " . $customerId . " has no phone number.");
 
-                \App\Models\CommunicationLog::create([
-                    'restaurant_id' => (string) $customer->restaurant_id,
-                    'recipient' => $customer->phone,
-                    'type' => 'sms',
-                    'status' => 'sent',
-                    'message' => "OTP for redemption: {$otpCode} (Simulated - Log Driver)",
-                    'sent_at' => now(),
-                ]);
-
-                return true;
-            }
-
-            // Real Send Logic
-            $message = "Your Restrufy redemption code is: {$otpCode}. Valid for 10 minutes.";
-            $restaurant = \App\Models\Restaurant::find($customer->restaurant_id);
-
-            // Check Balance
-            if ($restaurant && $restaurant->sms_balance <= 0) {
-                \Illuminate\Support\Facades\Log::warning("Restaurant {$restaurant->id} out of SMS credits.");
-                \App\Models\CommunicationLog::create([
-                    'restaurant_id' => (string) $customer->restaurant_id,
-                    'recipient' => $customer->phone,
+                \App\Services\CommunicationService::log([
+                    'restaurant_id' => $restaurantId,
+                    'recipient' => 'N/A',
                     'type' => 'sms',
                     'status' => 'failed',
-                    'message' => "OTP for redemption: {$otpCode}",
-                    'error_message' => 'Insufficient SMS Balance',
-                    'sent_at' => now(),
+                    'message' => __('loyalty.otp_send_failed'),
+                    'error_message' => 'Missing customer phone'
                 ]);
-                return false;
+
+                throw new \Exception(__('loyalty.customer_no_phone'));
             }
 
-            // Use the centralized SmsService
-            app(\App\Services\SmsService::class)->send($customer->phone, $message);
+            // Generate 6-digit OTP
+            $otpCode = (string) rand(100000, 999999);
+            \Illuminate\Support\Facades\Log::info("LoyaltyService: Generated OTP for Phone: " . $customer->phone);
 
-            if ($restaurant) {
-                $restaurant->decrement('sms_balance');
-            }
-
-            // Log Success
-            \App\Models\CommunicationLog::create([
-                'restaurant_id' => (string) $customer->restaurant_id,
-                'recipient' => $customer->phone,
-                'type' => 'sms',
-                'status' => 'sent',
-                'message' => "OTP for redemption: {$otpCode}",
-                'sent_at' => now(),
+            // Store OTP
+            \App\Models\CustomerOtp::create([
+                'customer_id' => $customer->id,
+                'phone' => $customer->phone,
+                'otp' => $otpCode,
+                'expires_at' => now()->addMinutes(10),
+                'is_used' => false,
+                'type' => 'redemption',
             ]);
 
-            return true;
+            // Attempt to use Dynamic System/Restaurant Communication Template
+            $template = \App\Models\CommunicationTemplate::withoutGlobalScopes()
+                ->where('trigger_event', 'loyalty_otp')
+                ->where(function ($query) use ($restaurantId) {
+                    $query->whereNull('restaurant_id')
+                        ->orWhere('restaurant_id', $restaurantId);
+                })
+                ->where('is_active', true)
+                ->orderBy('restaurant_id', 'desc')
+                ->first();
+
+            $smsSent = false;
+
+            if ($template && is_array($template->channels) && in_array('sms', $template->channels)) {
+                \Illuminate\Support\Facades\Log::info("LoyaltyService: Sending via template ID: " . $template->id);
+                $commResults = \App\Services\CustomerCommunicationService::send($template, $customer, ['otp' => $otpCode]);
+                $smsResult = $commResults['sms'] ?? null;
+                if ($smsResult && !$smsResult['success']) {
+                    throw new \Exception($smsResult['error'] ?? __('loyalty.otp_send_failed'));
+                }
+                $smsSent = true;
+            } else {
+                \Illuminate\Support\Facades\Log::warning("LoyaltyService: No SMS template found. Falling back to localized system message.");
+
+                $restaurant = \App\Models\Restaurant::find($restaurantId);
+                $restaurantName = $restaurant->name ?? config('app.name');
+
+                // Use translated fallback message
+                $message = __('loyalty.emergency_otp_message', [
+                    'restaurant' => $restaurantName,
+                    'otp' => $otpCode
+                ]);
+
+                $result = app(\App\Services\SmsService::class)->send($customer->phone, $message);
+                $smsSent = $result['success'];
+
+                // Manual Log for Fallback (ensures it shows in SMS logs)
+                \App\Services\CommunicationService::log([
+                    'restaurant_id' => $restaurantId,
+                    'recipient' => $customer->phone,
+                    'type' => 'sms',
+                    'status' => $result['status'],
+                    'message' => $message,
+                    'error_message' => $result['error'] ?? ($template ? 'Template found but SMS channel disabled' : 'Template not found - System fallback used'),
+                ]);
+
+                if (!$smsSent) {
+                    throw new \Exception($result['error'] ?? __('loyalty.otp_send_failed'));
+                }
+            }
+
+            return $smsSent;
 
         } catch (\Exception $e) {
-            // Log Failure
-            \App\Models\CommunicationLog::create([
-                'restaurant_id' => (string) $customer->restaurant_id,
-                'recipient' => $customer->phone,
-                'type' => 'sms',
-                'status' => 'failed',
-                'error_message' => $e->getMessage(),
-                'message' => "OTP for redemption: {$otpCode}",
-                'sent_at' => now(),
-            ]);
-
-            \Illuminate\Support\Facades\Log::error("Failed to send OTP SMS: " . $e->getMessage());
-            return false;
+            \Illuminate\Support\Facades\Log::error("LoyaltyService Failure: " . $e->getMessage());
+            throw $e; // Re-throw to be handled by controller
+        } catch (\Throwable $t) {
+            \Illuminate\Support\Facades\Log::error("LoyaltyService Critical: " . $t->getMessage());
+            throw new \Exception(__('loyalty.otp_send_failed'));
         }
     }
 
@@ -427,7 +421,8 @@ class LoyaltyService
             ->first();
 
         if ($validOtp) {
-            $validOtp->update(['is_used' => true]);
+            $validOtp->is_used = true;
+            $validOtp->save();
             return true;
         }
 
@@ -441,4 +436,3 @@ class LoyaltyService
             ->first();
     }
 }
-

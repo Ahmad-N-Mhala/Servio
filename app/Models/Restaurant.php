@@ -27,8 +27,6 @@ class Restaurant extends Model
         'currency',
         'locale',
         'settings',
-        'sms_balance',
-        'email_balance',
         'state',
         'zip_code',
         'google_map_location',

@@ -30,29 +30,22 @@ class CheckRestaurantContext
 
         // If no restaurant in session, auto-select the first one
         if (!$restaurantId) {
-            //TODO:
-            // FIX: Use manual query
             $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
                 ->table('restaurant_user')
                 ->where('email', $request->user()->email)
                 ->pluck('restaurant_id')
                 ->toArray();
 
-            \Illuminate\Support\Facades\Log::info('CheckRestaurantContext: User ' . $request->user()->email . ' has pivot IDs: ' . json_encode($pivotIds));
-
             $firstRestaurant = !empty($pivotIds)
                 ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first()
                 : null;
 
             if (!$firstRestaurant) {
-                // User has no restaurants - redirect to login with error
                 auth()->logout();
                 return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
             }
 
-            // Set the first restaurant as active and continue
             session(['active_restaurant_id' => $firstRestaurant->id]);
-            // No need to validate since we just selected from user's own restaurants
             return $next($request);
         }
 

@@ -1032,6 +1032,7 @@ const saveNotes = () => {
 };
 
 const submitOrder = () => {
+    form.customer_id = selectedCustomer.value?.id || null;
     if (selectedReward.value && !otpVerified.value) {
         alert(t('loyalty.verify_otp_required'));
         return;

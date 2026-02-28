@@ -60,7 +60,7 @@
                             'group flex items-center rounded-lg transition-all duration-200',
                             isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                             $page.url.includes('/dashboard') 
-                                ? 'bg-primary/10 text-primary font-medium' 
+                                ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                         ]"
                         :title="isSidebarCollapsed ? $t('nav.dashboard') : ''"
@@ -90,7 +90,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
-                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+                    <div v-else class="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mx-3 my-2"></div>
 
                     <div v-show="isSidebarCollapsed || openMenus['operations']" class="space-y-0.5">
                         <!-- Sub-Group: Orders -->
@@ -224,7 +224,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/pos') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? $t('nav.pos') : ''"
@@ -243,7 +243,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/service/delivery') 
-                                    ? 'bg-green-100 text-green-700 font-medium dark:bg-green-900/30 dark:text-green-400' 
+                                    ? 'bg-green-100 text-green-700 font-medium dark:bg-green-900/30 dark:text-green-400 sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? 'Order Delivery' : ''"
@@ -262,7 +262,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/orders/status/screen') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? 'Status Screen' : ''"
@@ -293,7 +293,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
-                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+                    <div v-else class="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mx-3 my-2"></div>
 
                     <div v-show="isSidebarCollapsed || openMenus['management']" class="space-y-0.5">
                          <!-- Sub-Group: Restaurant -->
@@ -369,7 +369,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/staff') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? $t('nav.staff') : ''"
@@ -400,7 +400,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
-                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+                    <div v-else class="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mx-3 my-2"></div>
 
                     <div v-show="isSidebarCollapsed || openMenus['growth']" class="space-y-0.5">
                         <!-- Customers -->
@@ -411,7 +411,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/customers') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? 'Customers' : ''"
@@ -495,7 +495,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/integrations/delivery') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? 'Delivery Integrations' : ''"
@@ -514,7 +514,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/feedback') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? 'Feedback' : ''"
@@ -533,7 +533,7 @@
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                 $page.url.includes('/communication') 
-                                    ? 'bg-primary/10 text-primary font-medium' 
+                                    ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
                             :title="isSidebarCollapsed ? 'Communication' : ''"
@@ -616,7 +616,7 @@
                                     'group flex items-center rounded-lg transition-all duration-200',
                                     isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
                                     $page.url.includes('/plans') 
-                                        ? 'bg-primary/10 text-primary font-medium' 
+                                        ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                                 ]"
                                 :title="isSidebarCollapsed ? 'Billing' : ''"
@@ -648,7 +648,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
-                    <div v-else class="h-px bg-gray-200 dark:bg-gray-700 mx-3 my-2"></div>
+                    <div v-else class="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mx-3 my-2"></div>
 
                     <div v-show="isSidebarCollapsed || openMenus['support']" class="space-y-0.5">
                          <div v-if="!isSidebarCollapsed" class="px-3 py-2 space-y-3">

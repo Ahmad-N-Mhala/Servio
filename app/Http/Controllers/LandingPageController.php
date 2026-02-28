@@ -175,10 +175,29 @@ class LandingPageController extends Controller
         try {
             \Log::info("Attempting to send Registration Interest email to: " . $contactEmail);
             Mail::to($contactEmail)->send(new RegistrationInterest($request->all()));
+
+            // MANUAL LOG
+            \App\Services\CommunicationService::log([
+                'recipient' => $contactEmail,
+                'type' => 'email',
+                'status' => 'sent',
+                'subject' => 'New Registration Interest',
+                'message' => "New lead from {$request->restaurant_name} ({$request->name})",
+            ]);
+
             \Log::info("Registration Interest email sent successfully.");
         } catch (\Exception $e) {
             \Log::error('Registration Interest Email Error: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString()); // Log trace
+
+            // MANUAL LOG FAILURE
+            \App\Services\CommunicationService::log([
+                'recipient' => $contactEmail,
+                'type' => 'email',
+                'status' => 'failed',
+                'subject' => 'New Registration Interest',
+                'error_message' => $e->getMessage(),
+            ]);
+
             return back()->with('error', 'Failed to send email. Please try again or contact us directly.');
         }
 

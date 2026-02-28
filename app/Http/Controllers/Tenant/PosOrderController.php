@@ -152,11 +152,12 @@ class PosOrderController extends Controller
                 ];
             });
 
+        // Pre-fetch all available batches to prevent N+1 queries
         $allBatches = \App\Models\IngredientBatch::where('restaurant_id', $restaurant->id)
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+            ->map(fn($batches) => collect($batches)->sum('quantity_remaining'));
 
         $menuItemStockInfo = [];
         $menuItemsWithIngredients = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get();
@@ -241,7 +242,20 @@ class PosOrderController extends Controller
         $customer = null;
         if (!empty($validated['customer_id'])) {
             $customer = \App\Models\Customer::find($validated['customer_id']);
-        } elseif (!empty($validated['customer_phone'])) {
+        }
+
+        if (!$customer && !empty($validated['customer_phone'])) {
+            $phone = $validated['customer_phone'];
+            $customer = \App\Models\Customer::where('restaurant_id', $restaurant->id)
+                ->where(function ($q) use ($phone) {
+                    $q->where('phone', $phone)
+                        ->orWhere('phone', '+' . ltrim($phone, '+'))
+                        ->orWhere('phone', str_replace('+971', '', $phone))
+                        ->orWhere('phone', '+971' . ltrim($phone, '0'));
+                })->first();
+        }
+
+        if (!$customer && !empty($validated['customer_phone'])) {
             $customer = $this->loyaltyService->findOrCreateCustomer(
                 $restaurant,
                 $validated['customer_phone'],
@@ -313,8 +327,8 @@ class PosOrderController extends Controller
                     'discount_amount' => $validated['discount_amount'] ?? 0,
                     'total' => $validated['total'],
                     'currency' => $restaurant->currency ?? 'AED',
-                    'customer_name' => $validated['customer_name'] ?? ($customer ? $customer->name : 'Guest'),
-                    'customer_phone' => $validated['customer_phone'] ?? null,
+                    'customer_name' => $customer ? $customer->name : ($validated['customer_name'] ?? 'Guest'),
+                    'customer_phone' => $customer ? $customer->phone : ($validated['customer_phone'] ?? null),
                     'notes' => $validated['notes'] ?? null,
                     'waiter_id' => auth()->id(),
                     'table_id' => $validated['table_id'] ?? null,
@@ -366,18 +380,26 @@ class PosOrderController extends Controller
 
         // Handle Reward Redemption
         if (!empty($validated['reward_id']) && $customer) {
-            if (empty($validated['otp'])) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['otp' => ['OTP is required.']]);
+            try {
+                if (empty($validated['otp'])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['otp' => ['OTP is required.']]);
+                }
+                if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['otp' => ['Invalid OTP.']]);
+                }
+                $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
+                $redemption->markAsUsed((string) $order->id);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("PosOrderController: Reward Redemption FAILED: " . $e->getMessage());
             }
-            if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['otp' => ['Invalid OTP.']]);
-            }
-            $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
-            $redemption->markAsUsed((string) $order->id);
         }
 
-        // Broadcast
-        broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
+        // Broadcast with safety
+        try {
+            broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("PosOrderController: Broadcasting failed: " . $e->getMessage());
+        }
 
         $order->refresh();
         if ($order->points_earned > 0) {

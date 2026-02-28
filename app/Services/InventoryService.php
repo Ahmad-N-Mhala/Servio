@@ -134,9 +134,30 @@ class InventoryService
                 if (!$sent) {
                     $emailTarget = ($recipient instanceof \App\Models\User) ? $recipient->email : $recipient;
                     \Illuminate\Support\Facades\Mail::to($emailTarget)->send(new \App\Mail\LowStockWarningMail($ingredient));
+
+                    // MANUAL LOG
+                    \App\Services\CommunicationService::log([
+                        'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
+                        'recipient' => $emailTarget,
+                        'type' => 'email',
+                        'status' => 'sent',
+                        'subject' => 'Low Stock Warning',
+                        'message' => "Ingredient {$ingredient->name['en']} is below reorder level.",
+                    ]);
                 }
             } catch (\Exception $e) {
                 Log::error("Failed to send low stock warning for ingredient {$ingredient->id}: " . $e->getMessage());
+
+                // Log Failure
+                \App\Services\CommunicationService::log([
+                    'restaurant_id' => $restaurant ? (string) $restaurant->id : null,
+                    'recipient' => ($recipient instanceof \App\Models\User) ? $recipient->email : ($recipient ?? 'N/A'),
+                    'type' => 'email',
+                    'status' => 'failed',
+                    'subject' => 'Low Stock Warning',
+                    'message' => "Ingredient {$ingredient->name['en']} is below reorder level.",
+                    'error_message' => $e->getMessage(),
+                ]);
             }
         }
     }

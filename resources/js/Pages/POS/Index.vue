@@ -1314,40 +1314,69 @@ const selectPaymentMethod = (method: string) => {
 const settleBill = () => {
     if (!selectedOrder.value || !paymentMethod.value) return;
     
-    // If unsaved changes, force update first?
-    if (hasUnsavedChanges.value) {
-        // optionally alert user?
-        // updateOrder(); // and then settle?
-        // simple: disable settle if changes detected. (Already done in template)
-        return;
-    }
-
     if (paymentMethod.value === 'cash' && !props.currentRegister) {
         showToast(t('pos.register_not_open_error', 'Please open the cash register first to process cash payments.'), 'error');
         return;
     }
 
-    processing.value = true;
-    router.post(route('pos.settle', selectedOrder.value.id), {
-        payment_method: paymentMethod.value,
-    }, {
-        onSuccess: () => {
-            try {
-                // Print receipt if checked OR if cash drawer needs to be opened (cash payment + setting enabled)
-                if (printBill.value || (currentRestaurant.value.has_cash_drawer && paymentMethod.value === 'cash')) {
-                    printReceipt(selectedOrder.value);
+    const doSettle = () => {
+        processing.value = true;
+        router.post(route('pos.settle', selectedOrder.value.id), {
+            payment_method: paymentMethod.value,
+        }, {
+            onSuccess: () => {
+                try {
+                    if (printBill.value || (currentRestaurant.value.has_cash_drawer && paymentMethod.value === 'cash')) {
+                        printReceipt(selectedOrder.value);
+                    }
+                } catch (e) {
+                    console.error('Print error in onSuccess:', e);
+                } finally {
+                    selectedOrder.value = null;
+                    processing.value = false;
                 }
-            } catch (e) {
-                console.error('Print error in onSuccess:', e);
-            } finally {
-                selectedOrder.value = null; // Clear selection
+            },
+            onError: () => {
                 processing.value = false;
             }
-        },
-        onError: () => {
-            processing.value = false;
-        }
-    });
+        });
+    };
+
+    // If there are unsaved changes, save first then settle
+    if (hasUnsavedChanges.value) {
+        processing.value = true;
+        const itemsData = editableItems.value.map(item => {
+            if (item.id.toString().startsWith('new_')) {
+                return {
+                    menu_item_id: item.menu_item_id,
+                    quantity: item.quantity,
+                    unit_price: item.unit_price,
+                    notes: item.notes || ''
+                };
+            } else {
+                return { id: item._id || item.id, quantity: item.quantity };
+            }
+        });
+
+        router.put(route('pos.update', selectedOrder.value.id), {
+            items: itemsData,
+            discount_type: discountType.value,
+            discount_value: discountValue.value,
+            additional_charge_type: additionalChargeType.value,
+            additional_charge_value: additionalChargeValue.value,
+        }, {
+            onSuccess: () => {
+                processing.value = false;
+                doSettle();
+            },
+            onError: () => {
+                processing.value = false;
+                showToast('Failed to save order changes before settling.', 'error');
+            }
+        });
+    } else {
+        doSettle();
+    }
 };
 
 

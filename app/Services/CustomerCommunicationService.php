@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Log;
 
 class CustomerCommunicationService
 {
-    public static function send(CommunicationTemplate $template, Customer $customer, array $data = []): void
+    public static function send(CommunicationTemplate $template, Customer $customer, array $data = []): array
     {
         $channels = $template->channels ?? [];
 
         // Ensure we find the right restaurant (System templates may have null restaurant_id)
-        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
+        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find((string) $customer->restaurant_id);
 
         // Enrich data with common variables
         $data = array_merge([
@@ -41,7 +41,7 @@ class CustomerCommunicationService
                 $itemIds = (array) $config['menu_item_ids'];
                 $items = \App\Models\MenuItem::whereIn('id', $itemIds)->get();
 
-                $locale = $template->restaurant->locale ?? 'en';
+                $locale = $restaurant->locale ?? 'en';
                 $itemNames = $items->map(function ($item) use ($locale) {
                     // Safety check if it's not hydrated as an Eloquent model with Translatable trait
                     if (method_exists($item, 'getTranslation')) {
@@ -62,19 +62,24 @@ class CustomerCommunicationService
         $data['birth_date'] = $customer->birth_date ? \Illuminate\Support\Carbon::parse($customer->birth_date)->toDateString() : '';
         $data['last_order_date'] = $customer->last_order_at ? \Illuminate\Support\Carbon::parse($customer->last_order_at)->toDateString() : '';
 
+        $results = [];
         foreach ($channels as $channel) {
             if ($channel === 'email') {
-                self::sendEmail($template, $customer, $data);
+                $results['email'] = self::sendEmail($template, $customer, $data);
             } elseif ($channel === 'sms') {
-                self::sendSms($template, $customer, $data);
+                $results['sms'] = self::sendSms($template, $customer, $data);
             }
         }
+        return $results;
     }
 
     private static function sendEmail($template, $customer, $data)
     {
-        if (!$customer->email)
+        if (!$customer->email) {
+            Log::warning("CustomerCommunicationService: Customer " . $customer->id . " has no email address. Skipping email sending.");
+            self::log($template, $customer, 'email', 'failed', 'Email skipped: Customer has no email address.', null, $template->restaurant_id ?? $customer->restaurant_id, 'Missing customer email');
             return;
+        }
 
         // Ensure we find the right restaurant (System templates may have null restaurant_id)
         $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
@@ -108,46 +113,55 @@ class CustomerCommunicationService
 
             $restaurant->decrement('email_balance');
             self::log($template, $customer, 'email', 'sent', $content, $subject, $restaurant->id ?? null);
+            return ['success' => true, 'status' => 'sent'];
         } catch (\Exception $e) {
             Log::error("Email failed: " . $e->getMessage());
             self::log($template, $customer, 'email', 'failed', $content, $subject, $restaurant->id ?? null, $e->getMessage());
+            return ['success' => false, 'status' => 'failed', 'error' => $e->getMessage()];
         }
     }
 
     private static function sendSms($template, $customer, $data)
     {
-        if (!$customer->phone)
+        if (!$customer->phone) {
+            Log::warning("CustomerCommunicationService: Customer " . $customer->id . " has no phone number. Skipping SMS sending.");
+            self::log($template, $customer, 'sms', 'failed', 'SMS skipped: Customer has no phone number.', null, $template->restaurant_id ?? $customer->restaurant_id, 'Missing customer phone');
             return;
+        }
 
         // Ensure we find the right restaurant (System templates may have null restaurant_id)
-        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find($customer->restaurant_id);
+        $restaurant = $template->restaurant ?? $customer->restaurant ?? \App\Models\Restaurant::find((string) $customer->restaurant_id);
 
         $locale = $restaurant->locale ?? 'en';
 
         // Pick SMS Content
         $content = $template->{"sms_content_{$locale}"} ?? $template->sms_content ?? $template->content;
+        if (!$content) {
+            $content = $template->{"content_{$locale}"} ?? ($locale === 'en' ? $template->content_en : $template->content_ar);
+        }
+
         if (!$content && $locale !== 'en') {
             $content = $template->sms_content_en ?? $template->content_en ?? $template->sms_content ?? $template->content;
         }
 
         $content = self::replaceVariables($content, $data);
 
-        if (!$restaurant || $restaurant->sms_balance <= 0) {
-            Log::warning("Restaurant " . ($restaurant->id ?? 'Unknown') . " out of SMS credits or not found.");
-            self::log($template, $customer, 'sms', 'failed', $content, null, $restaurant->id ?? null, 'Insufficient balance or restaurant mismatch');
-            return;
-        }
+        // Use Centralized SmsService
+        $result = app(\App\Services\SmsService::class)->send($customer->phone, $content);
 
-        try {
-            // Use Centralized SmsService
-            app(\App\Services\SmsService::class)->send($customer->phone, $content);
+        // Always log the result
+        self::log(
+            $template,
+            $customer,
+            'sms',
+            $result['status'],
+            $content,
+            null,
+            $restaurant->id ?? (string) $customer->restaurant_id,
+            $result['error']
+        );
 
-            $restaurant->decrement('sms_balance');
-            self::log($template, $customer, 'sms', 'sent', $content, null, $restaurant->id ?? null);
-        } catch (\Exception $e) {
-            Log::error("SMS failed: " . $e->getMessage());
-            self::log($template, $customer, 'sms', 'failed', $content, null, $restaurant->id ?? null, $e->getMessage());
-        }
+        return $result;
     }
 
     private static function replaceVariables(?string $text, array $data): string
@@ -173,8 +187,12 @@ class CustomerCommunicationService
 
     private static function log($template, $customer, $type, $status, $message = null, $subject = null, $forceRestaurantId = null, $errorMessage = null)
     {
+        // Root Fix: Use data_get and explicit casting to ensure restaurant_id is never NULL if available
+        $restaurantId = $forceRestaurantId ?? data_get($template, 'restaurant_id') ?? data_get($customer, 'restaurant_id');
+        $restaurantId = $restaurantId ? (string) $restaurantId : null;
+
         CommunicationLog::create([
-            'restaurant_id' => (string) ($forceRestaurantId ?? $template->restaurant_id ?? $customer->restaurant_id),
+            'restaurant_id' => $restaurantId,
             'communication_template_id' => $template ? (string) $template->id : null,
             'recipient' => $type === 'email' ? ($customer->email ?? 'N/A') : ($customer->phone ?? 'N/A'),
             'type' => $type, // sms or email

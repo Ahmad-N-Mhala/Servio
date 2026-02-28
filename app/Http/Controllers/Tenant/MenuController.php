@@ -281,7 +281,6 @@ class MenuController extends Controller
     public function updateItem(Request $request, MenuItem $item)
     {
         \Illuminate\Support\Facades\Gate::authorize('edit_item');
-        \Illuminate\Support\Facades\Log::info('Update Item Request Data:', $request->all());
 
         $validated = $request->validate([
             'menu_category_id' => ['required', 'exists:menu_categories,id'],

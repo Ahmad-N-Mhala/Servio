@@ -16,10 +16,10 @@ class OrderObserver
 
     public function updated(\App\Models\Order $order): void
     {
-        // Check if status changed
         if ($order->wasChanged('status')) {
             if ($order->status === 'completed') {
                 $this->processTriggers($order, 'order_completed');
+                $this->processTriggers($order, 'order_completed_feedback');
             } elseif ($order->status === 'cancelled') {
                 $this->processTriggers($order, 'order_cancelled');
             }
@@ -40,7 +40,7 @@ class OrderObserver
         $restaurant = $order->restaurant;
 
         // Find matching automation rules
-        $rules = \App\Models\CommunicationTemplate::where('restaurant_id', $restaurant->id)
+        $rules = \App\Models\CommunicationTemplate::where('restaurant_id', (string) $restaurant->id)
             ->where('is_active', true)
             ->where('trigger_event', $event)
             ->get();

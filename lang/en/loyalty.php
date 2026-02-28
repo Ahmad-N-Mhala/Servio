@@ -111,8 +111,7 @@ return [
     'whole_menu' => 'Whole Menu',
     'specific_items' => 'Specific Item(s)',
     'select_items' => 'Select Items',
-    'items_selected' => '{count} items selected', // Fallback if used elsewhere
-    'item_selected' => 'Item Selected',
+    'items_selected' => '{count} items selected',
     'discount_value_percent' => 'Discount Percentage',
     'percent_deduct' => 'Percentage to deduct from bill',
     'discount_value_amount' => 'Discount Amount',
@@ -120,5 +119,16 @@ return [
     'cashback_percent' => 'Cashback Percentage',
     'percent_returned' => 'Percentage returned as points',
     'customize_design' => 'Customize Design',
+    'otp_send_success' => 'OTP sent successfully',
+    'otp_send_failed' => 'Failed to send OTP. Please try again.',
+    'customer_not_found' => 'Customer not found.',
+    'customer_no_phone' => 'Customer has no phone number record.',
+    'loyalty_not_active' => 'Loyalty program is not active.',
+    'template_not_found' => 'Redemption code template not found. Please contact administration.',
+    'unauthorized_customer' => 'You are not authorized to access this customer data.',
+    'restaurant_context_missing' => 'Restaurant context is missing. Please refresh the page.',
+    'reward_redeemed' => 'Reward redeemed successfully',
+    'invalid_otp' => 'Invalid or expired OTP',
+    'otp_verified' => 'OTP Verified',
+    'emergency_otp_message' => 'Your {restaurant} redemption code is: {otp}. Valid for 10 minutes.',
 ];
-

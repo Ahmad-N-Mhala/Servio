@@ -30,7 +30,7 @@ class CommunicationController extends Controller
 
         // Refined Query:
         // Use whereRaw for generic JSON array check if possible or just get all system templates and filter 
-        $templates = CommunicationTemplate::whereNull('restaurant_id')->orderBy('created_at', 'desc')->get();
+        $templates = CommunicationTemplate::withoutGlobalScopes()->whereNull('restaurant_id')->orderBy('created_at', 'desc')->get();
 
         // Filter in PHP to handle array complexity
         $filtered = $templates->filter(function ($t) use ($channel) {
@@ -87,8 +87,10 @@ class CommunicationController extends Controller
         return redirect()->back()->with('success', 'System template created successfully.');
     }
 
-    public function update(Request $request, CommunicationTemplate $template)
+    public function update(Request $request, $id)
     {
+        $template = CommunicationTemplate::withoutGlobalScopes()->findOrFail($id);
+
         // Ensure it's a system template
         if ($template->restaurant_id !== null) {
             abort(403, 'Cannot edit restaurant templates here.');
@@ -120,8 +122,10 @@ class CommunicationController extends Controller
         return redirect()->back()->with('success', 'System template updated successfully.');
     }
 
-    public function destroy(CommunicationTemplate $template)
+    public function destroy($id)
     {
+        $template = CommunicationTemplate::withoutGlobalScopes()->findOrFail($id);
+
         if ($template->restaurant_id !== null) {
             abort(403, 'Cannot delete restaurant templates here.');
         }

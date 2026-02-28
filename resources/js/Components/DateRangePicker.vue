@@ -1,36 +1,43 @@
 <template>
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 mb-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="flex flex-wrap gap-2">
-                <button
-                    v-for="preset in presets"
-                    :key="preset.key"
-                    @click="selectPreset(preset)"
-                    :class="[
-                        'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                        selectedPresetKey === preset.key
-                            ? 'bg-primary text-white shadow-md'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    ]"
-                >
-                    {{ preset.label }}
-                </button>
+    <div class="glass-card rounded-2xl shadow-xl p-4 sm:p-6 border border-white/20 dark:border-gray-700/50 mb-6 group transition-all duration-300">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex p-2.5 rounded-xl bg-primary/10 text-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        v-for="preset in presets"
+                        :key="preset.key"
+                        @click="selectPreset(preset)"
+                        :class="[
+                            'px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 tracking-wider uppercase',
+                            selectedPresetKey === preset.key
+                                ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
+                                : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 border border-gray-100 dark:border-gray-700'
+                        ]"
+                    >
+                        {{ preset.label }}
+                    </button>
+                </div>
             </div>
             
             <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3 bg-gray-50/50 dark:bg-gray-900/50 p-1.5 rounded-xl border border-gray-100 dark:border-gray-800">
                     <input
                         type="date"
                         v-model="startDate"
                         @change="onDateChange"
-                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+                        class="px-3 py-1.5 bg-transparent border-none rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200 focus:ring-0 w-36"
                     />
-                    <span class="text-gray-500 dark:text-gray-400">{{ $t('reports.to') }}</span>
+                    <div class="w-4 h-px bg-gray-300 dark:bg-gray-700"></div>
                     <input
                         type="date"
                         v-model="endDate"
                         @change="onDateChange"
-                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+                        class="px-3 py-1.5 bg-transparent border-none rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200 focus:ring-0 w-36"
                     />
                 </div>
             </div>

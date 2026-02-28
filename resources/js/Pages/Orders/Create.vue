@@ -1191,6 +1191,7 @@ const createOrder = () => {
 };
 
 const submitOrder = () => {
+    form.customer_id = selectedCustomer.value?.id || null;
     form.items = cart.value.map(item => ({
         menu_item_id: item.id,
         quantity: item.qty,

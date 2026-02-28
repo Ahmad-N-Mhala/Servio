@@ -101,6 +101,8 @@ return [
     'trigger_birthday' => 'عيد ميلاد العميل',
     'trigger_churn_risk' => 'خطر التوقف (غير نشط)',
     'trigger_feedback_received' => 'تم استلام ملاحظات',
+    'trigger_loyalty_points_earned' => 'كسب نقاط ولاء',
+    'trigger_loyalty_tier_upgraded' => 'ترقية فئة الولاء',
     'trigger_when_hint' => 'متى يجب إرسال هذه الرسالة؟',
     'rule_name_placeholder' => 'مثال: رسالة ترحيب، تأكيد الطلب، تهنئة عيد ميلاد',
     'sender_name_placeholder' => 'مثال: Servio، اسم علامتك التجارية',

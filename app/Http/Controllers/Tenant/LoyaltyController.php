@@ -380,31 +380,54 @@ class LoyaltyController extends Controller
 
     public function requestRedemptionOtp(Request $request, Customer $customer)
     {
-        \Illuminate\Support\Facades\Log::info("LoyaltyController: Requesting OTP for Customer ID: " . $customer->id);
+        $logContext = [
+            'customer_id' => (string) $customer->id,
+            'user_id' => $request->user()->id,
+            'ip' => $request->ip()
+        ];
+
+        \Illuminate\Support\Facades\Log::info("LoyaltyController: Incoming OTP request", $logContext);
 
         try {
             \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
-            if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
-                \Illuminate\Support\Facades\Log::warning("LoyaltyController: Unauthorized access attempt.");
-                return response()->json(['message' => 'Unauthorized customer access'], 403);
+            // --- IMPROVED AUTH CHECK ---
+            $user = $request->user();
+            $restaurantId = (string) ($user->currentRestaurant()?->id ?? session('active_restaurant_id') ?? '');
+
+            // Rule: Super Admin can bypass. Non-super admins MUST match the customer's restaurant.
+            if (!$user->is_super_admin && (string) $customer->restaurant_id !== $restaurantId) {
+                \Illuminate\Support\Facades\Log::warning("LoyaltyController: Authorization Failed", array_merge($logContext, [
+                    'customer_restaurant' => (string) $customer->restaurant_id,
+                    'user_context_restaurant' => $restaurantId
+                ]));
+                return response()->json(['message' => __('loyalty.unauthorized_customer')], 403);
             }
 
-            \Illuminate\Support\Facades\Log::info("LoyaltyController: Calling sendRedemptionOtp");
+            if (!$restaurantId && !$user->is_super_admin) {
+                return response()->json(['message' => __('loyalty.restaurant_context_missing')], 400);
+            }
+
+            \Illuminate\Support\Facades\Log::info("LoyaltyController: Authorization Passed. Handing off to LoyaltyService.");
+
             $sent = $this->loyaltyService->sendRedemptionOtp($customer);
 
             if ($sent) {
-                \Illuminate\Support\Facades\Log::info("LoyaltyController: OTP sent successfully.");
-                return response()->json(['message' => 'OTP sent successfully']);
+                \Illuminate\Support\Facades\Log::info("LoyaltyController: Success. OTP process completed.");
+                return response()->json(['message' => __('loyalty.otp_send_success')]);
             }
 
-            \Illuminate\Support\Facades\Log::error("LoyaltyController: Service returned false.");
-            return response()->json(['message' => 'Failed to send OTP. SMS service may be unavailable.'], 503);
+            \Illuminate\Support\Facades\Log::error("LoyaltyController: Service indicated failure (SmsService issue).");
+            return response()->json(['message' => __('loyalty.otp_send_failed')], 503);
 
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("LoyaltyController Failure: " . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("LoyaltyController Exception: " . $e->getMessage());
-            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
-            return response()->json(['message' => 'Server Error: ' . $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error("LoyaltyController CRITICAL FAILURE: " . $e->getMessage(), array_merge($logContext, [
+                'trace' => $e->getTraceAsString()
+            ]));
+            return response()->json(['message' => __('common.server_error')], 500);
         }
     }
 
@@ -412,8 +435,8 @@ class LoyaltyController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
-        if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
-            return response()->json(['message' => 'Unauthorized customer access'], 403);
+        if (!$request->user()->is_super_admin && (string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+            return response()->json(['message' => __('loyalty.unauthorized_customer')], 403);
         }
 
         $validated = $request->validate([
@@ -422,13 +445,13 @@ class LoyaltyController extends Controller
         ]);
 
         if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
-            return response()->json(['message' => 'Invalid or expired OTP'], 422);
+            return response()->json(['message' => __('loyalty.invalid_otp')], 422);
         }
 
         try {
             $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
             return response()->json([
-                'message' => 'Reward redeemed successfully',
+                'message' => __('loyalty.reward_redeemed'),
                 'redemption' => $redemption
             ]);
         } catch (\Exception $e) {
@@ -440,8 +463,8 @@ class LoyaltyController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
-        if ((string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
-            return response()->json(['message' => 'Unauthorized customer access'], 403);
+        if (!$request->user()->is_super_admin && (string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+            return response()->json(['message' => __('loyalty.unauthorized_customer')], 403);
         }
 
         $validated = $request->validate([
@@ -449,10 +472,10 @@ class LoyaltyController extends Controller
         ]);
 
         if ($this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
-            return response()->json(['message' => 'OTP Verified']);
+            return response()->json(['message' => __('loyalty.otp_verified')]);
         }
 
-        return response()->json(['message' => 'Invalid or expired OTP'], 422);
+        return response()->json(['message' => __('loyalty.invalid_otp')], 422);
     }
 
     public function smsLogs(Request $request)

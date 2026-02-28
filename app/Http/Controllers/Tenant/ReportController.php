@@ -12,6 +12,10 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $restaurantId = session('active_restaurant_id');
+        if (!$restaurantId && auth()->user()->is_super_admin && request()->has('restaurant_id')) {
+            $restaurantId = request()->input('restaurant_id');
+        }
+
         if (!$restaurantId)
             abort(404, 'Restaurant context not found');
 
@@ -127,6 +131,10 @@ class ReportController extends Controller
     public function export(Request $request)
     {
         $restaurantId = session('active_restaurant_id');
+        if (!$restaurantId && auth()->user()->is_super_admin && request()->has('restaurant_id')) {
+            $restaurantId = request()->input('restaurant_id');
+        }
+
         if (!$restaurantId)
             abort(404, 'Restaurant context not found');
 

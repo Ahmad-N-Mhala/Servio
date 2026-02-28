@@ -14,7 +14,7 @@ class CustomerObserver
     public function created(Customer $customer): void
     {
         // Trigger "registration" event
-        $rules = CommunicationTemplate::where('restaurant_id', $customer->restaurant_id)
+        $rules = CommunicationTemplate::where('restaurant_id', (string) $customer->restaurant_id)
             ->where('is_active', true)
             ->where('trigger_event', 'registration')
             ->get();

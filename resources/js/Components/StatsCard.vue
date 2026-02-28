@@ -1,35 +1,39 @@
 <template>
     <div 
-        class="relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 dark:border-gray-700"
-        :class="gradientClass"
+        class="relative overflow-hidden rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl group border border-white/20 dark:border-gray-700/50"
+        :class="[gradientClass, colorGlowClass]"
     >
-        <div class="p-4 sm:p-6 relative z-10">
-            <div class="flex items-center justify-between mb-4">
-                <div :class="`p-3 rounded-xl ${iconBgClass}`">
+        <div class="p-5 sm:p-6 relative z-10">
+            <div class="flex items-center justify-between mb-5">
+                <div :class="`p-3 rounded-2xl shadow-inner transition-transform group-hover:scale-110 duration-300 ${iconBgClass}`">
                     <component :is="iconComponent" class="w-6 h-6" :class="iconColorClass" />
                 </div>
-                <div v-if="trend" class="flex items-center gap-1 text-sm font-medium" :class="trendColorClass">
-                    <svg v-if="trend > 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                <div v-if="trend" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold backdrop-blur-md bg-white/30 dark:bg-black/20 shadow-sm" :class="trendColorClass">
+                    <svg v-if="trend > 0" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
-                    <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                     <span>{{ Math.abs(trend) }}%</span>
                 </div>
             </div>
             
-            <div>
-                <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ title }}</p>
-                <p class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            <div class="space-y-1">
+                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ title }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white flex items-baseline gap-1">
                     <span ref="valueElement">{{ displayValue }}</span>
                 </p>
-                <p v-if="subtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ subtitle }}</p>
+                <div v-if="subtitle" class="flex items-center gap-1.5 mt-3">
+                    <div class="w-1.5 h-1.5 rounded-full" :class="dotColorClass"></div>
+                    <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 truncate opacity-80 uppercase tracking-tighter">{{ subtitle }}</p>
+                </div>
             </div>
         </div>
         
-        <!-- Decorative gradient overlay -->
-        <div class="absolute inset-0 opacity-10" :class="overlayClass"></div>
+        <!-- Decorative elements -->
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full opacity-10 blur-3xl" :class="glowBgClass"></div>
+        <div class="absolute inset-0 bg-white/40 dark:bg-transparent backdrop-blur-[2px] pointer-events-none"></div>
     </div>
 </template>
 
@@ -111,21 +115,43 @@ const iconColorClass = computed(() => {
     return classes[props.color];
 });
 
-const overlayClass = computed(() => {
-    const classes = {
-        blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
-        green: 'bg-gradient-to-br from-green-500 to-green-600',
-        yellow: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
-        purple: 'bg-gradient-to-br from-purple-500 to-purple-600',
-        red: 'bg-gradient-to-br from-red-500 to-red-600',
+const colorGlowClass = computed(() => {
+    const glows = {
+        blue: 'hover:shadow-blue-500/20',
+        green: 'hover:shadow-emerald-500/20',
+        yellow: 'hover:shadow-amber-500/20',
+        purple: 'hover:shadow-purple-500/20',
+        red: 'hover:shadow-rose-500/20',
     };
-    return classes[props.color];
+    return glows[props.color];
+});
+
+const dotColorClass = computed(() => {
+    const dots = {
+        blue: 'bg-blue-500',
+        green: 'bg-emerald-500',
+        yellow: 'bg-amber-500',
+        purple: 'bg-purple-500',
+        red: 'bg-rose-500',
+    };
+    return dots[props.color];
+});
+
+const glowBgClass = computed(() => {
+    const glows = {
+        blue: 'bg-blue-500',
+        green: 'bg-emerald-500',
+        yellow: 'bg-amber-500',
+        purple: 'bg-purple-500',
+        red: 'bg-rose-500',
+    };
+    return glows[props.color];
 });
 
 const trendColorClass = computed(() => {
     return props.trend && props.trend > 0 
-        ? 'text-green-600 dark:text-green-400' 
-        : 'text-red-600 dark:text-red-400';
+        ? 'text-emerald-600 dark:text-emerald-400' 
+        : 'text-rose-600 dark:text-rose-400';
 });
 
 // Animate number counting

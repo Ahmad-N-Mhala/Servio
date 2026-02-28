@@ -96,12 +96,12 @@ php artisan serve
 npm run dev
 ```
 
-### Terminal 3: Queue Worker (Optional but recommended)
+### Terminal 3: Queue Worker (REQUIRED for SMS/Email)
 ```bash
-php artisan horizon
-# or
 php artisan queue:work
 ```
+
+**Tip:** You can run all three automatically using `./run_dev.sh`.
 
 Access the application at `http://localhost:8000`.
 
