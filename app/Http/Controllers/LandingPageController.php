@@ -21,7 +21,10 @@ class LandingPageController extends Controller
         $newCount = ($currentVisits['count'] ?? 0) + 1;
         LandingSetting::set('landing_page_visits', ['count' => $newCount]);
 
-        $plans = Plan::where('is_active', true)->get();
+        $plans = Plan::where('is_active', true)
+            ->orderBy('order', 'asc')
+            ->orderBy('price_monthly', 'asc')
+            ->get();
 
         $modules = LandingModule::where('is_active', true)
             ->orderBy('sort_order', 'asc')

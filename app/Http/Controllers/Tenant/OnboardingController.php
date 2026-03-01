@@ -20,7 +20,7 @@ class OnboardingController extends Controller
 {
     public function show(): Response
     {
-        $plans = Plan::where('is_active', true)->orderBy('price_monthly')->get();
+        $plans = Plan::where('is_active', true)->orderBy('order')->orderBy('price_monthly')->get();
 
         // Get the base domain (skip 127.0.0.1, prefer localhost)
         $baseDomain = collect(config('tenancy.central_domains'))

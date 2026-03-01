@@ -26,6 +26,7 @@ class Plan extends Model
         'max_orders_per_month',
         'is_active',
         'is_featured',
+        'order',
     ];
 
     protected $casts = [

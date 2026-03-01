@@ -35,6 +35,7 @@ class OrderController extends Controller
             ->with([
                 'customer',
                 'waiter',
+                'table',
                 'items.menuItem' => function ($q) {
                     $q->withTrashed();
                 }
@@ -48,7 +49,10 @@ class OrderController extends Controller
                     ->orWhere('customer_name', 'like', "%{$search}%")
                     ->orWhere('customer_phone', 'like', "%{$search}%")
                     ->orWhere('delivery_provider', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%");
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhereHas('table', function ($t) use ($search) {
+                        $t->where('name', 'like', "%{$search}%");
+                    });
 
                 if (is_numeric($search)) {
                     $q->orWhere('total', (float) $search);
@@ -108,6 +112,7 @@ class OrderController extends Controller
             ->where('status', '!=', 'deleted')
             ->with([
                 'waiter',
+                'table',
                 'items.menuItem' => function ($q) {
                     $q->withTrashed();
                 }
@@ -121,7 +126,10 @@ class OrderController extends Controller
                     ->orWhere('customer_name', 'like', "%{$search}%")
                     ->orWhere('customer_phone', 'like', "%{$search}%")
                     ->orWhere('delivery_provider', 'like', "%{$search}%")
-                    ->orWhere('status', 'like', "%{$search}%");
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhereHas('table', function ($t) use ($search) {
+                        $t->where('name', 'like', "%{$search}%");
+                    });
 
                 if (is_numeric($search)) {
                     $q->orWhere('total', (float) $search);
@@ -162,6 +170,7 @@ class OrderController extends Controller
             __('reports.order_number'),
             __('reports.customer_name'),
             __('reports.phone'),
+            __('common.table'),
             __('reports.waiter'),
             __('reports.status'),
             __('orders.total'),
@@ -186,6 +195,7 @@ class OrderController extends Controller
                     $order->order_number,
                     $order->customer_name,
                     $order->customer_phone,
+                    $order->table->name ?? '-',
                     $order->waiter->name ?? '-',
                     $statusTranslated,
                     $order->total,

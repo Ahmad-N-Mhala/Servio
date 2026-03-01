@@ -17,7 +17,7 @@ class PlanController extends Controller
                 ->orWhere('slug', 'like', '%' . $request->input('search') . '%');
         }
 
-        $plans = $query->orderBy('price_monthly')->paginate(20)->withQueryString();
+        $plans = $query->orderBy('order')->orderBy('price_monthly')->paginate(20)->withQueryString();
 
         return inertia('Admin/Plans/Index', [
             'plans' => $plans,
@@ -49,6 +49,7 @@ class PlanController extends Controller
             'max_orders_per_month' => 'nullable|integer|min:1',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'order' => 'nullable|integer',
         ]);
 
         // Key generation
@@ -104,6 +105,7 @@ class PlanController extends Controller
             'max_orders_per_month' => 'nullable|integer|min:1',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'order' => 'nullable|integer',
         ]);
 
         $slug = $validated['slug'];

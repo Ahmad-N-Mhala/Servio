@@ -26,7 +26,10 @@ class SubscriptionController extends Controller
         $query->orderBy('starts_at', 'desc');
 
         // Get all available plans for the dropdown (in case filters/modals need it)
-        $plans = Plan::where('is_active', true)->get();
+        $plans = Plan::where('is_active', true)
+            ->orderBy('order')
+            ->orderBy('price_monthly')
+            ->get();
 
         return inertia('Admin/Subscriptions/Index', [
             'subscriptions' => $query->paginate(20)->withQueryString(),
@@ -38,7 +41,10 @@ class SubscriptionController extends Controller
     public function create()
     {
         $restaurants = Restaurant::select(['id', 'name'])->get();
-        $plans = Plan::where('is_active', true)->get();
+        $plans = Plan::where('is_active', true)
+            ->orderBy('order')
+            ->orderBy('price_monthly')
+            ->get();
 
         return inertia('Admin/Subscriptions/Create', [
             'restaurants' => $restaurants,
@@ -66,7 +72,10 @@ class SubscriptionController extends Controller
     public function edit(RestaurantSubscription $subscription)
     {
         $restaurants = Restaurant::select(['id', 'name'])->get();
-        $plans = Plan::where('is_active', true)->get();
+        $plans = Plan::where('is_active', true)
+            ->orderBy('order')
+            ->orderBy('price_monthly')
+            ->get();
 
         return inertia('Admin/Subscriptions/Edit', [
             'subscription' => $subscription->load(['restaurant', 'plan']),

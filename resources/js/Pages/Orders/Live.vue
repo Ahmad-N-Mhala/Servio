@@ -58,6 +58,11 @@
                     </div>
                 </template>
 
+                <!-- Table Column -->
+                <template #cell-table="{ row }">
+                    <span class="text-sm text-gray-900 dark:text-white">{{ row.table?.name || '-' }}</span>
+                </template>
+
                 <!-- Customer Column -->
                 <template #cell-customer_name="{ row }">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ row.customer_name || $t('orders.guest') }}</div>
@@ -292,6 +297,7 @@ const params = ref({
 const columns = computed(() => [
     { key: 'order_number', label: t('orders.order_number'), sortable: true },
     { key: 'customer_name', label: t('orders.customer'), sortable: true },
+    { key: 'table', label: t('common.table') || 'Table' },
     { key: 'waiter', label: t('orders.waiter') || 'Waiter' },
     { key: 'payment_method', label: t('orders.payment') },
     { key: 'status', label: t('orders.status'), sortable: true },

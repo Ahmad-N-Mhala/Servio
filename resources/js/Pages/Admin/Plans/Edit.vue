@@ -58,6 +58,13 @@
                                     <input v-model="form.price_yearly" type="number" step="0.01" id="price_yearly" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                     <div v-if="form.errors.price_yearly" class="text-red-500 text-xs mt-1">{{ form.errors.price_yearly }}</div>
                                 </div>
+                                
+                                <div>
+                                    <label for="order" class="block text-sm font-medium text-gray-700">Display Order</label>
+                                    <input v-model="form.order" type="number" id="order" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">Lower numbers appear first on the landing page</p>
+                                    <div v-if="form.errors.order" class="text-red-500 text-xs mt-1">{{ form.errors.order }}</div>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -164,6 +171,7 @@ const form = useForm({
     max_restaurants: props.plan.max_restaurants,
     max_users: props.plan.max_users,
     max_orders_per_month: props.plan.max_orders_per_month,
+    order: props.plan.order || 0,
     is_active: !!props.plan.is_active,
     features: props.plan.features || [],
     enabled_features: props.plan.enabled_features || [],

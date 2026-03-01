@@ -45,6 +45,7 @@ class LocalizationController extends Controller
                 if ($request->search) {
                     if (
                         strpos(strtolower($key), strtolower($request->search)) === false &&
+                        strpos(strtolower($fileName . '.' . $key), strtolower($request->search)) === false &&
                         strpos(strtolower((string) $value), strtolower($request->search)) === false &&
                         strpos(strtolower((string) ($flatAr[$key] ?? '')), strtolower($request->search)) === false
                     ) {
@@ -251,6 +252,8 @@ class LocalizationController extends Controller
                 if (function_exists('opcache_invalidate')) {
                     opcache_invalidate($path, true);
                 }
+
+                \Illuminate\Support\Facades\Cache::forget("translations_{$lang}");
             }
         }
     }
@@ -278,6 +281,8 @@ class LocalizationController extends Controller
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($path, true);
         }
+
+        \Illuminate\Support\Facades\Cache::forget("translations_{$lang}");
     }
 
     // Helper to format array output nicer than var_export
