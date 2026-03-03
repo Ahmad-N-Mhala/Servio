@@ -54,11 +54,8 @@ class PlanController extends Controller
 
         // Key generation
         $slug = $validated['slug'];
-        $validated['name'] = "plans.{$slug}_name";
-        $validated['description'] = "plans.{$slug}_desc";
-
-        // Save Translations
-        $this->updateTranslations($slug, $validated['name_en'], $validated['name_ar'], $validated['description_en'], $validated['description_ar']);
+        $validated['name'] = $validated['name_en'];
+        $validated['description'] = $validated['description_en'];
 
         Plan::create($validated);
 
@@ -68,22 +65,14 @@ class PlanController extends Controller
 
     public function edit(Plan $plan)
     {
-        // Retrieve current translations
-        // We use the slug to guess the key, or use the stored name if it looks like a key
-        $slug = $plan->slug;
-
-        // Fallback or explicit check
-        $nameKey = "plans.{$slug}_name";
-        $descKey = "plans.{$slug}_desc";
-
         return inertia('Admin/Plans/Edit', [
             'plan' => $plan,
             'availableFeatures' => config('features'),
             'translations' => [
-                'name_en' => trans($nameKey, [], 'en') === $nameKey ? $plan->name : trans($nameKey, [], 'en'),
-                'name_ar' => trans($nameKey, [], 'ar') === $nameKey ? $plan->name : trans($nameKey, [], 'ar'),
-                'description_en' => trans($descKey, [], 'en') === $descKey ? $plan->description : trans($descKey, [], 'en'),
-                'description_ar' => trans($descKey, [], 'ar') === $descKey ? $plan->description : trans($descKey, [], 'ar'),
+                'name_en' => $plan->name_en ?? $plan->name,
+                'name_ar' => $plan->name_ar ?? $plan->name,
+                'description_en' => $plan->description_en ?? $plan->description,
+                'description_ar' => $plan->description_ar ?? $plan->description,
             ]
         ]);
     }
@@ -109,11 +98,8 @@ class PlanController extends Controller
         ]);
 
         $slug = $validated['slug'];
-        $validated['name'] = "plans.{$slug}_name";
-        $validated['description'] = "plans.{$slug}_desc";
-
-        // Save Translations
-        $this->updateTranslations($slug, $validated['name_en'], $validated['name_ar'], $validated['description_en'], $validated['description_ar']);
+        $validated['name'] = $validated['name_en'];
+        $validated['description'] = $validated['description_en'];
 
         $plan->update($validated);
 
@@ -134,38 +120,5 @@ class PlanController extends Controller
 
         return redirect()->route('admin.plans.index')
             ->with('success', 'Plan deleted successfully');
-    }
-
-    private function updateTranslations($slug, $nameEn, $nameAr, $descEn, $descAr)
-    {
-        $this->saveTranslation('en', 'plans', "{$slug}_name", $nameEn);
-        $this->saveTranslation('ar', 'plans', "{$slug}_name", $nameAr);
-        $this->saveTranslation('en', 'plans', "{$slug}_desc", $descEn);
-        $this->saveTranslation('ar', 'plans', "{$slug}_desc", $descAr);
-
-        \Illuminate\Support\Facades\Cache::forget('translations_en');
-        \Illuminate\Support\Facades\Cache::forget('translations_ar');
-    }
-
-    private function saveTranslation($lang, $file, $key, $value)
-    {
-        $path = lang_path($lang . '/' . $file . '.php');
-
-        if (!\Illuminate\Support\Facades\File::exists(dirname($path))) {
-            \Illuminate\Support\Facades\File::makeDirectory(dirname($path), 0755, true);
-        }
-
-        $data = \Illuminate\Support\Facades\File::exists($path) ? include $path : [];
-        if (!is_array($data))
-            $data = [];
-
-        $data[$key] = $value;
-
-        $content = "<?php\n\nreturn " . var_export($data, true) . ";\n";
-        \Illuminate\Support\Facades\File::put($path, $content);
-
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($path, true);
-        }
     }
 }

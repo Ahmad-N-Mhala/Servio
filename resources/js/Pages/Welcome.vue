@@ -1164,26 +1164,35 @@ const getLocaleText = (obj: any) => {
 
 const getPlanName = (plan: any) => {
     if (!plan) return '';
+    
+    // Native database translation - guarantees instant updates without OPCache issues!
+    if (locale.value === 'ar' && plan.name_ar) return plan.name_ar;
+    if (locale.value === 'en' && plan.name_en) return plan.name_en;
+    
+    // Legacy fallback for older plans
     if (plan.slug) {
         const key = `plans.${plan.slug}_name`;
         const translated = t(key);
-        // Vue i18n returns the exact string key if not found. If they differ, translation was successful.
         if (translated && translated !== key) return translated;
     }
-    // Deep fallback: Try translating the literal name. If that fails (returns the name key), just use the literal DB name field.
     const transName = t(plan.name);
     return transName !== plan.name && transName !== `plans.${plan.name}` ? transName : plan.name;
 };
 
 const getPlanDescription = (plan: any) => {
     if (!plan) return '';
+    
+    // Native database translation
+    if (locale.value === 'ar' && plan.description_ar) return plan.description_ar;
+    if (locale.value === 'en' && plan.description_en) return plan.description_en;
+    
+    // Legacy fallback
     const desc = plan.description || '';
     if (plan.slug) {
         const key = `plans.${plan.slug}_desc`;
         const translated = t(key);
         if (translated && translated !== key) return translated;
     }
-    // Deep fallback
     const transDesc = t(desc);
     return transDesc !== desc && transDesc !== `plans.${desc}` ? transDesc : desc;
 };
