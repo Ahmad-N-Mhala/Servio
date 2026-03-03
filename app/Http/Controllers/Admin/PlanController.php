@@ -142,6 +142,9 @@ class PlanController extends Controller
         $this->saveTranslation('ar', 'plans', "{$slug}_name", $nameAr);
         $this->saveTranslation('en', 'plans', "{$slug}_desc", $descEn);
         $this->saveTranslation('ar', 'plans', "{$slug}_desc", $descAr);
+
+        \Illuminate\Support\Facades\Cache::forget('translations_en');
+        \Illuminate\Support\Facades\Cache::forget('translations_ar');
     }
 
     private function saveTranslation($lang, $file, $key, $value)
