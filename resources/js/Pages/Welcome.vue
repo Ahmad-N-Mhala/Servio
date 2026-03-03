@@ -689,11 +689,11 @@
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-8 items-start">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 items-stretch">
                     <div 
                         v-for="plan in plans" 
                         :key="plan.id"
-                        class="p-8 rounded-[2rem] transition-all duration-300 flex flex-col border w-full bg-white relative group hover:-translate-y-2 h-full"
+                        class="p-8 md:p-10 rounded-[2.5rem] transition-all duration-300 flex flex-col border w-full bg-white relative group hover:-translate-y-2 h-full"
                         :class="plan.is_featured ? 'border-2 border-emerald-500 shadow-2xl shadow-emerald-500/10 z-10 scale-105 md:scale-105' : 'border-gray-100 shadow-xl shadow-gray-200/50 opacity-90 hover:opacity-100'"
                     >
                         <!-- Featured Badge -->
@@ -701,11 +701,11 @@
                             {{ $t('landing.most_popular') }}
                         </div>
 
-                        <div class="mb-4">
-                            <h3 class="text-2xl font-black text-gray-900 mb-2">
+                        <div class="mb-5">
+                            <h3 class="text-3xl font-black text-gray-900 mb-3">
                                 {{ getPlanName(plan) }}
                             </h3>
-                            <p class="text-sm text-gray-500">
+                            <p class="text-base text-gray-600 font-medium leading-relaxed">
                                 {{ getPlanDescription(plan) }}
                             </p>
                         </div>
@@ -721,7 +721,7 @@
 
                         <div class="space-y-4 mb-8 flex-grow">
                              <!-- Features List -->
-                            <div v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start gap-3 text-sm text-gray-600">
+                            <div v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start gap-3 text-base text-gray-600 font-medium">
                                 <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -733,7 +733,7 @@
 
                         <button 
                             @click="openRegisterModal(plan)"
-                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-sm"
+                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-base"
                             :class="plan.is_featured ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-xl shadow-gray-900/10' : 'bg-gray-50 text-gray-900 hover:bg-gray-100 hover:scale-[1.02]'"
                         >
                             {{ $t('landing.select_plan') }}
@@ -742,9 +742,9 @@
 
                     <!-- Custom Plan Card -->
                     <div 
-                        class="p-[2px] rounded-[2.1rem] transition-all duration-300 relative group h-full opacity-90 hover:opacity-100 hover:-translate-y-2 bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 shadow-xl shadow-emerald-500/20 w-full flex flex-col"
+                        class="p-[2px] rounded-[2.6rem] transition-all duration-300 relative group h-full opacity-90 hover:opacity-100 hover:-translate-y-2 bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 shadow-xl shadow-emerald-500/20 w-full flex flex-col"
                     >
-                        <div class="p-8 rounded-[2rem] bg-white h-full flex flex-col relative overflow-hidden">
+                        <div class="p-8 md:p-10 rounded-[2.5rem] bg-white h-full flex flex-col relative overflow-hidden">
                             <!-- Exclusive pattern background overlay -->
                             <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/30 to-white/10 pointer-events-none"></div>
                             
@@ -753,11 +753,11 @@
                                 <span class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-bl-xl rounded-tr-[2rem] shadow-sm">Enterprise</span>
                             </div>
 
-                            <div class="mb-4 relative z-10">
-                                <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 mb-2">
+                            <div class="mb-5 relative z-10">
+                                <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 mb-3">
                                     {{ $t('landing.custom_plan_title') }}
                                 </h3>
-                                <p class="text-sm text-gray-500 font-medium">
+                                <p class="text-base text-gray-600 font-medium leading-relaxed">
                                     {{ $t('landing.custom_plan_card_desc') }}
                                 </p>
                             </div>
@@ -770,7 +770,7 @@
 
                         <div class="space-y-4 mb-8 flex-grow">
                              <!-- Features List -->
-                            <div class="flex items-start gap-3 text-sm text-gray-600">
+                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
                                 <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -778,7 +778,7 @@
                                 </div>
                                 <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_1') }}</span>
                             </div>
-                            <div class="flex items-start gap-3 text-sm text-gray-600">
+                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
                                 <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -786,7 +786,7 @@
                                 </div>
                                 <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_2') }}</span>
                             </div>
-                            <div class="flex items-start gap-3 text-sm text-gray-600">
+                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
                                 <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -794,7 +794,7 @@
                                 </div>
                                 <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_3') }}</span>
                             </div>
-                            <div class="flex items-start gap-3 text-sm text-gray-600">
+                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
                                 <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -806,7 +806,7 @@
 
                         <button 
                             @click="openRegisterModal()"
-                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-sm bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg shadow-gray-900/20 hover:shadow-gray-900/30 hover:-translate-y-0.5 mt-auto relative z-10"
+                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-base bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg shadow-gray-900/20 hover:shadow-gray-900/30 hover:-translate-y-0.5 mt-auto relative z-10"
                         >
                             {{ $t('landing.contact_us') }}
                         </button>
