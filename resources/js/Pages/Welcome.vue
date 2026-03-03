@@ -1176,7 +1176,14 @@ const getPlanName = (plan: any) => {
         if (translated && translated !== key) return translated;
     }
     const transName = t(plan.name);
-    return transName !== plan.name && transName !== `plans.${plan.name}` ? transName : plan.name;
+    let finalStr = transName !== plan.name && transName !== `plans.${plan.name}` ? transName : plan.name;
+    
+    // Safety cleaner: NEVER show raw keys like "plans.44_name" to public eyes
+    if (finalStr && finalStr.startsWith('plans.') && finalStr.endsWith('_name')) {
+        finalStr = finalStr.replace('plans.', '').replace('_name', '').replace(/_/g, ' ');
+        finalStr = finalStr.charAt(0).toUpperCase() + finalStr.slice(1); // Capitalize
+    }
+    return finalStr;
 };
 
 const getPlanDescription = (plan: any) => {
@@ -1194,7 +1201,13 @@ const getPlanDescription = (plan: any) => {
         if (translated && translated !== key) return translated;
     }
     const transDesc = t(desc);
-    return transDesc !== desc && transDesc !== `plans.${desc}` ? transDesc : desc;
+    let finalDesc = transDesc !== desc && transDesc !== `plans.${desc}` ? transDesc : desc;
+    
+    // Safety cleaner for desc
+    if (finalDesc && finalDesc.startsWith('plans.') && finalDesc.endsWith('_desc')) {
+        finalDesc = ''; // Hide raw desc keys completely
+    }
+    return finalDesc;
 };
 
 const formatPrice = (price: number | string) => {

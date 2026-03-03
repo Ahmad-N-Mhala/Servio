@@ -65,14 +65,18 @@ class PlanController extends Controller
 
     public function edit(Plan $plan)
     {
+        $slug = $plan->slug;
+        $nameKey = "plans.{$slug}_name";
+        $descKey = "plans.{$slug}_desc";
+
         return inertia('Admin/Plans/Edit', [
             'plan' => $plan,
             'availableFeatures' => config('features'),
             'translations' => [
-                'name_en' => $plan->name_en ?? $plan->name,
-                'name_ar' => $plan->name_ar ?? $plan->name,
-                'description_en' => $plan->description_en ?? $plan->description,
-                'description_ar' => $plan->description_ar ?? $plan->description,
+                'name_en' => $plan->name_en ?? (trans($nameKey, [], 'en') !== $nameKey ? trans($nameKey, [], 'en') : $plan->name),
+                'name_ar' => $plan->name_ar ?? (trans($nameKey, [], 'ar') !== $nameKey ? trans($nameKey, [], 'ar') : $plan->name),
+                'description_en' => $plan->description_en ?? (trans($descKey, [], 'en') !== $descKey ? trans($descKey, [], 'en') : $plan->description),
+                'description_ar' => $plan->description_ar ?? (trans($descKey, [], 'ar') !== $descKey ? trans($descKey, [], 'ar') : $plan->description),
             ]
         ]);
     }
