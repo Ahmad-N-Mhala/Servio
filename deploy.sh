@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "🚀 Starting Servio Deployment..."
 
 # 1. Take ownership temporarily so we don't get Permission Denied errors
