@@ -1167,23 +1167,25 @@ const getPlanName = (plan: any) => {
     if (plan.slug) {
         const key = `plans.${plan.slug}_name`;
         const translated = t(key);
+        // Vue i18n returns the exact string key if not found. If they differ, translation was successful.
         if (translated && translated !== key) return translated;
     }
-    // Fallback to t(name) or name
+    // Deep fallback: Try translating the literal name. If that fails (returns the name key), just use the literal DB name field.
     const transName = t(plan.name);
-    return transName !== plan.name ? transName : plan.name;
+    return transName !== plan.name && transName !== `plans.${plan.name}` ? transName : plan.name;
 };
 
 const getPlanDescription = (plan: any) => {
     if (!plan) return '';
+    const desc = plan.description || '';
     if (plan.slug) {
         const key = `plans.${plan.slug}_desc`;
         const translated = t(key);
         if (translated && translated !== key) return translated;
     }
-    // Fallback
-    const transDesc = t(plan.description || '');
-    return transDesc !== (plan.description || '') ? transDesc : (plan.description || '');
+    // Deep fallback
+    const transDesc = t(desc);
+    return transDesc !== desc && transDesc !== `plans.${desc}` ? transDesc : desc;
 };
 
 const formatPrice = (price: number | string) => {
