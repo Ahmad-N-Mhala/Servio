@@ -61,6 +61,12 @@ return [
     'choose_plan_desc' => 'شفافية كاملة. حدد الباقة التي تلبي أدوات التحكم والتشغيل لمطعمك.',
     'custom_plan_title' => 'هل تدير سلسلة مطاعم كبيرة؟',
     'custom_plan_desc' => 'تواصل مع خبرائنا لتفصيل أفضل خيارات الإدارة لحلول الشركات الواسعة.',
+    'custom_plan_card_desc' => 'هل تحتاج إلى باقة مختلفة؟ خصص باقتك لتناسب احتياجاتك بدقة.',
+    'lets_talk' => 'لنتحدث',
+    'custom_feature_1' => 'عدد غير محدود من كل شيء',
+    'custom_feature_2' => 'تكاملات مخصصة',
+    'custom_feature_3' => 'مدير حساب مخصص',
+    'custom_feature_4' => 'دعم فني على مدار الساعة',
     'contact_sales' => 'تواصل مع المبيعات',
     // About Us Content (Updated to High Conversion)
     'about_title_default' => 'توقف عن إدارة الأنظمة المتعددة. ابدأ بمضاعفة أرباحك.',
