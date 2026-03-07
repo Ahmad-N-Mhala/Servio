@@ -851,6 +851,14 @@ export default {
         reward_discount: 'Reward Discount',
         place_order: 'Place Order',
         by_placing_this_order: 'By placing this order you agree to our terms of service',
+        welcome_user: 'Welcome {name}!',
+        available_rewards: 'Available Rewards',
+        pts_required: '{pts} pts required',
+        keep_ordering: 'Keep ordering to unlock exciting rewards!',
+        no_loyalty_found: 'No loyalty account found for this number.',
+        preparing_discount: 'Preparing Discount...',
+        placing_order: 'Placing Order...',
+        order_number: 'Order Number',
     },
 };
 

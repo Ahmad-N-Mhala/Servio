@@ -831,6 +831,14 @@ export default {
         reward_discount: 'خصم المكافأة',
         place_order: 'تأكيد الطلب',
         by_placing_this_order: 'بإرسال هذا الطلب فإنك توافق على شروط الخدمة الخاصة بنا',
+        welcome_user: 'مرحباً {name}!',
+        available_rewards: 'المكافآت المتاحة',
+        pts_required: 'يتطلب {pts} نقطة',
+        keep_ordering: 'استمر في الطلب لفتح مكافآت رائعة!',
+        no_loyalty_found: 'لم يتم العثور على حساب ولاء لهذا الرقم.',
+        preparing_discount: 'جاري تحضير الخصم...',
+        placing_order: 'جاري تأكيد الطلب...',
+        order_number: 'رقم الطلب',
     },
 };
 

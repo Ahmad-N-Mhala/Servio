@@ -266,59 +266,70 @@
                         </div>
 
                         <!-- Customer Info Card -->
-                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-3">
                             <h3 class="font-bold text-gray-900 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                {{ $t('qr_menu.your_details') }} <span class="text-xs font-normal text-gray-500 ml-auto">({{ $t('common.optional') }})</span>
+                                {{ $t('qr_menu.your_details') }}
+                                <span class="text-xs font-normal text-gray-400 ms-auto">({{ $t('common.optional') }})</span>
                             </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <input 
-                                    v-model="customerName"
-                                    type="text"
-                                    :placeholder="$t('qr_menu.name')"
-                                    class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+
+                            <!-- Name field — full width -->
+                            <input
+                                v-model="customerName"
+                                type="text"
+                                :placeholder="$t('qr_menu.name')"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                            />
+
+                            <!-- Phone + Check Loyalty — full width -->
+                            <div class="flex gap-2">
+                                <input
+                                    v-model="customerPhone"
+                                    type="tel"
+                                    :placeholder="$t('qr_menu.phone_number')"
+                                    @input="resetLoyalty"
+                                    class="flex-1 min-w-0 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                 />
-                                <div class="flex gap-2">
-                                    <input 
-                                        v-model="customerPhone"
-                                        type="tel"
-                                        :placeholder="$t('qr_menu.phone_number')"
-                                        @input="resetLoyalty"
-                                        class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
-                                    />
-                                    <button 
-                                        @click="checkLoyalty" 
-                                        :disabled="!customerPhone || checkingLoyalty" 
-                                        type="button" 
-                                        class="bg-primary/10 text-primary px-4 rounded-xl font-bold hover:bg-primary/20 transition-all disabled:opacity-50 flex items-center justify-center whitespace-nowrap"
-                                    >
-                                        <svg v-if="checkingLoyalty" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span v-else>{{ $t('qr_menu.check_loyalty') }}</span>
-                                    </button>
-                                </div>
+                                <button
+                                    @click="checkLoyalty"
+                                    :disabled="!customerPhone || checkingLoyalty"
+                                    type="button"
+                                    class="shrink-0 bg-primary/10 text-primary px-4 py-3 rounded-xl font-bold hover:bg-primary/20 transition-all disabled:opacity-50 flex items-center justify-center whitespace-nowrap text-sm"
+                                >
+                                    <svg v-if="checkingLoyalty" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span v-else>{{ $t('qr_menu.check_loyalty') }}</span>
+                                </button>
                             </div>
-                            
+
+                            <!-- No loyalty found message -->
+                            <div v-if="loyaltyChecked && !loyaltyFound" class="text-sm text-gray-500 italic flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ $t('qr_menu.no_loyalty_found') }}
+                            </div>
+
                             <!-- Loyalty Data -->
-                            <div v-if="loyaltyFound && customerLoyaltyData" class="mt-4 p-4 bg-purple-50 rounded-xl border border-purple-100 transition-all">
+                            <div v-if="loyaltyFound && customerLoyaltyData" class="p-4 bg-purple-50 rounded-xl border border-purple-100 transition-all">
                                 <div class="flex justify-between items-center mb-4">
-                                    <span class="font-bold text-purple-900">Welcome {{ customerLoyaltyData.name }}!</span>
+                                    <span class="font-bold text-purple-900">{{ $t('qr_menu.welcome_user', { name: customerLoyaltyData.name }) }}</span>
                                     <span class="text-sm font-semibold text-purple-700 bg-purple-200 px-3 py-1 rounded-lg">{{ customerLoyaltyData.points }} pts</span>
                                 </div>
-                                
+
                                 <div v-if="availableRewards.length > 0" class="space-y-2">
-                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Available Rewards</p>
-                                    <div v-for="reward in availableRewards" :key="reward.id" 
+                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ $t('qr_menu.available_rewards') }}</p>
+                                    <div v-for="reward in availableRewards" :key="reward.id"
                                         @click="selectedReward = selectedReward?.id === reward.id ? null : reward"
                                         class="flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all"
                                         :class="selectedReward?.id === reward.id ? 'border-primary bg-primary/5 shadow-inner' : 'border-purple-200/50 hover:border-primary/30 bg-white shadow-sm'">
                                         <div>
                                             <p class="font-bold text-gray-900 text-sm">{{ getTranslatedName(reward.name) }}</p>
-                                            <p class="text-xs text-gray-500 font-medium">{{ reward.points_required }} pts required</p>
+                                            <p class="text-xs text-gray-500 font-medium">{{ $t('qr_menu.pts_required', { pts: reward.points_required }) }}</p>
                                         </div>
                                         <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
                                             :class="selectedReward?.id === reward.id ? 'border-primary bg-primary' : 'border-gray-300'">
@@ -329,14 +340,8 @@
                                     </div>
                                 </div>
                                 <div v-else class="text-sm text-gray-500 italic text-center py-3 bg-white/50 rounded-lg">
-                                    Keep ordering to unlock exciting rewards!
+                                    {{ $t('qr_menu.keep_ordering') }}
                                 </div>
-                            </div>
-                            <div v-else-if="loyaltyChecked && !loyaltyFound" class="mt-2 text-sm text-gray-500 italic flex items-center gap-2">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                No loyalty account found for this number.
                             </div>
                         </div>
                     </div>
@@ -372,8 +377,8 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span v-if="sendingOtp">Preparing Discount...</span>
-                        <span v-else-if="placing">Placing Order...</span>
+                        <span v-if="sendingOtp">{{ $t('qr_menu.preparing_discount') }}</span>
+                        <span v-else-if="placing">{{ $t('qr_menu.placing_order') }}</span>
                         <div v-else class="flex items-center gap-2">
                             <span>{{ $t('qr_menu.place_order') }}</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,7 +402,7 @@
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('orders.order_placed') }}</h2>
                 <p class="text-gray-600 mb-6">{{ $t('orders.order_sent_to_kitchen') }}</p>
                 <div class="bg-gradient-to-r from-primary/10 to-purple-100 rounded-xl p-6 mb-6">
-                    <p class="text-sm text-gray-600 mb-1">Order Number</p>
+                    <p class="text-sm text-gray-600 mb-1">{{ $t('qr_menu.order_number') }}</p>
                     <p class="text-3xl font-bold text-primary">{{ orderNumber }}</p>
                 </div>
                 <button 
