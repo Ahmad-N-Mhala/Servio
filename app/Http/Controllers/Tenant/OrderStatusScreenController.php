@@ -82,10 +82,7 @@ class OrderStatusScreenController extends Controller
         // We map 'ready' -> Ready
         $activeOrders = Order::query()
             ->whereIn('status', ['pending', 'processing', 'preparing', 'cooking', 'ready', 'ready_for_pickup'])
-            ->where(function ($query) {
-                $query->where('source', '!=', 'qr_code')
-                    ->orWhere('payment_status', 'paid');
-            })
+            ->excludeUnpaidQr()
             ->where('created_at', '>=', now()->subDay()) // Optimization: only recent orders
             ->select('id', 'order_number', 'transaction_number', 'status', 'created_at', 'updated_at')
             ->orderBy('updated_at', 'desc')

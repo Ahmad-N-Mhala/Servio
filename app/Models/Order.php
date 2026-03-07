@@ -46,6 +46,7 @@ class Order extends Model
         'additional_charge_value',
         'transaction_number',
         'feedback_token',
+        'source',
     ];
 
     protected $casts = [
@@ -82,6 +83,16 @@ class Order extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function scopeExcludeUnpaidQr($query)
+    {
+        return $query->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->where('source', '!=', 'qr_code')
+                    ->where('order_number', 'not like', 'QR-%');
+            })->orWhere('payment_status', 'paid');
+        });
     }
 
     public function items(): HasMany

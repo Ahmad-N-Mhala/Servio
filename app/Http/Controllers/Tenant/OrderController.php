@@ -32,6 +32,12 @@ class OrderController extends Controller
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->where('source', '!=', 'qr_code')
+                        ->where('order_number', 'not like', 'QR-%');
+                })->orWhere('payment_status', 'paid');
+            })
             ->with([
                 'customer',
                 'waiter',
@@ -110,6 +116,12 @@ class OrderController extends Controller
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
+            ->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->where('source', '!=', 'qr_code')
+                        ->where('order_number', 'not like', 'QR-%');
+                })->orWhere('payment_status', 'paid');
+            })
             ->with([
                 'waiter',
                 'table',

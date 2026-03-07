@@ -188,20 +188,7 @@
                                     {{ $t('orders.view_receipt') }}
                                 </button>
                                 
-                                <!-- View Bill Action -->
-                                <a 
-                                    v-if="row.status !== 'cancelled' && row.status !== 'deleted' && hasPermission('print_bill')"
-                                    :href="route('orders.bill', row.id)"
-                                    target="_blank"
-                                    @click="closeDropdown"
-                                    class="w-full text-start px-4 py-2.5 text-sm text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-3 transition-colors"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    {{ $t('orders.view_bill') }}
-                                </a>
-                                
+
                                 <!-- Cancel Action -->
                                 <button 
                                     v-if="(row.status === 'pending' || row.status === 'processing') && hasPermission('cancel_order')"

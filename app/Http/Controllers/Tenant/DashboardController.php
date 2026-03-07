@@ -197,6 +197,7 @@ class DashboardController extends Controller
         // Re-fetch stats for the report
         // Base Query
         $baseOrderQuery = Order::where('restaurant_id', $restaurant->id)
+            ->excludeUnpaidQr()
             ->where('status', '!=', 'deleted')
             ->whereBetween('created_at', [$startDate, $endDate]);
 
@@ -674,6 +675,7 @@ class DashboardController extends Controller
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->sum('total'),
             'orders' => Order::where('restaurant_id', $restaurant->id)
+                ->excludeUnpaidQr()
                 ->where('status', '!=', 'deleted')
                 ->where('status', '!=', 'cancelled')
                 ->whereBetween('created_at', [$startDate, $endDate])
@@ -702,6 +704,7 @@ class DashboardController extends Controller
 
         // 2. Statistics for Selected Period (Default 30 days if not set, handled at top)
         $baseOrderQuery = Order::where('restaurant_id', $restaurant->id)
+            ->excludeUnpaidQr()
             ->where('status', '!=', 'deleted')
             ->where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$startDate, $endDate]);

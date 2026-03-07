@@ -152,6 +152,24 @@ npm install
 npm run build
 ```
 
+Clear Corrupted Compiled Caches:
+```bash
+# This prevents "Class translator does not exist" 404 errors during caching
+rm -rf bootstrap/cache/*.php
+rm -rf storage/framework/views/*.php
+php artisan cache:clear
+php artisan route:clear
+php artisan config:clear
+php artisan view:clear
+```
+
+Rebuild Production Cache:
+```bash
+php artisan optimize
+php artisan route:cache
+php artisan view:cache
+```
+
 Set Permissions:
 ```bash
 chown -R www-data:www-data /var/www/servio

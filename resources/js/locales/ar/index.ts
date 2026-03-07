@@ -815,5 +815,22 @@ export default {
         api_access: 'الوصول إلى API',
         custom_integrations: 'تكاملات مخصصة',
     },
+    qr_menu: {
+        current_order: 'الطلب الحالي',
+        items_count: '{count} أصناف',
+        your_cart_is_empty: 'عربة التسوق فارغة',
+        looks_like_you_havent: 'يبدو أنك لم تضف أي شيء إلى طلبك بعد.',
+        browse_menu: 'تصفح القائمة',
+        add_notes: 'أضف ملاحظات (مثال: بدون بصل)',
+        your_details: 'تفاصيلك',
+        name: 'الاسم',
+        phone_number: 'رقم الهاتف',
+        check_loyalty: 'تحقق من الولاء',
+        subtotal: 'المجموع الفرعي',
+        tax_5: 'الضريبة (5%)',
+        reward_discount: 'خصم المكافأة',
+        place_order: 'تأكيد الطلب',
+        by_placing_this_order: 'بإرسال هذا الطلب فإنك توافق على شروط الخدمة الخاصة بنا',
+    },
 };
 

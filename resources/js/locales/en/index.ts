@@ -835,5 +835,22 @@ export default {
         api_access: 'API access',
         custom_integrations: 'Custom integrations',
     },
+    qr_menu: {
+        current_order: 'Current Order',
+        items_count: '{count} items',
+        your_cart_is_empty: 'Your cart is empty',
+        looks_like_you_havent: "Looks like you haven't added anything to your order yet.",
+        browse_menu: 'Browse Menu',
+        add_notes: 'Add notes (e.g. no onion)',
+        your_details: 'Your Details',
+        name: 'Name',
+        phone_number: 'Phone Number',
+        check_loyalty: 'Check Loyalty',
+        subtotal: 'Subtotal',
+        tax_5: 'Tax (5%)',
+        reward_discount: 'Reward Discount',
+        place_order: 'Place Order',
+        by_placing_this_order: 'By placing this order you agree to our terms of service',
+    },
 };
 

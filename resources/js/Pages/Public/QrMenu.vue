@@ -162,8 +162,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">Current Order</h2>
-                            <p class="text-sm text-gray-500">{{ cartItemCount }} items</p>
+                            <h2 class="text-xl font-bold text-gray-900">{{ $t('qr_menu.current_order') }}</h2>
+                            <p class="text-sm text-gray-500">{{ $t('qr_menu.items_count', { count: cartItemCount }) }}</p>
                         </div>
                     </div>
                     <button 
@@ -184,13 +184,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-1">Your cart is empty</h3>
-                        <p class="text-gray-500 max-w-xs">Looks like you haven't added anything to your order yet.</p>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $t('qr_menu.your_cart_is_empty') }}</h3>
+                        <p class="text-gray-500 max-w-xs">{{ $t('qr_menu.looks_like_you_havent') }}</p>
                         <button 
                             @click="showCart = false"
                             class="mt-6 px-6 py-2.5 bg-white border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                            Browse Menu
+                            {{ $t('qr_menu.browse_menu') }}
                         </button>
                     </div>
 
@@ -236,7 +236,7 @@
                                         <input 
                                             v-model="item.notes"
                                             type="text"
-                                            placeholder="Add notes (e.g. no onion)"
+                                            :placeholder="$t('qr_menu.add_notes')"
                                             class="w-full pl-9 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all placeholder-gray-400"
                                         />
                                     </div>
@@ -271,20 +271,20 @@
                                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Your Details <span class="text-xs font-normal text-gray-500 ml-auto">(Optional)</span>
+                                {{ $t('qr_menu.your_details') }} <span class="text-xs font-normal text-gray-500 ml-auto">({{ $t('common.optional') }})</span>
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <input 
                                     v-model="customerName"
                                     type="text"
-                                    placeholder="Name"
+                                    :placeholder="$t('qr_menu.name')"
                                     class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                 />
                                 <div class="flex gap-2">
                                     <input 
                                         v-model="customerPhone"
                                         type="tel"
-                                        placeholder="Phone Number"
+                                        :placeholder="$t('qr_menu.phone_number')"
                                         @input="resetLoyalty"
                                         class="w-full px-4 py-3 bg-gray-50 border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                     />
@@ -298,7 +298,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <span v-else>Check Loyalty</span>
+                                        <span v-else>{{ $t('qr_menu.check_loyalty') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -346,15 +346,15 @@
                 <div v-if="cart.length > 0" class="bg-white border-t border-gray-100 p-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20">
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between items-center text-gray-500 text-sm">
-                            <span>Subtotal</span>
+                            <span>{{ $t('qr_menu.subtotal') }}</span>
                             <span>{{ restaurant.currency }} {{ subtotal.toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between items-center text-gray-500 text-sm">
-                            <span>Tax (5%)</span>
+                            <span>{{ $t('qr_menu.tax_5') }}</span>
                             <span>{{ restaurant.currency }} {{ tax.toFixed(2) }}</span>
                         </div>
                         <div v-if="selectedReward" class="flex justify-between items-center text-primary text-sm font-bold">
-                            <span>Reward Discount</span>
+                            <span>{{ $t('qr_menu.reward_discount') }}</span>
                             <span>- {{ restaurant.currency }} {{ calculateDiscount().toFixed(2) }}</span>
                         </div>
                         <div class="pt-3 flex justify-between items-center border-t border-dashed border-gray-200">
@@ -375,13 +375,13 @@
                         <span v-if="sendingOtp">Preparing Discount...</span>
                         <span v-else-if="placing">Placing Order...</span>
                         <div v-else class="flex items-center gap-2">
-                            <span>Place Order</span>
+                            <span>{{ $t('qr_menu.place_order') }}</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </div>
                     </button>
-                    <p class="text-center text-xs text-gray-400 mt-4">By placing this order you agree to our terms of service</p>
+                    <p class="text-center text-xs text-gray-400 mt-4">{{ $t('qr_menu.by_placing_this_order') }}</p>
                 </div>
             </div>
         </div>

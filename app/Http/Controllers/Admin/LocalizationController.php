@@ -113,6 +113,13 @@ class LocalizationController extends Controller
         $content = "<?php\n\nreturn " . $this->varExport($data) . ";\n";
         File::put($path, $content);
 
+        // Clear OPCache if enabled to reflect changes immediately
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($path, true);
+        }
+
+        \Illuminate\Support\Facades\Cache::forget("translations_{$lang}");
+
         return redirect()->back()->with('success', 'Translation updated successfully.');
     }
 
