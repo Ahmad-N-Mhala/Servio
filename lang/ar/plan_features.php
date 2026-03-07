@@ -2,6 +2,7 @@
 
 return [
     'one_restaurant' => 'مطعم واحد',
+    'three_restaurant' => '3 مطاعم',
     'three_restaurants' => '3 مطاعم',
     'unlimited_restaurants' => 'عدد غير محدود من المطاعم',
     'staff_limit_5' => 'ما يصل إلى 5 موظفين',

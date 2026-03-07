@@ -2,6 +2,7 @@
 
 return [
     'one_restaurant' => '1 Restaurant',
+    'three_restaurant' => '3 Restaurants',
     'three_restaurants' => '3 Restaurants',
     'unlimited_restaurants' => 'Unlimited Restaurants',
     'staff_limit_5' => 'Up to 5 staff members',
