@@ -61,6 +61,7 @@ return [
     'minutes' => 'minutes',
     'price' => 'Price',
     'thank_you' => 'Thank you!',
+    'thank_you_visit' => 'Thank you for your visit!',
     'come_again' => 'Please come again',
     'search_orders' => 'Search orders...',
     'item' => 'Item',
@@ -94,9 +95,7 @@ return [
     'ready' => 'Ready',
     'completed' => 'Completed',
     'pending' => 'Pending',
-    'Pending' => 'Pending',
     'cancelled' => 'Cancelled',
     'deleted' => 'Deleted',
-    'processing' => 'Processing',
     'in_progress' => 'In Progress',
 ];

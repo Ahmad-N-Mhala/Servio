@@ -226,6 +226,8 @@ export default {
         members: 'الأعضاء',
         rewards: 'المكافآت',
         points: 'النقاط',
+        points_earned: 'النقاط المكتسبة',
+        total_balance: 'الرصيد الجديد',
         tier: 'المستوى',
         total_orders: 'إجمالي الطلبات',
         total_spent: 'إجمالي الإنفاق',

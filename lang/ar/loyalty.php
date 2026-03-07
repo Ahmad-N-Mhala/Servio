@@ -9,6 +9,8 @@ return [
     'total_orders' => 'إجمالي الطلبات',
     'total_spent' => 'إجمالي الإنفاق',
     'current_points' => 'النقاط الحالية',
+    'points_earned' => 'النقاط المكتسبة',
+    'total_balance' => 'الرصيد الجديد',
     'reward_created' => 'تم إنشاء المكافأة بنجاح',
     'reward_updated' => 'تم تحديث المكافأة بنجاح',
     'reward_deleted' => 'تم حذف المكافأة بنجاح',

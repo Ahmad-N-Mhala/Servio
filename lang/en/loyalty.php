@@ -9,6 +9,8 @@ return [
     'total_orders' => 'Total Orders',
     'total_spent' => 'Total Spent',
     'current_points' => 'Current Points',
+    'points_earned' => 'Points Earned',
+    'total_balance' => 'New Balance',
     'reward_created' => 'Reward created successfully',
     'reward_updated' => 'Reward updated successfully',
     'reward_deleted' => 'Reward deleted successfully',

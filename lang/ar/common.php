@@ -68,6 +68,7 @@ return [
     'regenerate' => 'إعادة توليد',
     'minutes' => 'دقيقة',
     'thank_you' => 'شكراً لك!',
+    'thank_you_visit' => 'شكراً لزيارتك!',
     'come_again' => 'نرجو زيارتنا مرة أخرى',
     'search_orders' => 'بحث في الطلبات...',
     'item' => 'صنف',
@@ -100,9 +101,7 @@ return [
     'ready' => 'جاهز',
     'completed' => 'مكتمل',
     'pending' => 'قيد الانتظار',
-    'Pending' => 'قيد الانتظار',
     'cancelled' => 'ملغي',
     'deleted' => 'محذوف',
-    'processing' => 'قيد المعالجة',
     'in_progress' => 'قيد التنفيذ',
 ];

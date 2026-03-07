@@ -298,13 +298,16 @@
 
     @if($order->points_earned > 0)
         <div style="margin-top: 3mm; text-align: center; border: 1px dashed #444; padding: 2mm;">
-            <div style="font-size: 10px; font-weight: bold;">Loyalty Points Earned: {{ $order->points_earned }}</div>
-            <div style="font-size: 9px;">Balance: {{ optional($order->customer)->loyalty_points ?? 0 }}</div>
+            <div style="font-size: 10px; font-weight: bold;">{{ __('loyalty.points_earned') }}: {{ $order->points_earned }}
+            </div>
+            <div style="font-size: 9px;">{{ __('loyalty.total_balance') }}:
+                {{ optional($order->customer)->loyalty_points ?? 0 }}
+            </div>
         </div>
     @endif
 
     <div class="footer">
-        <div>Thank you for your visit!</div>
+        <div>{{ __('common.thank_you_visit') }}</div>
         @if($order->restaurant->website)
             <div>{{ $order->restaurant->website }}</div>
         @endif

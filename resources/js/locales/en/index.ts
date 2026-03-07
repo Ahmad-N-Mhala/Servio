@@ -227,6 +227,8 @@ export default {
         members: 'Members',
         rewards: 'Rewards',
         points: 'Points',
+        points_earned: 'Points Earned',
+        total_balance: 'New Balance',
         tier: 'Tier',
         total_orders: 'Total Orders',
         total_spent: 'Total Spent',
