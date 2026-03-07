@@ -425,11 +425,26 @@ class QrOrderController extends Controller
         // Use the model accessor which safely falls back to 0
         $points = (int) ($customer->current_points ?? 0);
 
-        $availableRewards = \App\Models\Reward::withoutGlobalScopes()
-            ->where('restaurant_id', $restaurant->id)
-            ->where('is_active', true)
-            ->where('points_required', '<=', $points)
+        // Fetch ALL rewards for this restaurant, then filter in PHP.
+        // Avoids MongoDB type-comparison issues (is_active stored as 0/1 vs bool,
+        // or points_required stored as string vs int).
+        $restaurantId = (string) $restaurant->id;
+        $allRewards = \App\Models\Reward::withoutGlobalScopes()
+            ->where('restaurant_id', $restaurantId)
             ->get();
+
+        $availableRewards = $allRewards->filter(function ($reward) use ($points) {
+            if (!$reward->is_active)
+                return false;
+            if ((int) $reward->points_required > $points)
+                return false;
+            // Check validity dates
+            if ($reward->valid_from && now()->lt(\Illuminate\Support\Carbon::parse($reward->valid_from)))
+                return false;
+            if ($reward->valid_until && now()->gt(\Illuminate\Support\Carbon::parse($reward->valid_until)))
+                return false;
+            return true;
+        })->values();
 
         return response()->json([
             'success' => true,
