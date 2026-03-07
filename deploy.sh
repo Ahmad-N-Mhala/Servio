@@ -17,19 +17,27 @@ git pull origin main
 
 # 4. Safely install and compile dependencies
 composer install --no-dev --optimize-autoloader
+
+# 5. Force delete stale cache AGAIN after composer (ensures no dev-only providers remain)
+rm -f /var/www/servio/bootstrap/cache/services.php
+rm -f /var/www/servio/bootstrap/cache/packages.php
+
+# 6. Re-discover packages cleanly (respects dont-discover in composer.json)
+php artisan package:discover --ansi
+
 npm install
 npm run build
 
-# 5. Clear application cache as our user
+# 7. Clear & rebuild application caches
 php artisan optimize:clear
 php artisan view:cache
 
-# 6. Hand everything securely back to the web server
+# 8. Hand everything securely back to the web server
 sudo chown -R www-data:www-data /var/www/servio
 sudo chmod -R 775 /var/www/servio/storage
 sudo chmod -R 775 /var/www/servio/bootstrap/cache
 
-# 7. Reboot PHP cache 
+# 9. Reboot PHP cache
 sudo systemctl restart php8.2-fpm
 
 echo "✅ Server successfully deployed with zero errors!"
