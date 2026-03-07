@@ -285,12 +285,12 @@
 
                             <!-- Phone + Check Loyalty — full width -->
                             <div class="flex gap-2">
-                                <input
+                                <PhoneInput
                                     v-model="customerPhone"
-                                    type="tel"
-                                    :placeholder="$t('qr_menu.phone_number')"
+                                    :country="restaurant.country || 'United Arab Emirates'"
+                                    placeholder="Phone"
+                                    class="flex-1 min-w-0"
                                     @input="resetLoyalty"
-                                    class="flex-1 min-w-0 px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                                 />
                                 <button
                                     @click="checkLoyalty"
@@ -386,7 +386,7 @@
                             </svg>
                         </div>
                     </button>
-                    <p class="text-center text-xs text-gray-400 mt-4">{{ $t('qr_menu.by_placing_this_order') }}</p>
+
                 </div>
             </div>
         </div>
@@ -502,6 +502,7 @@
 import { ref, computed } from 'vue';
 import Carousel from '@/Components/Carousel.vue';
 import Modal from '@/Components/Modal.vue';
+import PhoneInput from '@/Components/PhoneInput.vue';
 
 const props = defineProps<{
     table: {
@@ -513,6 +514,7 @@ const props = defineProps<{
         name: string;
         currency: string;
         locale: string;
+        country?: string;
     };
     categories: any[];
     stockAvailability?: Record<number, { max_quantity: number; available: boolean; is_tracked?: boolean }>;
