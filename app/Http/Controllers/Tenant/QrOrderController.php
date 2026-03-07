@@ -401,8 +401,16 @@ class QrOrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Loyalty not active']);
         }
 
+        $rawPhone = $validated['phone'];
+        // Normalize: strip all non-digit characters for matching
+        $digitsOnly = preg_replace('/\D/', '', $rawPhone);
+
         $customer = Customer::where('restaurant_id', $restaurant->id)
-            ->where('phone', $validated['phone'])
+            ->where(function ($q) use ($rawPhone, $digitsOnly) {
+                $q->where('phone', $rawPhone)
+                    ->orWhere('phone', $digitsOnly)
+                    ->orWhere('phone', '+' . $digitsOnly);
+            })
             ->with(['loyaltyPoints'])
             ->first();
 
@@ -410,7 +418,8 @@ class QrOrderController extends Controller
             return response()->json(['success' => true, 'found' => false]);
         }
 
-        $points = $customer->loyaltyPoints->balance ?? 0;
+        // Use the model accessor which safely falls back to 0
+        $points = $customer->current_points;
 
         $availableRewards = \App\Models\Reward::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
@@ -427,6 +436,7 @@ class QrOrderController extends Controller
             ],
             'rewards' => $availableRewards
         ]);
+
     }
 
     /**
