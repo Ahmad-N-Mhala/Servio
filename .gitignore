@@ -26,8 +26,8 @@ yarn-error.log
 # Development tools (not for production)
 dev-tools/
 
-# Laravel cache files
-/bootstrap/cache/packages.php
-/bootstrap/cache/services.php
-/bootstrap/cache/config.php
-/bootstrap/cache/routes.php
+# Laravel bootstrap cache — NEVER commit these.
+# They are auto-generated per environment and cause 500 errors
+# when a dev machine's cache (with dev providers like CollisionServiceProvider)
+# gets deployed to production where those packages are not installed.
+/bootstrap/cache/*.php
