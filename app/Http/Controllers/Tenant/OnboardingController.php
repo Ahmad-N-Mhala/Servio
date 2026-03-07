@@ -22,6 +22,17 @@ class OnboardingController extends Controller
     {
         $plans = Plan::where('is_active', true)->orderBy('order')->orderBy('price_monthly')->get();
 
+        $locale = app()->getLocale();
+        foreach ($plans as $plan) {
+            if ($locale === 'ar') {
+                $plan->name = $plan->name_ar ?: $plan->name;
+                $plan->description = $plan->description_ar ?: $plan->description;
+            } elseif ($locale === 'en') {
+                $plan->name = $plan->name_en ?: $plan->name;
+                $plan->description = $plan->description_en ?: $plan->description;
+            }
+        }
+
         // Get the base domain (skip 127.0.0.1, prefer localhost)
         $baseDomain = collect(config('tenancy.central_domains'))
             ->reject(fn($domain) => in_array($domain, ['127.0.0.1']))

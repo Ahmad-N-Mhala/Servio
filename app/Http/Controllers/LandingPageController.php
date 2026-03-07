@@ -26,6 +26,17 @@ class LandingPageController extends Controller
             ->orderBy('price_monthly', 'asc')
             ->get();
 
+        $locale = app()->getLocale();
+        foreach ($plans as $plan) {
+            if ($locale === 'ar') {
+                $plan->name = $plan->name_ar ?: $plan->name;
+                $plan->description = $plan->description_ar ?: $plan->description;
+            } elseif ($locale === 'en') {
+                $plan->name = $plan->name_en ?: $plan->name;
+                $plan->description = $plan->description_en ?: $plan->description;
+            }
+        }
+
         $modules = LandingModule::where('is_active', true)
             ->orderBy('sort_order', 'asc')
             ->get();
