@@ -35,7 +35,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-2xl font-bold text-gray-900">{{ currency }} {{ convertPrice(plan.price_monthly) }}</p>
-                            <p class="text-xs text-gray-400">/month</p>
+                            <p class="text-xs text-gray-400">/6 months</p>
                         </div>
                     </div>
                     
@@ -82,7 +82,7 @@
                 <div class="space-y-6">
                     <div class="bg-primary-50 rounded-xl p-6 text-center">
                         <p class="text-4xl font-extrabold text-primary">{{ currency }} {{ convertPrice(selectedPlan.price_monthly) }}</p>
-                        <p class="text-sm text-primary-600 font-medium">per month</p>
+                        <p class="text-sm text-primary-600 font-medium">per 6 months</p>
                         <div class="mt-2 text-sm text-gray-500">
                             or {{ currency }} {{ convertPrice(selectedPlan.price_yearly) }} / year
                         </div>

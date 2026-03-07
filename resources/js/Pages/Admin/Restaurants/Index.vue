@@ -80,7 +80,7 @@
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-gray-900">{{ row.subscription.plan?.name?.en || row.subscription.plan?.name || 'Unknown Plan' }}</span>
                             <span class="text-xs px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600 border border-gray-200 capitalize">
-                                {{ row.subscription.billing_cycle || 'Monthly' }}
+                                {{ row.subscription.billing_cycle === 'monthly' ? 'half year' : (row.subscription.billing_cycle || 'half year') }}
                             </span>
                         </div>
                         
@@ -378,7 +378,7 @@
                             <div class="flex justify-between items-start mb-2">
                                 <div>
                                     <h4 class="font-bold text-gray-900">{{ log.plan?.name?.en || log.plan?.name || 'Unknown Plan' }}</h4>
-                                    <span class="text-xs text-gray-500 capitalize">{{ log.billing_cycle || 'monthly' }} cycle</span>
+                                    <span class="text-xs text-gray-500 capitalize">{{ log.billing_cycle === 'monthly' ? 'half year' : (log.billing_cycle || 'half year') }} cycle</span>
                                 </div>
                                 <span 
                                     class="px-2 py-0.5 rounded text-xs font-bold capitalize"

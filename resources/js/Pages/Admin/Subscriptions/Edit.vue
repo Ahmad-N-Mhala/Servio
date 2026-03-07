@@ -108,7 +108,7 @@ const restaurantOptions = computed(() => {
 });
 
 const planOptions = computed(() => {
-    return props.plans.map(p => ({ label: `${p.name} - $${p.price_monthly}/month`, value: p.id }));
+    return props.plans.map(p => ({ label: `${p.name} - $${p.price_monthly}/6 months`, value: p.id }));
 });
 
 const statusOptions = computed(() => [

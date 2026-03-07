@@ -122,7 +122,7 @@
                                     v-model="form.billing_cycle" 
                                     label="Billing Cycle" 
                                     :options="[
-                                        { label: 'Monthly', value: 'monthly' },
+                                        { label: 'Half Year', value: 'monthly' },
                                         { label: 'Yearly (Save ~20%)', value: 'yearly' }
                                     ]" 
                                     required 
