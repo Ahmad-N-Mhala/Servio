@@ -1,43 +1,100 @@
 #!/bin/bash
 
-set -e
+# ─────────────────────────────────────────────────────────────────────────────
+# Servio Production Deploy Script — Bulletproof Edition
+# Fixes: chicken-and-egg cache issue, silent failures, permission problems
+# ─────────────────────────────────────────────────────────────────────────────
 
-echo "🚀 Starting Servio Deployment..."
+# NOTE: We deliberately do NOT use "set -e" here.
+# "set -e" caused the script to silently abort on minor failures (e.g.
+# a failing artisan command), leaving the server in a broken half-deployed
+# state. Instead, we handle critical steps manually.
 
-# 1. Take ownership temporarily so we don't get Permission Denied errors
-sudo chown -R $USER:$USER /var/www/servio
+DEPLOY_DIR="/var/www/servio"
 
-# 2. Force delete any corrupted cache files BEFORE composer runs
-rm -f /var/www/servio/bootstrap/cache/*.php
+echo ""
+echo "========================================"
+echo "  🚀 Starting Servio Deployment..."
+echo "========================================"
+echo ""
 
-# 3. Pull latest code from GitHub
-cd /var/www/servio
-git reset --hard
-git pull origin main
+# ── Step 1: Ownership ────────────────────────────────────────────────────────
+echo "➡️  [1/9] Taking ownership of files..."
+sudo chown -R $USER:$USER $DEPLOY_DIR
+echo "   ✅ Done"
 
-# 4. Safely install and compile dependencies
-composer install --no-dev --optimize-autoloader
+# ── Step 2: Kill bootstrap cache FIRST (before ANYTHING else) ────────────────
+# This MUST happen before git pull or artisan runs, so we never hit
+# the chicken-and-egg problem where artisan fails due to a stale cache.
+echo ""
+echo "➡️  [2/9] Nuking stale bootstrap cache..."
+rm -f $DEPLOY_DIR/bootstrap/cache/services.php
+rm -f $DEPLOY_DIR/bootstrap/cache/packages.php
+rm -f $DEPLOY_DIR/bootstrap/cache/config.php
+rm -f $DEPLOY_DIR/bootstrap/cache/routes-v7.php
+echo "   ✅ Cache files deleted"
 
-# 5. Force delete stale cache AGAIN after composer (ensures no dev-only providers remain)
-rm -f /var/www/servio/bootstrap/cache/services.php
-rm -f /var/www/servio/bootstrap/cache/packages.php
+# ── Step 3: Pull latest code ─────────────────────────────────────────────────
+echo ""
+echo "➡️  [3/9] Pulling latest code from GitHub..."
+cd $DEPLOY_DIR
 
-# 6. Re-discover packages cleanly (respects dont-discover in composer.json)
+git reset --hard HEAD
+if ! git pull origin main; then
+    echo "   ❌ FATAL: git pull failed. Aborting deployment."
+    exit 1
+fi
+echo "   ✅ Code updated"
+
+# ── Step 4: Install PHP dependencies (no dev packages) ───────────────────────
+echo ""
+echo "➡️  [4/9] Installing PHP dependencies (no-dev)..."
+if ! composer install --no-dev --optimize-autoloader; then
+    echo "   ❌ FATAL: composer install failed. Aborting deployment."
+    exit 1
+fi
+echo "   ✅ PHP dependencies installed"
+
+# ── Step 5: Force nuke cache AGAIN (composer may have regenerated with stale data)
+echo ""
+echo "➡️  [5/9] Re-nuking bootstrap cache after composer..."
+rm -f $DEPLOY_DIR/bootstrap/cache/services.php
+rm -f $DEPLOY_DIR/bootstrap/cache/packages.php
+echo "   ✅ Cache cleared again"
+
+# ── Step 6: Re-discover packages cleanly ──────────────────────────────────────
+# This respects the "dont-discover" list in composer.json, ensuring dev-only
+# packages like nunomaduro/collision are NEVER registered in production.
+echo ""
+echo "➡️  [6/9] Discovering packages (respecting dont-discover list)..."
 php artisan package:discover --ansi
+echo "   ✅ Packages discovered"
 
+# ── Step 7: Build frontend assets ─────────────────────────────────────────────
+echo ""
+echo "➡️  [7/9] Building frontend assets..."
 npm install
 npm run build
+echo "   ✅ Frontend built"
 
-# 7. Clear & rebuild application caches
+# ── Step 8: Laravel cache rebuild ─────────────────────────────────────────────
+echo ""
+echo "➡️  [8/9] Rebuilding Laravel caches..."
 php artisan optimize:clear
 php artisan view:cache
+echo "   ✅ Caches rebuilt"
 
-# 8. Hand everything securely back to the web server
-sudo chown -R www-data:www-data /var/www/servio
-sudo chmod -R 775 /var/www/servio/storage
-sudo chmod -R 775 /var/www/servio/bootstrap/cache
-
-# 9. Reboot PHP cache
+# ── Step 9: Restore web server ownership and restart PHP ──────────────────────
+echo ""
+echo "➡️  [9/9] Restoring permissions and restarting PHP..."
+sudo chown -R www-data:www-data $DEPLOY_DIR
+sudo chmod -R 775 $DEPLOY_DIR/storage
+sudo chmod -R 775 $DEPLOY_DIR/bootstrap/cache
 sudo systemctl restart php8.2-fpm
+echo "   ✅ Permissions restored, PHP restarted"
 
-echo "✅ Server successfully deployed with zero errors!"
+echo ""
+echo "========================================"
+echo "  ✅ Deployment complete!"
+echo "========================================"
+echo ""
