@@ -180,6 +180,7 @@ class OrderController extends Controller
 
         $columns = [
             __('reports.order_number'),
+            'External Order ID',
             __('reports.customer_name'),
             __('reports.phone'),
             __('common.table'),
@@ -205,6 +206,7 @@ class OrderController extends Controller
 
                 $row = [
                     $order->order_number,
+                    $order->delivery_order_id ?? '-',
                     $order->customer_name,
                     $order->customer_phone,
                     $order->table->name ?? '-',

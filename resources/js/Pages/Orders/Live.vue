@@ -283,6 +283,7 @@ const params = ref({
 
 const columns = computed(() => [
     { key: 'order_number', label: t('orders.order_number'), sortable: true },
+    { key: 'delivery_order_id', label: 'External Order ID' },
     { key: 'customer_name', label: t('orders.customer'), sortable: true },
     { key: 'table', label: t('common.table') || 'Table' },
     { key: 'waiter', label: t('orders.waiter') || 'Waiter' },
