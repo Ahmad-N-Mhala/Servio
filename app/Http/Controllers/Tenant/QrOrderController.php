@@ -405,7 +405,11 @@ class QrOrderController extends Controller
         // Normalize: strip all non-digit characters for matching
         $digitsOnly = preg_replace('/\D/', '', $rawPhone);
 
-        $customer = Customer::where('restaurant_id', $restaurant->id)
+        // withoutGlobalScopes() — QR is a public route with no session/auth,
+        // so RestaurantScope would add no filter OR the wrong filter.
+        // We handle restaurant scoping explicitly via restaurant_id.
+        $customer = Customer::withoutGlobalScopes()
+            ->where('restaurant_id', $restaurant->id)
             ->where(function ($q) use ($rawPhone, $digitsOnly) {
                 $q->where('phone', $rawPhone)
                     ->orWhere('phone', $digitsOnly)
@@ -419,9 +423,10 @@ class QrOrderController extends Controller
         }
 
         // Use the model accessor which safely falls back to 0
-        $points = $customer->current_points;
+        $points = (int) ($customer->current_points ?? 0);
 
-        $availableRewards = \App\Models\Reward::where('restaurant_id', $restaurant->id)
+        $availableRewards = \App\Models\Reward::withoutGlobalScopes()
+            ->where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
             ->where('points_required', '<=', $points)
             ->get();
