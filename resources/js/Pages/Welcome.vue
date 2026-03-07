@@ -1164,50 +1164,22 @@ const getLocaleText = (obj: any) => {
 
 const getPlanName = (plan: any) => {
     if (!plan) return '';
-    
-    // Native database translation - guarantees instant updates without OPCache issues!
-    if (locale.value === 'ar' && plan.name_ar) return plan.name_ar;
-    if (locale.value === 'en' && plan.name_en) return plan.name_en;
-    
-    // Legacy fallback for older plans
-    if (plan.slug) {
-        const key = `plans.${plan.slug}_name`;
-        const translated = t(key);
-        if (translated && translated !== key) return translated;
-    }
-    const transName = t(plan.name);
-    let finalStr = transName !== plan.name && transName !== `plans.${plan.name}` ? transName : plan.name;
-    
-    // Safety cleaner: NEVER show raw keys like "plans.44_name" to public eyes
-    if (finalStr && finalStr.startsWith('plans.') && finalStr.endsWith('_name')) {
-        finalStr = finalStr.replace('plans.', '').replace('_name', '').replace(/_/g, ' ');
-        finalStr = finalStr.charAt(0).toUpperCase() + finalStr.slice(1); // Capitalize
-    }
-    return finalStr;
+
+    // The backend (LandingPageController) already resolves the correct
+    // locale-specific name into plan.name before sending to the frontend.
+    // So ALWAYS trust plan.name first — it is already Arabic or English as needed.
+    if (plan.name) return plan.name;
+
+    return '';
 };
 
 const getPlanDescription = (plan: any) => {
     if (!plan) return '';
-    
-    // Native database translation
-    if (locale.value === 'ar' && plan.description_ar) return plan.description_ar;
-    if (locale.value === 'en' && plan.description_en) return plan.description_en;
-    
-    // Legacy fallback
-    const desc = plan.description || '';
-    if (plan.slug) {
-        const key = `plans.${plan.slug}_desc`;
-        const translated = t(key);
-        if (translated && translated !== key) return translated;
-    }
-    const transDesc = t(desc);
-    let finalDesc = transDesc !== desc && transDesc !== `plans.${desc}` ? transDesc : desc;
-    
-    // Safety cleaner for desc
-    if (finalDesc && finalDesc.startsWith('plans.') && finalDesc.endsWith('_desc')) {
-        finalDesc = ''; // Hide raw desc keys completely
-    }
-    return finalDesc;
+
+    // The backend (LandingPageController) already resolves the correct
+    // locale-specific description into plan.description before sending to the frontend.
+    // So ALWAYS trust plan.description — it is already Arabic or English as needed.
+    return plan.description || '';
 };
 
 const formatPrice = (price: number | string) => {
