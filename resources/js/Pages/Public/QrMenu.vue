@@ -572,9 +572,9 @@ const calculateDiscount = () => {
     const sType = selectedReward.value.reward_type;
     const sVal = Number(selectedReward.value.discount_value) || 0;
     
-    if (sType === 'percentage') {
+    if (sType === 'discount_percentage') {
         return subtotal.value * (sVal / 100);
-    } else if (sType === 'fixed') {
+    } else if (sType === 'discount_fixed') {
         return Math.min(subtotal.value, sVal); 
     }
     return 0; // cashback doesn't alter subtotal on checkout directly

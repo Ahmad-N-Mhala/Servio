@@ -279,9 +279,9 @@ class QrOrderController extends Controller
 
             $redemptionRecord = $this->loyaltyService->redeemReward($customerObj, (string) $validated['reward_id']);
 
-            if ($reward->reward_type === 'percentage') {
+            if ($reward->reward_type === 'discount_percentage') {
                 $discountAmount = $subtotal * ($reward->discount_value / 100);
-            } elseif ($reward->reward_type === 'fixed') {
+            } elseif ($reward->reward_type === 'discount_fixed') {
                 $discountAmount = (float) $reward->discount_value;
             }
             $discountAmount = min($discountAmount, $subtotal);
