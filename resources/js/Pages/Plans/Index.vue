@@ -43,14 +43,14 @@
                 <!-- Billing Cycle Toggle -->
                 <div class="flex justify-center mb-12">
                     <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200 inline-flex">
-                        <button
-                            type="button"
-                            @click="billingCycle = 'monthly'"
-                            class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-200"
-                            :class="billingCycle === 'monthly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
-                        >
-                            {{ $t('landing.monthly') || 'Monthly' }}
-                        </button>
+                            <button
+                                type="button"
+                                @click="billingCycle = 'monthly'"
+                                class="px-8 py-3 text-sm font-bold rounded-xl transition-all duration-200"
+                                :class="billingCycle === 'monthly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
+                            >
+                                {{ $t('landing.monthly') || 'Half Year' }}
+                            </button>
                         <button
                             type="button"
                             @click="billingCycle = 'yearly'"
@@ -100,7 +100,7 @@
                                     <span class="text-4xl font-bold text-gray-900">
                                         {{ currency }}{{ convertPrice(billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly) }}
                                     </span>
-                                    <span class="text-gray-600">/{{ billingCycle === 'monthly' ? ($t('landing.month') || 'month') : ($t('landing.year') || 'year') }}</span>
+                                    <span class="text-gray-600">/{{ billingCycle === 'monthly' ? ($t('landing.per_month')?.replace('/', '') || '6 months') : ($t('landing.year') || 'year') }}</span>
                                 </div>
                             </div>
 
