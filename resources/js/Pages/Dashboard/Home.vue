@@ -455,7 +455,7 @@ const debounce = (fn: Function, wait: number) => {
     };
 };
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 Chart.register(...registerables);
 
 const page = usePage();
@@ -978,6 +978,7 @@ const fetchDetails = async (type: string, params: any = {}) => {
         const response = await axios.get(route('dashboard.details'), {
             params: {
                 type,
+                locale: locale.value,
                 start_date: dateRange.value.start_date,
                 end_date: dateRange.value.end_date,
                 ...params

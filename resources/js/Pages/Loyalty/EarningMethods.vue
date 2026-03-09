@@ -1,140 +1,249 @@
 <template>
     <MainLayout>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Header & Search -->
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('nav.earning_methods') || 'Earning Methods' }}</h1>
-                    <p class="mt-1 text-sm text-gray-500">{{ $t('loyalty.earning_description') || 'Configure how customers earn loyalty points' }}</p>
-                </div>
-                <div class="flex gap-4 w-full sm:w-auto">
-                    <div class="relative flex-1 sm:flex-none">
-                        <input 
-                            v-model="params.search"
-                            type="text" 
-                            :placeholder="$t('common.search')" 
-                            class="w-full sm:w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
-                        >
-                        <div class="absolute left-3 top-2.5 text-gray-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                    <Button v-if="methodsList.length === 0" @click="openModal()" variant="primary" class="whitespace-nowrap">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10" :dir="isRtl ? 'rtl' : 'ltr'">
+
+            <!-- Page Header -->
+            <div class="mb-10">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {{ $t('common.add') }} {{ $t('common.method') || 'Method' }}
-                    </Button>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black text-gray-900 tracking-tight">{{ $t('nav.earning_methods') }}</h1>
+                        <p class="text-sm text-gray-500 mt-0.5">{{ $t('loyalty.earning_description') }}</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Empty State -->
-            <div v-if="methodsList.length === 0" class="glass-card rounded-2xl overflow-hidden text-center py-16 px-6">
-                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                     </svg>
-                 </div>
-                 <h3 class="text-lg font-medium text-gray-900">{{ $t('charts.no_data') }}</h3>
-                 <p class="text-gray-500 mt-1">{{ $t('loyalty.no_methods_configured') || 'Add a method to start rewarding your customers.' }}</p>
-            </div>
+            <!-- ── EXISTING METHOD ── -->
+            <template v-if="method">
 
-            <!-- Methods Grid -->
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div 
-                    v-for="method in methodsList" 
-                    :key="method.id"
-                    class="glass-card p-6 rounded-2xl border border-gray-100 hover:border-primary/30 transition-all group relative overflow-hidden"
-                >
-                    <!-- Hover Actions -->
-                    <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
-                        <button @click="openModal(method)" class="text-purple-500 hover:text-purple-700 bg-white/90 p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Design Preview">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                            </svg>
-                        </button>
-                        <button @click="openModal(method)" class="text-blue-500 hover:text-blue-700 bg-white/90 p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Edit Configuration">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-                        <button @click="deleteMethod(method)" class="text-red-500 hover:text-red-700 bg-white/90 p-1.5 rounded-full shadow-sm backdrop-blur-sm transition-colors" title="Delete Method">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-purple-100 transition-transform group-hover:scale-110 duration-300">
-                             <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="getTypeIcon(method.type)" />
-                             </svg>
-                        </div>
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full border" :class="method.is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100'">
-                             {{ method.is_active ? $t('common.active') : $t('common.inactive') }}
+                <!-- Status + Actions Bar -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border"
+                              :class="method.is_active
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-gray-100 text-gray-500 border-gray-200'">
+                            <span class="w-1.5 h-1.5 rounded-full"
+                                  :class="method.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'"></span>
+                            {{ method.is_active ? $t('common.active') : $t('common.inactive') }}
                         </span>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">{{ getLocaleName(method.name) }}</h3>
-                    <p class="text-sm text-gray-500 line-clamp-2 mb-6 h-10">{{ method.description || $t('common.no_description') }}</p>
-
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-100 bg-gray-50/50 -mx-6 -mb-6 px-6 py-4">
-                        <span class="text-sm font-medium text-gray-600 flex items-center gap-2">
+                        <span class="text-xs font-semibold uppercase tracking-widest text-gray-400 px-3 py-1.5 bg-gray-100 rounded-full border border-gray-200">
                             {{ getTypeLabel(method.type) }}
                         </span>
-                        <div class="flex flex-col items-end">
-                            <span class="text-lg font-bold text-gray-900 leading-none">
-                                {{ method.points }} {{ $t('loyalty.points') }}
-                            </span>
-                            <span v-if="method.type === 'order_total'" class="text-[10px] text-gray-500 uppercase font-medium tracking-wide">
-                                {{ $t('loyalty.per') || 'per' }} {{ method.currency_amount || 1 }} {{ currency }}
-                            </span>
-                             <span v-else class="text-[10px] text-gray-500 uppercase font-medium tracking-wide">
-                                {{ $t('loyalty.per_visit') || 'per Visit' }}
-                            </span>
-                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button
+                            @click="openModal(method)"
+                            class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-all border border-primary/20 hover:border-primary/40"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            {{ $t('common.edit') }}
+                        </button>
+                        <button
+                            @click="deleteMethod(method)"
+                            class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-all border border-red-100 hover:border-red-200"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            {{ $t('common.delete') }}
+                        </button>
                     </div>
                 </div>
-            </div>
+
+                <!-- Main Config Card -->
+                <div class="glass-card rounded-3xl overflow-hidden shadow-xl border border-white/60">
+
+                    <!-- Hero Banner -->
+                    <div class="relative bg-gradient-to-br from-primary via-primary/90 to-purple-600 px-8 pt-8 pb-20 overflow-hidden">
+                        <!-- Background decoration -->
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+                        
+                        <div class="relative z-10 flex items-start gap-6">
+                            <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
+                                <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="getTypeIcon(method.type)" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-black text-white tracking-tight">{{ getLocaleName(method.name) }}</h2>
+                                <p class="text-white/70 mt-1 text-sm leading-relaxed max-w-lg">
+                                    {{ method.description || $t('common.no_description') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Strip (overlapping the banner) -->
+                    <div class="relative -mt-12 mx-8 mb-0">
+                        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 grid grid-cols-3 divide-x divide-gray-100">
+                            <!-- Points -->
+                            <div class="px-6 py-5 text-center">
+                                <p class="text-3xl font-black text-gray-900">{{ method.points }}</p>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{{ $t('loyalty.points') }}</p>
+                            </div>
+                            <!-- Per Amount / Per Visit -->
+                            <div class="px-6 py-5 text-center">
+                                <p class="text-3xl font-black text-gray-900" v-if="method.type === 'order_total'">
+                                    {{ method.currency_amount || 1 }} <span class="text-sm font-bold text-gray-400">{{ currency }}</span>
+                                </p>
+                                <p class="text-3xl font-black text-gray-900" v-else>1</p>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                    {{ method.type === 'order_total' ? $t('loyalty.order_amount') : $t('loyalty.per_visit') }}
+                                </p>
+                            </div>
+                            <!-- Min Spend -->
+                            <div class="px-6 py-5 text-center">
+                                <p class="text-3xl font-black" :class="method.min_spent ? 'text-gray-900' : 'text-gray-300'">
+                                    {{ method.min_spent ? method.min_spent : '—' }}
+                                    <span v-if="method.min_spent" class="text-sm font-bold text-gray-400">{{ currency }}</span>
+                                </p>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Min. Spend</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="px-8 pt-6 pb-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                            <!-- Earning Rule -->
+                            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-100">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{{ $t('loyalty.reward_type') }}</p>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getTypeIcon(method.type)" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-gray-900">{{ getTypeLabel(method.type) }}</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">
+                                            <template v-if="method.type === 'order_total'">
+                                                {{ method.points }} {{ $t('loyalty.points') }} {{ $t('loyalty.per') }} {{ method.currency_amount || 1 }} {{ currency }} {{ $t('loyalty.order_amount') }}
+                                            </template>
+                                            <template v-else>
+                                                {{ method.points }} {{ $t('loyalty.points') }} {{ $t('loyalty.per_visit') }}
+                                            </template>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Max Points Cap -->
+                            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-100">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Max Points Cap</p>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                                         :class="method.max_points ? 'bg-amber-50' : 'bg-gray-100'">
+                                        <svg class="w-5 h-5" :class="method.max_points ? 'text-amber-500' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-gray-900">
+                                            {{ method.max_points ? method.max_points + ' pts' : 'No cap' }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-0.5">
+                                            {{ method.max_points ? 'Maximum points per transaction' : 'Unlimited earning per transaction' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Edit CTA -->
+                        <button
+                            @click="openModal(method)"
+                            class="mt-6 w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-sm tracking-wide shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            {{ $t('loyalty.edit_reward') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Notice -->
+                <div class="mt-4 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-700">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm font-medium">
+                        Only one earning method is supported per restaurant. Edit the existing configuration to adjust how customers earn points.
+                    </p>
+                </div>
+
+            </template>
+
+            <!-- ── EMPTY STATE ── -->
+            <template v-else>
+                <div class="glass-card rounded-3xl p-16 flex flex-col items-center text-center border border-dashed border-gray-200 shadow-inner">
+                    <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-purple-100 flex items-center justify-center mb-6 shadow-lg">
+                        <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900 mb-2">Set Up Your Earning Method</h3>
+                    <p class="text-gray-500 text-sm max-w-sm mb-8 leading-relaxed">
+                        {{ $t('loyalty.no_methods_configured') }}
+                    </p>
+                    <button
+                        @click="openModal(null)"
+                        class="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-sm tracking-wide shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        {{ $t('common.add') }} {{ $t('common.method') }}
+                    </button>
+                </div>
+            </template>
+
         </div>
 
-        <!-- Add/Edit Modal (Fullscreen/Large for Designer) -->
-        <Modal :show="showModal" @close="closeModal" :title="editingMethod ? ($t('loyalty.edit_earning_method_design') || 'Edit Earning Method & Design') : ($t('loyalty.add_earning_method_design') || 'Add Earning Method & Design')" size="7xl">
-             <!-- Use key to force re-render when editingMethod changes -->
-             <div class="p-1">
-                 <CardDesigner 
+        <!-- Add/Edit Modal -->
+        <Modal
+            :show="showModal"
+            @close="closeModal"
+            :title="editingMethod
+                ? ($t('loyalty.edit_reward') || 'Edit Earning Method')
+                : ($t('common.add') + ' ' + $t('common.method'))"
+            size="7xl"
+        >
+            <div class="p-1">
+                <CardDesigner
                     :key="editingMethod?.id || 'new'"
                     :settings="settings"
                     :earning-method="editingMethod || undefined"
                     @success="closeModal"
-                 />
-             </div>
+                />
+            </div>
         </Modal>
     </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-// @ts-ignore
-import debounce from 'lodash/debounce';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
-import Button from '@/Components/Button.vue';
 import CardDesigner from './CardDesigner.vue';
 
 const props = withDefaults(defineProps<{
     methods: any;
     settings?: any;
-    filters?: {
-        search?: string;
-        sort_field?: string;
-        sort_direction?: string;
-    };
+    filters?: any;
 }>(), {
     methods: () => ({ data: [] }),
     settings: () => ({}),
@@ -145,36 +254,21 @@ const { locale, t } = useI18n();
 const route = (window as any).route;
 const page = usePage();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+const isRtl = computed(() => (page.props.isRtl as boolean));
+
+// Single method — always the first (and only) entry
+const method = computed(() => props.methods?.data?.[0] ?? null);
 
 const showModal = ref(false);
 const editingMethod = ref<any>(null);
 
-const params = ref({
-    search: props.filters?.search || '',
-    sort_field: props.filters?.sort_field || 'created_at',
-    sort_direction: props.filters?.sort_direction || 'desc'
-});
-
-watch(
-    () => params.value.search,
-    debounce((value: string) => {
-        // @ts-ignore
-        router.get(route('loyalty.earning-methods.index'), { ...params.value, search: value }, {
-            preserveState: true,
-            replace: true
-        });
-    }, 300)
-);
-
-const methodsList = computed(() => props.methods.data || []);
-
 const getLocaleName = (name: any) => {
     if (typeof name === 'string') {
-        if (name === 'Points per Spend') return t('loyalty.points_per_spend');
-        if (name === 'Points per Visit') return t('loyalty.points_per_visit');
+        if (name === 'Points per Spend') return t('loyalty.points_per_spend') || name;
+        if (name === 'Points per Visit') return t('loyalty.points_per_visit') || name;
         return name;
     }
-    if (!name) return t('common.unknown') || 'Unknown';
+    if (!name) return '';
     return name[locale.value] || Object.values(name)[0] || '';
 };
 
@@ -191,26 +285,25 @@ const getTypeIcon = (type: string) => {
         order_total: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         visit: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z'
     };
-    return icons[type] || '';
+    return icons[type] || icons['order_total'];
 };
 
-const openModal = (method: any = null) => {
-    editingMethod.value = method;
+const openModal = (m: any = null) => {
+    editingMethod.value = m;
     showModal.value = true;
 };
 
 const closeModal = () => {
     showModal.value = false;
     editingMethod.value = null;
-    // Optional: Refresh data to reflect changes
     router.reload({ only: ['methods', 'settings'] });
 };
 
-const form = useForm({}); // Placeholder for delete
+const form = useForm({});
 
-const deleteMethod = (method: any) => {
-    if (confirm(t('common.confirm'))) {
-        form.delete(route('loyalty.earning-methods.destroy', method.id));
+const deleteMethod = (m: any) => {
+    if (confirm(t('common.confirm_delete'))) {
+        form.delete(route('loyalty.earning-methods.destroy', m.id));
     }
 };
 </script>

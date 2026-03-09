@@ -504,8 +504,18 @@ class DashboardController extends Controller
             return response()->stream($callback, 200, $headers);
         }
 
+        // Force English locale for PDF generation — DomPDF's built-in fonts do not
+        // support Arabic/RTL characters and will render them as "?????" otherwise.
+        $previousLocale = app()->getLocale();
+        app()->setLocale('en');
+
         $pdf = Pdf::loadView('exports.dashboard', $data);
-        return $pdf->stream('dashboard-report-' . now()->format('Y-m-d') . '.pdf');
+        $pdfStream = $pdf->stream('dashboard-report-' . now()->format('Y-m-d') . '.pdf');
+
+        // Restore the original locale
+        app()->setLocale($previousLocale);
+
+        return $pdfStream;
     }
 
     public function index(Request $request): Response
@@ -1118,6 +1128,11 @@ class DashboardController extends Controller
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
 
+        // Honour the locale sent by the frontend so __() returns the correct language
+        if ($locale = $request->input('locale')) {
+            app()->setLocale($locale);
+        }
+
         if (is_string($startDate))
             $startDate = Carbon::parse($startDate)->startOfDay();
         if (is_string($endDate))
@@ -1130,7 +1145,7 @@ class DashboardController extends Controller
         switch ($type) {
             case 'total_orders':
             case 'today_orders':
-                $title = 'Orders';
+                $title = __('dashboard.modal_orders');
                 $query = Order::with('customer')
                     ->where('restaurant_id', $restaurant->id)
                     ->where('status', '!=', 'deleted');
@@ -1142,11 +1157,11 @@ class DashboardController extends Controller
                 }
 
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'customer_name', 'label' => 'Customer'],
-                    ['key' => 'total', 'label' => 'Total', 'format' => 'currency'],
-                    ['key' => 'status', 'label' => 'Status', 'format' => 'status'],
-                    ['key' => 'created_at', 'label' => 'Date', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'customer_name', 'label' => __('dashboard.col_customer')],
+                    ['key' => 'total', 'label' => __('dashboard.col_total'), 'format' => 'currency'],
+                    ['key' => 'status', 'label' => __('dashboard.col_status'), 'format' => 'status'],
+                    ['key' => 'created_at', 'label' => __('dashboard.col_date'), 'format' => 'datetime'],
                 ];
 
                 $data = $query->orderByDesc('created_at')->limit(50)->get()->map(function ($order) {
@@ -1162,13 +1177,13 @@ class DashboardController extends Controller
 
             case 'selection_sales':
             case 'revenue':
-                $title = 'Revenue Details';
+                $title = __('dashboard.modal_revenue_details');
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'customer_name', 'label' => 'Customer'],
-                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
-                    ['key' => 'payment_method', 'label' => 'Payment Method'],
-                    ['key' => 'created_at', 'label' => 'Date', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'customer_name', 'label' => __('dashboard.col_customer')],
+                    ['key' => 'total', 'label' => __('dashboard.col_amount'), 'format' => 'currency'],
+                    ['key' => 'payment_method', 'label' => __('dashboard.col_payment_method')],
+                    ['key' => 'created_at', 'label' => __('dashboard.col_date'), 'format' => 'datetime'],
                 ];
 
                 $data = Order::where('restaurant_id', $restaurant->id)
@@ -1182,7 +1197,7 @@ class DashboardController extends Controller
                     ->map(function ($order) {
                         return [
                             'order_number' => $order->order_number,
-                            'customer_name' => $order->customer_name ?: 'Guest',
+                            'customer_name' => $order->customer_name ?: __('reports.guest'),
                             'total' => $order->total,
                             'payment_method' => ucwords($order->payment_method ?? 'Cash'),
                             'created_at' => $order->created_at->toIso8601String(),
@@ -1191,12 +1206,12 @@ class DashboardController extends Controller
                 break;
 
             case 'new_customers':
-                $title = 'New Customers';
+                $title = __('dashboard.modal_new_customers');
                 $columns = [
-                    ['key' => 'name', 'label' => 'Name'],
-                    ['key' => 'phone', 'label' => 'Phone'],
-                    ['key' => 'email', 'label' => 'Email'],
-                    ['key' => 'joined_at', 'label' => 'Joined Date', 'format' => 'datetime'],
+                    ['key' => 'name', 'label' => __('dashboard.col_name')],
+                    ['key' => 'phone', 'label' => __('dashboard.col_phone')],
+                    ['key' => 'email', 'label' => __('dashboard.col_email')],
+                    ['key' => 'joined_at', 'label' => __('dashboard.col_joined_date'), 'format' => 'datetime'],
                 ];
 
                 $data = \App\Models\Customer::where('restaurant_id', $restaurant->id)
@@ -1212,12 +1227,12 @@ class DashboardController extends Controller
                 break;
 
             case 'repeat_customers':
-                $title = 'Repeat Customers';
+                $title = __('dashboard.modal_repeat_customers');
                 $columns = [
-                    ['key' => 'name', 'label' => 'Name'],
-                    ['key' => 'phone', 'label' => 'Phone'],
-                    ['key' => 'visit_count', 'label' => 'Visits'],
-                    ['key' => 'total_spent', 'label' => 'Total Spent', 'format' => 'currency'],
+                    ['key' => 'name', 'label' => __('dashboard.col_name')],
+                    ['key' => 'phone', 'label' => __('dashboard.col_phone')],
+                    ['key' => 'visit_count', 'label' => __('dashboard.col_visits')],
+                    ['key' => 'total_spent', 'label' => __('dashboard.col_total_spent'), 'format' => 'currency'],
                 ];
 
                 // Customers who had their first visit BEFORE start date but visited AGAIN in this period
@@ -1250,13 +1265,13 @@ class DashboardController extends Controller
                 break;
 
             case 'rewards_redeemed':
-                $title = 'Rewards Redeemed';
+                $title = __('dashboard.modal_rewards_redeemed');
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'customer_name', 'label' => 'Customer'],
-                    ['key' => 'reward_name', 'label' => 'Reward'],
-                    ['key' => 'points_cost', 'label' => 'Points'],
-                    ['key' => 'redeemed_at', 'label' => 'Date', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'customer_name', 'label' => __('dashboard.col_customer')],
+                    ['key' => 'reward_name', 'label' => __('dashboard.col_reward')],
+                    ['key' => 'points_cost', 'label' => __('dashboard.col_points')],
+                    ['key' => 'redeemed_at', 'label' => __('dashboard.col_redeemed_at'), 'format' => 'datetime'],
                 ];
 
                 $data = \App\Models\RewardRedemption::with(['customer', 'reward', 'order'])
@@ -1265,8 +1280,8 @@ class DashboardController extends Controller
                     ->orderByDesc('created_at')
                     ->get()
                     ->map(function ($redemption) {
-                        $customerName = $redemption->customer ? $redemption->customer->name : 'Guest';
-                        $rewardName = $redemption->reward ? ($redemption->reward->name ?? 'Unknown Reward') : 'Unknown Reward';
+                        $customerName = $redemption->customer ? $redemption->customer->name : __('reports.guest');
+                        $rewardName = $redemption->reward ? ($redemption->reward->name ?? __('reports.unknown')) : __('reports.unknown');
 
                         return [
                             'order_number' => $redemption->order ? $redemption->order->order_number : '-',
@@ -1280,14 +1295,14 @@ class DashboardController extends Controller
 
             case 'status_slice':
                 $status = $request->input('status');
-                $title = "Orders: " . ucfirst($status);
+                $title = __('dashboard.modal_orders_status', ['status' => ucfirst($status)]);
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'customer_name', 'label' => 'Customer'],
-                    ['key' => 'total', 'label' => 'Total', 'format' => 'currency'],
-                    ['key' => 'status', 'label' => 'Status', 'format' => 'status'],
-                    ['key' => 'payment_status', 'label' => 'Payment'],
-                    ['key' => 'created_at', 'label' => 'Date', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'customer_name', 'label' => __('dashboard.col_customer')],
+                    ['key' => 'total', 'label' => __('dashboard.col_total'), 'format' => 'currency'],
+                    ['key' => 'status', 'label' => __('dashboard.col_status'), 'format' => 'status'],
+                    ['key' => 'payment_status', 'label' => __('dashboard.col_payment')],
+                    ['key' => 'created_at', 'label' => __('dashboard.col_date'), 'format' => 'datetime'],
                 ];
 
                 $data = Order::where('restaurant_id', $restaurant->id)
@@ -1299,7 +1314,7 @@ class DashboardController extends Controller
                     ->map(function ($order) {
                         return [
                             'order_number' => $order->order_number,
-                            'customer_name' => $order->customer_name ?: 'Guest',
+                            'customer_name' => $order->customer_name ?: __('reports.guest'),
                             'total' => $order->total,
                             'status' => $order->status,
                             'payment_status' => ucfirst($order->payment_status ?: 'unpaid'),
@@ -1310,12 +1325,12 @@ class DashboardController extends Controller
 
             case 'revenue_chart_point':
                 $date = $request->input('date');
-                $title = "Revenue for " . $date;
+                $title = __('dashboard.modal_revenue_date', ['date' => $date]);
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'customer_name', 'label' => 'Customer'],
-                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
-                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'customer_name', 'label' => __('dashboard.col_customer')],
+                    ['key' => 'total', 'label' => __('dashboard.col_amount'), 'format' => 'currency'],
+                    ['key' => 'created_at', 'label' => __('dashboard.col_time'), 'format' => 'datetime'],
                 ];
 
                 $startDatePoint = Carbon::parse($date)->startOfDay();
@@ -1331,7 +1346,7 @@ class DashboardController extends Controller
                     ->map(function ($order) {
                         return [
                             'order_number' => $order->order_number,
-                            'customer_name' => $order->customer_name ?: 'Guest',
+                            'customer_name' => $order->customer_name ?: __('reports.guest'),
                             'total' => $order->total,
                             'created_at' => $order->created_at->toIso8601String(),
                         ];
@@ -1416,24 +1431,13 @@ class DashboardController extends Controller
 
             case 'payment_method_slice':
                 $method = $request->input('method');
-                // Reverse map the display method back to key if needed, or send key from frontend
-                // Assuming frontend sends the key (e.g. 'cash', 'card', 'online')
-                // But wait, the chart uses the grouped names.
-                // Let's assume we pass the raw db value from frontend if possible, or fuzzy match.
-                // Actually the chart `initPaymentChart` uses `paymentDistribution` values which have `method` property which is `ucwords(...)`.
-                // Better to make sure we query somewhat loosely or update frontend to send raw key.
-                // For now, let's try to match case-insensitive or expect mapped value.
-                // Ideally, we'd store raw key in chart data and use it.
-                // Let's assume frontend sends something we can query.
-
-                // If the frontend sends "Cash", we search for "cash" etc.
                 $searchMethod = strtolower(str_replace(' ', '_', $method));
 
-                $title = "Orders Paid via " . ucfirst($method);
+                $title = __('dashboard.modal_orders_paid_via', ['method' => ucfirst($method)]);
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
-                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'total', 'label' => __('dashboard.col_amount'), 'format' => 'currency'],
+                    ['key' => 'created_at', 'label' => __('dashboard.col_time'), 'format' => 'datetime'],
                 ];
 
                 $data = Order::where('restaurant_id', $restaurant->id)
@@ -1456,30 +1460,18 @@ class DashboardController extends Controller
 
             case 'peak_hour_slice':
                 $hour = (int) $request->input('hour');
-                $title = "Orders at " . sprintf('%02d:00', $hour);
+                $title = __('dashboard.modal_orders_at_hour', ['hour' => sprintf('%02d:00', $hour)]);
                 $columns = [
-                    ['key' => 'order_number', 'label' => 'Order #'],
-                    ['key' => 'total', 'label' => 'Amount', 'format' => 'currency'],
-                    ['key' => 'created_at', 'label' => 'Time', 'format' => 'datetime'],
+                    ['key' => 'order_number', 'label' => __('dashboard.col_order_number')],
+                    ['key' => 'total', 'label' => __('dashboard.col_amount'), 'format' => 'currency'],
+                    ['key' => 'created_at', 'label' => __('dashboard.col_time'), 'format' => 'datetime'],
                 ];
-
-                // Filter by hour. MongoDB aggregation or simple collection filter?
-                // Order::whereRaw check? MongoDB extraction in where is tricky in Eloquent without raw.
-                // Let's fetch ranges or use whereTime if supported (whereTime usually for time component).
-                // Or filter in memory since we have date range.
-                // Ideally:
-                // $query->where(function($q) use ($hour) { ... })
-                // actually whereTime works for specific time comparisons, not "hour part of any day".
-
-                // For MongoDB, we can use whereRaw with Mongo query syntax if needed, or just iterate.
-                // Given pagination limits, iterating might be slow if tons of orders.
-                // But for now, let's try a collection filter on the fetched range (which is limited by date).
 
                 $data = Order::where('restaurant_id', $restaurant->id)
                     ->where('status', '!=', 'deleted')
                     ->where('status', '!=', 'cancelled')
                     ->whereBetween('created_at', [$startDate, $endDate])
-                    ->get() // Pull into memory (careful with memory)
+                    ->get()
                     ->filter(function ($order) use ($hour) {
                         return $order->created_at->hour === $hour;
                     })
@@ -1492,18 +1484,18 @@ class DashboardController extends Controller
                             'created_at' => $order->created_at->toIso8601String(),
                         ];
                     })
-                    ->values(); // reset keys
+                    ->values();
                 break;
 
             case 'waste_chart_point':
                 $date = $request->input('date');
-                $title = "Waste for " . $date;
+                $title = __('dashboard.modal_waste_date', ['date' => $date]);
                 $columns = [
-                    ['key' => 'item_name', 'label' => 'Item'], // Ingredient or Menu Item
-                    ['key' => 'quantity', 'label' => 'Qty'],
-                    ['key' => 'loss', 'label' => 'Loss', 'format' => 'currency'],
-                    ['key' => 'reason', 'label' => 'Reason'],
-                    ['key' => 'time', 'label' => 'Time', 'format' => 'datetime']
+                    ['key' => 'item_name', 'label' => __('dashboard.col_item')],
+                    ['key' => 'quantity', 'label' => __('dashboard.col_qty')],
+                    ['key' => 'loss', 'label' => __('dashboard.col_loss'), 'format' => 'currency'],
+                    ['key' => 'reason', 'label' => __('dashboard.col_reason')],
+                    ['key' => 'time', 'label' => __('dashboard.col_time'), 'format' => 'datetime']
                 ];
 
                 $start = Carbon::parse($date)->startOfDay();
@@ -1513,19 +1505,19 @@ class DashboardController extends Controller
                     ->whereBetween('log_date', [$start, $end])
                     ->get()
                     ->map(function ($log) {
-                        // Resolve name
-                        $name = 'Unknown';
+                        $name = __('reports.unknown');
                         if ($log->wasteable_type === 'App\Models\Ingredient') {
                             $ing = Ingredient::find($log->wasteable_id);
-                            $name = $ing ? $ing->name : 'Deleted Ingredient';
+                            $name = $ing ? $ing->name : __('reports.deleted_item');
                         } elseif ($log->wasteable_type === 'App\Models\MenuItem') {
                             $item = \App\Models\MenuItem::find($log->wasteable_id);
-                            $name = $item ? $item->name : 'Deleted Item';
+                            $name = $item ? $item->name : __('reports.deleted_item');
                         }
 
                         if (is_string($name) && str_starts_with($name, '{')) {
                             $decoded = json_decode($name, true);
-                            $name = $decoded['en'] ?? $decoded['ar'] ?? 'Unknown';
+                            $locale = app()->getLocale();
+                            $name = $decoded[$locale] ?? $decoded['en'] ?? $decoded['ar'] ?? __('reports.unknown');
                         }
 
                         return [
@@ -1539,8 +1531,8 @@ class DashboardController extends Controller
                 break;
 
             case 'retention_bucket':
-                $range = $request->input('range'); // '1', '2', '3-5', '6+'
-                $title = "Customers with " . $range . " visit" . ($range === '1' ? '' : 's');
+                $range = $request->input('range');
+                $title = __('dashboard.modal_customers_visits', ['range' => $range]);
 
                 $columns = [
                     ['key' => 'name', 'label' => __('common.name')],
