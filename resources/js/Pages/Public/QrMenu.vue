@@ -293,6 +293,7 @@
                                     @input="resetLoyalty"
                                 />
                                 <button
+                                    v-if="hasLoyalty"
                                     @click="checkLoyalty"
                                     :disabled="!customerPhone || checkingLoyalty"
                                     type="button"
@@ -499,7 +500,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Carousel from '@/Components/Carousel.vue';
 import Modal from '@/Components/Modal.vue';
 import PhoneInput from '@/Components/PhoneInput.vue';
@@ -539,6 +540,22 @@ const loyaltyFound = ref(false);
 const customerLoyaltyData = ref<any>(null);
 const availableRewards = ref<any[]>([]);
 const selectedReward = ref<any>(null);
+
+const hasLoyalty = ref(true);
+
+watch(showCart, async (newVal) => {
+    if (newVal) {
+        try {
+            const response = await fetch((window as any).route('qr.loyalty.status', props.table.token));
+            const data = await response.json();
+            if (data.success) {
+                hasLoyalty.value = !!data.has_loyalty;
+            }
+        } catch (e) {
+            console.error('Failed to check loyalty status', e);
+        }
+    }
+});
 
 const showOtpModal = ref(false);
 const otpValue = ref('');

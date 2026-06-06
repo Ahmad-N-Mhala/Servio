@@ -13,7 +13,7 @@ class RestaurantController extends Controller
         $query = \App\Models\Restaurant::withTrashed()->with(['subscription.plan']);
 
         if ($request->input('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%');
+            $query->where('name', 'like', '%'.$request->input('search').'%');
         }
 
         if ($request->input('restaurant_id')) {
@@ -36,7 +36,7 @@ class RestaurantController extends Controller
         $restaurants = $query->latest()->paginate(10)->appends([
             'search' => $request->input('search'),
             'restaurant_id' => $request->input('restaurant_id'),
-            'status' => $request->input('status')
+            'status' => $request->input('status'),
         ]);
 
         // Manually attach owner (logic remains same)
@@ -67,8 +67,9 @@ class RestaurantController extends Controller
     public function create()
     {
         $plans = \App\Models\Plan::where('is_active', true)->get();
+
         return inertia('Admin/Restaurants/Create', [
-            'plans' => $plans
+            'plans' => $plans,
         ]);
     }
 
@@ -160,7 +161,7 @@ class RestaurantController extends Controller
             \Illuminate\Support\Facades\DB::table('restaurant_user')->insert([
                 'restaurant_id' => (string) $restaurant->id,
                 'email' => $user->email,
-                'role' => 'owner'
+                'role' => 'owner',
             ]);
 
             // Check if plan has loyalty feature
@@ -215,7 +216,7 @@ class RestaurantController extends Controller
 
         } catch (\Exception $e) {
             // \DB::rollBack();
-            return back()->with('error', 'Creation failed: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Creation failed: '.$e->getMessage())->withInput();
         }
     }
 
@@ -246,7 +247,7 @@ class RestaurantController extends Controller
         $restaurantData['owner_email'] = $ownerRef ? $ownerRef->email : $restaurant->email;
 
         return inertia('Admin/Restaurants/Edit', [
-            'restaurant' => $restaurantData
+            'restaurant' => $restaurantData,
         ]);
     }
 
@@ -255,7 +256,7 @@ class RestaurantController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255|unique:restaurants,slug,' . $restaurant->id,
+                'slug' => 'required|string|max:255|unique:restaurants,slug,'.$restaurant->id,
                 'email' => 'required|email',
                 'phone' => 'nullable|string',
                 'currency' => 'required|string|size:3',
@@ -326,10 +327,12 @@ class RestaurantController extends Controller
 
                     if ($user) {
                         // Update User Fields
-                        if ($request->filled('new_owner_name'))
+                        if ($request->filled('new_owner_name')) {
                             $user->name = $request->new_owner_name;
-                        if ($request->filled('new_owner_phone'))
+                        }
+                        if ($request->filled('new_owner_phone')) {
                             $user->phone = $request->new_owner_phone;
+                        }
 
                         // Handle Email Change
                         if ($request->filled('new_owner_email') && $request->new_owner_email !== $user->email) {
@@ -362,7 +365,7 @@ class RestaurantController extends Controller
 
         } catch (\Exception $e) {
             // \DB::rollBack();
-            return back()->with('error', 'Update failed: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Update failed: '.$e->getMessage())->withInput();
         }
     }
 
@@ -377,7 +380,7 @@ class RestaurantController extends Controller
                 ->where('restaurant_id', (string) $restaurant->id)
                 ->update([
                     'is_active' => false,
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
 
             // Update restaurant status to inactive
@@ -387,7 +390,7 @@ class RestaurantController extends Controller
                 ->with('success', 'Restaurant has been deleted and all associated users have been deactivated.');
         } catch (\Exception $e) {
             return redirect()->route('admin.restaurants.index')
-                ->with('error', 'Failed to delete restaurant: ' . $e->getMessage());
+                ->with('error', 'Failed to delete restaurant: '.$e->getMessage());
         }
     }
 
@@ -411,7 +414,7 @@ class RestaurantController extends Controller
                 ->where('restaurant_id', (string) $restaurant->id)
                 ->update([
                     'is_active' => true,
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
 
             // Update restaurant status to active
@@ -421,7 +424,7 @@ class RestaurantController extends Controller
                 ->with('success', 'Restaurant has been restored and all associated users have been reactivated.');
         } catch (\Exception $e) {
             return redirect()->route('admin.restaurants.index')
-                ->with('error', 'Failed to restore restaurant: ' . $e->getMessage());
+                ->with('error', 'Failed to restore restaurant: '.$e->getMessage());
         }
     }
 
@@ -436,8 +439,8 @@ class RestaurantController extends Controller
             // \DB::beginTransaction();
 
             // 1. Detach/Delete Users
-            // We only delete the association in the pivot table, not the actual User account 
-            // unless they are exclusively tied to this restaurant? 
+            // We only delete the association in the pivot table, not the actual User account
+            // unless they are exclusively tied to this restaurant?
             // For safety in this multi-tenant setup, we'll just remove the access.
             \Illuminate\Support\Facades\DB::table('restaurant_user')
                 ->where('restaurant_id', (string) $restaurant->id)
@@ -469,9 +472,10 @@ class RestaurantController extends Controller
         } catch (\Exception $e) {
             // \DB::rollBack();
             return redirect()->route('admin.restaurants.index')
-                ->with('error', 'Failed to permanently delete restaurant: ' . $e->getMessage());
+                ->with('error', 'Failed to permanently delete restaurant: '.$e->getMessage());
         }
     }
+
     public function getSubscriptionLogs($id)
     {
         $logs = \App\Models\RestaurantSubscription::where('restaurant_id', $id)

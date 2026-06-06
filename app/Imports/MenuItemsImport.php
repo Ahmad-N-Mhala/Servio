@@ -7,7 +7,6 @@ use App\Models\MenuItem;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Illuminate\Support\Facades\DB;
 
 class MenuItemsImport implements ToCollection, WithHeadingRow
 {
@@ -19,7 +18,7 @@ class MenuItemsImport implements ToCollection, WithHeadingRow
         foreach ($rows as $row) {
             // Basic Validation logic within the loop
             // 'category_name_en' and 'item_name_en' and 'price' are required.
-            if (empty($row['category_name_en']) || empty($row['item_name_en']) || !isset($row['price'])) {
+            if (empty($row['category_name_en']) || empty($row['item_name_en']) || ! isset($row['price'])) {
                 continue;
             }
 
@@ -45,15 +44,15 @@ class MenuItemsImport implements ToCollection, WithHeadingRow
             // But usually `where('name->en', $categoryEn)` works.
 
             $category = MenuCategory::where('restaurant_id', $restaurantId)
-                ->where('name', 'like', '%"en":"' . $categoryEn . '"%') // Fallback flexible search
+                ->where('name', 'like', '%"en":"'.$categoryEn.'"%') // Fallback flexible search
                 ->first();
 
-            if (!$category) {
+            if (! $category) {
                 $category = MenuCategory::create([
                     'restaurant_id' => $restaurantId,
                     'name' => ['en' => $categoryEn, 'ar' => $categoryAr],
                     'is_active' => true,
-                    'sort_order' => 0
+                    'sort_order' => 0,
                 ]);
             }
 
@@ -69,7 +68,7 @@ class MenuItemsImport implements ToCollection, WithHeadingRow
                 'is_available' => $isAvailable,
                 'sort_order' => $sortOrder,
                 'images' => [],
-                'allergens' => []
+                'allergens' => [],
             ]);
         }
     }

@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class StaffLog extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'staff_logs';
 
     protected $fillable = [
@@ -17,7 +18,7 @@ class StaffLog extends Model
         'causer_id', // ID of the user performing the action
         'causer_name', // Cached name of the user performing the action
         'ip_address',
-        'user_agent'
+        'user_agent',
     ];
 
     protected $casts = [

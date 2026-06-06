@@ -416,73 +416,62 @@
                     </div>
                 </div>
 
-                <div class="glass-card rounded-2xl overflow-hidden p-6">
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-600">
-                        <thead class="bg-gray-50 text-gray-900 border-b border-gray-100">
-                            <tr>
-                                <th class="px-4 py-3 font-semibold">{{ $t('common.date') }}</th>
-                                <th class="px-4 py-3 font-semibold">{{ $t('communication.rule') }}</th>
-                                <th class="px-4 py-3 font-semibold">{{ $t('communication.recipient') }}</th>
-                                <th class="px-4 py-3 font-semibold">{{ $t('communication.message') }}</th>
-                                <th class="px-4 py-3 font-semibold">{{ $t('communication.channel') }}</th>
-                                <th class="px-4 py-3 font-semibold">{{ $t('common.status') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            <tr v-for="log in logs.data" :key="log.id" class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-4 py-3">{{ formatDateTime(log.created_at) }}</td>
-                                <td class="px-4 py-3">
-                                    <span v-if="log.template" class="text-blue-600 font-medium">{{ log.template.name }}</span>
-                                    <span v-else class="text-gray-400">-</span>
-                                </td>
-                                <td class="px-4 py-3">{{ log.recipient }}</td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="truncate max-w-[150px]" :title="log.message">{{ log.message }}</span>
-                                        <button 
-                                            @click="openLogMessage(log)"
-                                            class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                            :title="$t('communication.view_message')"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 uppercase text-xs font-bold">{{ log.type }}</td>
-                                <td class="px-4 py-3">
-                                    <span 
-                                        :class="{
-                                            'text-green-600 bg-green-50': log.status === 'sent',
-                                            'text-red-600 bg-red-50': log.status === 'failed',
-                                            'text-blue-600 bg-blue-50': log.status === 'simulated'
-                                        }" 
-                                        class="px-2 py-1 rounded-full text-xs cursor-help relative group/tooltip"
-                                    >
-                                        {{ log.status }}
-                                        <div v-if="log.status === 'failed' && log.error_message" 
-                                             class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg hidden group-hover/tooltip:block z-50 text-center whitespace-normal normal-case font-normal shadow-xl border border-gray-700">
-                                            {{ log.error_message }}
-                                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                        </div>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="logs.data.length === 0">
-                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">{{ $t('communication.no_logs') }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4">
-                    <Pagination :meta="logs" />
-                </div>
+                <Table
+                    :columns="logColumns"
+                    :data="logs.data || []"
+                    :pagination="logs"
+                    :emptyMessage="$t('communication.no_logs')"
+                >
+                    <template #cell-created_at="{ row }">
+                        <span class="font-mono text-xs text-gray-500">
+                            {{ formatDateTime(row.created_at) }}
+                        </span>
+                    </template>
+                    
+                    <template #cell-template="{ row }">
+                        <span v-if="row.template" class="text-blue-600 font-medium">{{ row.template.name }}</span>
+                        <span v-else class="text-gray-400">-</span>
+                    </template>
+                    
+                    <template #cell-message="{ row }">
+                        <div class="flex items-center gap-2">
+                            <span class="truncate max-w-[150px]" :title="row.message">{{ row.message }}</span>
+                            <button 
+                                @click="openLogMessage(row)"
+                                class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                :title="$t('communication.view_message')"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                    
+                    <template #cell-type="{ row }">
+                        <span class="text-xs font-bold uppercase">{{ row.type }}</span>
+                    </template>
+                    
+                    <template #cell-status="{ row }">
+                        <span 
+                            :class="{
+                                'text-green-600 bg-green-50': row.status === 'sent',
+                                'text-red-600 bg-red-50': row.status === 'failed',
+                                'text-blue-600 bg-blue-50': row.status === 'simulated'
+                            }" 
+                            class="px-2 py-1 rounded-full text-xs cursor-help relative group/tooltip"
+                        >
+                            {{ row.status }}
+                            <div v-if="row.status === 'failed' && row.error_message" 
+                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg hidden group-hover/tooltip:block z-50 text-center whitespace-normal normal-case font-normal shadow-xl border border-gray-700">
+                                {{ row.error_message }}
+                                <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                            </div>
+                        </span>
+                    </template>
+                </Table>
             </div>
-        </div>
 
 
 
@@ -1025,11 +1014,21 @@ import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import Select from '@/Components/Select.vue';
+import Table from '@/Components/Table.vue';
 import { computed } from 'vue';
 import { useFeatures } from '@/Composables/useFeatures';
 
 const { hasFeature } = useFeatures();
 const { t, locale } = useI18n();
+
+const logColumns = computed(() => [
+    { key: 'created_at', label: t('common.date'), sortable: true },
+    { key: 'template', label: t('communication.rule'), sortable: true },
+    { key: 'recipient', label: t('communication.recipient'), sortable: true },
+    { key: 'message', label: t('communication.message'), sortable: true },
+    { key: 'type', label: t('communication.channel'), sortable: true },
+    { key: 'status', label: t('common.status'), sortable: true }
+]);
 
 interface TemplateCondition {
     min_order_amount?: number | null;

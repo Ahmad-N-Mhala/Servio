@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use MongoDB\Laravel\Eloquent\Model;
 
 class RewardRedemption extends Model
 {
@@ -38,7 +38,7 @@ class RewardRedemption extends Model
         parent::boot();
 
         static::creating(function ($redemption) {
-            if (!$redemption->code) {
+            if (! $redemption->code) {
                 $redemption->code = strtoupper(Str::random(8));
             }
         });
@@ -68,4 +68,3 @@ class RewardRedemption extends Model
         ]);
     }
 }
-

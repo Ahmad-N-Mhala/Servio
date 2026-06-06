@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Config;
 use MongoDB\Laravel\Eloquent\Model;
 use Spatie\Permission\Contracts\Permission as PermissionContract;
-use Spatie\Permission\Traits\HasRoles;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
-use Illuminate\Support\Facades\Config;
+use Spatie\Permission\Traits\HasRoles;
 
 class Permission extends Model implements PermissionContract
 {
@@ -25,7 +25,7 @@ class Permission extends Model implements PermissionContract
         $guardName = $guardName ?? Config::get('auth.defaults.guard');
         $permission = static::where('id', $id)->where('guard_name', $guardName)->first();
 
-        if (!$permission) {
+        if (! $permission) {
             throw PermissionDoesNotExist::withId((string) $id, $guardName);
         }
 
@@ -37,7 +37,7 @@ class Permission extends Model implements PermissionContract
         $guardName = $guardName ?? Config::get('auth.defaults.guard');
         $permission = static::where('name', $name)->where('guard_name', $guardName)->first();
 
-        if (!$permission) {
+        if (! $permission) {
             // Fallback if named() doesn't exist, though typically it does in Spatie
             throw PermissionDoesNotExist::create($name, $guardName);
         }
@@ -50,7 +50,7 @@ class Permission extends Model implements PermissionContract
         $guardName = $guardName ?? Config::get('auth.defaults.guard');
         $permission = static::where('name', $name)->where('guard_name', $guardName)->first();
 
-        if (!$permission) {
+        if (! $permission) {
             return static::create(['name' => $name, 'guard_name' => $guardName]);
         }
 

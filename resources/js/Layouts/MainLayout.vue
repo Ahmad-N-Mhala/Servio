@@ -697,7 +697,7 @@
             !isFullScreen ? (currentLocale === 'ar' ? (isSidebarCollapsed ? 'lg:mr-20' : 'lg:mr-64') : (isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64')) : ''
         ]">
             <!-- Header -->
-            <header v-if="!isFullScreen" class="glass sticky top-0 z-40 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-gray-100/50 dark:border-gray-700/50">
+            <header v-if="!isFullScreen" class="glass sticky top-0 z-[45] h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-gray-100/50 dark:border-gray-700/50">
                 <div class="flex items-center gap-4">
                     <button @click="isSidebarOpen = !isSidebarOpen" class="lg:hidden p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition-all">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -785,8 +785,10 @@
                     <!-- User Menu -->
                     <div class="relative">
                         <button 
+                            ref="userMenuButtonRef"
                             @click="userMenuOpen = !userMenuOpen" 
-                            class="flex items-center gap-2 sm:gap-3 p-1 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                            class="flex items-center gap-2 sm:gap-3 p-1 rounded-xl transition-all duration-200"
+                            :class="userMenuOpen ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                         >
                             <img 
                                 class="h-8 w-8 sm:h-9 sm:w-9 rounded-xl object-cover ring-2 ring-primary/10" 
@@ -811,83 +813,151 @@
                             leave-to-class="transform opacity-0 scale-95"
                         >
                             <div 
+                                ref="userMenuRef"
                                 v-show="userMenuOpen" 
-                                @click.away="userMenuOpen = false" 
-                                class="absolute ltr:right-0 rtl:left-0 mt-2 w-72 glass-card rounded-xl shadow-lifted py-2 z-50 overflow-hidden"
+                                class="absolute ltr:right-0 rtl:left-0 mt-3 w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl py-3 z-50 overflow-hidden divide-y divide-gray-50 dark:divide-gray-800 animate-slide-up"
                             >
-                                <!-- Subscription Info Section -->
-                                <div class="px-2 pb-2 border-b border-gray-100 dark:border-gray-700">
+                                <!-- Header Profile & Restaurant Context -->
+                                <div class="px-4 pb-3.5 space-y-3">
+                                    <!-- User Identity Row -->
+                                    <div class="flex items-center gap-3">
+                                        <img 
+                                            class="h-10 w-10 rounded-xl object-cover ring-2 ring-primary/20 bg-gray-50" 
+                                            :src="userAvatarUrl" 
+                                            alt="User avatar" 
+                                        />
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <p class="text-sm font-black text-gray-900 dark:text-white leading-none truncate">{{ userName }}</p>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider bg-primary/10 text-primary">
+                                                    {{ userRole }}
+                                                </span>
+                                            </div>
+                                            <p class="text-[11px] text-gray-400 mt-1 truncate">{{ userEmail }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cohesive Active Restaurant & ID Badge -->
+                                    <div v-if="currentRestaurant" class="p-3 rounded-xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 space-y-2">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-[10px] font-black text-primary uppercase tracking-widest truncate">{{ currentRestaurant.name }}</span>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-200/50 dark:bg-gray-700/50 text-gray-500 font-bold uppercase tracking-wider flex-shrink-0">Active</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-800 rounded-lg p-1.5 pl-2 shadow-inner">
+                                            <span class="font-mono text-[10px] text-gray-600 dark:text-gray-300 select-all truncate flex-1 min-w-0" :title="currentRestaurant.id">{{ currentRestaurant.id }}</span>
+                                            <button 
+                                                @click.stop="copyRestaurantId" 
+                                                class="flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 hover:bg-primary/5 dark:hover:bg-primary/5 hover:text-primary border border-gray-200/60 dark:border-gray-700/60 text-gray-500 hover:border-primary/30 transition-all cursor-pointer shadow-sm active:scale-95 flex-shrink-0"
+                                                :title="$t('auth.restaurant_id')"
+                                            >
+                                                <svg v-if="!isCopied" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                                </svg>
+                                                <svg v-else class="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span class="text-[9px] font-black tracking-wide uppercase" :class="isCopied ? 'text-primary' : 'text-gray-500'">
+                                                    {{ isCopied ? $t('auth.copied') : $t('auth.copy') }}
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Integrated Subscription Banner -->
+                                <div class="px-2 py-2">
                                     <Link 
                                         :href="route('plans.index')"
                                         class="block group"
                                     >
                                         <div 
                                             v-if="currentSubscription"
-                                            class="px-3 py-3 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all duration-200 cursor-pointer border border-primary/20 hover:border-primary/30"
+                                            class="px-3 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 border border-emerald-500/10 hover:border-emerald-500/20 transition-all duration-300 relative overflow-hidden"
                                         >
-                                            <div class="flex items-start gap-3">
-                                                <div class="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                                    </svg>
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex items-center justify-between mb-1">
-                                                        <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">{{ currentSubscription.plan?.name || 'No Plan' }}</p>
-                                                        <svg class="w-3 h-3 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                            <!-- Decorative background elements -->
+                                            <div class="absolute -right-2 -bottom-2 opacity-5 text-emerald-600">
+                                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
+                                            </div>
+
+                                            <div class="flex items-center justify-between gap-3">
+                                                <div class="flex items-center gap-2.5 min-w-0">
+                                                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                                         </svg>
                                                     </div>
-                                                    <p class="text-[10px] text-gray-600 dark:text-gray-400 mb-1">
-                                                        <span class="font-medium">{{ subscriptionStatus }}</span>
-                                                    </p>
-                                                    <div class="flex items-center gap-1 text-[10px] text-gray-500">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        <span>Expires {{ formatExpiryDate(currentSubscription.ends_at) }}</span>
+                                                    <div class="min-w-0">
+                                                        <p class="text-xs font-black text-gray-900 dark:text-white truncate uppercase tracking-wide">{{ currentSubscription.plan?.name || 'No Plan' }}</p>
+                                                        <p class="text-[10px] text-gray-500 mt-0.5 font-medium">Expires {{ formatExpiryDate(currentSubscription.ends_at) }}</p>
                                                     </div>
                                                 </div>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                                                    {{ subscriptionStatus }}
+                                                </span>
                                             </div>
                                         </div>
                                         <div 
                                             v-else
-                                            class="px-3 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200 cursor-pointer text-center"
+                                            class="px-3 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/80 border border-gray-200/40 text-center transition-colors cursor-pointer"
                                         >
-                                            <p class="text-xs font-semibold text-gray-900 dark:text-white">No Active Plan</p>
-                                            <p class="text-[10px] text-primary mt-1 font-medium">Click to choose a plan</p>
+                                            <p class="text-xs font-bold text-gray-900 dark:text-white">No Active Plan</p>
+                                            <p class="text-[10px] text-primary mt-1 font-black">Click to choose a plan</p>
                                         </div>
                                     </Link>
                                 </div>
-                                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ userName }}</p>
-                                    <p class="text-xs text-gray-500">{{ userEmail }}</p>
-                                </div>
-                                <div class="py-1">
-                                    <Link :href="route('profile.edit')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        {{ $t('auth.profile') }}
+
+                                <!-- Actions List Section -->
+                                <div class="p-2 space-y-1">
+                                    <Link 
+                                        :href="route('profile.edit')" 
+                                        class="flex items-center gap-3 px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-200 group text-start"
+                                    >
+                                        <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800/40 flex items-center justify-center group-hover:bg-primary/10 transition-colors flex-shrink-0">
+                                            <svg class="w-4 h-4 text-gray-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold leading-none text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ $t('auth.profile') }}</p>
+                                            <p class="text-[10px] text-gray-400 mt-1 font-medium leading-tight">{{ $t('auth.profile_subtitle') }}</p>
+                                        </div>
                                     </Link>
-                                    <a :href="route('restaurants.index')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                        </svg>
-                                        {{ $t('nav.multi_store') }}
+                                    
+                                    <a 
+                                        :href="route('restaurants.index')" 
+                                        class="flex items-center gap-3 px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-200 group text-start"
+                                    >
+                                        <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800/40 flex items-center justify-center group-hover:bg-primary/10 transition-colors flex-shrink-0">
+                                            <svg class="w-4 h-4 text-gray-500 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold leading-none text-gray-900 dark:text-white group-hover:text-primary transition-colors">{{ $t('nav.multi_store') }}</p>
+                                            <p class="text-[10px] text-gray-400 mt-1 font-medium leading-tight">{{ $t('auth.multi_store_subtitle') }}</p>
+                                        </div>
                                     </a>
                                 </div>
-                                <div class="border-t border-gray-100 dark:border-gray-700 pt-1">
+
+                                <!-- Sign Out Footer -->
+                                <div class="p-2">
                                     <Link 
                                         :href="route('logout')" 
                                         method="post" 
                                         as="button"
-                                        class="w-full text-start flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                        class="w-full flex items-center gap-3 px-3 py-2 text-xs sm:text-sm font-semibold text-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200 group text-start"
                                     >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        {{ $t('auth.logout') }}
+                                        <div class="w-8 h-8 rounded-lg bg-red-50/50 dark:bg-red-950/10 flex items-center justify-center group-hover:bg-red-100 dark:group-hover:bg-red-950/30 transition-colors flex-shrink-0">
+                                            <svg class="w-4 h-4 text-red-500 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold leading-none text-red-600 group-hover:text-red-700 transition-colors">{{ $t('auth.logout') }}</p>
+                                            <p class="text-[10px] text-red-400 mt-1 font-medium leading-tight">{{ $t('auth.logout_subtitle') }}</p>
+                                        </div>
                                     </Link>
                                 </div>
                             </div>
@@ -1034,6 +1104,42 @@ const currentRestaurantName = computed(() => {
 const currentRestaurantLogo = computed(() => {
     const restaurant = userRestaurants.value.find((r: any) => r.id === currentRestaurantId.value);
     return restaurant?.logo || null;
+});
+
+const currentRestaurant = computed(() => (page.props as any).current_restaurant || null);
+
+const isCopied = ref(false);
+const copyRestaurantId = () => {
+    if (currentRestaurant.value?.id) {
+        navigator.clipboard.writeText(String(currentRestaurant.value.id));
+        isCopied.value = true;
+        setTimeout(() => {
+            isCopied.value = false;
+        }, 2000);
+    }
+};
+
+const userMenuRef = ref<HTMLElement | null>(null);
+const userMenuButtonRef = ref<HTMLElement | null>(null);
+
+const handleClickOutside = (event: MouseEvent) => {
+    if (
+        userMenuOpen.value &&
+        userMenuRef.value &&
+        !userMenuRef.value.contains(event.target as Node) &&
+        userMenuButtonRef.value &&
+        !userMenuButtonRef.value.contains(event.target as Node)
+    ) {
+        userMenuOpen.value = false;
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
 });
 
 const switchRestaurant = (restaurant: any) => {

@@ -51,14 +51,14 @@ class PlanInterestController extends Controller
 
     public function export(Request $request)
     {
-        $filename = 'plan-interests-' . date('Y-m-d-His') . '.csv';
+        $filename = 'plan-interests-'.date('Y-m-d-His').'.csv';
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = ['ID', 'Date', 'Name', 'Email', 'Phone', 'Restaurant', 'Plan', 'Status', 'Message', 'Admin Notes'];
@@ -66,7 +66,7 @@ class PlanInterestController extends Controller
         $callback = function () use ($request, $columns) {
             $file = fopen('php://output', 'w');
             // Add BOM for Excel compatibility
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             fputcsv($file, $columns);
 
             $query = PlanInterest::query()->latest();
@@ -99,7 +99,7 @@ class PlanInterestController extends Controller
                     $interest->plan_name,
                     ucfirst(str_replace('_', ' ', $interest->status)),
                     $interest->message,
-                    $interest->admin_notes
+                    $interest->admin_notes,
                 ]);
             }
 

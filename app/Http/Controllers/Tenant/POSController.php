@@ -16,8 +16,9 @@ class POSController extends Controller
     public function index(): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $orders = Order::with([
             'items.menuItem' => function ($query) {
@@ -25,7 +26,7 @@ class POSController extends Controller
             },
             'customer',
             'table',
-            'waiter'
+            'waiter',
         ])
             ->where('restaurant_id', $restaurant->id)
             ->whereIn('status', ['pending', 'pending_approval', 'completed', 'processing', 'ready', 'served'])
@@ -43,7 +44,7 @@ class POSController extends Controller
             ->with(['category', 'extras'])
             ->orderBy('name->en')
             ->get()
-            ->filter(fn($item) => (bool) $item->is_available)
+            ->filter(fn ($item) => (bool) $item->is_available)
             ->values();
 
         // Get current open cash register for this user
@@ -53,7 +54,7 @@ class POSController extends Controller
             ->with([
                 'transactions' => function ($query) {
                     $query->latest()->limit(20);
-                }
+                },
             ])
             ->first();
 
@@ -81,9 +82,9 @@ class POSController extends Controller
                 ->where('status', 'open')
                 ->first();
 
-            if (!$cashRegister) {
+            if (! $cashRegister) {
                 return redirect()->back()->withErrors([
-                    'payment_method' => 'Cash register must be open to accept cash payments. Please open your cash register first.'
+                    'payment_method' => 'Cash register must be open to accept cash payments. Please open your cash register first.',
                 ]);
             }
         }
@@ -116,7 +117,7 @@ class POSController extends Controller
                     'type' => 'sale',
                     'amount' => $order->total,
                     'balance_after' => $newBalance,
-                    'notes' => 'Cash payment for order #' . $order->id,
+                    'notes' => 'Cash payment for order #'.$order->id,
                 ]);
             }
         }
@@ -134,6 +135,7 @@ class POSController extends Controller
 
         return redirect()->back()->with('message', 'Order settled and table marked available.');
     }
+
     public function update(Request $request, Order $order)
     {
         $validated = $request->validate([
@@ -165,7 +167,7 @@ class POSController extends Controller
                     $menuItem = \App\Models\MenuItem::find($itemData['menu_item_id']);
 
                     $extrasCost = 0;
-                    if (!empty($itemData['extras']) && is_array($itemData['extras'])) {
+                    if (! empty($itemData['extras']) && is_array($itemData['extras'])) {
                         foreach ($itemData['extras'] as $extra) {
                             $extrasCost += (float) ($extra['price'] ?? 0);
                         }
@@ -197,7 +199,7 @@ class POSController extends Controller
 
                             // storage format of extras in Mongo might be array of objects
                             $existingExtrasCost = 0;
-                            if (!empty($orderItem->extras) && is_array($orderItem->extras)) {
+                            if (! empty($orderItem->extras) && is_array($orderItem->extras)) {
                                 foreach ($orderItem->extras as $ex) {
                                     $existingExtrasCost += (float) ($ex['price'] ?? 0);
                                 }
@@ -206,7 +208,7 @@ class POSController extends Controller
                             $orderItem->update([
                                 'quantity' => $itemData['quantity'],
                                 'total_price' => $itemData['quantity'] * ($price + $existingExtrasCost),
-                                'unit_price' => $price
+                                'unit_price' => $price,
                             ]);
                         }
                     }
@@ -272,7 +274,7 @@ class POSController extends Controller
             if ($customer) {
                 $customer->update(['birth_date' => $validated['customer_birth_date']]);
                 // Optionally link customer to order if not linked
-                if (!$order->customer_id) {
+                if (! $order->customer_id) {
                     $updateData['customer_id'] = $customer->id;
                 }
             }

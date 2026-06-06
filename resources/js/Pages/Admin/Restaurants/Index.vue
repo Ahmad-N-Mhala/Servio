@@ -11,6 +11,7 @@
                 :pagination="restaurants"
                 v-model:search="search"
                 title="All Restaurants"
+                :row-class="getRowClass"
             >
                 <!-- Header Actions -->
                 <template #header-actions>
@@ -42,16 +43,22 @@
                         </div>
                         
                         <!-- Owner Info -->
-                        <div class="flex items-center gap-1 text-sm text-gray-500">
-                             <span class="text-gray-400">Owner:</span>
-                             <button 
-                                v-if="getOwner(row)" 
-                                @click="openOwnerModal(getOwner(row))"
-                                class="text-primary hover:text-primary-hover hover:underline font-medium transition-colors"
-                            >
-                                {{ getOwner(row).name }}
-                            </button>
-                            <span v-else class="italic text-gray-400">Unassigned</span>
+                        <div class="flex flex-col text-sm text-gray-500">
+                            <div class="flex items-center gap-1">
+                                <span class="text-gray-400">Owner:</span>
+                                <button 
+                                    v-if="getOwner(row)" 
+                                    @click="openOwnerModal(getOwner(row))"
+                                    class="text-primary hover:text-primary-hover hover:underline font-medium transition-colors"
+                                >
+                                    {{ getOwner(row).name }}
+                                </button>
+                                <span v-else class="italic text-gray-400">Unassigned</span>
+                            </div>
+                            <div v-if="getOwner(row)" class="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>{{ getOwner(row).email }}</span>
+                            </div>
                         </div>
 
                         <!-- Location Info -->
@@ -88,13 +95,13 @@
                             <span 
                                 class="px-2 py-0.5 rounded-full text-xs font-bold capitalize"
                                 :class="{
-                                    'bg-green-100 text-green-700': row.subscription.status === 'active',
-                                    'bg-red-100 text-red-700': row.subscription.status === 'expired' || row.subscription.status === 'cancelled',
-                                    'bg-yellow-100 text-yellow-700': row.subscription.status === 'trial',
-                                    'bg-gray-100 text-gray-600': !row.subscription.status
+                                    'bg-green-100 text-green-700': !isExpired(row) && row.subscription.status === 'active',
+                                    'bg-red-100 text-red-700': isExpired(row) || row.subscription.status === 'expired' || row.subscription.status === 'cancelled',
+                                    'bg-yellow-100 text-yellow-700': !isExpired(row) && row.subscription.status === 'trial',
+                                    'bg-gray-100 text-gray-600': !isExpired(row) && !row.subscription.status
                                 }"
                             >
-                                {{ row.subscription.status || 'Inactive' }}
+                                {{ isExpired(row) ? 'expired' : (row.subscription.status || 'Inactive') }}
                             </span>
                             
                             <span v-if="row.subscription.ends_at" class="text-xs text-gray-500 flex items-center gap-1">
@@ -425,6 +432,20 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
+const isExpired = (row: any) => {
+    if (!row.subscription) return false;
+    if (row.subscription.status === 'expired') return true;
+    if (row.subscription.ends_at) {
+        const expiryDate = new Date(row.subscription.ends_at);
+        return expiryDate < new Date();
+    }
+    return false;
+};
+
+const getRowClass = (row: any) => {
+    return isExpired(row) ? 'expired-row' : '';
+};
+
 const columns = [
     { key: 'name', label: 'Restaurant & Owner', sortable: true },
     { key: 'subscription', label: 'Subscription Details', sortable: false },
@@ -623,3 +644,21 @@ const closeLogsModal = () => {
 
 const route = (window as any).route;
 </script>
+
+<style scoped>
+:deep(.expired-row) td {
+    border-top: 2px solid #ef4444 !important;
+    border-bottom: 2px solid #ef4444 !important;
+    background-color: rgba(254, 242, 242, 0.4) !important;
+}
+:deep(.expired-row) td:first-child {
+    border-left: 2px solid #ef4444 !important;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+:deep(.expired-row) td:last-child {
+    border-right: 2px solid #ef4444 !important;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+</style>

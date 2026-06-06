@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckRestaurantContext
 {
@@ -29,79 +29,87 @@ class CheckRestaurantContext
         $restaurantId = session('active_restaurant_id');
 
         // If no restaurant in session, auto-select the first one
-        if (!$restaurantId) {
+        if (! $restaurantId) {
             $pivotIds = \Illuminate\Support\Facades\DB::connection('mongodb')
                 ->table('restaurant_user')
                 ->where('email', $request->user()->email)
                 ->pluck('restaurant_id')
                 ->toArray();
 
-            $firstRestaurant = !empty($pivotIds)
+            $firstRestaurant = ! empty($pivotIds)
                 ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first()
                 : null;
 
-            if (!$firstRestaurant) {
+            if (! $firstRestaurant) {
                 auth()->logout();
+
                 return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
             }
 
             session(['active_restaurant_id' => $firstRestaurant->id]);
+
             return $next($request);
         }
 
         // If restaurant is already in session, validate user still has access
         // Direct query to pivot collection works fine in Mongo for simple where
         // If restaurant is already in session, validate user still has access
-        $cacheKey = 'user_restaurants_' . $request->user()->id;
+        $cacheKey = 'user_restaurants_'.$request->user()->id;
         $pivotIds = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($request) {
             return \Illuminate\Support\Facades\DB::connection('mongodb')
                 ->table('restaurant_user')
                 ->where('email', $request->user()->email)
                 ->pluck('restaurant_id')
-                ->map(fn($id) => (string) $id)
+                ->map(fn ($id) => (string) $id)
                 ->toArray();
         });
 
         $hasAccess = in_array($restaurantId, $pivotIds);
 
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             // User lost access to current restaurant, try to switch to another
             session()->forget('active_restaurant_id');
 
             // FIX: Use manual query (reusing pivotIds from above)
-            $anotherRestaurant = !empty($pivotIds)
+            $anotherRestaurant = ! empty($pivotIds)
                 ? \App\Models\Restaurant::whereIn('id', $pivotIds)->first()
                 : null;
 
             if ($anotherRestaurant) {
                 session(['active_restaurant_id' => $anotherRestaurant->id]);
+
                 return redirect()->back()->with('message', 'Switched to available restaurant.');
             }
 
             // No restaurants available - log out
             auth()->logout();
+
             return redirect()->route('login')->with('error', 'No restaurant access found for this account.');
         }
 
         // Share restaurant ID globally or with views if needed
-        // config(['app.active_restaurant_id' => $restaurantId]); 
+        // config(['app.active_restaurant_id' => $restaurantId]);
 
         // Validated Access - Now Check Subscription Status
         $isExpired = \Illuminate\Support\Facades\Cache::remember("restaurant_{$restaurantId}_is_expired", 60, function () use ($restaurantId) {
             $restaurant = \App\Models\Restaurant::find($restaurantId);
-            if (!$restaurant)
+            if (! $restaurant) {
                 return true;
+            }
 
             $subscription = $restaurant->subscription; // HasOne relationship
 
             // Check if subscription exists and is valid
             // You can adjust these rules (e.g., allow grace period)
-            if (!$subscription)
+            if (! $subscription) {
                 return true;
-            if ($subscription->status !== 'active')
+            }
+            if ($subscription->status !== 'active') {
                 return true;
-            if ($subscription->ends_at && $subscription->ends_at->isPast())
+            }
+            if ($subscription->ends_at && $subscription->ends_at->isPast()) {
                 return true;
+            }
 
             return false;
         });

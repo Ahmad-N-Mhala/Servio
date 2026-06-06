@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\CashRegister;
 use App\Models\CashTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Carbon\Carbon;
 
 class CashRegisterController extends Controller
 {
@@ -19,7 +19,7 @@ class CashRegisterController extends Controller
     {
         $restaurant = $request->user()->currentRestaurant();
 
-        if (!$restaurant && $request->user()->is_super_admin) {
+        if (! $restaurant && $request->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
@@ -30,7 +30,7 @@ class CashRegisterController extends Controller
             ->with([
                 'transactions' => function ($query) {
                     $query->latest()->limit(50);
-                }
+                },
             ])
             ->first();
 
@@ -61,7 +61,7 @@ class CashRegisterController extends Controller
 
         $restaurant = $request->user()->currentRestaurant();
 
-        if (!$restaurant && $request->user()->is_super_admin) {
+        if (! $restaurant && $request->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
@@ -73,7 +73,7 @@ class CashRegisterController extends Controller
 
         if ($existingRegister) {
             return redirect()->back()->withErrors([
-                'error' => 'You already have an open cash register. Please close it first.'
+                'error' => 'You already have an open cash register. Please close it first.',
             ]);
         }
 
@@ -120,7 +120,7 @@ class CashRegisterController extends Controller
 
         if ($cashRegister->status === 'closed') {
             return redirect()->back()->withErrors([
-                'error' => 'This cash register is already closed.'
+                'error' => 'This cash register is already closed.',
             ]);
         }
 
@@ -167,7 +167,7 @@ class CashRegisterController extends Controller
 
         if ($cashRegister->status !== 'open') {
             return redirect()->back()->withErrors([
-                'error' => 'Cash register must be open to withdraw cash.'
+                'error' => 'Cash register must be open to withdraw cash.',
             ]);
         }
 
@@ -175,7 +175,7 @@ class CashRegisterController extends Controller
 
         if ($validated['amount'] > $currentBalance) {
             return redirect()->back()->withErrors([
-                'error' => 'Insufficient cash in register.'
+                'error' => 'Insufficient cash in register.',
             ]);
         }
 
@@ -212,7 +212,7 @@ class CashRegisterController extends Controller
 
         if ($cashRegister->status !== 'open') {
             return redirect()->back()->withErrors([
-                'error' => 'Cash register must be open to deposit cash.'
+                'error' => 'Cash register must be open to deposit cash.',
             ]);
         }
 
@@ -251,9 +251,9 @@ class CashRegisterController extends Controller
             ->where('status', 'open')
             ->first();
 
-        if (!$cashRegister) {
+        if (! $cashRegister) {
             return response()->json([
-                'error' => 'No open cash register found. Please open the cash register first.'
+                'error' => 'No open cash register found. Please open the cash register first.',
             ], 400);
         }
 
@@ -269,7 +269,7 @@ class CashRegisterController extends Controller
             'type' => 'sale',
             'amount' => $validated['amount'],
             'balance_after' => $newBalance,
-            'notes' => 'Cash payment for order #' . $validated['order_id'],
+            'notes' => 'Cash payment for order #'.$validated['order_id'],
         ]);
 
         return response()->json([
@@ -285,7 +285,7 @@ class CashRegisterController extends Controller
     {
         $restaurant = $request->user()->currentRestaurant();
 
-        if (!$restaurant && $request->user()->is_super_admin) {
+        if (! $restaurant && $request->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
@@ -300,7 +300,7 @@ class CashRegisterController extends Controller
                 'user',
                 'transactions' => function ($q) {
                     $q->orderBy('created_at', 'asc')->with('order');
-                }
+                },
             ]);
 
         // Apply filters
@@ -349,24 +349,24 @@ class CashRegisterController extends Controller
             'user',
             'transactions' => function ($q) {
                 $q->orderBy('created_at', 'asc');
-            }
+            },
         ]);
 
-        $filename = 'cash_register_' . $cashRegister->opened_at->format('Y-m-d') . '.csv';
+        $filename = 'cash_register_'.$cashRegister->opened_at->format('Y-m-d').'.csv';
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($cashRegister) {
             $file = fopen('php://output', 'w');
 
             // Add BOM for Excel UTF-8 compatibility
-            fputs($file, "\xEF\xBB\xBF");
+            fwrite($file, "\xEF\xBB\xBF");
 
             // Title
             fputcsv($file, [__('reports.cash_register_report')]);
@@ -380,7 +380,7 @@ class CashRegisterController extends Controller
                 $cashRegister->user->name,
                 strtoupper($cashRegister->status),
                 $cashRegister->opened_at->format('Y-m-d H:i:s'),
-                $cashRegister->closed_at ? $cashRegister->closed_at->format('Y-m-d H:i:s') : 'N/A'
+                $cashRegister->closed_at ? $cashRegister->closed_at->format('Y-m-d H:i:s') : 'N/A',
             ]);
             fputcsv($file, []); // Spacer
 
@@ -407,10 +407,12 @@ class CashRegisterController extends Controller
             if ($cashRegister->opening_notes || $cashRegister->closing_notes) {
                 fputcsv($file, [strtoupper(__('reports.notes'))]);
                 fputcsv($file, [__('reports.type'), __('reports.content')]);
-                if ($cashRegister->opening_notes)
+                if ($cashRegister->opening_notes) {
                     fputcsv($file, [__('reports.opening_notes'), $cashRegister->opening_notes]);
-                if ($cashRegister->closing_notes)
+                }
+                if ($cashRegister->closing_notes) {
                     fputcsv($file, [__('reports.closing_notes'), $cashRegister->closing_notes]);
+                }
                 fputcsv($file, []); // Spacer
             }
 
@@ -425,7 +427,7 @@ class CashRegisterController extends Controller
                     strtoupper($transaction->type),
                     number_format((float) $transaction->amount, 2),
                     number_format((float) $transaction->balance_after, 2),
-                    $transaction->notes
+                    $transaction->notes,
                 ]);
             }
 

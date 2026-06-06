@@ -19,12 +19,13 @@ class CommunicationController extends Controller
     public function index(Request $request): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+        if (! $restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
             $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
         }
 
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Ensure default bundles exist
         if (CommunicationBundle::count() === 0) {
@@ -72,6 +73,7 @@ class CommunicationController extends Controller
             ->map(function ($template) {
                 // Manually count logs to avoid MongoDB withCount limitations
                 $template->logs_count = CommunicationLog::where('communication_template_id', (string) $template->id)->count();
+
                 return $template;
             });
 
@@ -80,7 +82,7 @@ class CommunicationController extends Controller
         $menuCategories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->where('is_active', true)
             ->with([
-                'items'
+                'items',
             ])
             ->get();
 
@@ -100,12 +102,13 @@ class CommunicationController extends Controller
     public function purchaseBundle(Request $request, CommunicationBundle $bundle)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+        if (! $restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
             $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
         }
 
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Balances are now unlimited and not tracked per restaurant.
         // if ($bundle->type === 'sms') {
@@ -122,19 +125,20 @@ class CommunicationController extends Controller
         // Redirect to index with filtered logs
         return redirect()->route('communication.index', [
             'template_id' => $template->id,
-            'active_tab' => 'logs' // We will handle this in frontend to open logs tab
+            'active_tab' => 'logs', // We will handle this in frontend to open logs tab
         ]);
     }
 
     public function storeTemplate(Request $request)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+        if (! $restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
             $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
         }
 
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -178,11 +182,11 @@ class CommunicationController extends Controller
     public function updateTemplate(Request $request, CommunicationTemplate $template)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin) {
+        if (! $restaurant && auth()->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::find($template->restaurant_id);
         }
 
-        if (!$restaurant || (!auth()->user()->is_super_admin && $template->restaurant_id !== $restaurant->id)) {
+        if (! $restaurant || (! auth()->user()->is_super_admin && $template->restaurant_id !== $restaurant->id)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -226,15 +230,16 @@ class CommunicationController extends Controller
     public function destroyTemplate(CommunicationTemplate $template)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin) {
+        if (! $restaurant && auth()->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::find($template->restaurant_id);
         }
 
-        if (!$restaurant || (!auth()->user()->is_super_admin && $template->restaurant_id !== $restaurant->id)) {
+        if (! $restaurant || (! auth()->user()->is_super_admin && $template->restaurant_id !== $restaurant->id)) {
             abort(403, 'Unauthorized action.');
         }
 
         $template->delete();
+
         return redirect()->back()->with('message', 'Communication rule deleted successfully.');
     }
 

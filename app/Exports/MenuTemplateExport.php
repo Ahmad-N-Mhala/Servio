@@ -2,13 +2,13 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MenuTemplateExport implements WithHeadings, WithTitle, ShouldAutoSize, WithStyles
+class MenuTemplateExport implements ShouldAutoSize, WithHeadings, WithStyles, WithTitle
 {
     public function headings(): array
     {

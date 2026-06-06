@@ -2,16 +2,16 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\Customer;
+use App\Models\Ingredient;
+use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Customer;
 use App\Models\Restaurant;
-use App\Models\MenuItem;
 use App\Models\WasteLog;
-use App\Models\Ingredient;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ManageDashboardData extends Command
 {
@@ -42,8 +42,9 @@ class ManageDashboardData extends Command
 
         $restaurant = Restaurant::first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             $this->error('No restaurant found.');
+
             return;
         }
 
@@ -65,9 +66,9 @@ class ManageDashboardData extends Command
         for ($i = 0; $i < 200; $i++) {
             $customers[] = Customer::create([
                 'restaurant_id' => $restaurant->id,
-                'name' => 'Demo Customer ' . $i,
-                'email' => 'demo' . $i . '@example.com',
-                'phone' => '+971-50-DEMO' . str_pad((string) $i, 4, '0', STR_PAD_LEFT),
+                'name' => 'Demo Customer '.$i,
+                'email' => 'demo'.$i.'@example.com',
+                'phone' => '+971-50-DEMO'.str_pad((string) $i, 4, '0', STR_PAD_LEFT),
                 'is_active' => true,
             ]);
         }
@@ -118,7 +119,7 @@ class ManageDashboardData extends Command
                     $paymentStatus = 'paid';
                 }
 
-                $orderNumber = 'DEMO-' . strtoupper(substr(uniqid(), -6));
+                $orderNumber = 'DEMO-'.strtoupper(substr(uniqid(), -6));
 
                 $order = Order::create([
                     'restaurant_id' => $restaurant->id,

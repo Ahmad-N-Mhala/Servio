@@ -21,7 +21,7 @@ class SuperAdminController extends Controller
             ->get();
 
         return Inertia::render('Admin/SuperAdmins/Index', [
-            'superAdmins' => $superAdmins
+            'superAdmins' => $superAdmins,
         ]);
     }
 
@@ -32,7 +32,7 @@ class SuperAdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:' . User::class,
+            'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -55,11 +55,11 @@ class SuperAdminController extends Controller
             return redirect()->back()->with('error', 'You cannot delete yourself.');
         }
 
-        if (!$superAdmin->is_super_admin) {
+        if (! $superAdmin->is_super_admin) {
             return redirect()->back()->with('error', 'User is not a super admin.');
         }
 
-        // Hard Delete or toggle? Usually Hard Delete for purely admin users, 
+        // Hard Delete or toggle? Usually Hard Delete for purely admin users,
         // but if they might own test restaurants, maybe just toggle.
         // User asked to "add new users", let's assume standard user management.
         // We will delete the user account entirely to be safe, assuming these are dedicated admin accounts.

@@ -4,8 +4,12 @@
             {{ label }}
             <span v-if="required" class="text-rose-500">*</span>
         </label>
-        <div class="flex rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 bg-white dark:bg-slate-800 dark:ring-slate-700" :class="{'opacity-60 cursor-not-allowed bg-gray-50': disabled}">
-            <span class="flex select-none items-center pl-3 text-gray-500 dark:text-slate-400 sm:text-sm bg-gray-50 dark:bg-slate-900 rounded-l-xl border-r dark:border-slate-700 px-3 min-w-[60px] justify-center font-mono">
+        <div 
+            dir="ltr"
+            class="flex flex-row rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 bg-white dark:bg-slate-800 dark:ring-slate-700" 
+            :class="{'opacity-60 cursor-not-allowed bg-gray-50': disabled}"
+        >
+            <span class="flex select-none items-center text-gray-500 dark:text-slate-400 sm:text-sm bg-gray-50 dark:bg-slate-900 rounded-l-xl border-r dark:border-slate-700 px-3 min-w-[60px] justify-center font-mono">
                 {{ prefix }}
             </span>
             <input

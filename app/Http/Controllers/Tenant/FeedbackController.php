@@ -72,14 +72,15 @@ class FeedbackController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404);
+        }
 
         // Ensure settings is an array
         $currentSettings = $restaurant->settings;
         if (is_string($currentSettings)) {
             $currentSettings = json_decode($currentSettings, true) ?? [];
-        } elseif (!is_array($currentSettings)) {
+        } elseif (! is_array($currentSettings)) {
             $currentSettings = [];
         }
 
@@ -92,12 +93,12 @@ class FeedbackController extends Controller
         // Handle File Uploads
         elseif ($request->hasFile('header_logo')) {
             $path = $request->file('header_logo')->store('feedback/logos', 'public');
-            $feedbackDesign['header_logo'] = '/storage/' . $path;
+            $feedbackDesign['header_logo'] = '/storage/'.$path;
         }
 
         if ($request->hasFile('background_image')) {
             $path = $request->file('background_image')->store('feedback/backgrounds', 'public');
-            $feedbackDesign['background_image'] = '/storage/' . $path;
+            $feedbackDesign['background_image'] = '/storage/'.$path;
         }
 
         // Update Fields

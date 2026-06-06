@@ -23,20 +23,22 @@ class CommunicationController extends Controller
     {
         $templates = CommunicationTemplate::query()
             ->whereNull('restaurant_id') // System Templates
-            ->where('channels', 'like', '%"' . $channel . '"%') // Ideally simpler if strictly one channel per template
+            ->where('channels', 'like', '%"'.$channel.'"%') // Ideally simpler if strictly one channel per template
             ->orWhere('channels', $channel) // Handle if stored as string or array
             // Actually, best to just filter by logic if complex, but let's assume we stick to model.
             ->get();
 
         // Refined Query:
-        // Use whereRaw for generic JSON array check if possible or just get all system templates and filter 
+        // Use whereRaw for generic JSON array check if possible or just get all system templates and filter
         $templates = CommunicationTemplate::withoutGlobalScopes()->whereNull('restaurant_id')->orderBy('created_at', 'desc')->get();
 
         // Filter in PHP to handle array complexity
         $filtered = $templates->filter(function ($t) use ($channel) {
             $c = $t->channels; // cast to array by model
-            if (is_string($c))
+            if (is_string($c)) {
                 $c = json_decode($c, true) ?? [];
+            }
+
             return in_array($channel, $c ?? []);
         })->values();
 
@@ -130,6 +132,7 @@ class CommunicationController extends Controller
             abort(403, 'Cannot delete restaurant templates here.');
         }
         $template->delete();
+
         return redirect()->back()->with('success', 'System template deleted successfully.');
     }
 }

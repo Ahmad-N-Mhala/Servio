@@ -8,21 +8,25 @@
                     <p class="mt-2 text-gray-600">{{ $t('expenses.manage_description') }}</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button
+                    <Button
                         @click="exportExcel"
-                        class="px-5 py-3 bg-white text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm font-semibold flex items-center gap-2"
+                        variant="outline"
+                        size="md"
                     >
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Export
-                    </button>
-                    <button
+                        <template #icon>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </template>
+                        {{ $t('common.export') || 'Export' }}
+                    </Button>
+                    <Button
                         @click="showAddModal = true"
-                        class="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-hover transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
+                        variant="primary"
+                        size="md"
                     >
                         + {{ $t('expenses.add_expense') }}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -65,111 +69,99 @@
                 </div>
             </div>
 
-            <!-- Excel-like Table -->
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.category') }}</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.description') }}</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.amount') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.status') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.paid_date') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.evidence') || 'Evidence' }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ $t('expenses.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <!-- Fixed Inventory Purchases Row -->
-                            <tr class="bg-purple-50 border-b-2 border-purple-200">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-lg bg-purple-100 text-purple-800 flex items-center gap-2 w-fit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
-                                        {{ $t('expenses.inventory_purchases') }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-700 italic">{{ $t('expenses.auto_calculated_inventory') }}</div>
-                                    <div class="text-xs text-gray-500 mt-1">{{ $t('expenses.inventory_update_note') }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right">
-                                    <span class="text-lg font-bold text-purple-900">{{ formatCurrency(inventoryPurchases) }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                                        {{ $t('expenses.auto') }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                                    -
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-400">
-                                    -
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-400">
-                                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </td>
-                            </tr>
+            <Table
+                :columns="columns"
+                :data="tableData"
+                rowKey="id"
+                :highlightRow="(row) => row.is_inventory_purchase"
+                :emptyMessage="$t('expenses.no_expenses') || 'No expenses'"
+            >
+                <template #cell-category="{ row }">
+                    <span 
+                        :class="row.is_inventory_purchase 
+                            ? 'px-3 py-1 text-sm font-semibold rounded-lg bg-purple-100 text-purple-800 flex items-center gap-2 w-fit' 
+                            : 'px-3 py-1 text-sm font-semibold rounded-lg bg-blue-100 text-blue-800'"
+                    >
+                        <svg v-if="row.is_inventory_purchase" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        {{ row.category }}
+                    </span>
+                </template>
 
-                            <!-- Regular Expenses -->
-                            <tr v-for="expense in expenses" :key="expense.id" class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-lg bg-blue-100 text-blue-800">
-                                        {{ expense.category }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ expense.description || '-' }}</div>
-                                    <div v-if="expense.notes" class="text-xs text-gray-500 mt-1">{{ expense.notes }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right">
-                                    <span class="text-lg font-bold text-gray-900">{{ formatCurrency(expense.amount) }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span
-                                        :class="expense.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
-                                        class="px-3 py-1 text-xs font-semibold rounded-full"
-                                    >
-                                        {{ expense.payment_status === 'paid' ? $t('expenses.paid') : $t('expenses.pending') }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                                    {{ expense.paid_at || '-' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div v-if="expense.evidence_files && expense.evidence_files.length > 0" class="flex flex-col gap-1 items-center">
-                                        <a v-for="(file, index) in expense.evidence_files" :key="index" :href="file.url" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
-                                            Doc {{ Number(index) + 1 }}
-                                        </a>
-                                    </div>
-                                    <span v-else class="text-gray-400">-</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <button
-                                        @click="editExpense(expense)"
-                                        class="text-blue-600 hover:text-blue-800 font-medium mr-3 transition-colors"
-                                    >{{ $t('common.edit') }}</button>
-                                    <button
-                                        @click="deleteExpense(expense.id)"
-                                        class="text-red-600 hover:text-red-800 font-medium transition-colors"
-                                    >{{ $t('common.delete') }}</button>
-                                </td>
-                            </tr>
-                            <tr v-if="expenses.length === 0">
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                                    <div class="text-lg font-medium">{{ $t('expenses.no_expenses') }}</div>
-                                    <p class="text-sm mt-2">{{ $t('expenses.click_add_to_start') }}</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <template #cell-description="{ row }">
+                    <div v-if="row.is_inventory_purchase">
+                        <div class="text-sm text-gray-700 italic">{{ $t('expenses.auto_calculated_inventory') }}</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ $t('expenses.inventory_update_note') }}</div>
+                    </div>
+                    <div v-else>
+                        <div class="text-sm text-gray-900">{{ row.description || '-' }}</div>
+                        <div v-if="row.notes" class="text-xs text-gray-500 mt-1">{{ row.notes }}</div>
+                    </div>
+                </template>
+
+                <template #cell-amount="{ row }">
+                    <span :class="row.is_inventory_purchase ? 'text-lg font-bold text-purple-900' : 'text-lg font-bold text-gray-900'">
+                        {{ formatCurrency(row.amount) }}
+                    </span>
+                </template>
+
+                <template #cell-payment_status="{ row }">
+                    <span
+                        v-if="row.is_inventory_purchase"
+                        class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800"
+                    >
+                        {{ $t('expenses.auto') }}
+                    </span>
+                    <span
+                        v-else
+                        :class="row.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
+                        class="px-3 py-1 text-xs font-semibold rounded-full"
+                    >
+                        {{ row.payment_status === 'paid' ? $t('expenses.paid') : $t('expenses.pending') }}
+                    </span>
+                </template>
+
+                <template #cell-paid_at="{ row }">
+                    <span class="text-sm text-gray-600">{{ row.paid_at || '-' }}</span>
+                </template>
+
+                <template #cell-evidence_files="{ row }">
+                    <div v-if="row.is_inventory_purchase" class="text-gray-400">-</div>
+                    <div v-else-if="row.evidence_files && row.evidence_files.length > 0" class="flex flex-col gap-1 items-center">
+                        <a v-for="(file, index) in row.evidence_files" :key="index" :href="file.url" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+                            Doc {{ Number(index) + 1 }}
+                        </a>
+                    </div>
+                    <span v-else class="text-gray-400">-</span>
+                </template>
+
+                <template #actions="{ row }">
+                    <div v-if="row.is_inventory_purchase" class="text-gray-400">
+                        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <div v-else class="flex gap-2 justify-end">
+                        <Button
+                            @click="editExpense(row)"
+                            variant="ghost"
+                            size="sm"
+                            class="text-blue-600 hover:text-blue-800"
+                        >
+                            {{ $t('common.edit') }}
+                        </Button>
+                        <Button
+                            @click="deleteExpense(row.id)"
+                            variant="ghost"
+                            size="sm"
+                            class="text-red-600 hover:text-red-800"
+                        >
+                            {{ $t('common.delete') }}
+                        </Button>
+                    </div>
+                </template>
+            </Table>
 
             <!-- Add/Edit Modal -->
             <div v-if="showAddModal || editingExpense" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -258,19 +250,21 @@
                             </div>
 
                             <div class="flex justify-end gap-4 pt-4">
-                                <button
+                                <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="md"
                                     @click="closeModal"
-                                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all"
                                 >
                                     {{ $t('expenses.cancel') }}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="submit"
-                                    class="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-hover font-semibold transition-all shadow-lg"
+                                    variant="primary"
+                                    size="md"
                                 >
                                     {{ editingExpense ? $t('common.update') : $t('common.create') }} {{ $t('expenses.add_expense') }}
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     </div>
@@ -287,6 +281,8 @@ import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Select from '@/Components/Select.vue';
 import Input from '@/Components/Input.vue';
+import Table from '@/Components/Table.vue';
+import Button from '@/Components/Button.vue';
 
 const page = usePage();
 const { t } = useI18n();
@@ -304,6 +300,31 @@ const props = defineProps<{
     categories: string[];
     inventoryPurchases: number;
 }>();
+
+const columns = [
+    { key: 'category', label: t('expenses.category') },
+    { key: 'description', label: t('expenses.description') },
+    { key: 'amount', label: t('expenses.amount'), align: 'right' as const },
+    { key: 'payment_status', label: t('expenses.status'), align: 'center' as const },
+    { key: 'paid_at', label: t('expenses.paid_date'), align: 'center' as const },
+    { key: 'evidence_files', label: t('expenses.evidence') || 'Evidence', align: 'center' as const }
+];
+
+const tableData = computed(() => {
+    return [
+        {
+            id: 'inventory_purchases',
+            is_inventory_purchase: true,
+            category: t('expenses.inventory_purchases'),
+            description: t('expenses.auto_calculated_inventory'),
+            amount: props.inventoryPurchases,
+            payment_status: 'auto',
+            paid_at: '-',
+            evidence_files: []
+        },
+        ...props.expenses
+    ];
+});
 
 const showAddModal = ref(false);
 const editingExpense = ref<any>(null);

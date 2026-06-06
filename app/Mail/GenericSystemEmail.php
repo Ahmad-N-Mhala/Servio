@@ -15,8 +15,7 @@ class GenericSystemEmail extends Mailable
     public function __construct(
         public string $customSubject,
         public string $customContent
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Customer;
-use App\Models\LoyaltyPoint;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\RewardRedemption;
-use Illuminate\Support\Facades\DB;
 
 class LoyaltyService
 {
     protected int $pointsPerCurrency = 1; // 1 point per 1 currency unit (e.g., 1 AED = 1 point)
+
     protected int $pointsExpiryDays = 365; // Points expire after 1 year
 
     public function findOrCreateCustomer(Restaurant $restaurant, string $phone, ?string $name = null, ?string $email = null, ?string $birthDate = null): Customer
@@ -34,14 +33,17 @@ class LoyaltyService
 
         if ($customer->wasRecentlyCreated === false) {
             $updates = [];
-            if ($name && $customer->name !== $name)
+            if ($name && $customer->name !== $name) {
                 $updates['name'] = $name;
-            if ($email && $customer->email !== $email)
+            }
+            if ($email && $customer->email !== $email) {
                 $updates['email'] = $email;
-            if ($birthDate && $customer->birth_date !== $birthDate)
+            }
+            if ($birthDate && $customer->birth_date !== $birthDate) {
                 $updates['birth_date'] = $birthDate;
+            }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $customer->update($updates);
             }
         }
@@ -56,12 +58,12 @@ class LoyaltyService
             return;
         }
 
-        if (!$order->customer_id || $order->payment_status !== 'paid') {
+        if (! $order->customer_id || $order->payment_status !== 'paid') {
             return;
         }
 
         $customer = $order->customer;
-        if (!$customer) {
+        if (! $customer) {
             return;
         }
 
@@ -78,7 +80,7 @@ class LoyaltyService
             ->first();
 
         // If no active earning method, don't award points
-        if (!$earningMethod) {
+        if (! $earningMethod) {
             return;
         }
 
@@ -195,6 +197,7 @@ class LoyaltyService
             ->reduce(function ($carry, $order) {
                 $carry['total_orders']++;
                 $carry['total_spent'] += $order->total;
+
                 return $carry;
             }, ['total_orders' => 0, 'total_spent' => 0.0]);
 
@@ -208,12 +211,14 @@ class LoyaltyService
 
     public function revertOrderPoints(Order $order): void
     {
-        if (!$order->customer_id)
+        if (! $order->customer_id) {
             return;
+        }
 
         $customer = $order->customer;
-        if (!$customer)
+        if (! $customer) {
             return;
+        }
 
         // Revert Loyalty Points if any
         if ($order->points_earned > 0) {
@@ -267,7 +272,7 @@ class LoyaltyService
             throw new \Exception('Invalid reward for this customer');
         }
 
-        if (!$reward->isAvailable()) {
+        if (! $reward->isAvailable()) {
             throw new \Exception('Reward is not available');
         }
 
@@ -319,11 +324,11 @@ class LoyaltyService
         $customerId = (string) $customer->id;
         $restaurantId = (string) $customer->restaurant_id;
 
-        \Illuminate\Support\Facades\Log::info("LoyaltyService: sendRedemptionOtp called for Customer: " . $customerId);
+        \Illuminate\Support\Facades\Log::info('LoyaltyService: sendRedemptionOtp called for Customer: '.$customerId);
 
         try {
-            if (!$customer->phone) {
-                \Illuminate\Support\Facades\Log::warning("LoyaltyService: Customer " . $customerId . " has no phone number.");
+            if (! $customer->phone) {
+                \Illuminate\Support\Facades\Log::warning('LoyaltyService: Customer '.$customerId.' has no phone number.');
 
                 \App\Services\CommunicationService::log([
                     'restaurant_id' => $restaurantId,
@@ -331,7 +336,7 @@ class LoyaltyService
                     'type' => 'sms',
                     'status' => 'failed',
                     'message' => __('loyalty.otp_send_failed'),
-                    'error_message' => 'Missing customer phone'
+                    'error_message' => 'Missing customer phone',
                 ]);
 
                 throw new \Exception(__('loyalty.customer_no_phone'));
@@ -339,7 +344,7 @@ class LoyaltyService
 
             // Generate 6-digit OTP
             $otpCode = (string) rand(100000, 999999);
-            \Illuminate\Support\Facades\Log::info("LoyaltyService: Generated OTP for Phone: " . $customer->phone);
+            \Illuminate\Support\Facades\Log::info('LoyaltyService: Generated OTP for Phone: '.$customer->phone);
 
             // Store OTP
             \App\Models\CustomerOtp::create([
@@ -365,15 +370,15 @@ class LoyaltyService
             $smsSent = false;
 
             if ($template && is_array($template->channels) && in_array('sms', $template->channels)) {
-                \Illuminate\Support\Facades\Log::info("LoyaltyService: Sending via template ID: " . $template->id);
+                \Illuminate\Support\Facades\Log::info('LoyaltyService: Sending via template ID: '.$template->id);
                 $commResults = \App\Services\CustomerCommunicationService::send($template, $customer, ['otp' => $otpCode]);
                 $smsResult = $commResults['sms'] ?? null;
-                if ($smsResult && !$smsResult['success']) {
+                if ($smsResult && ! $smsResult['success']) {
                     throw new \Exception($smsResult['error'] ?? __('loyalty.otp_send_failed'));
                 }
                 $smsSent = true;
             } else {
-                \Illuminate\Support\Facades\Log::warning("LoyaltyService: No SMS template found. Falling back to localized system message.");
+                \Illuminate\Support\Facades\Log::warning('LoyaltyService: No SMS template found. Falling back to localized system message.');
 
                 $restaurant = \App\Models\Restaurant::find($restaurantId);
                 $restaurantName = $restaurant->name ?? config('app.name');
@@ -381,7 +386,7 @@ class LoyaltyService
                 // Use translated fallback message
                 $message = __('loyalty.emergency_otp_message', [
                     'restaurant' => $restaurantName,
-                    'otp' => $otpCode
+                    'otp' => $otpCode,
                 ]);
 
                 $result = app(\App\Services\SmsService::class)->send($customer->phone, $message);
@@ -397,7 +402,7 @@ class LoyaltyService
                     'error_message' => $result['error'] ?? ($template ? 'Template found but SMS channel disabled' : 'Template not found - System fallback used'),
                 ]);
 
-                if (!$smsSent) {
+                if (! $smsSent) {
                     throw new \Exception($result['error'] ?? __('loyalty.otp_send_failed'));
                 }
             }
@@ -405,10 +410,10 @@ class LoyaltyService
             return $smsSent;
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("LoyaltyService Failure: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('LoyaltyService Failure: '.$e->getMessage());
             throw $e; // Re-throw to be handled by controller
         } catch (\Throwable $t) {
-            \Illuminate\Support\Facades\Log::error("LoyaltyService Critical: " . $t->getMessage());
+            \Illuminate\Support\Facades\Log::error('LoyaltyService Critical: '.$t->getMessage());
             throw new \Exception(__('loyalty.otp_send_failed'));
         }
     }
@@ -427,6 +432,7 @@ class LoyaltyService
                 $validOtp->is_used = true;
                 $validOtp->save();
             }
+
             return true;
         }
 

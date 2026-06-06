@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\WasteLog;
 use App\Models\Ingredient;
 use App\Models\InventoryLog;
+use App\Models\WasteLog;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class WasteController extends Controller
 {
@@ -18,11 +18,11 @@ class WasteController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         // Enforce strict context - removed implicit fallback for super admin
-        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+        if (! $restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
             $restaurant = auth()->user()->currentRestaurant();
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
         }
 
@@ -69,7 +69,7 @@ class WasteController extends Controller
                 'batches' => function ($query) {
                     $query->where('quantity_remaining', '>', 0)
                         ->orderBy('created_at', 'asc');
-                }
+                },
             ])
             ->get();
 
@@ -88,7 +88,7 @@ class WasteController extends Controller
                         'quantity_remaining' => $batch->quantity_remaining,
                         'cost_per_unit' => $batch->cost_per_unit,
                     ];
-                })->toArray()
+                })->toArray(),
             ];
         })->toArray();
 
@@ -97,7 +97,7 @@ class WasteController extends Controller
             'wasteActivityLogs' => $wasteActivityLogs,
             'ingredients' => $ingredientsData,
             'filters' => $request->only(['start_date', 'end_date']),
-            'summary' => $summary
+            'summary' => $summary,
         ]);
     }
 
@@ -119,11 +119,11 @@ class WasteController extends Controller
                 $log->waste_amount,
                 $log->stock_after,
                 $log->total_loss,
-                $status
+                $status,
             ];
         }
 
-        $filename = "waste_report_" . date('Y_m_d_H_i_s') . ".csv";
+        $filename = 'waste_report_'.date('Y_m_d_H_i_s').'.csv';
         $handle = fopen('php://temp', 'r+');
         foreach ($csvData as $row) {
             fputcsv($handle, $row);
@@ -177,17 +177,17 @@ class WasteController extends Controller
             'ingredient_batch_id' => 'required|exists:ingredient_batches,id',
             'waste_amount' => 'required|numeric|min:0.0001',
             'log_date' => 'required|date',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
         $restaurant = $request->user()->currentRestaurant();
 
         // Enforce strict context - removed implicit fallback for super admin
-        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+        if (! $restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
             $restaurant = auth()->user()->currentRestaurant();
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
         }
 
@@ -205,7 +205,7 @@ class WasteController extends Controller
             // Check stock in batch
             if ((float) $batch->quantity_remaining < (float) $validated['waste_amount']) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'waste_amount' => "Insufficient stock in selected batch. Available: {$batch->quantity_remaining}"
+                    'waste_amount' => "Insufficient stock in selected batch. Available: {$batch->quantity_remaining}",
                 ]);
             }
 
@@ -246,7 +246,7 @@ class WasteController extends Controller
                 'action' => 'waste',
                 'quantity_change' => -$validated['waste_amount'],
                 'new_stock_level' => $ingredient->fresh()->current_stock,
-                'notes' => "Waste logged from Batch #{$batch->batch_number}: " . ($validated['notes'] ?? ''),
+                'notes' => "Waste logged from Batch #{$batch->batch_number}: ".($validated['notes'] ?? ''),
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -257,7 +257,7 @@ class WasteController extends Controller
             ]);
 
             return redirect()->back()->withErrors([
-                'error' => 'Failed to create waste log: ' . $e->getMessage()
+                'error' => 'Failed to create waste log: '.$e->getMessage(),
             ])->withInput();
         }
 
@@ -277,7 +277,7 @@ class WasteController extends Controller
             $loss = $validated['waste_amount'] * $wasteLog->cost_per_unit;
             $wasteLog->update([
                 'waste_amount' => $validated['waste_amount'],
-                'total_loss' => $loss
+                'total_loss' => $loss,
             ]);
 
             // Update Stock if linked to ingredient
@@ -295,7 +295,7 @@ class WasteController extends Controller
                         'action' => 'waste_update',
                         'quantity_change' => -$diff,
                         'new_stock_level' => $ingredient->fresh()->current_stock,
-                        'notes' => 'Waste adjusted by ' . $diff,
+                        'notes' => 'Waste adjusted by '.$diff,
                     ]);
                 }
             }

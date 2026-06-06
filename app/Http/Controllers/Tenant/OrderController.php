@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Tenant;
 
+use App\Events\OrderUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Services\LoyaltyService;
 use App\Services\InventoryService;
-use App\Events\OrderUpdated;
+use App\Services\LoyaltyService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,14 +19,14 @@ class OrderController extends Controller
     public function __construct(
         protected LoyaltyService $loyaltyService,
         protected InventoryService $inventoryService
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
@@ -44,7 +42,7 @@ class OrderController extends Controller
                 'table',
                 'items.menuItem' => function ($q) {
                     $q->withTrashed();
-                }
+                },
             ]);
 
         // Search
@@ -90,8 +88,6 @@ class OrderController extends Controller
         $orders = $query->paginate(10)
             ->withQueryString();
 
-
-
         return Inertia::render('Orders/Live', [
             'orders' => $orders,
             'currency' => $restaurant->currency ?? config('app.currency', 'AED'),
@@ -111,8 +107,9 @@ class OrderController extends Controller
     public function export(Request $request)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $query = Order::where('restaurant_id', $restaurant->id)
             ->where('status', '!=', 'deleted')
@@ -127,7 +124,7 @@ class OrderController extends Controller
                 'table',
                 'items.menuItem' => function ($q) {
                     $q->withTrashed();
-                }
+                },
             ]);
 
         // Search
@@ -171,11 +168,11 @@ class OrderController extends Controller
         $orders = $query->get();
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=orders_" . date('Y-m-d_H-i') . ".csv",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=orders_'.date('Y-m-d_H-i').'.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = [
@@ -189,7 +186,7 @@ class OrderController extends Controller
             __('orders.total'),
             __('reports.currency'),
             __('reports.delivery_provider'),
-            __('reports.created_at')
+            __('reports.created_at'),
         ];
 
         $callback = function () use ($orders, $columns) {
@@ -197,7 +194,7 @@ class OrderController extends Controller
             fputcsv($file, $columns);
 
             foreach ($orders as $order) {
-                $statusKey = 'orders.' . strtolower($order->status);
+                $statusKey = 'orders.'.strtolower($order->status);
                 $statusTranslated = __($statusKey);
                 // If translation equals key (missing), fallback to ucfirst
                 if ($statusTranslated === $statusKey) {
@@ -215,7 +212,7 @@ class OrderController extends Controller
                     $order->total,
                     $order->currency,
                     ucfirst($order->delivery_provider ?? ''),
-                    $order->created_at->format('Y-m-d H:i:s')
+                    $order->created_at->format('Y-m-d H:i:s'),
                 ];
 
                 fputcsv($file, $row);
@@ -232,8 +229,9 @@ class OrderController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('pos_system');
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Get tables with availability status
         $tables = \App\Models\Table::where('restaurant_id', $restaurant->id)
@@ -251,7 +249,7 @@ class OrderController extends Controller
                     'capacity' => $table->capacity,
                     'location' => $table->location,
                     'status' => $table->status,
-                    'is_available' => !$hasActiveOrder, // Available if no active orders
+                    'is_available' => ! $hasActiveOrder, // Available if no active orders
                 ];
             });
 
@@ -260,7 +258,7 @@ class OrderController extends Controller
             ->with([
                 'items' => function ($query) {
                     $query->with(['ingredients', 'extras', 'bundles.childItem']);
-                }
+                },
             ])
             ->orderBy('sort_order')
             ->get()
@@ -270,11 +268,12 @@ class OrderController extends Controller
             ->values()
             ->map(function ($category) {
                 // Sort items by name in PHP (handle JSON translations)
-                $sortedItems = $category->items->filter(fn($item) => (bool) $item->is_available)->sortBy(function ($item) {
+                $sortedItems = $category->items->filter(fn ($item) => (bool) $item->is_available)->sortBy(function ($item) {
                     $name = $item->name;
                     if (is_array($name)) {
                         return $name['en'] ?? $name['ar'] ?? '';
                     }
+
                     return $name;
                 })->each(function ($item) {
                     $item->append('inventory_status');
@@ -347,8 +346,8 @@ class OrderController extends Controller
                 return [
                     $ing->id => [
                         'current_stock' => (float) $ing->current_stock,
-                        'name' => $ing->name
-                    ]
+                        'name' => $ing->name,
+                    ],
                 ];
             });
 
@@ -357,7 +356,7 @@ class OrderController extends Controller
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => collect($batches)->sum('quantity_remaining'));
+            ->map(fn ($batches) => collect($batches)->sum('quantity_remaining'));
 
         // Calculate stock availability for each menu item
         $menuItemsWithIngredients = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get();
@@ -367,7 +366,7 @@ class OrderController extends Controller
             if ($menuItem->ingredients->isNotEmpty()) {
                 foreach ($menuItem->ingredients as $ingredient) {
                     // Skip if pivot data is missing
-                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity)) {
+                    if (! $ingredient->pivot || ! isset($ingredient->pivot->quantity)) {
                         continue;
                     }
 
@@ -442,12 +441,13 @@ class OrderController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Note: MongoDB transactions require replica sets, so we execute without transaction wrapper
         // Update table status if dine-in
-        if ($validated['type'] === 'dine_in' && !empty($validated['table_id'])) {
+        if ($validated['type'] === 'dine_in' && ! empty($validated['table_id'])) {
             $table = \App\Models\Table::find($validated['table_id']);
             if ($table) {
                 // Ensure table belongs to restaurant
@@ -460,63 +460,63 @@ class OrderController extends Controller
 
         // ====== PRE-VALIDATE REWARD ======
         $customer = null;
-        if (!empty($validated['customer_id'])) {
+        if (! empty($validated['customer_id'])) {
             $customer = \App\Models\Customer::find($validated['customer_id']);
         }
 
-        if (!$customer && !empty($validated['customer_phone'])) {
+        if (! $customer && ! empty($validated['customer_phone'])) {
             $phone = $validated['customer_phone'];
             // Basic normalization for UAE if needed, but search both
             $customer = \App\Models\Customer::where('restaurant_id', $restaurant->id)
                 ->where(function ($q) use ($phone) {
                     $q->where('phone', $phone)
-                        ->orWhere('phone', '+' . ltrim($phone, '+'))
+                        ->orWhere('phone', '+'.ltrim($phone, '+'))
                         ->orWhere('phone', str_replace('+971', '', $phone))
-                        ->orWhere('phone', '+971' . ltrim($phone, '0'));
+                        ->orWhere('phone', '+971'.ltrim($phone, '0'));
                 })->first();
         }
 
-        if (!empty($validated['reward_id']) && $customer) {
-            \Illuminate\Support\Facades\Log::info("OrderController: Reward ID provided, starting reward pre-validation.");
+        if (! empty($validated['reward_id']) && $customer) {
+            \Illuminate\Support\Facades\Log::info('OrderController: Reward ID provided, starting reward pre-validation.');
             $reward = \App\Models\Reward::find($validated['reward_id']);
 
             if ($reward) {
                 if ($reward->min_order_value > 0 && $validated['subtotal'] < $reward->min_order_value) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'reward_id' => [__('loyalty.min_order', ['amount' => (float) $reward->min_order_value])]
+                        'reward_id' => [__('loyalty.min_order', ['amount' => (float) $reward->min_order_value])],
                     ]);
                 }
 
                 // Verify OTP early
                 if (empty($validated['otp'])) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'otp' => [__('loyalty.verify_otp_required')]
+                        'otp' => [__('loyalty.verify_otp_required')],
                     ]);
                 }
 
-                if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+                if (! $this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'otp' => [__('loyalty.invalid_otp')]
+                        'otp' => [__('loyalty.invalid_otp')],
                     ]);
                 }
 
                 // Check points balance
                 $lp = $customer->loyaltyPoints;
-                if (!$lp || $lp->balance < $reward->points_required) {
+                if (! $lp || $lp->balance < $reward->points_required) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'reward_id' => [__('loyalty.insufficient_points')]
+                        'reward_id' => [__('loyalty.insufficient_points')],
                     ]);
                 }
 
-                \Illuminate\Support\Facades\Log::info("OrderController: Reward pre-validation successful for Customer: " . $customer->id);
+                \Illuminate\Support\Facades\Log::info('OrderController: Reward pre-validation successful for Customer: '.$customer->id);
             } else {
                 \Illuminate\Support\Facades\Log::warning("OrderController: Reward ID {$validated['reward_id']} not found during pre-validation.");
             }
         }
-        \Illuminate\Support\Facades\Log::info("OrderController: Initial validation and setup complete.");
+        \Illuminate\Support\Facades\Log::info('OrderController: Initial validation and setup complete.');
 
         // Find or create customer ONLY if not already found and phone is provided
-        if (!$customer && !empty($validated['customer_phone'])) {
+        if (! $customer && ! empty($validated['customer_phone'])) {
             $customer = $this->loyaltyService->findOrCreateCustomer(
                 $restaurant,
                 $validated['customer_phone'],
@@ -533,8 +533,15 @@ class OrderController extends Controller
 
         $ingredientIds = [];
         foreach ($menuItems as $item) {
-            if ($item->ingredients->isNotEmpty()) {
-                $ingredientIds = array_merge($ingredientIds, $item->ingredients->pluck('id')->toArray());
+            $recipe = $item->recipe ?? [];
+            if (! empty($recipe)) {
+                foreach ($recipe as $component) {
+                    if (! empty($component['ingredient_id'])) {
+                        $ingredientIds[] = (string) $component['ingredient_id'];
+                    }
+                }
+            } elseif ($item->ingredients->isNotEmpty()) {
+                $ingredientIds = array_merge($ingredientIds, $item->ingredients->pluck('id')->map(fn ($id) => (string) $id)->toArray());
             }
         }
         $ingredientIds = array_unique($ingredientIds);
@@ -543,15 +550,38 @@ class OrderController extends Controller
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => collect($batches)->sum('quantity_remaining'));
+            ->map(fn ($batches) => collect($batches)->sum('quantity_remaining'));
 
         foreach ($validated['items'] as $item) {
             $menuItem = $menuItems[$item['menu_item_id']] ?? null;
+            if (! $menuItem) {
+                continue;
+            }
 
-            if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
+            $recipe = $menuItem->recipe ?? [];
+            if (! empty($recipe)) {
+                foreach ($recipe as $component) {
+                    $ingId = $component['ingredient_id'] ?? null;
+                    $neededPerServing = (float) ($component['quantity'] ?? 0);
+
+                    if ($ingId && $neededPerServing > 0) {
+                        $neededQty = $neededPerServing * $item['quantity'];
+                        $availableStock = $allBatches[(string) $ingId] ?? 0;
+
+                        if ($availableStock < $neededQty) {
+                            $menuItemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
+                            $ingredient = \App\Models\Ingredient::find($ingId);
+                            $ingredientName = $ingredient ? (is_array($ingredient->name) ? ($ingredient->name['en'] ?? reset($ingredient->name)) : $ingredient->name) : 'Unknown';
+                            $unit = $ingredient ? $ingredient->unit : 'pcs';
+
+                            $stockErrors[] = "{$menuItemName} - Insufficient stock for ingredient '{$ingredientName}'. Available: {$availableStock} {$unit}, Required: {$neededQty} {$unit}";
+                        }
+                    }
+                }
+            } elseif ($menuItem->ingredients->isNotEmpty()) {
                 foreach ($menuItem->ingredients as $ingredient) {
                     // Skip if pivot data is missing
-                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity)) {
+                    if (! $ingredient->pivot || ! isset($ingredient->pivot->quantity)) {
                         continue;
                     }
 
@@ -579,9 +609,9 @@ class OrderController extends Controller
             }
         }
         // If there are stock errors, abort the transaction and return error
-        if (!empty($stockErrors)) {
+        if (! empty($stockErrors)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'items' => $stockErrors
+                'items' => $stockErrors,
             ]);
         }
         // ====== END STOCK VALIDATION ======
@@ -592,7 +622,7 @@ class OrderController extends Controller
 
         for ($i = 0; $i < $maxRetries; $i++) {
             $transactionNumber = $restaurant->next_order_number ?? 1;
-            $orderNumber = 'ORD-' . $transactionNumber;
+            $orderNumber = 'ORD-'.$transactionNumber;
 
             try {
                 // Create order
@@ -629,24 +659,26 @@ class OrderController extends Controller
                     \Illuminate\Support\Facades\Log::warning("Duplicate order number detected: {$orderNumber}. Incrementing and retrying...");
                     $restaurant->increment('next_order_number');
                     $restaurant->refresh();
+
                     continue;
                 }
                 throw $e; // Rethrow other exceptions
             }
         }
 
-        if (!$order) {
+        if (! $order) {
             throw new \Exception("Failed to generate a unique order number after {$maxRetries} attempts.");
         }
 
         // Create order items
         foreach ($validated['items'] as $item) {
             $menuItem = $menuItems[$item['menu_item_id']] ?? null;
-            if (!$menuItem)
-                continue; // Should be handled by validation, but safe check
+            if (! $menuItem) {
+                continue;
+            } // Should be handled by validation, but safe check
 
             $extrasCost = 0;
-            if (!empty($item['extras']) && is_array($item['extras'])) {
+            if (! empty($item['extras']) && is_array($item['extras'])) {
                 foreach ($item['extras'] as $extra) {
                     // Assuming extra price is per unit of the main item
                     $extrasCost += (float) ($extra['price'] ?? 0);
@@ -666,19 +698,18 @@ class OrderController extends Controller
             ]);
         }
 
-
         // Handle Reward Redemption (Actual Deduction)
-        if (!empty($validated['reward_id']) && $customer) {
+        if (! empty($validated['reward_id']) && $customer) {
             $reward = \App\Models\Reward::find($validated['reward_id']);
             if ($reward) {
                 try {
-                    \Illuminate\Support\Facades\Log::info("OrderController: Processing reward redemption for Reward: " . $reward->id);
+                    \Illuminate\Support\Facades\Log::info('OrderController: Processing reward redemption for Reward: '.$reward->id);
                     $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
                     $redemption->markAsUsed((string) $order->id);
-                    \Illuminate\Support\Facades\Log::info("OrderController: Reward " . $reward->id . " marked as used for order " . $order->id);
+                    \Illuminate\Support\Facades\Log::info('OrderController: Reward '.$reward->id.' marked as used for order '.$order->id);
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("OrderController: Reward redemption FAILED: " . $e->getMessage());
-                    // We don't throw here to avoid breaking the order flow if it's already created, 
+                    \Illuminate\Support\Facades\Log::error('OrderController: Reward redemption FAILED: '.$e->getMessage());
+                    // We don't throw here to avoid breaking the order flow if it's already created,
                 }
             }
         }
@@ -694,10 +725,10 @@ class OrderController extends Controller
                 },
                 'table' => function ($q) {
                     $q->select(['id', 'name', 'restaurant_id']);
-                }
+                },
             ]), 'created'))->toOthers();
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("OrderController: Broadcasting failed: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('OrderController: Broadcasting failed: '.$e->getMessage());
         }
 
         // Refresh to check for points (if points_earned is calculated after order creation)
@@ -749,7 +780,7 @@ class OrderController extends Controller
                 }
 
                 // Deduct Extras
-                if (!empty($orderItem->extras)) {
+                if (! empty($orderItem->extras)) {
                     foreach ($orderItem->extras as $extra) {
                         // Check structure: assuming frontend sends { name, price, ingredient_id, quantity }
                         // or we might need to look it up if only ID sent. Assuming full object snapshot for robustness in order history.
@@ -804,7 +835,7 @@ class OrderController extends Controller
         $settings = $restaurant->receipt_template;
         if (is_object($settings) && method_exists($settings, 'getArrayCopy')) {
             $settings = $settings->getArrayCopy();
-        } elseif (!is_array($settings)) {
+        } elseif (! is_array($settings)) {
             $settings = [];
         }
 
@@ -837,14 +868,15 @@ class OrderController extends Controller
      */
     private function processInventoryForMenuItem($menuItem, $qty, $order)
     {
-        if (!$menuItem)
+        if (! $menuItem) {
             return;
+        }
 
         $itemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
 
         // A. If Meal, process bundles
         if (($menuItem->type ?? 'item') === 'meal') {
-            if (!$menuItem->relationLoaded('bundles')) {
+            if (! $menuItem->relationLoaded('bundles')) {
                 $menuItem->load(['bundles.childItem']);
             }
 
@@ -863,7 +895,7 @@ class OrderController extends Controller
 
         // B. Process Recipe (Standard or Legacy)
         $recipe = $menuItem->recipe ?? [];
-        if (!empty($recipe)) {
+        if (! empty($recipe)) {
             foreach ($recipe as $component) {
                 $ingId = $component['ingredient_id'] ?? null;
                 $needed = (float) ($component['quantity'] ?? 0);

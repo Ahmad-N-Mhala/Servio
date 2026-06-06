@@ -2,16 +2,17 @@
 
 namespace App\Services\Delivery\Providers;
 
-use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
+use App\Services\Delivery\DeliveryProviderInterface;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class CareemProvider implements DeliveryProviderInterface
 {
     // Research indicates 'careemnow' domain is used for partners
     protected $baseUrl = 'https://api.careemnow.com/food/v1';
+
     protected $authUrl = 'https://auth.careemnow.com/oauth/token'; // Hypothetical Standard OAuth
 
     /**
@@ -19,7 +20,7 @@ class CareemProvider implements DeliveryProviderInterface
      */
     protected function getAccessToken(DeliveryIntegration $integration): ?string
     {
-        $cacheKey = "careem_token_" . $integration->id;
+        $cacheKey = 'careem_token_'.$integration->id;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -43,10 +44,12 @@ class CareemProvider implements DeliveryProviderInterface
                 return $token;
             }
 
-            Log::error('Careem Token Fetch Failed: ' . $response->body());
+            Log::error('Careem Token Fetch Failed: '.$response->body());
+
             return null;
         } catch (\Exception $e) {
-            Log::error('Careem Token Exception: ' . $e->getMessage());
+            Log::error('Careem Token Exception: '.$e->getMessage());
+
             return null;
         }
     }
@@ -95,8 +98,9 @@ class CareemProvider implements DeliveryProviderInterface
     public function pushMenu(DeliveryIntegration $integration, array $menuData): bool
     {
         $token = $this->getAccessToken($integration);
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             $response = Http::withToken($token)
@@ -105,7 +109,8 @@ class CareemProvider implements DeliveryProviderInterface
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error('Careem Menu Push Failed: ' . $e->getMessage());
+            Log::error('Careem Menu Push Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -113,8 +118,9 @@ class CareemProvider implements DeliveryProviderInterface
     public function acceptOrder(DeliveryIntegration $integration, string $externalOrderId): bool
     {
         $token = $this->getAccessToken($integration);
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             $response = Http::withToken($token)
@@ -129,13 +135,14 @@ class CareemProvider implements DeliveryProviderInterface
     public function rejectOrder(DeliveryIntegration $integration, string $externalOrderId, string $reason): bool
     {
         $token = $this->getAccessToken($integration);
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/reject", [
-                    'rejection_reason' => $reason
+                    'rejection_reason' => $reason,
                 ]);
 
             return $response->successful();

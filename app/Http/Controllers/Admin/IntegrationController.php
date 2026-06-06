@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\DeliveryIntegration;
 use App\Models\Restaurant;
+use Illuminate\Http\Request;
 
 class IntegrationController extends Controller
 {
@@ -16,10 +16,10 @@ class IntegrationController extends Controller
         if ($request->input('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('provider', 'like', '%' . $search . '%')
-                    ->orWhere('api_key', 'like', '%' . $search . '%')
+                $q->where('provider', 'like', '%'.$search.'%')
+                    ->orWhere('api_key', 'like', '%'.$search.'%')
                     ->orWhereHas('restaurant', function ($subQ) use ($search) {
-                        $subQ->where('name', 'like', '%' . $search . '%');
+                        $subQ->where('name', 'like', '%'.$search.'%');
                     });
             });
         }

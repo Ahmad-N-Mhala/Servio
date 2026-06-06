@@ -156,4 +156,5 @@ return [
     'item_selected' => 'تم اختيار العنصر',
     'no_item_selected' => 'لم يتم اختيار عنصر',
     'desc' => 'الوصف',
+    'reward_type' => 'Reward Type',
 ];

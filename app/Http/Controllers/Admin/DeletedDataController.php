@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Restaurant;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DeletedDataController extends Controller
@@ -55,7 +55,7 @@ class DeletedDataController extends Controller
 
             return redirect()->back()->with('success', 'User restored successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to restore user: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to restore user: '.$e->getMessage());
         }
     }
 }

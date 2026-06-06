@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
 use App\Models\IngredientBatch;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class InventoryReminderController extends Controller
@@ -18,6 +17,7 @@ class InventoryReminderController extends Controller
             ->filter(function ($ingredient) {
                 $current = (float) ($ingredient->current_stock ?? 0);
                 $reorder = (float) ($ingredient->reorder_level ?? 0);
+
                 return $current <= $reorder;
             })
             ->map(function ($ingredient) {
@@ -42,6 +42,7 @@ class InventoryReminderController extends Controller
             ->filter(function ($batch) {
                 $reminderDays = (int) ($batch->reminder_days_before ?? 7);
                 $thresholdDate = now()->addDays($reminderDays);
+
                 return $batch->expiration_date && $batch->expiration_date <= $thresholdDate;
             })
             ->map(function ($batch) {

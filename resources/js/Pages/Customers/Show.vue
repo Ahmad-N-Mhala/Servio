@@ -40,36 +40,28 @@
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-bold text-gray-900">{{ $t('customers.points_log') }}</h2>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.description') }}</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('customers.points') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <tr v-for="log in transactions" :key="log.id" class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                            {{ new Date(log.created_at).toLocaleDateString() }}
-                                            <span class="text-xs text-gray-400 block">{{ new Date(log.created_at).toLocaleTimeString() }}</span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900">
-                                            {{ log.description }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-right font-medium" :class="log.points > 0 ? 'text-green-600' : 'text-red-600'">
-                                            {{ log.points > 0 ? '+' : '' }}{{ log.points }}
-                                        </td>
-                                    </tr>
-                                    <tr v-if="transactions.length === 0">
-                                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">{{ $t('customers.no_history') }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <Table
+                        :columns="logColumns"
+                        :data="transactions || []"
+                        :emptyMessage="$t('customers.no_history')"
+                    >
+                        <template #cell-created_at="{ row }">
+                            <span class="text-sm text-gray-500 whitespace-nowrap font-mono">
+                                {{ new Date(row.created_at).toLocaleDateString() }}
+                                <span class="text-xs text-gray-400 block">{{ new Date(row.created_at).toLocaleTimeString() }}</span>
+                            </span>
+                        </template>
+                        <template #cell-description="{ row }">
+                            <span class="text-sm text-gray-900">
+                                {{ row.description }}
+                            </span>
+                        </template>
+                        <template #cell-points="{ row }">
+                            <span class="text-sm font-bold font-mono" :class="row.points > 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ row.points > 0 ? '+' : '' }}{{ row.points }}
+                            </span>
+                        </template>
+                    </Table>
                 </div>
 
                 <!-- Order History -->
@@ -77,50 +69,42 @@
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-bold text-gray-900">{{ $t('customers.order_history') }}</h2>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('customers.order_number') }}</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.status') }}</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ $t('common.total') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 text-sm font-medium text-primary">
-                                            {{ order.order_number }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                            {{ new Date(order.created_at).toLocaleDateString() }}
-                                        </td>
-                                        <td class="px-6 py-4 text-sm">
-                                            <span class="px-2 py-1 rounded-full text-xs font-semibold capitalize block w-fit"
-                                                :class="{
-                                                    'bg-green-100 text-green-800': order.status === 'completed',
-                                                    'bg-yellow-100 text-yellow-800': order.status === 'pending' || order.status === 'processing',
-                                                    'bg-red-100 text-red-800': order.status === 'cancelled' || order.status === 'deleted',
-                                                    'bg-gray-100 text-gray-800': !['completed', 'pending', 'processing', 'cancelled', 'deleted'].includes(order.status)
-                                                }">
-                                                {{ order.status }}
-                                                <span v-if="['cancelled', 'deleted'].includes(order.status)" class="block text-[10px] opacity-80 font-normal">
-                                                    {{ new Date(order.updated_at).toLocaleDateString() }}
-                                                </span>
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-900 text-right font-medium">
-                                            {{ order.total }} {{ order.currency }}
-                                        </td>
-                                    </tr>
-                                    <tr v-if="orders.data.length === 0">
-                                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">{{ $t('customers.no_orders') }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <Table
+                        :columns="orderColumns"
+                        :data="orders.data || []"
+                        :pagination="orders"
+                        :emptyMessage="$t('customers.no_orders')"
+                    >
+                        <template #cell-order_number="{ row }">
+                            <span class="text-sm font-bold text-primary font-mono">
+                                {{ row.order_number }}
+                            </span>
+                        </template>
+                        <template #cell-created_at="{ row }">
+                            <span class="text-sm text-gray-500 whitespace-nowrap font-mono">
+                                {{ new Date(row.created_at).toLocaleDateString() }}
+                            </span>
+                        </template>
+                        <template #cell-status="{ row }">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold capitalize block w-fit"
+                                :class="{
+                                    'bg-green-100 text-green-800': row.status === 'completed',
+                                    'bg-yellow-100 text-yellow-800': row.status === 'pending' || row.status === 'processing',
+                                    'bg-red-100 text-red-800': row.status === 'cancelled' || row.status === 'deleted',
+                                    'bg-gray-100 text-gray-800': !['completed', 'pending', 'processing', 'cancelled', 'deleted'].includes(row.status)
+                                }">
+                                {{ row.status }}
+                                <span v-if="['cancelled', 'deleted'].includes(row.status)" class="block text-[10px] opacity-80 font-normal">
+                                    {{ new Date(row.updated_at).toLocaleDateString() }}
+                                </span>
+                            </span>
+                        </template>
+                        <template #cell-total="{ row }">
+                            <span class="text-sm font-bold font-mono text-gray-900">
+                                {{ row.total }} {{ row.currency }}
+                            </span>
+                        </template>
+                    </Table>
                 </div>
             </div>
         </div>
@@ -129,10 +113,13 @@
 
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import Table from '@/Components/Table.vue';
 import { computed } from 'vue';
 
 const page = usePage();
+const { t } = useI18n();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 
 const props = defineProps<{
@@ -141,6 +128,19 @@ const props = defineProps<{
     transactions: any[];
     redemptions: any[];
 }>();
+
+const logColumns = computed(() => [
+    { key: 'created_at', label: t('common.date'), sortable: true },
+    { key: 'description', label: t('common.description'), sortable: true },
+    { key: 'points', label: t('customers.points'), sortable: true, align: 'right' as const }
+]);
+
+const orderColumns = computed(() => [
+    { key: 'order_number', label: t('customers.order_number'), sortable: true },
+    { key: 'created_at', label: t('common.date'), sortable: true },
+    { key: 'status', label: t('common.status'), sortable: true },
+    { key: 'total', label: t('common.total'), sortable: true, align: 'right' as const }
+]);
 
 const route = (window as any).route;
 </script>

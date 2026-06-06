@@ -32,7 +32,7 @@ class DashboardController extends Controller
             ->map(function ($group, $month) {
                 return [
                     'month' => $month,
-                    'count' => $group->count()
+                    'count' => $group->count(),
                 ];
             })
             ->values();
@@ -47,7 +47,7 @@ class DashboardController extends Controller
             ->map(function ($group, $name) {
                 return [
                     'plan_name' => $name,
-                    'count' => $group->count()
+                    'count' => $group->count(),
                 ];
             })
             ->values();
@@ -61,7 +61,7 @@ class DashboardController extends Controller
             ->map(function ($group, $month) {
                 return [
                     'month' => $month,
-                    'revenue' => round($group->sum('total'), 2)
+                    'revenue' => round($group->sum('total'), 2),
                 ];
             })
             ->values();
@@ -70,7 +70,7 @@ class DashboardController extends Controller
         // Efficient way: Aggregate orders by restaurant_id
         $topRestaurantIds = \App\Models\Order::get(['restaurant_id'])
             ->groupBy('restaurant_id')
-            ->map(fn($orders) => $orders->count())
+            ->map(fn ($orders) => $orders->count())
             ->sortDesc()
             ->take(5);
 
@@ -79,7 +79,7 @@ class DashboardController extends Controller
         $charts['top_restaurants'] = $topRestaurantIds->map(function ($count, $id) use ($restaurantNames) {
             return [
                 'name' => $restaurantNames[$id] ?? 'Unknown',
-                'orders' => $count
+                'orders' => $count,
             ];
         })->values();
 
@@ -89,7 +89,7 @@ class DashboardController extends Controller
             ->map(function ($group, $status) {
                 return [
                     'status' => $status,
-                    'count' => $group->count()
+                    'count' => $group->count(),
                 ];
             })
             ->values();

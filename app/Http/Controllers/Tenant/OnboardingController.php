@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -35,8 +34,8 @@ class OnboardingController extends Controller
 
         // Get the base domain (skip 127.0.0.1, prefer localhost)
         $baseDomain = collect(config('tenancy.central_domains'))
-            ->reject(fn($domain) => in_array($domain, ['127.0.0.1']))
-            ->first(fn($domain) => $domain === 'localhost') ?? collect(config('tenancy.central_domains'))->reject(fn($domain) => in_array($domain, ['127.0.0.1', 'localhost']))->first() ?? 'localhost';
+            ->reject(fn ($domain) => in_array($domain, ['127.0.0.1']))
+            ->first(fn ($domain) => $domain === 'localhost') ?? collect(config('tenancy.central_domains'))->reject(fn ($domain) => in_array($domain, ['127.0.0.1', 'localhost']))->first() ?? 'localhost';
 
         // Auto-detect country from IP
         $defaultCountry = $this->getCountryFromIp(request()->ip());
@@ -58,7 +57,7 @@ class OnboardingController extends Controller
      */
     private function getCountryFromIp(?string $ip): string
     {
-        if (!$ip || in_array($ip, ['127.0.0.1', '::1'])) {
+        if (! $ip || in_array($ip, ['127.0.0.1', '::1'])) {
             return 'United Arab Emirates';
         }
 
@@ -117,7 +116,7 @@ class OnboardingController extends Controller
         // FORCE DISABLE TRANSACTIONS for standalone MongoDB support
         $useTransactions = false;
 
-        /* 
+        /*
         // Transaction logic disabled to support standalone MongoDB
         try {
             DB::beginTransaction();
@@ -147,7 +146,7 @@ class OnboardingController extends Controller
             // 2. Create Restaurant (Central)
             $restaurant = \App\Models\Restaurant::create([
                 'name' => $validated['restaurant_name'],
-                'slug' => Str::slug($validated['restaurant_name']) . '-' . Str::random(6),
+                'slug' => Str::slug($validated['restaurant_name']).'-'.Str::random(6),
                 'currency' => $currency, // Dynamic currency based on country
                 'locale' => 'en', // Default locale
                 'country' => $validated['country'],
@@ -172,7 +171,7 @@ class OnboardingController extends Controller
             ]);
 
             // 4. Create Staff Record
-            $staff = new \App\Models\Staff();
+            $staff = new \App\Models\Staff;
             $staff->restaurant_id = $restaurant->id;
             $staff->user_id = $user->id;
             $staff->role = 'owner';
@@ -181,7 +180,7 @@ class OnboardingController extends Controller
             $staff->save();
 
             // 5. Create Default Earning Method (Conditional)
-            if ($hasLoyalty && !empty($validated['earning_method_type'])) {
+            if ($hasLoyalty && ! empty($validated['earning_method_type'])) {
                 \App\Models\EarningMethod::create([
                     'restaurant_id' => $restaurant->id,
                     'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
@@ -196,15 +195,13 @@ class OnboardingController extends Controller
 
             // 6. Create Subscription
             // For free plans, create active subscription immediately and bypass payment
-            $sub = \App\Models\Subscription::create([
+            $sub = \App\Models\RestaurantSubscription::create([
                 'restaurant_id' => $restaurant->id,
                 'plan_id' => $plan->id,
                 'status' => $isFree ? 'active' : 'pending', // Active for free, pending for paid
                 'billing_cycle' => $validated['billing_cycle'],
                 'starts_at' => now(),
                 'ends_at' => $validated['billing_cycle'] === 'yearly' ? now()->addYear() : now()->addMonth(),
-                // Generate a dummy ID to satisfy unique index constraint on MongoDB where nulls collide
-                'stripe_subscription_id' => 'sub_free_' . Str::random(16),
             ]);
 
             // Trigger Subscription Notification
@@ -212,7 +209,7 @@ class OnboardingController extends Controller
                 app(\App\Services\CommunicationService::class)->sendNotification('subscription_created', $user, [
                     'plan_name' => is_array($plan->name) ? ($plan->name['en'] ?? reset($plan->name)) : $plan->name,
                     'expiry_date' => $sub->ends_at->format('Y-m-d'),
-                    'restaurant_name' => $restaurant->name
+                    'restaurant_name' => $restaurant->name,
                 ]);
             }
 
@@ -221,7 +218,7 @@ class OnboardingController extends Controller
                     DB::commit();
                 } catch (\Exception $e) {
                     // If commit fails due to transaction support, ignore it as operations likely ran in standalone mode
-                    if (!\Illuminate\Support\Str::contains($e->getMessage(), ['replica set member', 'mongos', 'Transaction numbers'])) {
+                    if (! \Illuminate\Support\Str::contains($e->getMessage(), ['replica set member', 'mongos', 'Transaction numbers'])) {
                         throw $e;
                     }
                 }
@@ -269,9 +266,9 @@ class OnboardingController extends Controller
                     // Ignore rollback errors
                 }
             }
-            \Log::error('Onboarding failed: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Onboarding failed: ' . $e->getMessage()]);
+            \Log::error('Onboarding failed: '.$e->getMessage());
+
+            return back()->withErrors(['error' => 'Onboarding failed: '.$e->getMessage()]);
         }
     }
 }
-

@@ -3,15 +3,16 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Log;
 use Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper;
+use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
 use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 use Stancl\Tenancy\Tenancy;
-use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
-use Illuminate\Support\Facades\Log;
 
 class InitializeTenancyByDomainOrFail
 {
     protected $tenancy;
+
     protected $resolver;
 
     public function __construct(Tenancy $tenancy, DomainTenantResolver $resolver)
@@ -54,7 +55,7 @@ class InitializeTenancyByDomainOrFail
             Log::error("Tenant could not be identified on domain: {$domain}", [
                 'host' => $request->getHost(),
                 'domain' => $domain,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             abort(404, "Tenant could not be identified on domain {$domain}. Please check your subdomain.");

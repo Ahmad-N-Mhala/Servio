@@ -2,8 +2,8 @@
 
 namespace App\Services\Delivery\Providers;
 
-use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
+use App\Services\Delivery\DeliveryProviderInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -57,7 +57,8 @@ class KeetaProvider implements DeliveryProviderInterface
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error('Keeta Menu Push Error: ' . $e->getMessage());
+            Log::error('Keeta Menu Push Error: '.$e->getMessage());
+
             return false;
         }
     }
@@ -80,9 +81,9 @@ class KeetaProvider implements DeliveryProviderInterface
             return Http::withHeaders([
                 'X-Keeta-App-Token' => $integration->api_key,
             ])->post("{$this->baseUrl}/order/cancel", [
-                        'order_id' => $externalOrderId,
-                        'reason' => $reason
-                    ])->successful();
+                'order_id' => $externalOrderId,
+                'reason' => $reason,
+            ])->successful();
         } catch (\Exception $e) {
             return false;
         }

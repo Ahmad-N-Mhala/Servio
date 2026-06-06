@@ -29,11 +29,11 @@ class TestEmail extends Command
         $recipient = $this->argument('recipient') ?? config('mail.from.address');
 
         $this->info('Testing email configuration...');
-        $this->info('Recipient: ' . $recipient);
-        $this->info('From: ' . config('mail.from.address'));
-        $this->info('Mailer: ' . config('mail.default'));
-        $this->info('Host: ' . config('mail.mailers.smtp.host'));
-        $this->info('Port: ' . config('mail.mailers.smtp.port'));
+        $this->info('Recipient: '.$recipient);
+        $this->info('From: '.config('mail.from.address'));
+        $this->info('Mailer: '.config('mail.default'));
+        $this->info('Host: '.config('mail.mailers.smtp.host'));
+        $this->info('Port: '.config('mail.mailers.smtp.port'));
         $this->newLine();
 
         try {
@@ -43,7 +43,7 @@ class TestEmail extends Command
             });
 
             $this->info('✅ Test email sent successfully!');
-            $this->info('Please check the inbox for: ' . $recipient);
+            $this->info('Please check the inbox for: '.$recipient);
             $this->newLine();
             $this->info('If you don\'t receive the email:');
             $this->warn('1. Check your spam/junk folder');
@@ -54,7 +54,7 @@ class TestEmail extends Command
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->error('❌ Failed to send test email!');
-            $this->error('Error: ' . $e->getMessage());
+            $this->error('Error: '.$e->getMessage());
             $this->newLine();
             $this->warn('Common issues:');
             $this->warn('1. Not using Gmail App Password - regular passwords don\'t work');

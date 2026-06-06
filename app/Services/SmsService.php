@@ -10,8 +10,8 @@ class SmsService
     /**
      * Send an SMS using the configured driver.
      *
-     * @param string $to Recipient phone number
-     * @param string $message Message content
+     * @param  string  $to  Recipient phone number
+     * @param  string  $message  Message content
      * @return array Standardized result [success, status, error]
      */
     public function send(string $to, string $message): array
@@ -35,24 +35,26 @@ class SmsService
                 default:
                     // Fallback to log
                     Log::info("SMS (Log Driver) to {$to}: {$message}");
+
                     return [
                         'success' => true,
                         'status' => 'simulated',
-                        'error' => null
+                        'error' => null,
                     ];
             }
 
             return [
                 'success' => true,
                 'status' => 'sent',
-                'error' => null
+                'error' => null,
             ];
         } catch (\Exception $e) {
-            Log::error("SmsService Error: " . $e->getMessage());
+            Log::error('SmsService Error: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'status' => 'failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -63,8 +65,8 @@ class SmsService
         $token = config('services.twilio.token');
         $from = config('services.twilio.from');
 
-        if (!$sid || !$token || !$from) {
-            throw new \Exception("Twilio credentials missing");
+        if (! $sid || ! $token || ! $from) {
+            throw new \Exception('Twilio credentials missing');
         }
 
         $response = Http::asForm()
@@ -75,8 +77,8 @@ class SmsService
                 'Body' => $message,
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("Twilio Error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Twilio Error: '.$response->body());
         }
     }
 
@@ -85,19 +87,19 @@ class SmsService
         $apiKey = config('services.unifonic.api_key');
         $senderId = config('services.unifonic.sender_id');
 
-        if (!$apiKey) {
-            throw new \Exception("Unifonic API Key missing");
+        if (! $apiKey) {
+            throw new \Exception('Unifonic API Key missing');
         }
 
-        $response = Http::post("https://el.cloud.unifonic.com/rest/SMS/Messages", [
+        $response = Http::post('https://el.cloud.unifonic.com/rest/SMS/Messages', [
             'AppSid' => $apiKey,
             'SenderID' => $senderId,
             'Recipient' => $to,
             'Body' => $message,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("Unifonic Error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Unifonic Error: '.$response->body());
         }
     }
 
@@ -107,11 +109,11 @@ class SmsService
         $pass = config('services.sms_ae.password');
         $sender = config('services.sms_ae.sender_id');
 
-        if (!$user || !$pass) {
-            throw new \Exception("SMS.ae credentials missing");
+        if (! $user || ! $pass) {
+            throw new \Exception('SMS.ae credentials missing');
         }
 
-        $response = Http::get("https://www.sms.ae/api/http/send.aspx", [
+        $response = Http::get('https://www.sms.ae/api/http/send.aspx', [
             'username' => $user,
             'password' => $pass,
             'recipient' => $to,
@@ -119,8 +121,8 @@ class SmsService
             'message' => $message,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("SMS.ae Error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('SMS.ae Error: '.$response->body());
         }
     }
 
@@ -130,12 +132,12 @@ class SmsService
         $secret = config('services.nexmo.secret');
         $from = config('services.nexmo.sms_from') ?? 'SERVIO';
 
-        if (!$key || !$secret) {
-            throw new \Exception("Nexmo credentials missing (Key/Secret).");
+        if (! $key || ! $secret) {
+            throw new \Exception('Nexmo credentials missing (Key/Secret).');
         }
 
         // Nexmo API
-        $response = Http::asForm()->post("https://rest.nexmo.com/sms/json", [
+        $response = Http::asForm()->post('https://rest.nexmo.com/sms/json', [
             'api_key' => $key,
             'api_secret' => $secret,
             'to' => $to,
@@ -143,13 +145,13 @@ class SmsService
             'text' => $message,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception("Nexmo HTTP Error: " . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Nexmo HTTP Error: '.$response->body());
         }
 
         $json = $response->json();
         if (isset($json['messages'][0]['status']) && $json['messages'][0]['status'] != '0') {
-            throw new \Exception("Nexmo API Error: " . ($json['messages'][0]['error-text'] ?? 'Unknown error'));
+            throw new \Exception('Nexmo API Error: '.($json['messages'][0]['error-text'] ?? 'Unknown error'));
         }
     }
 }

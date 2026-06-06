@@ -33,6 +33,7 @@ Route::prefix('qr')->name('qr.')->group(function () {
     Route::get('/order/{token}/{orderNumber}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'getOrderStatus'])->name('order.status');
 
     // Loyalty Routes
+    Route::get('/loyalty/status/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'getLoyaltyStatus'])->name('loyalty.status');
     Route::post('/loyalty/check/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'checkLoyalty'])->name('loyalty.check');
     Route::post('/loyalty/request-otp/{token}', [\App\Http\Controllers\Tenant\QrOrderController::class, 'requestRedemptionOtp'])->name('loyalty.request-otp');
 });

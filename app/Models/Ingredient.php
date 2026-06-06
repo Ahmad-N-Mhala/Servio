@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-
+use App\Traits\HasRestaurant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Traits\HasRestaurant;
+use MongoDB\Laravel\Eloquent\Model;
 
 class Ingredient extends Model
 {
@@ -63,9 +62,10 @@ class Ingredient extends Model
 
     /**
      * Atomically decrement stock (thread-safe for concurrent orders)
-     * 
-     * @param float $quantity Amount to deduct
+     *
+     * @param  float  $quantity  Amount to deduct
      * @return bool Success status
+     *
      * @throws \Exception if insufficient stock
      */
     public function decrementStock(float $quantity): bool
@@ -80,7 +80,7 @@ class Ingredient extends Model
         if ($this->current_stock < 0) {
             // Rollback by incrementing
             $this->increment('current_stock', $quantity);
-            throw new \Exception("Insufficient stock for ingredient '" . ($this->name['en'] ?? json_encode($this->name)) . "'. Available: " . ($this->current_stock + $quantity) . ", Required: {$quantity}");
+            throw new \Exception("Insufficient stock for ingredient '".($this->name['en'] ?? json_encode($this->name))."'. Available: ".($this->current_stock + $quantity).", Required: {$quantity}");
         }
 
         return $result;

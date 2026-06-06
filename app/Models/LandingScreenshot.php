@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class LandingScreenshot extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'landing_screenshots';
 
     protected $fillable = [

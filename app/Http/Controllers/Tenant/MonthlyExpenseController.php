@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\MonthlyExpense;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class MonthlyExpenseController extends Controller
 {
@@ -17,11 +16,11 @@ class MonthlyExpenseController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         // Enforce strict context - removed implicit fallback for super admin
-        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+        if (! $restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
             $restaurant = auth()->user()->currentRestaurant();
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
         }
 
@@ -29,8 +28,8 @@ class MonthlyExpenseController extends Controller
         $selectedMonthStr = $request->input('month', now()->format('Y-m'));
 
         // Calculate Inventory Purchases for the month
-        $monthStart = \Carbon\Carbon::parse($selectedMonthStr . '-01')->startOfMonth();
-        $monthEnd = \Carbon\Carbon::parse($selectedMonthStr . '-01')->endOfMonth();
+        $monthStart = \Carbon\Carbon::parse($selectedMonthStr.'-01')->startOfMonth();
+        $monthEnd = \Carbon\Carbon::parse($selectedMonthStr.'-01')->endOfMonth();
 
         $inventoryPurchases = \Illuminate\Support\Facades\DB::table('ingredient_batches')
             ->join('ingredients', 'ingredient_batches.ingredient_id', '=', 'ingredients.id')
@@ -40,6 +39,7 @@ class MonthlyExpenseController extends Controller
             ->sum(function ($batch) {
                 $qty = (float) (string) ($batch->quantity_initial ?? 0);
                 $cost = (float) (string) ($batch->cost_per_unit ?? 0);
+
                 return $qty * $cost;
             });
 
@@ -50,6 +50,7 @@ class MonthlyExpenseController extends Controller
                 ->sum(function ($ingredient) {
                     $stock = (float) (string) ($ingredient->current_stock ?? 0);
                     $cost = (float) (string) ($ingredient->cost ?? 0);
+
                     return $stock * $cost;
                 });
         }
@@ -107,7 +108,7 @@ class MonthlyExpenseController extends Controller
                 round($inventoryPurchases, 2),
                 'paid',
                 '-',
-                ''
+                '',
             ];
         }
 
@@ -161,7 +162,7 @@ class MonthlyExpenseController extends Controller
                 $path = $file->store('monthly_expenses', 'public');
                 $evidencePaths[] = [
                     'name' => $file->getClientOriginalName(),
-                    'url' => '/storage/' . $path
+                    'url' => '/storage/'.$path,
                 ];
             }
         }
@@ -191,7 +192,7 @@ class MonthlyExpenseController extends Controller
                 $path = $file->store('monthly_expenses', 'public');
                 $evidencePaths[] = [
                     'name' => $file->getClientOriginalName(),
-                    'url' => '/storage/' . $path
+                    'url' => '/storage/'.$path,
                 ];
             }
             $existing = $monthlyExpense->evidence_files ?? [];

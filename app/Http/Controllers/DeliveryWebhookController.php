@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\DeliveryIntegration;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -20,12 +18,12 @@ class DeliveryWebhookController extends Controller
 
         // Note: Real providers might pass store_id in headers or a different field
         // This is a minimal fallback
-        if (!$storeId && isset($request['store'])) {
+        if (! $storeId && isset($request['store'])) {
             $storeId = $request['store']['id'] ?? null;
         }
 
-        if (!$storeId) {
-            // For testing only - if no store_id provided in generic payload, 
+        if (! $storeId) {
+            // For testing only - if no store_id provided in generic payload,
             // accept it if we can find ANY integration for this provider.
             // WARNING: This is dangerous for production but useful for sandbox testing without real payloads
             $integration = DeliveryIntegration::withoutGlobalScope(\App\Models\Scopes\RestaurantScope::class)
@@ -46,11 +44,11 @@ class DeliveryWebhookController extends Controller
                 ->first();
         }
 
-        if (!$integration) {
+        if (! $integration) {
             return response()->json(['error' => 'Integration not configured for this store'], 404);
         }
 
-        if (!$integration->is_enabled) {
+        if (! $integration->is_enabled) {
             return response()->json(['error' => 'Integration disabled'], 403);
         }
 
@@ -59,7 +57,7 @@ class DeliveryWebhookController extends Controller
             $service = \App\Services\Delivery\DeliveryService::getProvider($provider);
 
             // Verify Signature
-            if (!$service->verifyWebhookSignature($request, $integration)) {
+            if (! $service->verifyWebhookSignature($request, $integration)) {
                 return response()->json(['error' => 'Invalid Signature'], 401);
             }
 
@@ -67,7 +65,8 @@ class DeliveryWebhookController extends Controller
             $orderData = $service->parseOrderPayload($request->all());
 
         } catch (\Exception $e) {
-            Log::error("Provider Error: " . $e->getMessage());
+            Log::error('Provider Error: '.$e->getMessage());
+
             return response()->json(['error' => 'Provider processing error'], 500);
         }
 
@@ -83,7 +82,7 @@ class DeliveryWebhookController extends Controller
             $restaurant->increment('next_order_number');
         }
 
-        $orderNumber = ucfirst($provider) . '-' . $transactionNumber;
+        $orderNumber = ucfirst($provider).'-'.$transactionNumber;
 
         // 4. Create Order
         $order = Order::create([
@@ -107,14 +106,14 @@ class DeliveryWebhookController extends Controller
             $menuItem = null;
 
             // A. Try matching by SKU (External ID)
-            if (!empty($item['external_id'])) {
+            if (! empty($item['external_id'])) {
                 $menuItem = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
                     ->where('sku', (string) $item['external_id'])
                     ->first();
             }
 
             // B. Try matching by Name (if no SKU match)
-            if (!$menuItem && !empty($item['name'])) {
+            if (! $menuItem && ! empty($item['name'])) {
                 $menuItem = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)
                     ->where(function ($q) use ($item) {
                         $q->where('name', $item['name'])

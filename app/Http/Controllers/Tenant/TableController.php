@@ -8,7 +8,6 @@ use App\Models\Table;
 use App\Models\Zone;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TableController extends Controller
 {
@@ -16,14 +15,15 @@ class TableController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_tables');
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $zones = Zone::where('restaurant_id', $restaurant->id)
             ->with([
                 'tables' => function ($query) {
                     $query->orderBy('name');
-                }
+                },
             ])
             ->get();
 
@@ -51,8 +51,9 @@ class TableController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         Table::create([
             'restaurant_id' => $restaurant->id,
@@ -109,7 +110,7 @@ class TableController extends Controller
         }
 
         $zone->delete();
-        // Tables will set zone_id to null via DB constraint or just stay orphaned depending on MongoDB handling, 
+        // Tables will set zone_id to null via DB constraint or just stay orphaned depending on MongoDB handling,
         // but let's explicity nullify if needed. MongoDB doesn't enforce cascade null on delete roughly speaking unless handled.
 
         return redirect()->back()->with('message', 'Zone deleted successfully');
@@ -119,6 +120,7 @@ class TableController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('delete_table');
         $table->delete();
+
         return redirect()->back()->with('message', 'Table deleted successfully');
     }
 

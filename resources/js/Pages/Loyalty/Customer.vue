@@ -77,36 +77,26 @@
                             <h2 class="text-lg font-bold text-gray-900 font-display">{{ $t('loyalty.point_transactions') }}</h2>
                         </div>
                         
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50/50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ $t('orders.date') }}</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ $t('loyalty.activity') }}</th>
-                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">{{ $t('loyalty.points') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100">
-                                    <tr v-for="tx in customer.point_transactions" :key="tx.id">
-                                        <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                                            {{ new Date(tx.created_at).toLocaleDateString() }}
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <p class="text-sm font-medium text-gray-900">{{ tx.description }}</p>
-                                            <p v-if="tx.reference_type" class="text-xs text-gray-400">Ref: {{ tx.reference_type }}</p>
-                                        </td>
-                                        <td class="px-6 py-4 text-right whitespace-nowrap">
-                                            <span class="text-sm font-bold" :class="tx.points > 0 ? 'text-green-600' : 'text-red-600'">
-                                                {{ tx.points > 0 ? '+' : '' }}{{ tx.points }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="!customer.point_transactions?.length">
-                                        <td colspan="3" class="px-6 py-12 text-center text-gray-500 italic">{{ $t('loyalty.no_transactions') }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <Table
+                            :columns="tableColumns"
+                            :data="customer.point_transactions || []"
+                            :emptyMessage="$t('loyalty.no_transactions')"
+                        >
+                            <template #cell-created_at="{ row }">
+                                <span class="text-xs text-gray-500">
+                                    {{ new Date(row.created_at).toLocaleDateString() }}
+                                </span>
+                            </template>
+                            <template #cell-description="{ row }">
+                                <p class="text-sm font-medium text-gray-900">{{ row.description }}</p>
+                                <p v-if="row.reference_type" class="text-xs text-gray-400">Ref: {{ row.reference_type }}</p>
+                            </template>
+                            <template #cell-points="{ row }">
+                                <span class="text-sm font-bold" :class="row.points > 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ row.points > 0 ? '+' : '' }}{{ row.points }}
+                                </span>
+                            </template>
+                        </Table>
                     </div>
                 </div>
             </div>
@@ -189,6 +179,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
+import Table from '@/Components/Table.vue';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 
@@ -201,6 +192,12 @@ const { locale, t } = useI18n();
 const page = usePage();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
 const route = (window as any).route;
+
+const tableColumns = computed(() => [
+    { key: 'created_at', label: t('orders.date'), sortable: true },
+    { key: 'description', label: t('loyalty.activity'), sortable: true },
+    { key: 'points', label: t('loyalty.points'), sortable: true, align: 'right' as const }
+]);
 
 const showRedeemModal = ref(false);
 const selectedReward = ref<any>(null);

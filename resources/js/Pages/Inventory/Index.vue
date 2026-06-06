@@ -296,48 +296,49 @@
                  <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                    {{ $t('inventory.history') }}: {{ getLocaleName(selectedItem?.name) }}
                 </h3>
-                <div class="overflow-x-auto max-h-[70vh]">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('common.date') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.action') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.change') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.new_level') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.user_notes') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('inventory.docs') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="log in historyLogs" :key="log.id">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ formatDateTime(log.created_at) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 capitalize">{{ log.action.replace('_', ' ') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold" :class="log.quantity_change > 0 ? 'text-green-600' : 'text-red-600'">
-                                    {{ log.quantity_change > 0 ? '+' : '' }}{{ log.quantity_change }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ log.new_stock_level }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ log.user ? log.user.name : 'System' }}
-                                    <span v-if="log.notes" class="block text-xs text-gray-400">{{ log.notes }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    <a 
-                                        v-if="log.bill_path" 
-                                        :href="`/storage/${log.bill_path}`" 
-                                        target="_blank"
-                                        class="text-primary hover:text-primary-hover underline text-xs flex items-center gap-1"
-                                    >
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                        {{ $t('inventory.download') }}
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr v-if="historyLogs.length === 0">
-                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">{{ $t('inventory.no_history') }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <Table
+                    :columns="historyColumns"
+                    :data="historyLogs"
+                    :emptyMessage="$t('inventory.no_history')"
+                >
+                    <template #cell-created_at="{ row }">
+                        <span class="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                            {{ formatDateTime(row.created_at) }}
+                        </span>
+                    </template>
+                    <template #cell-action="{ row }">
+                        <span class="text-sm text-gray-900 dark:text-gray-100 capitalize">
+                            {{ row.action.replace('_', ' ') }}
+                        </span>
+                    </template>
+                    <template #cell-quantity_change="{ row }">
+                        <span class="text-sm font-bold font-mono" :class="row.quantity_change > 0 ? 'text-green-600' : 'text-red-600'">
+                            {{ row.quantity_change > 0 ? '+' : '' }}{{ row.quantity_change }}
+                        </span>
+                    </template>
+                    <template #cell-new_stock_level="{ row }">
+                        <span class="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                            {{ row.new_stock_level }}
+                        </span>
+                    </template>
+                    <template #cell-user_notes="{ row }">
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ row.user ? row.user.name : 'System' }}
+                            <span v-if="row.notes" class="block text-xs text-gray-400">{{ row.notes }}</span>
+                        </div>
+                    </template>
+                    <template #cell-docs="{ row }">
+                        <a 
+                            v-if="row.bill_path" 
+                            :href="`/storage/${row.bill_path}`" 
+                            target="_blank"
+                            class="text-primary hover:text-primary-hover underline text-xs flex items-center gap-1"
+                        >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            {{ $t('inventory.download') }}
+                        </a>
+                    </template>
+                </Table>
                 <div class="flex justify-end mt-6">
                     <Button type="button" variant="secondary" @click="closeHistoryModal">
                         {{ $t('common.close') }}
@@ -361,54 +362,36 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.batch_number') }}</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.initial_qty') }}</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.remaining') }}</th>
-                                    <th class="px-6 py-3 text-right font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.cost_unit') }}</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.received_at') }}</th>
-                                    <th class="px-6 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider">{{ $t('inventory.expiry_date') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="batch in selectedIngredientBatches" :key="batch.id" :class="{'bg-red-50/30': batch.quantity_remaining <= 0}">
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                                        {{ batch.batch_number }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-gray-600">
-                                        {{ batch.quantity_initial }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span 
-                                            class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                                            :class="batch.quantity_remaining > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                                        >
-                                            {{ batch.quantity_remaining }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right font-semibold text-gray-900">
-                                        {{ formatCurrency(batch.cost_per_unit) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                                        {{ formatDate(batch.created_at) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
-                                        {{ batch.expiration_date ? formatDate(batch.expiration_date) : '-' }}
-                                    </td>
-                                </tr>
-                                <tr v-if="selectedIngredientBatches.length === 0">
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">
-                                        {{ $t('inventory.no_batches') }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <Table
+                    :columns="batchesColumns"
+                    :data="selectedIngredientBatches"
+                    :emptyMessage="$t('inventory.no_batches')"
+                    :rowClass="(row) => row.quantity_remaining <= 0 ? 'bg-red-50/30' : ''"
+                >
+                    <template #cell-quantity_initial="{ row }">
+                        <span class="font-mono text-gray-600">
+                            {{ row.quantity_initial }}
+                        </span>
+                    </template>
+                    <template #cell-quantity_remaining="{ row }">
+                        <span 
+                            class="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono"
+                            :class="row.quantity_remaining > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                        >
+                            {{ row.quantity_remaining }}
+                        </span>
+                    </template>
+                    <template #cell-created_at="{ row }">
+                        <span class="text-sm text-gray-500 font-mono">
+                            {{ formatDate(row.created_at) }}
+                        </span>
+                    </template>
+                    <template #cell-expiration_date="{ row }">
+                        <span class="text-sm text-gray-500 font-mono">
+                            {{ row.expiration_date ? formatDate(row.expiration_date) : '-' }}
+                        </span>
+                    </template>
+                </Table>
 
                 <div class="mt-8 flex justify-end">
                     <Button variant="secondary" @click="closeBatchesModal" class="px-6">{{ $t('common.close') }}</Button>
@@ -477,6 +460,24 @@ const columns = computed(() => [
     { key: 'unit', label: t('inventory_page.unit'), sortable: true },
     { key: 'cost', label: t('inventory.cost_unit'), sortable: true, format: 'currency' as const, currency: currency.value },
     { key: 'total_value', label: t('common.total'), sortable: true, format: 'currency' as const, currency: currency.value },
+]);
+
+const historyColumns = computed(() => [
+    { key: 'created_at', label: t('common.date'), sortable: true },
+    { key: 'action', label: t('inventory.action'), sortable: true },
+    { key: 'quantity_change', label: t('inventory.change'), sortable: true },
+    { key: 'new_stock_level', label: t('inventory.new_level'), sortable: true },
+    { key: 'user_notes', label: t('inventory.user_notes'), sortable: true },
+    { key: 'docs', label: t('inventory.docs') }
+]);
+
+const batchesColumns = computed(() => [
+    { key: 'batch_number', label: t('inventory.batch_number'), sortable: true },
+    { key: 'quantity_initial', label: t('inventory.initial_qty'), sortable: true, align: 'center' as const },
+    { key: 'quantity_remaining', label: t('inventory.remaining'), sortable: true, align: 'center' as const },
+    { key: 'cost_per_unit', label: t('inventory.cost_unit'), sortable: true, align: 'right' as const, format: 'currency' as const, currency: currency.value },
+    { key: 'created_at', label: t('inventory.received_at'), sortable: true, align: 'center' as const },
+    { key: 'expiration_date', label: t('inventory.expiry_date'), sortable: true, align: 'center' as const }
 ]);
 
 const search = ref('');

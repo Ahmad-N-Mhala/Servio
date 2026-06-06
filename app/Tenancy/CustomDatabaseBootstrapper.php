@@ -2,7 +2,6 @@
 
 namespace App\Tenancy;
 
-use Illuminate\Support\Facades\DB;
 use Stancl\Tenancy\Contracts\TenancyBootstrapper;
 use Stancl\Tenancy\Contracts\Tenant;
 use Stancl\Tenancy\Database\DatabaseManager;

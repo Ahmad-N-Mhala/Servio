@@ -140,102 +140,103 @@
             </div>
 
             <!-- Transactions History -->
-            <div v-if="currentRegister" class="glass-card rounded-2xl p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Transactions</h3>
+            <Table
+                v-if="currentRegister"
+                title="Recent Transactions"
+                :columns="transactionColumns"
+                :data="currentRegister.transactions || []"
+                :emptyMessage="'No transactions yet'"
+                :currency="currency"
+                class="mb-6"
+            >
+                <template #cell-created_at="{ row }">
+                    <span class="text-sm font-mono text-gray-500">
+                        {{ formatTime(row.created_at) }}
+                    </span>
+                </template>
                 
-                <div v-if="currentRegister.transactions && currentRegister.transactions.length > 0" class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.time') }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance After</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('kitchen.notes') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="transaction in currentRegister.transactions" :key="transaction.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    {{ formatTime(transaction.created_at) }}
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1 rounded-full text-xs font-bold capitalize" :class="{
-                                        'bg-green-100 text-green-700': transaction.type === 'sale' || transaction.type === 'deposit',
-                                        'bg-red-100 text-red-700': transaction.type === 'withdrawal',
-                                        'bg-blue-100 text-blue-700': transaction.type === 'opening',
-                                        'bg-gray-100 text-gray-700': transaction.type === 'closing'
-                                    }">
-                                        {{ transaction.type }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-sm font-medium" :class="{
-                                    'text-green-600': transaction.amount > 0,
-                                    'text-red-600': transaction.amount < 0,
-                                    'text-gray-600': transaction.amount === 0
-                                }">
-                                    {{ transaction.amount > 0 ? '+' : '' }}{{ formatCurrency(transaction.amount) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">
-                                    {{ formatCurrency(transaction.balance_after) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-500">
-                                    {{ transaction.notes || '-' }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div v-else class="text-center py-8 text-gray-500">
-                    No transactions yet
-                </div>
-            </div>
+                <template #cell-type="{ row }">
+                    <span class="px-2 py-1 rounded-full text-xs font-bold capitalize" :class="{
+                        'bg-green-100 text-green-700': row.type === 'sale' || row.type === 'deposit',
+                        'bg-red-100 text-red-700': row.type === 'withdrawal',
+                        'bg-blue-100 text-blue-700': row.type === 'opening',
+                        'bg-gray-100 text-gray-700': row.type === 'closing'
+                    }">
+                        {{ row.type }}
+                    </span>
+                </template>
+                
+                <template #cell-amount="{ row }">
+                    <span class="text-sm font-bold font-mono" :class="{
+                        'text-green-600': row.amount > 0,
+                        'text-red-600': row.amount < 0,
+                        'text-gray-600': row.amount === 0
+                    }">
+                        {{ row.amount > 0 ? '+' : '' }}{{ formatCurrency(row.amount) }}
+                    </span>
+                </template>
+                
+                <template #cell-balance_after="{ row }">
+                    <span class="text-sm font-bold font-mono text-gray-900 dark:text-white">
+                        {{ formatCurrency(row.balance_after) }}
+                    </span>
+                </template>
+                
+                <template #cell-notes="{ row }">
+                    <span class="text-sm text-gray-500">
+                        {{ row.notes || '-' }}
+                    </span>
+                </template>
+            </Table>
 
             <!-- Recent Closed Registers -->
-            <div v-if="recentRegisters && recentRegisters.length > 0" class="glass-card rounded-2xl p-6 mt-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Closed Registers</h3>
+            <Table
+                v-if="recentRegisters && recentRegisters.length > 0"
+                title="Recent Closed Registers"
+                :columns="closedRegisterColumns"
+                :data="recentRegisters"
+                :currency="currency"
+            >
+                <template #cell-closed_at="{ row }">
+                    <span class="text-sm font-mono text-gray-500">
+                        {{ formatDate(row.closed_at) }}
+                    </span>
+                </template>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.date') }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cashier</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Opening</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actual</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Difference</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="register in recentRegisters" :key="register.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    {{ formatDate(register.closed_at) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    {{ register.user?.name || 'Unknown' }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    {{ formatCurrency(register.opening_balance) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    {{ formatCurrency(register.expected_balance) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    {{ formatCurrency(register.closing_balance) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm font-bold" :class="{
-                                    'text-green-600': register.difference > 0,
-                                    'text-red-600': register.difference < 0,
-                                    'text-gray-600': register.difference === 0
-                                }">
-                                    {{ register.difference > 0 ? '+' : '' }}{{ formatCurrency(register.difference) }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <template #cell-user="{ row }">
+                    <span class="text-sm text-gray-900 dark:text-white font-medium">
+                        {{ row.user?.name || 'Unknown' }}
+                    </span>
+                </template>
+                
+                <template #cell-opening_balance="{ row }">
+                    <span class="text-sm font-mono text-gray-900 dark:text-white font-semibold">
+                        {{ formatCurrency(row.opening_balance) }}
+                    </span>
+                </template>
+                
+                <template #cell-expected_balance="{ row }">
+                    <span class="text-sm font-mono text-gray-900 dark:text-white font-semibold">
+                        {{ formatCurrency(row.expected_balance) }}
+                    </span>
+                </template>
+                
+                <template #cell-closing_balance="{ row }">
+                    <span class="text-sm font-mono text-gray-900 dark:text-white font-semibold">
+                        {{ formatCurrency(row.closing_balance) }}
+                    </span>
+                </template>
+                
+                <template #cell-difference="{ row }">
+                    <span class="text-sm font-bold font-mono" :class="{
+                        'text-green-600': row.difference > 0,
+                        'text-red-600': row.difference < 0,
+                        'text-gray-600': row.difference === 0
+                    }">
+                        {{ row.difference > 0 ? '+' : '' }}{{ formatCurrency(row.difference) }}
+                    </span>
+                </template>
+            </Table>
         </div>
 
         <!-- Open Register Modal -->
@@ -389,21 +390,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
 import Modal from '@/Components/Modal.vue';
+import Table from '@/Components/Table.vue';
 
 const page = usePage();
 const route = (window as any).route;
+const { t } = useI18n();
 
 const props = defineProps<{
     currentRegister: any;
     currentBalance: number;
     recentRegisters: any[];
 }>();
+
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+
+const transactionColumns = computed(() => [
+    { key: 'created_at', label: t('common.time') || 'Time', sortable: true },
+    { key: 'type', label: 'Type', sortable: true },
+    { key: 'amount', label: 'Amount', sortable: true },
+    { key: 'balance_after', label: 'Balance After', sortable: true },
+    { key: 'notes', label: t('kitchen.notes') || 'Notes', sortable: true }
+]);
+
+const closedRegisterColumns = computed(() => [
+    { key: 'closed_at', label: t('common.date') || 'Date', sortable: true },
+    { key: 'user', label: 'Cashier', sortable: true },
+    { key: 'opening_balance', label: 'Opening', sortable: true },
+    { key: 'expected_balance', label: 'Expected', sortable: true },
+    { key: 'closing_balance', label: 'Actual', sortable: true },
+    { key: 'difference', label: 'Difference', sortable: true }
+]);
 
 const showOpenModal = ref(false);
 const showCloseModal = ref(false);

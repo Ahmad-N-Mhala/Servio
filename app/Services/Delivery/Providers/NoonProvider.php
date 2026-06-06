@@ -2,8 +2,8 @@
 
 namespace App\Services\Delivery\Providers;
 
-use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
+use App\Services\Delivery\DeliveryProviderInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -58,20 +58,21 @@ class NoonProvider implements DeliveryProviderInterface
         // PUT /menus/{store_id}
 
         try {
-            $url = "{$this->baseUrl}/menus/" . $integration->store_id;
+            $url = "{$this->baseUrl}/menus/".$integration->store_id;
 
             // In a real scenario, $menuData needs to be mapped to Noon's specific JSON schema
             // e.g. Noon requires categories -> items hierarchy
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $integration->api_key,
+                'Authorization' => 'Bearer '.$integration->api_key,
                 'Content-Type' => 'application/json',
             ])->put($url, $menuData);
 
             return $response->successful();
 
         } catch (\Exception $e) {
-            Log::error('Noon Menu Push Failed: ' . $e->getMessage());
+            Log::error('Noon Menu Push Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -90,11 +91,12 @@ class NoonProvider implements DeliveryProviderInterface
     {
         try {
             $payload = ['status' => $status];
-            if ($reason)
+            if ($reason) {
                 $payload['reason'] = $reason;
+            }
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $integration->api_key,
+                'Authorization' => 'Bearer '.$integration->api_key,
             ])->post("{$this->baseUrl}/orders/{$orderId}/status", $payload);
 
             return $response->successful();

@@ -12,6 +12,7 @@ class ExpiryWarningMail extends Mailable
     use Queueable, SerializesModels;
 
     public $batch;
+
     public $daysRemaining;
 
     public function __construct(IngredientBatch $batch, $daysRemaining)
@@ -24,7 +25,7 @@ class ExpiryWarningMail extends Mailable
     {
         $ingredientName = $this->batch->ingredient->name['en'] ?? ($this->batch->ingredient->name['ar'] ?? 'Unknown Item');
 
-        return $this->subject('Inventory Expiry Warning: ' . $ingredientName)
+        return $this->subject('Inventory Expiry Warning: '.$ingredientName)
             ->view('emails.expiry_warning');
     }
 }

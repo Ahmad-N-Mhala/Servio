@@ -11,6 +11,6 @@ class MenuItemIngredient extends Model
     protected $fillable = [
         'menu_item_id',
         'ingredient_id',
-        'quantity'
+        'quantity',
     ];
 }

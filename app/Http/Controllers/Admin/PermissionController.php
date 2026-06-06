@@ -19,32 +19,32 @@ class PermissionController extends Controller
 
         foreach ($dbRoles as $role) {
             $label = null;
-            $display = (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name)))
+            $display = (! empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name)))
                 ? (array) $role->display_name
                 : [];
 
             // 1. Check DB display_name (Current Locale) - User Override
-            if (!empty($display[$locale])) {
+            if (! empty($display[$locale])) {
                 $label = $display[$locale];
             }
 
             // 2. Check Translation File
-            if (!$label && \Illuminate\Support\Facades\Lang::has('roles.' . $role->name)) {
-                $label = __('roles.' . $role->name);
+            if (! $label && \Illuminate\Support\Facades\Lang::has('roles.'.$role->name)) {
+                $label = __('roles.'.$role->name);
             }
 
             // 3. Fallback to DB display_name (English)
-            if (!$label && !empty($display['en'])) {
+            if (! $label && ! empty($display['en'])) {
                 $label = $display['en'];
             }
 
             // 4. Fallback to Config
-            if (!$label) {
+            if (! $label) {
                 $label = $configNames[$role->name] ?? null;
             }
 
             // 5. Fallback to Name
-            if (!$label) {
+            if (! $label) {
                 $label = ucwords(str_replace('_', ' ', $role->name));
             }
 
@@ -90,8 +90,8 @@ class PermissionController extends Controller
             'guard_name' => 'web',
             'display_name' => [
                 'en' => $validated['name_en'],
-                'ar' => $validated['name_ar']
-            ]
+                'ar' => $validated['name_ar'],
+            ],
         ]);
 
         return back()->with('success', 'Role created successfully.');
@@ -108,7 +108,7 @@ class PermissionController extends Controller
 
         $role->display_name = [
             'en' => $validated['name_en'],
-            'ar' => $validated['name_ar']
+            'ar' => $validated['name_ar'],
         ];
         $role->save();
 
@@ -145,7 +145,7 @@ class PermissionController extends Controller
 
         try {
             $role = \App\Models\Role::findByName($roleName, 'web');
-            \Log::info("Role found: " . $role->id . " Name: " . $role->name);
+            \Log::info('Role found: '.$role->id.' Name: '.$role->name);
 
             // Ensure all permissions exist in DB first (just in case)
             $permissionModels = [];
@@ -163,14 +163,14 @@ class PermissionController extends Controller
                 $role->save();
 
                 // Now sync the new ones
-                if (!empty($permissions)) {
+                if (! empty($permissions)) {
                     $role->syncPermissions($permissions);
                 }
 
                 \Log::info("Permissions synced successfully for role: {$roleName}");
             } catch (\Exception $e) {
                 // Fallback for MongoDB: Manually set the permission_ids array if syncPermissions fails
-                $ids = array_map(fn($p) => $p->id, $permissionModels);
+                $ids = array_map(fn ($p) => $p->id, $permissionModels);
                 $role->permission_ids = $ids;
                 $role->save();
                 \Log::info("Permissions manually assigned for role: {$roleName} via fallback");
@@ -178,14 +178,15 @@ class PermissionController extends Controller
 
             // Clear cache to apply changes immediately
             app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-            \Log::info("Permissions cache cleared");
+            \Log::info('Permissions cache cleared');
 
         } catch (\Exception $e) {
-            \Log::error("Failed to update permissions: " . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Failed to update permissions: ' . $e->getMessage()]);
+            \Log::error('Failed to update permissions: '.$e->getMessage());
+
+            return redirect()->back()->withErrors(['error' => 'Failed to update permissions: '.$e->getMessage()]);
         }
 
         return redirect()->route('admin.permissions.index')
-            ->with('success', 'Permissions updated successfully for ' . $validated['role']);
+            ->with('success', 'Permissions updated successfully for '.$validated['role']);
     }
 }

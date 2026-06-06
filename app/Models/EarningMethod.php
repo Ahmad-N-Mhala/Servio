@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasRestaurant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
-use App\Traits\HasRestaurant;
-
 class EarningMethod extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant;
+    use HasFactory, HasRestaurant, HasTranslations;
 
     protected $fillable = [
         'restaurant_id',

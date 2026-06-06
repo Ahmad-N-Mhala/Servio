@@ -18,15 +18,14 @@ class OrderUpdated implements ShouldBroadcast
     public function __construct(
         public Order $order,
         public string $action = 'updated' // 'created', 'updated', 'status_changed'
-    ) {
-    }
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.
      */
     public function broadcastOn(): Channel
     {
-        return new Channel('restaurant.' . $this->order->restaurant_id . '.orders');
+        return new Channel('restaurant.'.$this->order->restaurant_id.'.orders');
     }
 
     /**
@@ -34,7 +33,7 @@ class OrderUpdated implements ShouldBroadcast
      */
     public function broadcastAs(): string
     {
-        return 'order.' . $this->action;
+        return 'order.'.$this->action;
     }
 
     /**
@@ -48,7 +47,7 @@ class OrderUpdated implements ShouldBroadcast
                 $q->withTrashed();
             },
             'customer',
-            'table'
+            'table',
         ]);
 
         return [

@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class OrderStatusScreenController extends Controller
 {
     public function index()
     {
         $this->checkServiceType();
+
         return Inertia::render('Orders/StatusScreen', [
             'orders' => $this->getOrders(),
             'canManage' => Auth::check() && Auth::user()->can('manage_order_status_screen'),
@@ -22,6 +23,7 @@ class OrderStatusScreenController extends Controller
     public function manage()
     {
         $this->checkServiceType();
+
         return Inertia::render('Orders/StatusManager', [
             'orders' => $this->getOrders(),
         ]);
@@ -31,7 +33,7 @@ class OrderStatusScreenController extends Controller
     {
         $request->validate([
             'order_id' => 'required',
-            'action' => 'required|in:mark_ready,mark_completed'
+            'action' => 'required|in:mark_ready,mark_completed',
         ]);
 
         $order = Order::findOrFail($request->order_id);
@@ -56,7 +58,7 @@ class OrderStatusScreenController extends Controller
     private function checkServiceType()
     {
         $restaurantId = session('active_restaurant_id');
-        if (!$restaurantId) {
+        if (! $restaurantId) {
             abort(403, 'No active restaurant session');
         }
 
@@ -70,6 +72,7 @@ class OrderStatusScreenController extends Controller
     public function poll()
     {
         $this->checkServiceType();
+
         return response()->json([
             'orders' => $this->getOrders(),
         ]);

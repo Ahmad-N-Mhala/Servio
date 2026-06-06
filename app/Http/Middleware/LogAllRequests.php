@@ -10,9 +10,10 @@ class LogAllRequests
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!str_contains($request->fullUrl(), '/debug/bar') && !str_contains($request->fullUrl(), '/service/delivery/check')) {
-            Log::info("REQUEST: [" . $request->method() . "] " . $request->fullUrl() . " FROM IP: " . $request->ip());
+        if (! str_contains($request->fullUrl(), '/debug/bar') && ! str_contains($request->fullUrl(), '/service/delivery/check')) {
+            Log::info('REQUEST: ['.$request->method().'] '.$request->fullUrl().' FROM IP: '.$request->ip());
         }
+
         return $next($request);
     }
 }

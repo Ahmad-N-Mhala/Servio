@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Tenant;
 
+use App\Events\OrderUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\LoyaltyService;
-use App\Events\OrderUpdated;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,14 +17,14 @@ class KitchenController extends Controller
     public function __construct(
         protected LoyaltyService $loyaltyService,
         protected \App\Services\InventoryService $inventoryService
-    ) {
-    }
+    ) {}
 
     public function index(): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Fetch active orders (pending, processing, ready, served)
         // Ordered by FIFO (First In, First Out)
@@ -42,7 +42,7 @@ class KitchenController extends Controller
                     $query->withTrashed();
                 },
                 'customer',
-                'table'
+                'table',
             ])
             ->orderBy('created_at', 'asc')
             ->get();
@@ -55,7 +55,7 @@ class KitchenController extends Controller
                     $query->withTrashed();
                 },
                 'customer',
-                'table'
+                'table',
             ])
             ->orderBy('completed_at', 'desc')
             ->limit(10)
@@ -104,7 +104,7 @@ class KitchenController extends Controller
         ];
 
         if ($status === 'cancelled' && $cancellationReason) {
-            $updateData['notes'] = ($order->notes ? $order->notes . "\n" : "") . "Cancelled by Kitchen: " . $cancellationReason;
+            $updateData['notes'] = ($order->notes ? $order->notes."\n" : '').'Cancelled by Kitchen: '.$cancellationReason;
         }
 
         $order->update($updateData);
@@ -119,7 +119,7 @@ class KitchenController extends Controller
                 $q->withTrashed();
             },
             'customer',
-            'table'
+            'table',
         ]), 'status_changed'))->toOthers();
 
         return redirect()->back()->with('message', __('orders.status_updated'));
@@ -131,14 +131,15 @@ class KitchenController extends Controller
      */
     private function processInventoryForMenuItem($menuItem, $qty, $order)
     {
-        if (!$menuItem)
+        if (! $menuItem) {
             return;
+        }
 
         $itemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
 
         // A. If Meal, process bundles
         if (($menuItem->type ?? 'item') === 'meal') {
-            if (!$menuItem->relationLoaded('bundles')) {
+            if (! $menuItem->relationLoaded('bundles')) {
                 $menuItem->load(['bundles.childItem']);
             }
 
@@ -155,7 +156,7 @@ class KitchenController extends Controller
 
         // B. Process Recipe (Standard or Legacy)
         $recipe = $menuItem->recipe ?? [];
-        if (!empty($recipe)) {
+        if (! empty($recipe)) {
             foreach ($recipe as $component) {
                 $ingId = $component['ingredient_id'] ?? null;
                 $needed = (float) ($component['quantity'] ?? 0);

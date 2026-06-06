@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,7 +15,7 @@ class ReceiptTemplateController extends Controller
     {
         $restaurant = auth()->user()->currentRestaurant();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant not found');
         }
 
@@ -24,7 +23,7 @@ class ReceiptTemplateController extends Controller
         if ($restaurant->logo) {
             $logoUrl = filter_var($restaurant->logo, FILTER_VALIDATE_URL)
                 ? $restaurant->logo
-                : asset('storage/' . $restaurant->logo);
+                : asset('storage/'.$restaurant->logo);
         }
 
         return Inertia::render('Settings/ReceiptTemplate', [
@@ -40,7 +39,7 @@ class ReceiptTemplateController extends Controller
     {
         $restaurant = auth()->user()->currentRestaurant();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant not found');
         }
 

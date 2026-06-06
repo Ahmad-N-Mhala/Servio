@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
+use MongoDB\Laravel\Auth\User as Authenticatable;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, \App\Traits\TracksDeletes;
+    use \App\Traits\TracksDeletes, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -52,7 +52,9 @@ class User extends Authenticatable
     }
 
     protected $_currentRestaurantCache = false;
+
     protected $_permissionsCache = false;
+
     protected $_restaurantRoleCache = false;
 
     public function currentRestaurant()
@@ -67,6 +69,7 @@ class User extends Authenticatable
             if ($restaurantId) {
                 return $this->_currentRestaurantCache = Restaurant::find($restaurantId);
             }
+
             return $this->_currentRestaurantCache = null;
         }
 
@@ -75,7 +78,7 @@ class User extends Authenticatable
             ->table('restaurant_user')
             ->where('email', $this->email)
             ->pluck('restaurant_id')
-            ->map(fn($id) => (string) $id)
+            ->map(fn ($id) => (string) $id)
             ->toArray();
 
         // Check active session
@@ -86,7 +89,7 @@ class User extends Authenticatable
         }
 
         // Fallback to first allowed restaurant
-        if (!empty($allowedRestaurantIds)) {
+        if (! empty($allowedRestaurantIds)) {
             return $this->_currentRestaurantCache = Restaurant::whereIn('id', $allowedRestaurantIds)->orderBy('id')->first();
         }
 
@@ -104,7 +107,7 @@ class User extends Authenticatable
         }
 
         $restaurant = $this->currentRestaurant();
-        if (!$restaurant) {
+        if (! $restaurant) {
             return $this->_permissionsCache = collect([]);
         }
 
@@ -115,7 +118,7 @@ class User extends Authenticatable
             ->where('restaurant_id', (string) $restaurant->id)
             ->first();
 
-        if (!$pivot || !isset($pivot->role)) {
+        if (! $pivot || ! isset($pivot->role)) {
             return $this->_permissionsCache = collect([]);
         }
 
@@ -188,7 +191,7 @@ class User extends Authenticatable
         }
 
         $restaurant = $this->currentRestaurant();
-        if (!$restaurant) {
+        if (! $restaurant) {
             return $this->_restaurantRoleCache = 'User';
         }
 
@@ -244,8 +247,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user has actively set their password.
-     *
-     * @return bool
      */
     public function hasActivePassword(): bool
     {
@@ -254,8 +255,6 @@ class User extends Authenticatable
 
     /**
      * Mark the password as actively set by the user.
-     *
-     * @return void
      */
     public function markPasswordAsSet(): void
     {
@@ -282,8 +281,7 @@ class User extends Authenticatable
         // Try System Template First
         $commService = app(\App\Services\CommunicationService::class);
         $commService->sendNotification('password_reset', $this, [
-            'link' => $resetUrl
+            'link' => $resetUrl,
         ]);
     }
 }
-

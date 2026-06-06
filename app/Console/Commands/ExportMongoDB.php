@@ -38,7 +38,7 @@ class ExportMongoDB extends Command
         $timestamp = date('Y-m-d_H-i-s');
         $outputDir = $this->option('output') ?: storage_path("backups/mongodb_{$timestamp}");
 
-        if (!is_dir($outputDir)) {
+        if (! is_dir($outputDir)) {
             mkdir($outputDir, 0755, true);
         }
 
@@ -57,7 +57,7 @@ class ExportMongoDB extends Command
 
         $this->info("Running: {$command}");
 
-        exec($command . ' 2>&1', $output, $returnVar);
+        exec($command.' 2>&1', $output, $returnVar);
 
         if ($returnVar === 0) {
             $this->info('✅ MongoDB export successful!');

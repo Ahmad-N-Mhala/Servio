@@ -386,8 +386,10 @@
                     <!-- User Menu -->
                     <div class="relative">
                         <button 
+                            ref="userMenuButtonRef"
                             @click="userMenuOpen = !userMenuOpen" 
-                            class="flex items-center gap-3 p-1.5 pr-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                            class="flex items-center gap-3 p-1.5 pr-3 rounded-xl transition-all duration-200"
+                            :class="userMenuOpen ? 'bg-gray-100 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
                         >
                             <img 
                                 class="h-8 w-8 rounded-lg object-cover ring-2 ring-primary/20" 
@@ -412,8 +414,8 @@
                             leave-to-class="transform opacity-0 scale-95"
                         >
                             <div 
+                                ref="userMenuRef"
                                 v-show="userMenuOpen" 
-                                @click.away="userMenuOpen = false" 
                                 class="absolute right-0 mt-2 w-56 glass-card rounded-xl shadow-lifted py-2 z-50"
                             >
                                 <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
@@ -501,7 +503,7 @@ const globalSidebarScroll = globalRef(0);
 </script>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Logo from '@/Components/Logo.vue';
@@ -518,6 +520,29 @@ const isSidebarOpen = globalIsSidebarOpen;
 const userMenuOpen = globalUserMenuOpen;
 const openMenus = globalOpenMenus;
 const sidebarNav = ref<HTMLElement | null>(null);
+
+const userMenuRef = ref<HTMLElement | null>(null);
+const userMenuButtonRef = ref<HTMLElement | null>(null);
+
+const handleClickOutside = (event: MouseEvent) => {
+    if (
+        userMenuOpen.value &&
+        userMenuRef.value &&
+        !userMenuRef.value.contains(event.target as Node) &&
+        userMenuButtonRef.value &&
+        !userMenuButtonRef.value.contains(event.target as Node)
+    ) {
+        userMenuOpen.value = false;
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
 
 router.on('start', () => {
     userMenuOpen.value = false;

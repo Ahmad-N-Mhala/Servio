@@ -76,5 +76,5 @@ return [
     'waiter' => 'النادل',
     'order_created_with_points' => 'تم إنشاء الطلب #:order بنجاح. +:points نقاط ولاء مكتسبة!',
     'order_created_successfully' => 'تم إنشاء الطلب #:order بنجاح.',
+    'order_created' => 'تم إنشاء الطلب بنجاح',
 ];
-

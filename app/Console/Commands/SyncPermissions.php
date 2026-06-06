@@ -36,23 +36,24 @@ class SyncPermissions extends Command
             }
         }
 
-        $this->info('Found ' . count($configPermissions) . ' permissions in config');
+        $this->info('Found '.count($configPermissions).' permissions in config');
 
         // Get existing permissions from database
         $existingPermissions = Permission::pluck('name')->toArray();
-        $this->info('Found ' . count($existingPermissions) . ' permissions in database');
+        $this->info('Found '.count($existingPermissions).' permissions in database');
 
         // Find missing permissions
         $missingPermissions = array_diff($configPermissions, $existingPermissions);
 
         if (empty($missingPermissions)) {
             $this->info('✅ All permissions are already in sync!');
+
             return 0;
         }
 
-        $this->warn('Found ' . count($missingPermissions) . ' missing permissions:');
+        $this->warn('Found '.count($missingPermissions).' missing permissions:');
         foreach ($missingPermissions as $permission) {
-            $this->line('  - ' . $permission);
+            $this->line('  - '.$permission);
         }
 
         // Create missing permissions
@@ -65,10 +66,10 @@ class SyncPermissions extends Command
                     'name' => $permission,
                     'guard_name' => 'web',
                 ]);
-                $this->info('  ✓ Created: ' . $permission);
+                $this->info('  ✓ Created: '.$permission);
                 $created++;
             } catch (\Exception $e) {
-                $this->error('  ✗ Failed to create: ' . $permission . ' - ' . $e->getMessage());
+                $this->error('  ✗ Failed to create: '.$permission.' - '.$e->getMessage());
             }
         }
 
@@ -77,7 +78,7 @@ class SyncPermissions extends Command
         $this->info('Permission cache cleared');
 
         $this->info('');
-        $this->info('✅ Sync complete! Created ' . $created . ' new permissions.');
+        $this->info('✅ Sync complete! Created '.$created.' new permissions.');
 
         return 0;
     }

@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Eloquent\Model;
-use Spatie\Translatable\HasTranslations; // Assuming Spatie is used or manually handle casting
+
+// Assuming Spatie is used or manually handle casting
 
 class LandingModule extends Model
 {

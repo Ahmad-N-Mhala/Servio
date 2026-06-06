@@ -98,4 +98,12 @@ return [
     'cancelled' => 'Cancelled',
     'deleted' => 'Deleted',
     'in_progress' => 'In Progress',
+    'quantity' => 'الكمية',
+    'qty' => 'الكمية',
+    'apply' => 'تطبيق',
+    'note' => 'ملاحظة',
+    'notes' => 'ملاحظات',
+    'send' => 'إرسال',
+    'resend' => 'إعادة إرسال',
+    'code' => 'الرمز',
 ];

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Tenant\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\StaffLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\StaffLog;
 
 class LoginController extends Controller
 {
@@ -46,7 +46,7 @@ class LoginController extends Controller
                 ->table('restaurant_user')
                 ->where('email', $user->email)
                 ->pluck('restaurant_id')
-                ->map(fn($id) => (string) $id) // Ensure strings
+                ->map(fn ($id) => (string) $id) // Ensure strings
                 ->toArray();
 
             $restaurants = \App\Models\Restaurant::whereIn('id', $restaurantIds)->get();
@@ -54,6 +54,7 @@ class LoginController extends Controller
             // If user has 0 restaurants, redirect to onboarding or show error
             if ($restaurants->count() === 0) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'No restaurant access found for this account.',
                 ])->onlyInput('email');
@@ -68,7 +69,7 @@ class LoginController extends Controller
             $subscription = $restaurant->subscription;
             $isExpired = false;
 
-            if (!$subscription || $subscription->status !== 'active' || ($subscription->ends_at && $subscription->ends_at->isPast())) {
+            if (! $subscription || $subscription->status !== 'active' || ($subscription->ends_at && $subscription->ends_at->isPast())) {
                 $isExpired = true;
             }
 
@@ -83,7 +84,7 @@ class LoginController extends Controller
                 return back()->withErrors([
                     'email' => __('subscription.expired_with_contact', [
                         'email' => $supportEmail,
-                        'phone' => $supportPhone
+                        'phone' => $supportPhone,
                     ]),
                 ])->onlyInput('email');
             }
@@ -105,7 +106,7 @@ class LoginController extends Controller
                     'causer_id' => $user->id,
                     'causer_name' => $user->name,
                     'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent()
+                    'user_agent' => $request->userAgent(),
                 ]);
             } else {
                 // Even if no staff record found for current context (super admin or multi-tenant edge case), we can log with null staff_id
@@ -117,7 +118,7 @@ class LoginController extends Controller
                     'causer_id' => $user->id,
                     'causer_name' => $user->name,
                     'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent()
+                    'user_agent' => $request->userAgent(),
                 ]);
             }
 
@@ -148,7 +149,7 @@ class LoginController extends Controller
                 'causer_id' => $user->id,
                 'causer_name' => $user->name,
                 'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
+                'user_agent' => $request->userAgent(),
             ]);
         }
 

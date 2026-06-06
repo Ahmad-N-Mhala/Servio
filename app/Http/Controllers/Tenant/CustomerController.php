@@ -14,8 +14,9 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $query = Customer::where('restaurant_id', $restaurant->id)
             ->with(['loyaltyPoints'])
@@ -35,12 +36,13 @@ class CustomerController extends Controller
         // Calculate order count manually for the current page to avoid MongoDB withCount limitations
         $customers->getCollection()->transform(function ($customer) {
             $customer->orders_count = $customer->orders()->where('payment_status', 'paid')->count();
+
             return $customer;
         });
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -48,7 +50,7 @@ class CustomerController extends Controller
     {
         // Ensure customer belongs to tenant (Bypass for Super Admin)
         $restaurantId = session('active_restaurant_id');
-        if (!auth()->user()->is_super_admin && (string) $customer->restaurant_id !== (string) $restaurantId) {
+        if (! auth()->user()->is_super_admin && (string) $customer->restaurant_id !== (string) $restaurantId) {
             abort(403);
         }
 

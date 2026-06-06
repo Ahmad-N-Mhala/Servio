@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Ingredient;
-use App\Models\InventoryLog;
 use App\Models\IngredientBatch;
+use App\Models\InventoryLog;
 use Illuminate\Support\Facades\Log;
 
 class InventoryService
@@ -14,8 +14,9 @@ class InventoryService
      */
     public function deductStock(Ingredient $ingredient, float $quantity, string $reason, $userId = null)
     {
-        if ($quantity <= 0)
+        if ($quantity <= 0) {
             return;
+        }
 
         $remainingQty = $quantity;
 
@@ -28,8 +29,9 @@ class InventoryService
         $batchesUsed = [];
 
         foreach ($batches as $batch) {
-            if ($remainingQty <= 0)
+            if ($remainingQty <= 0) {
                 break;
+            }
 
             // Determine deduction amount for this batch
             $deduct = min($remainingQty, (float) $batch->quantity_remaining);
@@ -62,7 +64,7 @@ class InventoryService
             'action' => 'used_in_menu',
             'quantity_change' => -$quantity,
             'new_stock_level' => $ingredient->current_stock,
-            'notes' => $reason . ($batchesUsed ? ' | Batches: ' . implode(', ', $batchesUsed) : ''),
+            'notes' => $reason.($batchesUsed ? ' | Batches: '.implode(', ', $batchesUsed) : ''),
         ]);
 
         // Check for Low Stock Trigger
@@ -81,7 +83,7 @@ class InventoryService
             if ($ingredient->current_stock <= $ingredient->reorder_level) {
 
                 // Only send if we haven't sent it yet for this cycle
-                if (!$ingredient->low_stock_notification_sent) {
+                if (! $ingredient->low_stock_notification_sent) {
                     $this->sendLowStockNotification($ingredient);
 
                     $ingredient->low_stock_notification_sent = true;
@@ -113,7 +115,7 @@ class InventoryService
         }
 
         // Fallback: Restaurant Notification Email
-        if (!$recipient && $restaurant && !empty($restaurant->notification_email)) {
+        if (! $recipient && $restaurant && ! empty($restaurant->notification_email)) {
             $recipient = $restaurant->notification_email;
         }
 
@@ -123,15 +125,15 @@ class InventoryService
                 $data = [
                     'ingredient_name_en' => $ingredient->name['en'] ?? '',
                     'ingredient_name_ar' => $ingredient->name['ar'] ?? ($ingredient->name['en'] ?? ''),
-                    'current_stock' => $ingredient->current_stock . ' ' . $ingredient->unit,
-                    'reorder_level' => $ingredient->reorder_level . ' ' . $ingredient->unit,
+                    'current_stock' => $ingredient->current_stock.' '.$ingredient->unit,
+                    'reorder_level' => $ingredient->reorder_level.' '.$ingredient->unit,
                     'restaurant_id' => $restaurant ? $restaurant->id : null,
                 ];
 
                 $commService = app(\App\Services\CommunicationService::class);
                 $sent = $commService->sendNotification('inventory_low_stock_warning', $recipient, $data);
 
-                if (!$sent) {
+                if (! $sent) {
                     $emailTarget = ($recipient instanceof \App\Models\User) ? $recipient->email : $recipient;
                     \Illuminate\Support\Facades\Mail::to($emailTarget)->send(new \App\Mail\LowStockWarningMail($ingredient));
 
@@ -146,7 +148,7 @@ class InventoryService
                     ]);
                 }
             } catch (\Exception $e) {
-                Log::error("Failed to send low stock warning for ingredient {$ingredient->id}: " . $e->getMessage());
+                Log::error("Failed to send low stock warning for ingredient {$ingredient->id}: ".$e->getMessage());
 
                 // Log Failure
                 \App\Services\CommunicationService::log([

@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\HasRestaurant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Translatable\HasTranslations;
-
-use App\Traits\HasRestaurant;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
+use MongoDB\Laravel\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class MenuCategory extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant, SoftDeletes;
+    use HasFactory, HasRestaurant, HasTranslations, SoftDeletes;
 
     public $translatable = ['name'];
 
@@ -43,4 +41,3 @@ class MenuCategory extends Model
         return $this->hasMany(MenuItem::class);
     }
 }
-

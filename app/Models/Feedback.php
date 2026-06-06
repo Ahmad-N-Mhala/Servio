@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
-use App\Models\Restaurant;
-use App\Models\Order;
-use App\Models\Customer;
 
 class Feedback extends Model
 {
@@ -16,7 +13,7 @@ class Feedback extends Model
         'rating',
         'comment',
         'status',
-        'redirected_to_google'
+        'redirected_to_google',
     ];
 
     public function restaurant()

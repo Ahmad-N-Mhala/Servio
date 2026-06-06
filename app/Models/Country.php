@@ -17,7 +17,7 @@ class Country extends Model
         'currency',
         'dial_code',
         'rate',
-        'states'
+        'states',
     ];
 
     protected $casts = [

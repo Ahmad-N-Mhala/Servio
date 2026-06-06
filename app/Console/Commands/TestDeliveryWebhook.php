@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\DeliveryIntegration;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use App\Models\DeliveryIntegration;
 use Illuminate\Support\Str;
 
 class TestDeliveryWebhook extends Command
@@ -38,10 +38,11 @@ class TestDeliveryWebhook extends Command
 
         $integration = $query->first();
 
-        if (!$integration) {
-            // Create a temporary mock integration if none exists, just for testing flow? 
+        if (! $integration) {
+            // Create a temporary mock integration if none exists, just for testing flow?
             // Better to ask user to create one first.
             $this->error("No active integration found for provider: {$provider}. Please enable it in the admin panel first.");
+
             return 1;
         }
 
@@ -62,8 +63,8 @@ class TestDeliveryWebhook extends Command
             // Ensure we use the raw client_secret, typically it's the 'webhook_secret' or 'client_secret' depending on provider impl.
             // UberEatsProvider.php uses $integration->client_secret
             $secret = $integration->client_secret;
-            if (!$secret) {
-                $this->warn("Client Secret is missing. Signature verification may fail.");
+            if (! $secret) {
+                $this->warn('Client Secret is missing. Signature verification may fail.');
                 $secret = 'dummy_secret';
             }
             $signature = hash_hmac('sha256', $body, $secret);
@@ -72,18 +73,17 @@ class TestDeliveryWebhook extends Command
             // X-Deliveroo-Hmac-Sha256
             // Signature = HMAC(SHA256, key=webhook_secret, msg=guid + ' ' + body)
             $secret = $integration->webhook_secret;
-            if (!$secret) {
-                $this->warn("Webhook Secret is missing. Signature verification may fail.");
+            if (! $secret) {
+                $this->warn('Webhook Secret is missing. Signature verification may fail.');
                 $secret = 'dummy_secret';
             }
             $guid = Str::uuid()->toString();
             $headers['X-Deliveroo-Sequence-Guid'] = $guid;
-            $message = $guid . ' ' . $body;
+            $message = $guid.' '.$body;
             $signature = hash_hmac('sha256', $message, $secret);
             $headers['X-Deliveroo-Hmac-Sha256'] = $signature;
         }
         // Talabat (current impl has no verification, so no headers needed)
-
 
         // 4. Send Request
         $url = url("/api/webhook/delivery/{$provider}");
@@ -95,19 +95,19 @@ class TestDeliveryWebhook extends Command
                 ->post($url);
 
             if ($response->successful()) {
-                $this->info("✅ Success! Status: " . $response->status());
-                $this->info("Response: " . $response->body());
+                $this->info('✅ Success! Status: '.$response->status());
+                $this->info('Response: '.$response->body());
             } else {
-                $this->error("❌ Failed. Status: " . $response->status());
-                $this->error("Response: " . $response->body());
+                $this->error('❌ Failed. Status: '.$response->status());
+                $this->error('Response: '.$response->body());
 
                 if ($response->status() === 401) {
-                    $this->line("Hint: Check if your API/Webhook secrets match what is in the database.");
+                    $this->line('Hint: Check if your API/Webhook secrets match what is in the database.');
                 }
             }
 
         } catch (\Exception $e) {
-            $this->error("Connection Error: " . $e->getMessage());
+            $this->error('Connection Error: '.$e->getMessage());
         }
 
         return 0;
@@ -120,86 +120,86 @@ class TestDeliveryWebhook extends Command
             'name' => 'Test Burger',
             'quantity' => 1,
             'price' => 10.00,
-            'notes' => 'Extra cheese'
+            'notes' => 'Extra cheese',
         ];
 
         switch ($provider) {
             case 'uber-eats':
                 // Based on UberEatsProvider::parseOrderPayload
                 return [
-                    'id' => 'UB-' . $id,
+                    'id' => 'UB-'.$id,
                     'display_id' => 'AAAA1',
                     'cart' => [
-                            'items' => [
-                                [
-                                    'title' => 'Cheeseburger',
-                                    'quantity' => 2,
-                                    'price' => ['amount' => 1500, 'currency_code' => 'AED'], // cents
-                                    'special_instructions' => 'No onions',
-                                    'external_id' => 'ITEM-001'
-                                ]
-                            ]
+                        'items' => [
+                            [
+                                'title' => 'Cheeseburger',
+                                'quantity' => 2,
+                                'price' => ['amount' => 1500, 'currency_code' => 'AED'], // cents
+                                'special_instructions' => 'No onions',
+                                'external_id' => 'ITEM-001',
+                            ],
                         ],
+                    ],
                     'eater' => [
                         'first_name' => 'John',
                         'last_name' => 'Doe',
-                        'phone' => '+971500000000'
+                        'phone' => '+971500000000',
                     ],
                     'payment' => [
                         'charges' => [
-                            'total' => ['amount' => 3000, 'currency_code' => 'AED']
-                        ]
+                            'total' => ['amount' => 3000, 'currency_code' => 'AED'],
+                        ],
                     ],
                     // Store ID is usually in a meta field or URL param in real webhooks,
                     // but our controller logic attempts to find store_id in body if missing.
                     // Let's add it for safety if the controller supports it.
-                    'store' => ['id' => 'TEST-STORE-ID']
+                    'store' => ['id' => 'TEST-STORE-ID'],
                 ];
 
             case 'deliveroo':
                 // Based on DeliverooProvider::parseOrderPayload
                 return [
-                    'id' => 'DEL-' . $id,
+                    'id' => 'DEL-'.$id,
                     'total_price' => 45.50,
                     'currency' => 'AED',
                     'customer' => [
-                            'name' => 'Jane Smith',
-                            'phone_number' => '+971550000000'
-                        ],
+                        'name' => 'Jane Smith',
+                        'phone_number' => '+971550000000',
+                    ],
                     'items' => [
                         [
                             'name' => 'Pepperoni Pizza',
                             'quantity' => 1,
                             'price' => 45.50,
                             'notes' => 'Crispy please',
-                            'id' => 'ITEM-002'
-                        ]
+                            'id' => 'ITEM-002',
+                        ],
                     ],
                     'notes' => 'Ring the doorbell',
-                    'store' => ['id' => 'TEST-STORE-ID']
+                    'store' => ['id' => 'TEST-STORE-ID'],
                 ];
 
             case 'talabat':
                 // Based on TalabatProvider::parseOrderPayload
                 return [
-                    'orderId' => 'TB-' . $id,
+                    'orderId' => 'TB-'.$id,
                     'total' => 25.00,
                     'currency' => 'AED',
                     'customer' => [
-                            'firstName' => 'Ahmed',
-                            'mobile' => '+971560000000'
-                        ],
+                        'firstName' => 'Ahmed',
+                        'mobile' => '+971560000000',
+                    ],
                     'items' => [
                         [
                             'name' => 'Shawarma',
                             'quantity' => 2,
                             'price' => 12.50,
                             'comment' => 'Spicy',
-                            'remoteCode' => 'ITEM-003'
-                        ]
+                            'remoteCode' => 'ITEM-003',
+                        ],
                     ],
                     'comment' => 'Leave at reception',
-                    'store' => ['id' => 'TEST-STORE-ID']
+                    'store' => ['id' => 'TEST-STORE-ID'],
                 ];
 
             default:

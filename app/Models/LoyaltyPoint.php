@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use MongoDB\Laravel\Eloquent\Model;
 
 class LoyaltyPoint extends Model
 {
@@ -30,7 +30,7 @@ class LoyaltyPoint extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function addPoints(int $points, string $description = null, string|int|null $orderId = null, ?\DateTime $expiresAt = null): PointTransaction
+    public function addPoints(int $points, ?string $description = null, string|int|null $orderId = null, ?\DateTime $expiresAt = null): PointTransaction
     {
         $this->increment('balance', $points);
         $this->increment('total_earned', $points);
@@ -46,7 +46,7 @@ class LoyaltyPoint extends Model
         ]);
     }
 
-    public function redeemPoints(int $points, string $description = null, string|int|null $redemptionId = null): PointTransaction
+    public function redeemPoints(int $points, ?string $description = null, string|int|null $redemptionId = null): PointTransaction
     {
         if ($this->balance < $points) {
             throw new \Exception('Insufficient points');
@@ -65,4 +65,3 @@ class LoyaltyPoint extends Model
         ]);
     }
 }
-

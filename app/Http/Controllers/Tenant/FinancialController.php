@@ -7,10 +7,9 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\MonthlyExpense;
 use App\Models\Order;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
-use Carbon\Carbon;
 
 class FinancialController extends Controller
 {
@@ -19,11 +18,11 @@ class FinancialController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         // Enforce strict context - removed implicit fallback for super admin
-        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+        if (! $restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
             $restaurant = auth()->user()->currentRestaurant();
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return redirect()->route('restaurants.selection')->with('error', 'Please select a restaurant to view financials.');
         }
 
@@ -65,10 +64,12 @@ class FinancialController extends Controller
         $startDate = $request->input('start_date', now()->subDays(30)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
 
-        if (is_string($startDate))
+        if (is_string($startDate)) {
             $startDate = Carbon::parse($startDate)->startOfDay();
-        if (is_string($endDate))
+        }
+        if (is_string($endDate)) {
             $endDate = Carbon::parse($endDate)->endOfDay();
+        }
 
         $orders = Order::where('restaurant_id', $restaurant->id)
             ->whereBetween('created_at', [$startDate, $endDate])

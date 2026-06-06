@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Order;
+use Illuminate\Console\Command;
 
 class FixOrderStatuses extends Command
 {
@@ -35,6 +35,7 @@ class FixOrderStatuses extends Command
         $count = $orders->count();
         if ($count === 0) {
             $this->info('No inconsistent orders found.');
+
             return;
         }
 

@@ -7,16 +7,14 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\Staff;
+use App\Models\StaffLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
-
-use App\Models\StaffLog;
 
 class StaffController extends Controller
 {
@@ -32,7 +30,7 @@ class StaffController extends Controller
                     'changes' => $log->changes,
                     'causer_name' => $log->causer_name ?? 'System',
                     'date' => $log->created_at->format('Y-m-d H:i:s'),
-                    'ip' => $log->ip_address
+                    'ip' => $log->ip_address,
                 ];
             });
 
@@ -42,11 +40,11 @@ class StaffController extends Controller
     public function index(Request $request): Response
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+        if (! $restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
             $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
         }
 
@@ -73,7 +71,7 @@ class StaffController extends Controller
 
         $ownerEmails = array_unique(array_filter($ownerEmails));
 
-        if (!empty($ownerEmails)) {
+        if (! empty($ownerEmails)) {
             $ownerUsers = User::whereIn('email', $ownerEmails)->get();
 
             foreach ($ownerUsers as $ownerUser) {
@@ -82,7 +80,7 @@ class StaffController extends Controller
                     ->where('user_id', $ownerUser->id)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     Staff::create([
                         'user_id' => $ownerUser->id,
                         'restaurant_id' => $restaurant->id,
@@ -92,7 +90,7 @@ class StaffController extends Controller
                     ]);
 
                     // Also ensure they have the role
-                    if (!$ownerUser->hasRole('owner')) {
+                    if (! $ownerUser->hasRole('owner')) {
                         $ownerUser->assignRole('owner');
                     }
                 }
@@ -157,7 +155,6 @@ class StaffController extends Controller
             'by_role' => $allStaff->groupBy('role')->map->count(),
         ];
 
-
         // Fetch Roles dynamically
         $dbRoles = \App\Models\Role::all();
         $configNames = config('roles.display_names', []);
@@ -166,38 +163,38 @@ class StaffController extends Controller
         $rolesList = [];
         foreach ($dbRoles as $role) {
             $label = null;
-            $display = (!empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name)))
+            $display = (! empty($role->display_name) && (is_array($role->display_name) || is_object($role->display_name)))
                 ? (array) $role->display_name
                 : [];
 
             // 1. DB Display Name (Current Locale)
-            if (!empty($display[$locale])) {
+            if (! empty($display[$locale])) {
                 $label = $display[$locale];
             }
 
             // 2. Translation File
-            if (!$label && \Illuminate\Support\Facades\Lang::has('roles.' . $role->name)) {
-                $label = __('roles.' . $role->name);
+            if (! $label && \Illuminate\Support\Facades\Lang::has('roles.'.$role->name)) {
+                $label = __('roles.'.$role->name);
             }
 
             // 3. DB Display Name (English Fallback)
-            if (!$label && !empty($display['en'])) {
+            if (! $label && ! empty($display['en'])) {
                 $label = $display['en'];
             }
 
             // 4. Config
-            if (!$label) {
+            if (! $label) {
                 $label = $configNames[$role->name] ?? null;
             }
 
             // 5. Fallback
-            if (!$label) {
+            if (! $label) {
                 $label = ucwords(str_replace('_', ' ', $role->name));
             }
 
             $rolesList[] = [
                 'value' => $role->name,
-                'label' => $label
+                'label' => $label,
             ];
         }
 
@@ -219,19 +216,19 @@ class StaffController extends Controller
                 'required',
                 'string',
                 function ($attribute, $value, $fail) {
-                    if (!\App\Models\Role::where('name', $value)->exists()) {
+                    if (! \App\Models\Role::where('name', $value)->exists()) {
                         $fail('The selected role is invalid.');
                     }
-                }
+                },
             ],
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
+        if (! $restaurant && auth()->user()->is_super_admin && $request->has('restaurant_id')) {
             $restaurant = \App\Models\Restaurant::find($request->input('restaurant_id'));
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
         }
 
@@ -274,7 +271,7 @@ class StaffController extends Controller
 
         $commService = app(\App\Services\CommunicationService::class);
         $commService->sendNotification('user_registered', $user, [
-            'link' => $resetUrl
+            'link' => $resetUrl,
         ]);
 
         // Log Staff Creation
@@ -287,12 +284,12 @@ class StaffController extends Controller
                 'email' => ['new' => $validated['email']],
                 'phone' => ['new' => $validated['phone']],
                 'role' => ['new' => $validated['role']],
-                'is_active' => ['new' => true]
+                'is_active' => ['new' => true],
             ],
             'causer_id' => auth()->id(),
             'causer_name' => auth()->user()->name,
             'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent(),
         ]);
 
         return back()->with('success', 'Staff member added successfully. An invitation email has been sent.');
@@ -302,23 +299,22 @@ class StaffController extends Controller
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'unique:users,email,' . $staff->user_id],
+            'email' => ['sometimes', 'email', 'unique:users,email,'.$staff->user_id],
             'phone' => ['sometimes', 'string', 'max:20'],
             'role' => [
                 'sometimes',
                 'string',
                 function ($attribute, $value, $fail) {
-                    if (!\App\Models\Role::where('name', $value)->exists()) {
+                    if (! \App\Models\Role::where('name', $value)->exists()) {
                         $fail('The selected role is invalid.');
                     }
-                }
+                },
             ],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
         $user = $staff->user;
         $oldEmail = $user->email;
-
 
         // Capture Old Data for Logging
         $oldUserData = [
@@ -332,15 +328,18 @@ class StaffController extends Controller
 
         // Update User details
         $userUpdateData = [];
-        if (isset($validated['name']) && $validated['name'] !== $oldUserData['name'])
+        if (isset($validated['name']) && $validated['name'] !== $oldUserData['name']) {
             $userUpdateData['name'] = $validated['name'];
+        }
         // Email is tricky because we use oldEmail for pivot lookup, but let's check change
-        if (isset($validated['email']) && $validated['email'] !== $oldEmail)
+        if (isset($validated['email']) && $validated['email'] !== $oldEmail) {
             $userUpdateData['email'] = $validated['email'];
-        if (isset($validated['phone']) && $validated['phone'] !== $oldUserData['phone'])
+        }
+        if (isset($validated['phone']) && $validated['phone'] !== $oldUserData['phone']) {
             $userUpdateData['phone'] = $validated['phone'];
+        }
 
-        if (!empty($userUpdateData)) {
+        if (! empty($userUpdateData)) {
             $user->update($userUpdateData);
         }
 
@@ -353,7 +352,7 @@ class StaffController extends Controller
             $staffUpdates['role'] = $validated['role'];
         }
 
-        if (!empty($staffUpdates)) {
+        if (! empty($staffUpdates)) {
             $staff->update($staffUpdates);
         }
 
@@ -364,7 +363,7 @@ class StaffController extends Controller
         foreach ($userUpdateData as $key => $newValue) {
             $changes[$key] = [
                 'old' => $key === 'email' ? $oldEmail : ($oldUserData[$key] ?? null),
-                'new' => $newValue
+                'new' => $newValue,
             ];
         }
 
@@ -372,12 +371,12 @@ class StaffController extends Controller
         foreach ($staffUpdates as $key => $newValue) {
             $changes[$key] = [
                 'old' => $oldStaffData[$key] ?? null,
-                'new' => $newValue
+                'new' => $newValue,
             ];
         }
 
         // Log to StaffLog if there are any changes
-        if (!empty($changes)) {
+        if (! empty($changes)) {
             StaffLog::create([
                 'staff_id' => $staff->id,
                 'user_id' => $staff->user_id,
@@ -386,7 +385,7 @@ class StaffController extends Controller
                 'causer_id' => auth()->id(),
                 'causer_name' => auth()->user()->name,
                 'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
+                'user_agent' => $request->userAgent(),
             ]);
         }
 

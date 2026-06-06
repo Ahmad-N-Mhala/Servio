@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class NotifyExpiringSubscriptions extends Command
 {
     protected $signature = 'subscriptions:notify-expiring';
+
     protected $description = 'Send notifications for expiring subscriptions based on system templates';
 
     public function handle(CommunicationService $commService)
@@ -36,6 +37,7 @@ class NotifyExpiringSubscriptions extends Command
 
         if ($allTemplates->isEmpty()) {
             $this->warn('No active system templates found for subscription notifications.');
+
             return;
         }
 
@@ -77,7 +79,7 @@ class NotifyExpiringSubscriptions extends Command
                     ->whereDate('sent_at', Carbon::today())
                     ->exists();
 
-                if (!$alreadyLogged) {
+                if (! $alreadyLogged) {
                     $this->notifyOwner($sub, $template, $commService);
                 }
             }
@@ -89,8 +91,9 @@ class NotifyExpiringSubscriptions extends Command
     protected function notifyOwner(RestaurantSubscription $subscription, CommunicationTemplate $template, CommunicationService $commService)
     {
         $restaurant = $subscription->restaurant;
-        if (!$restaurant)
+        if (! $restaurant) {
             return;
+        }
 
         // Find Owner
         $ownerPivot = DB::table('restaurant_user')
@@ -98,12 +101,14 @@ class NotifyExpiringSubscriptions extends Command
             ->where('role', 'owner')
             ->first();
 
-        if (!$ownerPivot)
+        if (! $ownerPivot) {
             return;
+        }
 
         $user = User::where('email', $ownerPivot->email)->first();
-        if (!$user)
+        if (! $user) {
             return;
+        }
 
         $this->line("Notifying owner of {$restaurant->name} ({$user->email}) for template: {$template->name}");
 

@@ -171,20 +171,20 @@
                         </div>
                         <div class="flex gap-4 mt-2">
                             <div class="text-center bg-white border border-gray-100 rounded-lg p-2 flex-1 shadow-sm">
-                                <span class="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">Points</span>
+                                <span class="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">{{ $t('loyalty.points') }}</span>
                                 <span class="block text-lg font-bold text-purple-600">{{ selectedCustomer.loyalty_points }}</span>
                             </div>
                         </div>
                     </div>
                     <div v-else class="space-y-2">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide px-1">Customer</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide px-1">{{ $t('orders.customer') }}</p>
                         <div class="flex gap-2">
                             <div class="flex-1">
                                 <PhoneInput 
                                     v-model="form.customer_phone"
                                     :country="currentCountry"
                                     @blur="lookupCustomer"
-                                    placeholder="Phone"
+                                    :placeholder="$t('orders.customer_phone') || 'Phone'"
                                     class="w-full"
                                 />
                             </div>
@@ -246,7 +246,7 @@
                                 v-model="form.delivery_provider"
                                 :label="$t('orders.delivery_provider_label')"
                                 :options="deliveryProviderOptions"
-                                placeholder="Select Provider"
+                                :placeholder="$t('orders.select_provider') || 'Select Provider'"
                                 class="w-full"
                             />
                         </div>
@@ -259,7 +259,7 @@
                      <div v-if="cart.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400 p-8 text-center opacity-60">
                         <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         <p class="text-lg font-medium">{{ $t('orders.no_items') }}</p>
-                        <p class="text-sm">{{ $t('common.select') }} items from menu</p>
+                        <p class="text-sm">{{ $t('orders.select_items_from_menu') }}</p>
                      </div>
 
                      <div v-else class="p-4 space-y-6">
@@ -274,7 +274,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-1">
                                             <span class="font-bold text-gray-800 text-sm truncate">{{ item.name }}</span>
-                                            <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-wide">FREE</span>
+                                            <span v-if="selectedReward?.reward_type === 'free_item' && ((freeItems.some(i => i.id === item.id)) || (!freeItems.length && selectedReward.menu_item_id === item.id))" class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-wide">{{ $t('loyalty.free') }}</span>
                                         </div>
                                         
                                         <!-- Extras -->
@@ -313,7 +313,7 @@
 
                         <!-- Global Notes -->
                         <div>
-                             <label class="text-xs font-bold text-gray-400 uppercase tracking-wide block mb-1.5">Order Notes</label>
+                             <label class="text-xs font-bold text-gray-400 uppercase tracking-wide block mb-1.5">{{ $t('orders.order_notes') }}</label>
                              <textarea 
                                 v-model="form.notes"
                                 rows="2"
@@ -325,8 +325,8 @@
                         <!-- Rewards Section -->
                         <div v-if="availableRewards.length > 0 && selectedCustomer" class="border-t border-dashed border-gray-200 pt-4">
                             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3 flex justify-between items-center">
-                                <span>available rewards</span>
-                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px]">{{ selectedCustomer.loyalty_points }} pts</span>
+                                <span>{{ $t('loyalty.available_rewards') }}</span>
+                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px]">{{ selectedCustomer.loyalty_points }} {{ $t('loyalty.pts') }}</span>
                             </h4>
                             <div class="space-y-2">
                                 <div 
@@ -339,7 +339,7 @@
                                     <div class="flex justify-between items-start">
                                         <div>
                                             <p class="font-bold text-sm text-gray-800">{{ getLocaleName(reward.name) }}</p>
-                                            <p class="text-xs text-gray-500">{{ reward.points_required }} pts • {{ getRewardTypeLabel(reward) }}</p>
+                                            <p class="text-xs text-gray-500">{{ reward.points_required }} {{ $t('loyalty.pts') }} • {{ getRewardTypeLabel(reward) }}</p>
                                         </div>
                                         <div v-if="selectedReward?.id === reward.id" class="text-purple-600 bg-white rounded-full p-0.5 shadow-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -376,7 +376,7 @@
                      <!-- OTP (Compact) -->
                     <div v-if="selectedReward && !otpVerified" class="mb-4">
                         <div class="bg-purple-50 rounded-lg p-2 border border-purple-100 flex gap-2">
-                             <input v-model="otpInput" type="text" maxlength="6" placeholder="OTP" class="w-20 text-center rounded border-gray-200 text-sm p-1 font-mono uppercase focus:ring-purple-500 focus:border-purple-500" :class="{'border-red-500': otpError || form.errors.otp}">
+                             <input v-model="otpInput" type="text" maxlength="6" :placeholder="$t('orders.otp_placeholder') || 'OTP'" class="w-20 text-center rounded border-gray-200 text-sm p-1 font-mono uppercase focus:ring-purple-500 focus:border-purple-500" :class="{'border-red-500': otpError || form.errors.otp}">
                               <Button v-if="(!otpSent && otpTimer === 0) && otpInput.length < 6" size="sm" @click="requestOtp" class="flex-1 text-xs py-1 h-8">{{ $t('loyalty.send_code') }}</Button>
                               <Button v-else size="sm" @click="verifyOtp" class="flex-1 text-xs py-1 h-8" :disabled="otpInput.length !== 6">{{ $t('common.verify') }}</Button>
                         </div>
@@ -500,8 +500,8 @@
         <!-- Mobile Cart Summary (Fixed Bottom) -->
         <div v-if="cart.length > 0" class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 safe-area-bottom">
             <button @click="scrollToCart" class="w-full bg-primary text-white font-bold py-3 rounded-xl flex justify-between px-6 shadow-lg active:scale-95 transition-transform">
-                <span>{{ cart.reduce((s,i)=>s+i.qty,0) }} Items</span>
-                <span>View Cart</span>
+                <span>{{ cart.reduce((s,i)=>s+i.qty,0) }} {{ $t('common.items') }}</span>
+                <span>{{ $t('orders.view_cart') }}</span>
                 <span>{{ currencyCode }} {{ total.toFixed(2) }}</span>
             </button>
         </div>
@@ -724,7 +724,7 @@ const requestOtp = async () => {
         startOtpTimer();
     } catch (error: any) {
         console.error('Failed to send OTP', error);
-        const msg = error.response?.data?.message || 'Failed to send OTP. Please try again.';
+        const msg = error.response?.data?.message || t('loyalty.otp_send_failed') || 'Failed to send OTP. Please try again.';
         otpError.value = msg;
         otpSent.value = false;
     }
@@ -743,7 +743,7 @@ const verifyOtp = async () => {
     } catch (error: any) {
         console.error('OTP Verification Failed', error);
         otpVerified.value = false;
-        otpError.value = error.response?.data?.message || 'Invalid OTP';
+        otpError.value = error.response?.data?.message || t('loyalty.invalid_otp') || 'Invalid OTP';
     }
 };
 
@@ -1212,7 +1212,7 @@ const submitOrder = () => {
         onSuccess: () => {
             // Get success message from flash or fallback
             const flash = (page.props as any).flash;
-            successMessage.value = flash?.message || 'Order Created Successfully';
+            successMessage.value = flash?.message || t('orders.order_created') || 'Order Created Successfully';
             console.log('Order created successfully, showing modal.');
             showOrderSuccessModal.value = true;
 
@@ -1232,7 +1232,7 @@ const submitOrder = () => {
             form.processing = false;
             
             // Show a toast or generic error message so it doesn't fail silently
-            const errorMessage = Object.values(errors)[0] || 'Validation failed. Please check the form.';
+            const errorMessage = Object.values(errors)[0] || t('common.please_correct') || 'Validation failed. Please check the form.';
             alert(errorMessage); // Simple alert fallback. In production, consider a toast notification system.
             
             window.scrollTo({ top: 0, behavior: 'smooth' });

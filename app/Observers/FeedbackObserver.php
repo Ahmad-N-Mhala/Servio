@@ -57,7 +57,7 @@ class FeedbackObserver
             }
 
             // Award Feedback Points if configured in the rule
-            if (!empty($topRule->conditions['feedback_points'])) {
+            if (! empty($topRule->conditions['feedback_points'])) {
                 $points = (int) $topRule->conditions['feedback_points'];
                 if ($points > 0) {
                     $lp = $feedback->customer->loyaltyPoints()->firstOrCreate([

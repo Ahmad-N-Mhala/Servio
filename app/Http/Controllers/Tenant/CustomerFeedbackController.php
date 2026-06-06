@@ -58,6 +58,7 @@ class CustomerFeedbackController extends Controller
                 if ($request->wantsJson()) {
                     return response()->json(['message' => 'Feedback already submitted.'], 422);
                 }
+
                 return redirect()->back()->with('error', 'Feedback already submitted for this order.');
             }
         }
@@ -67,7 +68,7 @@ class CustomerFeedbackController extends Controller
             'comment' => 'nullable|string|max:1000',
             'order_id' => $order ? 'nullable' : 'nullable|exists:orders,id',
             'customer_id' => $order ? 'nullable' : 'nullable|exists:customers,id',
-            'redirected_to_google' => 'boolean'
+            'redirected_to_google' => 'boolean',
         ]);
 
         $orderId = $order ? $order->id : ($validated['order_id'] ?? null);
@@ -82,9 +83,6 @@ class CustomerFeedbackController extends Controller
             'status' => 'pending',
             'redirected_to_google' => $validated['redirected_to_google'] ?? false,
         ]);
-
-
-
 
         // Logic check for Google Redirect
         $shouldRedirect = false;
@@ -105,11 +103,11 @@ class CustomerFeedbackController extends Controller
         $googleReviewLink = $restaurant->google_map_location;
 
         // If it's a test form (no order) and no link is configured, supply a generic one so testing works
-        if (empty($googleReviewLink) && !$order) {
+        if (empty($googleReviewLink) && ! $order) {
             $googleReviewLink = 'https://maps.google.com/';
         }
 
-        if ($validated['rating'] >= $minRating && !empty($googleReviewLink)) {
+        if ($validated['rating'] >= $minRating && ! empty($googleReviewLink)) {
             $shouldRedirect = true;
 
             // Parse Google Maps URL to extract Place ID and generate review URL
@@ -125,7 +123,7 @@ class CustomerFeedbackController extends Controller
                             'follow_location' => true,
                             'max_redirects' => 5,
                             'timeout' => 5,
-                        ]
+                        ],
                     ]);
                     $headers = get_headers($googleUrl, 1, $context);
                     if (isset($headers['Location'])) {
@@ -146,14 +144,14 @@ class CustomerFeedbackController extends Controller
             }
 
             // Try to extract CID (hex format like 0x...:0x...)
-            if (!$placeId && preg_match('/!1s0x[a-fA-F0-9]+:0x([a-fA-F0-9]+)/', $googleUrl, $matches)) {
+            if (! $placeId && preg_match('/!1s0x[a-fA-F0-9]+:0x([a-fA-F0-9]+)/', $googleUrl, $matches)) {
                 $cid = $matches[1];
             }
 
             // Generate the review URL
             if ($placeId) {
                 // Preferred: Use Place ID for review URL
-                $redirectUrl = "https://search.google.com/local/writereview?placeid=" . $placeId;
+                $redirectUrl = 'https://search.google.com/local/writereview?placeid='.$placeId;
             } else {
                 // Fallback: Clean the URL and open the place page
                 $redirectUrl = preg_replace('/[?&]entry=.*$/', '', $googleUrl);
@@ -169,7 +167,7 @@ class CustomerFeedbackController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if ($template && !empty($template->conditions['feedback_points'])) {
+        if ($template && ! empty($template->conditions['feedback_points'])) {
             $points = (int) $template->conditions['feedback_points'];
             $customerId = $validated['customer_id'] ?? null;
             $orderId = $validated['order_id'] ?? null;
@@ -195,7 +193,7 @@ class CustomerFeedbackController extends Controller
             'success' => true,
             'message' => 'Thank you for your feedback!',
             'redirect_url' => $redirectUrl,
-            'should_redirect' => $shouldRedirect
+            'should_redirect' => $shouldRedirect,
         ]);
     }
 }

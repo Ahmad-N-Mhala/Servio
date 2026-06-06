@@ -2,13 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Jobs\SendCustomerCommunicationJob;
 use App\Models\CommunicationTemplate;
 use App\Models\Customer;
-use App\Models\Order;
-use App\Jobs\SendCustomerCommunicationJob;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Console\Command;
 
 class CheckCommunicationTriggers extends Command
 {
@@ -46,7 +43,7 @@ class CheckCommunicationTriggers extends Command
     }
 
     /**
-     * @param CommunicationTemplate $template
+     * @param  CommunicationTemplate  $template
      */
     private function processTemplate($template)
     {
@@ -60,7 +57,7 @@ class CheckCommunicationTriggers extends Command
     }
 
     /**
-     * @param CommunicationTemplate $template
+     * @param  CommunicationTemplate  $template
      */
     private function processBirthday($template)
     {
@@ -96,7 +93,7 @@ class CheckCommunicationTriggers extends Command
     }
 
     /**
-     * @param CommunicationTemplate $template
+     * @param  CommunicationTemplate  $template
      */
     private function processChurnRisk($template)
     {
@@ -118,8 +115,8 @@ class CheckCommunicationTriggers extends Command
     }
 
     /**
-     * @param CommunicationTemplate $template
-     * @param Customer $customer
+     * @param  CommunicationTemplate  $template
+     * @param  Customer  $customer
      */
     private function dispatchCommunication($template, $customer)
     {
@@ -140,7 +137,7 @@ class CheckCommunicationTriggers extends Command
 
         // If timing_time is set for scheduled triggers, we can delay the job
         $delay = null;
-        if (!empty($template->timing_time)) {
+        if (! empty($template->timing_time)) {
             $timeParts = explode(':', $template->timing_time);
             if (count($timeParts) === 2) {
                 $delay = now()->setTime((int) $timeParts[0], (int) $timeParts[1], 0);

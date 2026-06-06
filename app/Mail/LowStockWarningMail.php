@@ -22,7 +22,7 @@ class LowStockWarningMail extends Mailable
     {
         $name = $this->ingredient->name['en'] ?? ($this->ingredient->name['ar'] ?? 'Unknown Item');
 
-        return $this->subject('Low Stock Warning: ' . $name)
+        return $this->subject('Low Stock Warning: '.$name)
             ->view('emails.low_stock_warning');
     }
 }

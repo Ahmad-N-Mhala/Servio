@@ -21,7 +21,7 @@ class CommunicationLog extends Model
         'error_message',
         'communication_template_id',
         'restaurant_id',
-        'sent_at'
+        'sent_at',
     ];
 
     protected $casts = [

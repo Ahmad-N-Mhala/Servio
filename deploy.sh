@@ -88,6 +88,8 @@ echo "   ✅ Packages discovered cleanly — no dev-only providers"
 # ── Step 7: Build frontend assets ────────────────────────────────────────────
 echo ""
 echo "➡️  [7/9] Building frontend assets..."
+echo "   ➡️  Running automatic translation sync..."
+node sync-translations.cjs
 npm install
 npm run build
 echo "   ✅ Frontend built"

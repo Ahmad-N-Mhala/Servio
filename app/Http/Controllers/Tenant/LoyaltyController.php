@@ -16,16 +16,16 @@ class LoyaltyController extends Controller
 {
     public function __construct(
         protected LoyaltyService $loyaltyService
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Customers Query
         $customersQuery = Customer::where('restaurant_id', $restaurant->id)
@@ -70,7 +70,7 @@ class LoyaltyController extends Controller
             ->with([
                 'items' => function ($q) {
                     $q->select(['id', 'name', 'price', 'menu_category_id']);
-                }
+                },
             ])
             ->orderBy('sort_order')
             ->get()
@@ -78,6 +78,7 @@ class LoyaltyController extends Controller
                 $cat->setRelation('items', $cat->items->sortBy(function ($item) {
                     return is_array($item->name) ? ($item->name['en'] ?? $item->name['ar'] ?? '') : $item->name;
                 })->values());
+
                 return $cat;
             });
 
@@ -119,7 +120,7 @@ class LoyaltyController extends Controller
             'rewardRedemptions.reward',
             'orders' => function ($query) {
                 $query->orderBy('created_at', 'desc')->limit(10);
-            }
+            },
         ]);
 
         $rewards = \App\Models\Reward::where('restaurant_id', $customer->restaurant_id)
@@ -151,8 +152,9 @@ class LoyaltyController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $data = $validated;
         unset($data['menu_item_ids']);
@@ -190,7 +192,7 @@ class LoyaltyController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant || (string) $reward->restaurant_id !== (string) $restaurant->id) {
+        if (! $restaurant || (string) $reward->restaurant_id !== (string) $restaurant->id) {
             abort(403, 'Unauthorized');
         }
 
@@ -211,7 +213,7 @@ class LoyaltyController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant || (string) $reward->restaurant_id !== (string) $restaurant->id) {
+        if (! $restaurant || (string) $reward->restaurant_id !== (string) $restaurant->id) {
             abort(403, 'Unauthorized');
         }
         $reward->delete();
@@ -228,7 +230,7 @@ class LoyaltyController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant || (string) $customer->restaurant_id !== (string) $restaurant->id) {
+        if (! $restaurant || (string) $customer->restaurant_id !== (string) $restaurant->id) {
             abort(403, 'Unauthorized');
         }
 
@@ -249,14 +251,14 @@ class LoyaltyController extends Controller
         return redirect()->back()->with('message', __('loyalty.points_adjusted'));
     }
 
-
     public function settings(Request $request): Response
     {
         \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $earningMethod = \App\Models\EarningMethod::where('restaurant_id', $restaurant->id)->first();
 
@@ -290,20 +292,21 @@ class LoyaltyController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $currentSettings = $restaurant->settings ?? [];
 
         // Handle File Uploads (naive implementation for local serve)
         if ($request->hasFile('loyalty_logo')) {
             $path = $request->file('loyalty_logo')->store('loyalty/logos', 'public');
-            $currentSettings['loyalty_logo'] = '/storage/' . $path;
+            $currentSettings['loyalty_logo'] = '/storage/'.$path;
         }
 
         if ($request->hasFile('loyalty_banner')) {
             $path = $request->file('loyalty_banner')->store('loyalty/banners', 'public');
-            $currentSettings['loyalty_banner'] = '/storage/' . $path;
+            $currentSettings['loyalty_banner'] = '/storage/'.$path;
         }
 
         // Update other fields
@@ -335,6 +338,7 @@ class LoyaltyController extends Controller
 
         return redirect()->back()->with('success', 'Loyalty card updated successfully.');
     }
+
     public function updateRewardDesign(Request $request, Reward $reward)
     {
         \Illuminate\Support\Facades\Gate::authorize('manage_rewards');
@@ -356,12 +360,12 @@ class LoyaltyController extends Controller
         // Handle File Uploads
         if ($request->hasFile('loyalty_logo')) {
             $path = $request->file('loyalty_logo')->store('loyalty/rewards/logos', 'public');
-            $currentDesign['loyalty_logo'] = '/storage/' . $path;
+            $currentDesign['loyalty_logo'] = '/storage/'.$path;
         }
 
         if ($request->hasFile('loyalty_banner')) {
             $path = $request->file('loyalty_banner')->store('loyalty/rewards/banners', 'public');
-            $currentDesign['loyalty_banner'] = '/storage/' . $path;
+            $currentDesign['loyalty_banner'] = '/storage/'.$path;
         }
 
         // Update generic fields
@@ -383,10 +387,10 @@ class LoyaltyController extends Controller
         $logContext = [
             'customer_id' => (string) $customer->id,
             'user_id' => $request->user()->id,
-            'ip' => $request->ip()
+            'ip' => $request->ip(),
         ];
 
-        \Illuminate\Support\Facades\Log::info("LoyaltyController: Incoming OTP request", $logContext);
+        \Illuminate\Support\Facades\Log::info('LoyaltyController: Incoming OTP request', $logContext);
 
         try {
             \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
@@ -396,37 +400,42 @@ class LoyaltyController extends Controller
             $restaurantId = (string) ($user->currentRestaurant()?->id ?? session('active_restaurant_id') ?? '');
 
             // Rule: Super Admin can bypass. Non-super admins MUST match the customer's restaurant.
-            if (!$user->is_super_admin && (string) $customer->restaurant_id !== $restaurantId) {
-                \Illuminate\Support\Facades\Log::warning("LoyaltyController: Authorization Failed", array_merge($logContext, [
+            if (! $user->is_super_admin && (string) $customer->restaurant_id !== $restaurantId) {
+                \Illuminate\Support\Facades\Log::warning('LoyaltyController: Authorization Failed', array_merge($logContext, [
                     'customer_restaurant' => (string) $customer->restaurant_id,
-                    'user_context_restaurant' => $restaurantId
+                    'user_context_restaurant' => $restaurantId,
                 ]));
+
                 return response()->json(['message' => __('loyalty.unauthorized_customer')], 403);
             }
 
-            if (!$restaurantId && !$user->is_super_admin) {
+            if (! $restaurantId && ! $user->is_super_admin) {
                 return response()->json(['message' => __('loyalty.restaurant_context_missing')], 400);
             }
 
-            \Illuminate\Support\Facades\Log::info("LoyaltyController: Authorization Passed. Handing off to LoyaltyService.");
+            \Illuminate\Support\Facades\Log::info('LoyaltyController: Authorization Passed. Handing off to LoyaltyService.');
 
             $sent = $this->loyaltyService->sendRedemptionOtp($customer);
 
             if ($sent) {
-                \Illuminate\Support\Facades\Log::info("LoyaltyController: Success. OTP process completed.");
+                \Illuminate\Support\Facades\Log::info('LoyaltyController: Success. OTP process completed.');
+
                 return response()->json(['message' => __('loyalty.otp_send_success')]);
             }
 
-            \Illuminate\Support\Facades\Log::error("LoyaltyController: Service indicated failure (SmsService issue).");
+            \Illuminate\Support\Facades\Log::error('LoyaltyController: Service indicated failure (SmsService issue).');
+
             return response()->json(['message' => __('loyalty.otp_send_failed')], 503);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("LoyaltyController Failure: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('LoyaltyController Failure: '.$e->getMessage());
+
             return response()->json(['message' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("LoyaltyController CRITICAL FAILURE: " . $e->getMessage(), array_merge($logContext, [
-                'trace' => $e->getTraceAsString()
+            \Illuminate\Support\Facades\Log::error('LoyaltyController CRITICAL FAILURE: '.$e->getMessage(), array_merge($logContext, [
+                'trace' => $e->getTraceAsString(),
             ]));
+
             return response()->json(['message' => __('common.server_error')], 500);
         }
     }
@@ -435,7 +444,7 @@ class LoyaltyController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
-        if (!$request->user()->is_super_admin && (string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+        if (! $request->user()->is_super_admin && (string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
             return response()->json(['message' => __('loyalty.unauthorized_customer')], 403);
         }
 
@@ -444,15 +453,16 @@ class LoyaltyController extends Controller
             'otp' => 'required|string|size:6',
         ]);
 
-        if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+        if (! $this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
             return response()->json(['message' => __('loyalty.invalid_otp')], 422);
         }
 
         try {
             $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
+
             return response()->json([
                 'message' => __('loyalty.reward_redeemed'),
-                'redemption' => $redemption
+                'redemption' => $redemption,
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
@@ -463,7 +473,7 @@ class LoyaltyController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('view_loyalty');
 
-        if (!$request->user()->is_super_admin && (string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
+        if (! $request->user()->is_super_admin && (string) $customer->restaurant_id !== (string) session('active_restaurant_id')) {
             return response()->json(['message' => __('loyalty.unauthorized_customer')], 403);
         }
 
@@ -490,7 +500,7 @@ class LoyaltyController extends Controller
             ->paginate(20);
 
         return Inertia::render('Loyalty/SmsLogs', [
-            'logs' => $logs
+            'logs' => $logs,
         ]);
     }
 }

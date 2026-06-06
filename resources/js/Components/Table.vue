@@ -96,7 +96,10 @@
                         v-for="(row, index) in sortedData"
                         :key="row[rowKey] || index"
                         class="hover:bg-gray-50 transition-colors duration-150"
-                        :class="{ 'bg-primary/5': highlightRow && highlightRow(row) }"
+                        :class="[
+                            { 'bg-primary/5': highlightRow && highlightRow(row) },
+                            rowClass ? rowClass(row) : ''
+                        ]"
                     >
                         <td
                             v-for="column in columns"
@@ -174,6 +177,7 @@ const props = withDefaults(defineProps<{
     rowKey?: string;
     currency?: string;
     highlightRow?: (row: any) => boolean;
+    rowClass?: (row: any) => string | object;
     serverSide?: boolean;
     allowOverflow?: boolean;
 }>(), {

@@ -17,7 +17,7 @@ class PlanController extends Controller
         $restaurant = auth()->user()->currentRestaurant();
 
         // If no restaurant is available, redirect to restaurant selection
-        if (!$restaurant) {
+        if (! $restaurant) {
             return Inertia::render('Plans/Index', [
                 'plans' => Plan::where('is_active', true)->orderBy('order')->orderBy('price_monthly', 'asc')->get(),
                 'currentSubscription' => null,

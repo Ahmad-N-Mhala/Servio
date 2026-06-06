@@ -40,48 +40,24 @@
             <div v-if="activeTab === 'overview'" class="space-y-12">
                 <!-- Stats Overview -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- ... existing stats ... -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-purple-100 rounded-xl">
-                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.total_members') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ stats.total_members }}</p>
-                            </div>
-                        </div>
-                    </div>
-                
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-blue-100 rounded-xl">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.active_rewards') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ stats.active_rewards }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-2xl">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-green-100 rounded-xl">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">{{ $t('loyalty.redemptions') }}</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ stats.total_redemptions }}</p>
-                            </div>
-                        </div>
-                    </div>
+                    <StatsCard
+                        :title="$t('loyalty.total_members')"
+                        :value="stats.total_members"
+                        icon="customers"
+                        color="purple"
+                    />
+                    <StatsCard
+                        :title="$t('loyalty.active_rewards')"
+                        :value="stats.active_rewards"
+                        icon="gift"
+                        color="blue"
+                    />
+                    <StatsCard
+                        :title="$t('loyalty.redemptions')"
+                        :value="stats.total_redemptions"
+                        icon="orders"
+                        color="green"
+                    />
                 </div>
 
 
@@ -156,109 +132,45 @@
             <!-- Customers Table -->
              <div v-show="activeTab === 'members'">
 
-            <!-- Customers Table -->
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                    <h2 class="text-lg font-bold text-gray-900">{{ $t('loyalty.members') }}</h2>
-                    <div class="relative">
-                        <input 
-                            v-model="params.search"
-                            type="text" 
-                            :placeholder="$t('loyalty.search_members')" 
-                            class="pl-10 pr-4 py-2 rounded-xl border-gray-200 focus:border-primary focus:ring-primary text-sm"
-                        >
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+            <Table
+                :title="$t('loyalty.members')"
+                v-model:search="params.search"
+                :columns="customerColumns"
+                :data="customers.data"
+                :pagination="paginationMeta"
+                :currency="currency"
+                serverSide
+                @sort="handleSort"
+            >
+                <template #cell-name="{ row }">
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold">
+                            {{ row.name ? row.name.charAt(0).toUpperCase() : '?' }}
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900">{{ row.name || $t('common.unknown') }}</div>
+                            <div class="text-xs text-gray-500">{{ $t('loyalty.member_since') }} {{ new Date(row.created_at).toLocaleDateString() }}</div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50/50">
-                            <tr>
-                                <th 
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('name')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.customer') }}
-                                        <span v-if="params.sort_field === 'name'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('phone')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('orders.customer_phone') }}
-                                        <span v-if="params.sort_field === 'phone'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('points_balance')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('loyalty.points_balance') }}
-                                        <span v-if="params.sort_field === 'points_balance'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th 
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    @click="sort('total_spent')"
-                                >
-                                    <div class="flex items-center gap-1">
-                                        {{ $t('loyalty.total_spent') }}
-                                        <span v-if="params.sort_field === 'total_spent'">
-                                            {{ params.sort_direction === 'asc' ? '↑' : '↓' }}
-                                        </span>
-                                    </div>
-                                </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('orders.actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr v-for="customer in customers.data" :key="customer.id" class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold">
-                                            {{ customer.name ? customer.name.charAt(0).toUpperCase() : '?' }}
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ customer.name || $t('common.unknown') }}</div>
-                                            <div class="text-xs text-gray-500">{{ $t('loyalty.member_since') }} {{ new Date(customer.created_at).toLocaleDateString() }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ customer.phone }}</div>
-                                    <div class="text-xs text-gray-500">{{ customer.email || '-' }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        {{ customer.loyalty_points?.balance || 0 }} {{ $t('loyalty.points') }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ currency }} {{ customer.total_spent || '0.00' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <Link :href="route('loyalty.customers.show', customer.id)" class="text-primary hover:text-primary-hover font-bold">{{ $t('loyalty.view_details') }}</Link>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <Pagination :meta="paginationMeta" />
-            </div>
+                </template>
+                <template #cell-phone="{ row }">
+                    <div class="text-sm text-gray-900">{{ row.phone }}</div>
+                    <div class="text-xs text-gray-500">{{ row.email || '-' }}</div>
+                </template>
+                <template #cell-points_balance="{ row }">
+                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        {{ row.loyalty_points?.balance || 0 }} {{ $t('loyalty.points') }}
+                    </span>
+                </template>
+                <template #cell-total_spent="{ row }">
+                    {{ currency }} {{ row.total_spent || '0.00' }}
+                </template>
+                <template #actions="{ row }">
+                    <Link :href="route('loyalty.customers.show', row.id)" class="text-primary hover:text-primary-hover font-bold">
+                        {{ $t('loyalty.view_details') }}
+                    </Link>
+                </template>
+            </Table>
 
             <!-- Add Reward Modal -->
             <Modal :show="showRewardModal" @close="closeRewardModal" :title="editingRewardId ? $t('loyalty.edit_reward') : $t('loyalty.add_new_reward')" size="lg">
@@ -499,7 +411,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useForm, router, usePage } from '@inertiajs/vue3';
+import { useForm, router, usePage, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import debounce from 'lodash/debounce';
@@ -508,6 +420,8 @@ import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import Button from '@/Components/Button.vue';
 import Input from '@/Components/Input.vue';
+import Table from '@/Components/Table.vue';
+import StatsCard from '@/Components/StatsCard.vue';
 import CardDesigner from './CardDesigner.vue'; // New Import
 import { usePermissions } from '@/Composables/usePermissions';
 
@@ -557,6 +471,23 @@ const params = ref({
     sort_field: props.filters?.sort_field || 'total_spent',
     sort_direction: props.filters?.sort_direction || 'desc'
 });
+
+const customerColumns = [
+    { key: 'name', label: t('orders.customer'), sortable: true },
+    { key: 'phone', label: t('orders.customer_phone'), sortable: true },
+    { key: 'points_balance', label: t('loyalty.points_balance'), sortable: true },
+    { key: 'total_spent', label: t('loyalty.total_spent'), sortable: true }
+];
+
+const handleSort = (field: string, direction: 'asc' | 'desc') => {
+    params.value.sort_field = field;
+    params.value.sort_direction = direction;
+    
+    router.get(route('loyalty.index'), params.value, {
+        preserveState: true,
+        replace: true
+    });
+};
 
 const paginationMeta = computed(() => {
     return {

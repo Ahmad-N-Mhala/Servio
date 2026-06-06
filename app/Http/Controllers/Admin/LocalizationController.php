@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+use Inertia\Inertia;
 
 class LocalizationController extends Controller
 {
     public function index(Request $request)
     {
         $langPath = lang_path();
-        $files = File::files($langPath . '/en');
+        $files = File::files($langPath.'/en');
 
         $translations = [];
 
@@ -21,7 +21,7 @@ class LocalizationController extends Controller
             $fileName = $file->getFilenameWithoutExtension();
             $enData = include $file->getPathname();
 
-            $arPath = $langPath . '/ar/' . $fileName . '.php';
+            $arPath = $langPath.'/ar/'.$fileName.'.php';
             $arData = File::exists($arPath) ? include $arPath : [];
 
             // Flatten generic function
@@ -29,11 +29,12 @@ class LocalizationController extends Controller
                 $result = [];
                 foreach ($array as $key => $value) {
                     if (is_array($value)) {
-                        $result = $result + $flatten($value, $prefix . $key . '.');
+                        $result = $result + $flatten($value, $prefix.$key.'.');
                     } else {
-                        $result[$prefix . $key] = $value;
+                        $result[$prefix.$key] = $value;
                     }
                 }
+
                 return $result;
             };
 
@@ -45,7 +46,7 @@ class LocalizationController extends Controller
                 if ($request->search) {
                     if (
                         strpos(strtolower($key), strtolower($request->search)) === false &&
-                        strpos(strtolower($fileName . '.' . $key), strtolower($request->search)) === false &&
+                        strpos(strtolower($fileName.'.'.$key), strtolower($request->search)) === false &&
                         strpos(strtolower((string) $value), strtolower($request->search)) === false &&
                         strpos(strtolower((string) ($flatAr[$key] ?? '')), strtolower($request->search)) === false
                     ) {
@@ -56,7 +57,7 @@ class LocalizationController extends Controller
                 $translations[] = [
                     'file' => $fileName,
                     'key' => $key,
-                    'full_key' => $fileName . '.' . $key,
+                    'full_key' => $fileName.'.'.$key,
                     'en' => $value,
                     'ar' => $flatAr[$key] ?? '',
                 ];
@@ -94,23 +95,24 @@ class LocalizationController extends Controller
         $key = $request->key;
         $value = $request->value;
         $lang = $request->lang;
-        $path = lang_path($lang . '/' . $file . '.php');
+        $path = lang_path($lang.'/'.$file.'.php');
 
         // Ensure directory exists
-        if (!File::exists(dirname($path))) {
+        if (! File::exists(dirname($path))) {
             File::makeDirectory(dirname($path), 0755, true);
         }
 
         // Load existing
         $data = File::exists($path) ? include $path : [];
-        if (!is_array($data))
+        if (! is_array($data)) {
             $data = [];
+        }
 
         // Set value using dot notation helper
         \Illuminate\Support\Arr::set($data, $key, $value);
 
         // Save back
-        $content = "<?php\n\nreturn " . $this->varExport($data) . ";\n";
+        $content = "<?php\n\nreturn ".$this->varExport($data).";\n";
         File::put($path, $content);
 
         // Clear OPCache if enabled to reflect changes immediately
@@ -144,7 +146,7 @@ class LocalizationController extends Controller
         }
 
         // Check for duplicates in English file (primary source)
-        $path = lang_path('en/' . $file . '.php');
+        $path = lang_path('en/'.$file.'.php');
         $data = File::exists($path) ? include $path : [];
 
         if (Arr::has($data, $key)) {
@@ -171,19 +173,20 @@ class LocalizationController extends Controller
         $file = $request->file('file');
 
         // Simple CSV parser for now
-        $handle = fopen($file->getRealPath(), "r");
-        $header = fgetcsv($handle, 1000, ","); // Skip header: key, en, ar
+        $handle = fopen($file->getRealPath(), 'r');
+        $header = fgetcsv($handle, 1000, ','); // Skip header: key, en, ar
 
         // Basic validation for header structure could be added here
 
-        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        while (($data = fgetcsv($handle, 1000, ',')) !== false) {
             // Assuming order: key, en, ar
             $fullKey = $data[0] ?? null;
             $enVal = $data[1] ?? null;
             $arVal = $data[2] ?? null;
 
-            if (!$fullKey || !$enVal)
+            if (! $fullKey || ! $enVal) {
                 continue;
+            }
 
             $parts = explode('.', $fullKey, 2);
             if (count($parts) === 2) {
@@ -246,14 +249,14 @@ class LocalizationController extends Controller
 
     private function deleteKey($lang, $file, $key)
     {
-        $path = lang_path($lang . '/' . $file . '.php');
+        $path = lang_path($lang.'/'.$file.'.php');
 
         if (File::exists($path)) {
             $data = include $path;
             if (is_array($data) && Arr::has($data, $key)) {
                 Arr::forget($data, $key);
 
-                $content = "<?php\n\nreturn " . $this->varExport($data) . ";\n";
+                $content = "<?php\n\nreturn ".$this->varExport($data).";\n";
                 File::put($path, $content);
 
                 if (function_exists('opcache_invalidate')) {
@@ -267,21 +270,22 @@ class LocalizationController extends Controller
 
     private function saveTranslation($lang, $file, $key, $value)
     {
-        $path = lang_path($lang . '/' . $file . '.php');
+        $path = lang_path($lang.'/'.$file.'.php');
 
         // Ensure directory exists
-        if (!File::exists(dirname($path))) {
+        if (! File::exists(dirname($path))) {
             File::makeDirectory(dirname($path), 0755, true);
         }
 
         // Always load fresh data to avoid race conditions or stale data overwrites
         $data = File::exists($path) ? include $path : [];
-        if (!is_array($data))
+        if (! is_array($data)) {
             $data = [];
+        }
 
         Arr::set($data, $key, $value);
 
-        $content = "<?php\n\nreturn " . $this->varExport($data) . ";\n";
+        $content = "<?php\n\nreturn ".$this->varExport($data).";\n";
         File::put($path, $content);
 
         // Clear OPCache if enabled to reflect changes immediately
@@ -296,10 +300,11 @@ class LocalizationController extends Controller
     private function varExport($expression)
     {
         $export = var_export($expression, true);
-        $export = preg_replace("/^([ ]*)(.*)/m", '$1$1$2', $export);
+        $export = preg_replace('/^([ ]*)(.*)/m', '$1$1$2', $export);
         $array = preg_split("/\r\n|\n|\r/", $export);
-        $array = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [NULL, ']$1', ' => ['], $array);
-        $export = join(PHP_EOL, array_filter(["["] + $array));
+        $array = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [null, ']$1', ' => ['], $array);
+        $export = implode(PHP_EOL, array_filter(['['] + $array));
+
         return $export;
     }
 }

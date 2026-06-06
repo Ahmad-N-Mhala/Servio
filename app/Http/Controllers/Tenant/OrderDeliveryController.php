@@ -15,8 +15,9 @@ class OrderDeliveryController extends Controller
     public function index(Request $request)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // If self-service only, hide waiter delivery screen
         if ($restaurant->service_type === 'self_service') {
@@ -27,7 +28,7 @@ class OrderDeliveryController extends Controller
             'items.menuItem' => function ($query) {
                 $query->withTrashed();
             },
-            'table'
+            'table',
         ])
             ->where('restaurant_id', $restaurant->id)
             ->where('status', 'ready')
@@ -35,7 +36,7 @@ class OrderDeliveryController extends Controller
             ->get();
 
         return Inertia::render('Waiter/Delivery', [
-            'orders' => $readyOrders
+            'orders' => $readyOrders,
         ]);
     }
 
@@ -46,7 +47,7 @@ class OrderDeliveryController extends Controller
     {
         // Ensure the order belongs to the current restaurant
         $currentRestaurant = auth()->user()->currentRestaurant();
-        if (!$currentRestaurant || $order->restaurant_id !== $currentRestaurant->id) {
+        if (! $currentRestaurant || $order->restaurant_id !== $currentRestaurant->id) {
             abort(403);
         }
 
@@ -61,13 +62,13 @@ class OrderDeliveryController extends Controller
 
         $order->update([
             'status' => $newStatus,
-            'completed_at' => $newStatus === 'completed' ? now() : null
+            'completed_at' => $newStatus === 'completed' ? now() : null,
             // We might want to track who served it, but standard order table doesn't have 'served_by' usually.
             // We can assume valid update.
         ]);
 
-        // Update table status if needed? 
-        // Typically table is 'occupied' until payment. 
+        // Update table status if needed?
+        // Typically table is 'occupied' until payment.
         // If it was somehow not occupied, ensure it tracks correctly.
         // But usually table status is managed at order creation/payment.
 
@@ -80,12 +81,12 @@ class OrderDeliveryController extends Controller
     public function checkNewOrders(Request $request)
     {
         // Permission check manually passed or middleware
-        if (!$request->user()->can('deliver_orders')) {
+        if (! $request->user()->can('deliver_orders')) {
             return response()->json(['ids' => []]);
         }
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['ids' => []]);
         }
 
@@ -97,7 +98,7 @@ class OrderDeliveryController extends Controller
         $ids = Order::where('restaurant_id', $restaurant->id)
             ->where('status', 'ready')
             ->pluck('id')
-            ->map(fn($id) => (string) $id);
+            ->map(fn ($id) => (string) $id);
 
         return response()->json(['ids' => $ids]);
     }

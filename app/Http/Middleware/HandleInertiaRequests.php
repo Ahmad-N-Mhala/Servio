@@ -6,13 +6,12 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
 
-    public function version(Request $request): string|null
+    public function version(Request $request): ?string
     {
         return parent::version($request);
     }
@@ -48,14 +47,16 @@ class HandleInertiaRequests extends Middleware
             },
             // Share user's restaurants for restaurant switcher (regular users)
             'user_restaurants' => function () use ($request) {
-                if ($request->user() && !$request->user()->is_super_admin) {
+                if ($request->user() && ! $request->user()->is_super_admin) {
                     $ids = \Illuminate\Support\Facades\DB::table('restaurant_user')
                         ->where('email', $request->user()->email)
                         ->pluck('restaurant_id')
-                        ->map(fn($id) => (string) $id)
+                        ->map(fn ($id) => (string) $id)
                         ->toArray();
+
                     return empty($ids) ? [] : \App\Models\Restaurant::whereIn('id', $ids)->select(['id', 'name', 'logo'])->get();
                 }
+
                 return [];
             },
             'active_restaurant_id' => function () use ($request) {
@@ -87,6 +88,7 @@ class HandleInertiaRequests extends Middleware
                         ];
                     }
                 }
+
                 return null;
             },
 
@@ -102,10 +104,11 @@ class HandleInertiaRequests extends Middleware
                             ->first();
                     }
                 }
+
                 return null;
             },
 
-            'ziggy' => fn() => [
+            'ziggy' => fn () => [
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
@@ -114,7 +117,7 @@ class HandleInertiaRequests extends Middleware
                     $langPath = lang_path();
                     $data = [];
 
-                    $path = $langPath . '/' . $locale;
+                    $path = $langPath.'/'.$locale;
                     if (\Illuminate\Support\Facades\File::exists($path)) {
                         $files = \Illuminate\Support\Facades\File::files($path);
                         foreach ($files as $file) {
@@ -123,6 +126,7 @@ class HandleInertiaRequests extends Middleware
                             $data[$locale][$name] = $content;
                         }
                     }
+
                     return $data;
                 });
             },
@@ -133,8 +137,7 @@ class HandleInertiaRequests extends Middleware
                         'support_phone' => \App\Models\SystemConfiguration::get('support_phone') ?? '+9715049460976',
                     ];
                 });
-            }
+            },
         ]);
     }
 }
-

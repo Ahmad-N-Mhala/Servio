@@ -2,11 +2,11 @@
 
 namespace App\Services\Delivery\Providers;
 
-use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
+use App\Services\Delivery\DeliveryProviderInterface;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class UberEatsProvider implements DeliveryProviderInterface
 {
@@ -22,7 +22,7 @@ class UberEatsProvider implements DeliveryProviderInterface
     protected function getAccessToken(DeliveryIntegration $integration): ?string
     {
         // Use cached token if available
-        $cacheKey = "uber_token_" . $integration->id;
+        $cacheKey = 'uber_token_'.$integration->id;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -33,7 +33,7 @@ class UberEatsProvider implements DeliveryProviderInterface
                 'client_id' => $integration->client_id,
                 'client_secret' => $integration->client_secret,
                 'grant_type' => 'client_credentials',
-                'scope' => 'eats.store eats.order' // Verified scopes
+                'scope' => 'eats.store eats.order', // Verified scopes
             ]);
 
             if ($response->successful()) {
@@ -47,11 +47,13 @@ class UberEatsProvider implements DeliveryProviderInterface
                 return $token;
             }
 
-            Log::error('Uber Token Fetch Failed: ' . $response->body());
+            Log::error('Uber Token Fetch Failed: '.$response->body());
+
             return null;
 
         } catch (\Exception $e) {
-            Log::error('Uber Token Fetch Exception: ' . $e->getMessage());
+            Log::error('Uber Token Fetch Exception: '.$e->getMessage());
+
             return null;
         }
     }
@@ -80,7 +82,7 @@ class UberEatsProvider implements DeliveryProviderInterface
         $customerPhone = '';
 
         if (isset($payload['eater'])) {
-            $customerName = ($payload['eater']['first_name'] ?? '') . ' ' . ($payload['eater']['last_name'] ?? '');
+            $customerName = ($payload['eater']['first_name'] ?? '').' '.($payload['eater']['last_name'] ?? '');
             $customerPhone = $payload['eater']['phone'] ?? '';
         }
 
@@ -107,28 +109,32 @@ class UberEatsProvider implements DeliveryProviderInterface
         // Validation logic for Uber Eats (HMAC-SHA256)
         // Header: X-Uber-Signature
         $signature = $request->header('X-Uber-Signature');
-        if (!$signature)
+        if (! $signature) {
             return false;
+        }
 
         $computed = hash_hmac('sha256', $request->getContent(), $integration->client_secret);
+
         return hash_equals($signature, $computed);
     }
 
     public function pushMenu(DeliveryIntegration $integration, array $menuData): bool
     {
         $token = $this->getAccessToken($integration);
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/stores/{$integration->store_id}/menus", [
-                    'menus' => [$menuData]
+                    'menus' => [$menuData],
                 ]);
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error('Uber Eats Menu Push Failed: ' . $e->getMessage());
+            Log::error('Uber Eats Menu Push Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -136,13 +142,14 @@ class UberEatsProvider implements DeliveryProviderInterface
     public function acceptOrder(DeliveryIntegration $integration, string $externalOrderId): bool
     {
         $token = $this->getAccessToken($integration);
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/accept", [
-                    'reason' => 'PosConfirmed'
+                    'reason' => 'PosConfirmed',
                 ]);
 
             return $response->successful();
@@ -154,16 +161,17 @@ class UberEatsProvider implements DeliveryProviderInterface
     public function rejectOrder(DeliveryIntegration $integration, string $externalOrderId, string $reason): bool
     {
         $token = $this->getAccessToken($integration);
-        if (!$token)
+        if (! $token) {
             return false;
+        }
 
         try {
             $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/deny", [
                     'reason' => [
                         'explanation' => $reason,
-                        'code' => 'KITCHEN_FULL'
-                    ]
+                        'code' => 'KITCHEN_FULL',
+                    ],
                 ]);
 
             return $response->successful();

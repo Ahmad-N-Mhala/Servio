@@ -2,8 +2,8 @@
 
 namespace App\Services\Delivery\Providers;
 
-use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
+use App\Services\Delivery\DeliveryProviderInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -52,7 +52,7 @@ class DeliverooProvider implements DeliveryProviderInterface
         // Headers: X-Deliveroo-Sequence-Guid, X-Deliveroo-Hmac-Sha256
 
         $signature = $request->header('X-Deliveroo-Hmac-Sha256');
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
 
@@ -65,7 +65,7 @@ class DeliverooProvider implements DeliveryProviderInterface
 
         // Construct the expected message string (Guid + Space + Body)
         // Note: For legacy Pos integration it might be different, but for new APIs it's space separated
-        $message = $guid ? ($guid . ' ' . $rawPayload) : $rawPayload;
+        $message = $guid ? ($guid.' '.$rawPayload) : $rawPayload;
 
         $computed = hash_hmac('sha256', $message, $integration->webhook_secret);
 
@@ -83,13 +83,14 @@ class DeliverooProvider implements DeliveryProviderInterface
 
             $response = Http::withBasicAuth($integration->api_key, $integration->api_secret)
                 ->post('https://api.developers.deliveroo.com/menu/v1/menus', [
-                    'menu' => $menuData
+                    'menu' => $menuData,
                 ]);
 
             return $response->successful();
 
         } catch (\Exception $e) {
-            Log::error('Deliveroo Menu Push Failed: ' . $e->getMessage());
+            Log::error('Deliveroo Menu Push Failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -102,7 +103,7 @@ class DeliverooProvider implements DeliveryProviderInterface
         try {
             $response = Http::withBasicAuth($integration->api_key, $integration->api_secret)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/confirm", [
-                    'status' => 'confirmed'
+                    'status' => 'confirmed',
                 ]);
 
             return $response->successful();
@@ -116,7 +117,7 @@ class DeliverooProvider implements DeliveryProviderInterface
         try {
             $response = Http::withBasicAuth($integration->api_key, $integration->api_secret)
                 ->post("{$this->baseUrl}/orders/{$externalOrderId}/reject", [
-                    'reason' => $reason
+                    'reason' => $reason,
                 ]);
 
             return $response->successful();

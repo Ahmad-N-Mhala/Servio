@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ingredient;
+use App\Models\MonthlyExpense;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\Staff;
-use App\Models\Ingredient;
 use App\Models\WasteLog;
-use App\Models\MonthlyExpense;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
-use Carbon\Carbon;
-use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
 {
@@ -28,28 +27,30 @@ class DashboardController extends Controller
         $endDate = $request->input('end_date', now()->endOfDay());
         $format = $request->input('format', 'pdf');
 
-        if (is_string($startDate))
+        if (is_string($startDate)) {
             $startDate = Carbon::parse($startDate)->startOfDay();
-        if (is_string($endDate))
+        }
+        if (is_string($endDate)) {
             $endDate = Carbon::parse($endDate)->endOfDay();
+        }
 
         // Specific Export for Retention Bucket
         if ($request->input('type') === 'retention_bucket' && $format === 'csv') {
             $bucket = (int) $request->input('bucket');
             $headers = [
-                "Content-type" => "text/csv",
-                "Content-Disposition" => "attachment; filename=customers_visit_count_{$bucket}.csv",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
+                'Content-type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=customers_visit_count_{$bucket}.csv",
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
             ];
 
             $callback = function () use ($restaurant, $startDate, $endDate, $bucket) {
                 $file = fopen('php://output', 'w');
-                $title = ($bucket === 5) ? "Customers with 5+ Visits" : "Customers with {$bucket} Visits";
+                $title = ($bucket === 5) ? 'Customers with 5+ Visits' : "Customers with {$bucket} Visits";
                 fputcsv($file, [$title]);
                 fputcsv($file, [__('reports.restaurant'), $restaurant->name]);
-                fputcsv($file, [__('reports.date_range'), $startDate->format('Y-m-d') . ' ' . __('reports.to') . ' ' . $endDate->format('Y-m-d')]);
+                fputcsv($file, [__('reports.date_range'), $startDate->format('Y-m-d').' '.__('reports.to').' '.$endDate->format('Y-m-d')]);
                 fputcsv($file, []);
                 fputcsv($file, ['Name', 'Phone', 'Total Visits', 'Total Spent']);
 
@@ -62,12 +63,15 @@ class DashboardController extends Controller
                     ->groupBy('customer_id')
                     ->map(function ($orders) use ($bucket) {
                         $count = $orders->count();
-                        if ($bucket < 5 && $count !== $bucket)
+                        if ($bucket < 5 && $count !== $bucket) {
                             return null;
-                        if ($bucket === 5 && $count < 5)
+                        }
+                        if ($bucket === 5 && $count < 5) {
                             return null;
+                        }
 
                         $customer = $orders->first()->customer;
+
                         return [
                             $customer ? $customer->name : 'Unknown',
                             $customer ? $customer->phone : 'N/A',
@@ -90,18 +94,18 @@ class DashboardController extends Controller
         // Specific Export for Item Sales
         if ($request->input('tab') === 'item_sales' && $format === 'excel') {
             $headers = [
-                "Content-type" => "text/csv",
-                "Content-Disposition" => "attachment; filename=item_sales_report.csv",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
+                'Content-type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename=item_sales_report.csv',
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
             ];
 
             $callback = function () use ($restaurant, $startDate, $endDate) {
                 $file = fopen('php://output', 'w');
                 fputcsv($file, [__('reports.item_sales_report')]);
                 fputcsv($file, [__('reports.restaurant'), $restaurant->name]);
-                fputcsv($file, [__('reports.date_range'), $startDate->format('Y-m-d') . ' ' . __('reports.to') . ' ' . $endDate->format('Y-m-d')]);
+                fputcsv($file, [__('reports.date_range'), $startDate->format('Y-m-d').' '.__('reports.to').' '.$endDate->format('Y-m-d')]);
                 fputcsv($file, []);
 
                 fputcsv($file, [__('reports.item_name'), __('reports.category'), __('reports.quantity_sold'), __('reports.revenue')]);
@@ -116,9 +120,9 @@ class DashboardController extends Controller
                             $query->withTrashed()->with([
                                 'category' => function ($q) {
                                     $q->withTrashed();
-                                }
+                                },
                             ]);
-                        }
+                        },
                     ])
                     ->get();
 
@@ -131,7 +135,7 @@ class DashboardController extends Controller
                             $quantity = $item->quantity;
                             $total = (float) ($item->total_price ?? 0);
 
-                            if (!isset($itemStats[$id])) {
+                            if (! isset($itemStats[$id])) {
                                 // Priority 1: Fetch from the Menu Items table (Source of Truth)
                                 if ($item->menuItem) {
                                     $name = $item->menuItem->name;
@@ -148,7 +152,7 @@ class DashboardController extends Controller
                                 }
 
                                 if ($item->menuItem && $item->menuItem->trashed()) {
-                                    $name .= ' (Deleted - ' . $item->menuItem->deleted_at->format('d-m-Y') . ')';
+                                    $name .= ' (Deleted - '.$item->menuItem->deleted_at->format('d-m-Y').')';
                                 }
 
                                 // Category
@@ -164,7 +168,7 @@ class DashboardController extends Controller
                                     }
 
                                     if ($item->menuItem->category->trashed()) {
-                                        $categoryName .= ' (Deleted - ' . $item->menuItem->category->deleted_at->format('d-m-Y') . ')';
+                                        $categoryName .= ' (Deleted - '.$item->menuItem->category->deleted_at->format('d-m-Y').')';
                                     }
                                 }
 
@@ -182,7 +186,7 @@ class DashboardController extends Controller
                 }
 
                 // sort by quantity desc by default
-                usort($itemStats, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
+                usort($itemStats, fn ($a, $b) => $b['quantity'] <=> $a['quantity']);
 
                 foreach ($itemStats as $stat) {
                     fputcsv($file, [$stat['name'], $stat['category'], $stat['quantity'], $stat['revenue']]);
@@ -250,7 +254,7 @@ class DashboardController extends Controller
                     $menuItemIds[] = $id;
 
                     // Top Items
-                    if (!isset($allItems[$id])) {
+                    if (! isset($allItems[$id])) {
                         $name = $item->name;
                         if (is_string($name) && str_starts_with($name, '{')) {
                             $decoded = json_decode($name, true);
@@ -264,7 +268,7 @@ class DashboardController extends Controller
                 }
             }
         }
-        usort($allItems, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
+        usort($allItems, fn ($a, $b) => $b['quantity'] <=> $a['quantity']);
         $topMenuItems = array_slice($allItems, 0, 5);
 
         // Fetch Categories
@@ -286,7 +290,7 @@ class DashboardController extends Controller
                         $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
                     }
 
-                    if (!isset($categorySales[$catName])) {
+                    if (! isset($categorySales[$catName])) {
                         $categorySales[$catName] = 0;
                     }
                     // Use stored total_price which effectively includes extras
@@ -305,33 +309,35 @@ class DashboardController extends Controller
             ->take(5)
             ->toArray();
 
-
         // Recent Orders
         // -- Customer Retention (Visits Funnel) --
         $customerVisits = $revenueOrders
             ->whereNotNull('customer_name')
             ->where('customer_name', '!=', 'Guest')
             ->groupBy('customer_name')
-            ->map(fn($o) => $o->count());
+            ->map(fn ($o) => $o->count());
 
         $totalCustomers = $customerVisits->count();
         $retentionStats = [];
 
         for ($i = 1; $i <= 5; $i++) {
-            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i . match ($i) { 2 => 'nd', 3 => 'rd', default => 'th'} . ' Visit');
+            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i.match ($i) {
+                2 => 'nd', 3 => 'rd', default => 'th'
+            }.' Visit');
 
             if ($totalCustomers === 0) {
                 $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
+
                 continue;
             }
 
-            $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            $countAtLeast = $customerVisits->filter(fn ($visits) => $visits >= $i)->count();
             $percentage = ($countAtLeast / $totalCustomers) * 100;
 
             $retentionStats[] = [
                 'label' => $label,
                 'percentage' => round($percentage, 1),
-                'count' => $countAtLeast
+                'count' => $countAtLeast,
             ];
         }
 
@@ -399,6 +405,7 @@ class DashboardController extends Controller
             ->sum(function ($batch) {
                 $qty = isset($batch->quantity_remaining) ? (string) $batch->quantity_remaining : 0;
                 $cost = isset($batch->cost_per_unit) ? (string) $batch->cost_per_unit : 0;
+
                 return (float) $qty * (float) $cost;
             });
 
@@ -431,7 +438,7 @@ class DashboardController extends Controller
                 'new_customers' => $selectionNewCustomers,
                 'repeat_customers' => $selectionRepeatCustomers,
                 'rewards_redeemed' => $rewardsRedeemed,
-                'total_unique_customers' => $uniqueCustomersSelection
+                'total_unique_customers' => $uniqueCustomersSelection,
             ],
             'topMenuItems' => $topMenuItems,
             'topCategories' => $topCategories,
@@ -446,11 +453,11 @@ class DashboardController extends Controller
 
         if ($format === 'excel') {
             $headers = [
-                "Content-type" => "text/csv",
-                "Content-Disposition" => "attachment; filename=dashboard_report.csv",
-                "Pragma" => "no-cache",
-                "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-                "Expires" => "0"
+                'Content-type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename=dashboard_report.csv',
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
             ];
 
             $callback = function () use ($data) {
@@ -459,7 +466,7 @@ class DashboardController extends Controller
                 // Header
                 fputcsv($file, [__('reports.dashboard_report')]);
                 fputcsv($file, [__('reports.restaurant'), $data['restaurant']->name]);
-                fputcsv($file, [__('reports.date_range'), $data['startDate']->format('Y-m-d') . ' ' . __('reports.to') . ' ' . $data['endDate']->format('Y-m-d')]);
+                fputcsv($file, [__('reports.date_range'), $data['startDate']->format('Y-m-d').' '.__('reports.to').' '.$data['endDate']->format('Y-m-d')]);
                 fputcsv($file, []);
 
                 // Stats
@@ -494,7 +501,7 @@ class DashboardController extends Controller
                 fputcsv($file, [__('reports.customer_retention')]);
                 fputcsv($file, [__('reports.milestone'), __('reports.count'), __('reports.percentage')]);
                 foreach ($data['retentionStats'] as $stat) {
-                    fputcsv($file, [$stat['label'], $stat['count'], $stat['percentage'] . '%']);
+                    fputcsv($file, [$stat['label'], $stat['count'], $stat['percentage'].'%']);
                 }
                 fputcsv($file, []);
 
@@ -510,7 +517,7 @@ class DashboardController extends Controller
         app()->setLocale('en');
 
         $pdf = Pdf::loadView('exports.dashboard', $data);
-        $pdfStream = $pdf->stream('dashboard-report-' . now()->format('Y-m-d') . '.pdf');
+        $pdfStream = $pdf->stream('dashboard-report-'.now()->format('Y-m-d').'.pdf');
 
         // Restore the original locale
         app()->setLocale($previousLocale);
@@ -526,10 +533,12 @@ class DashboardController extends Controller
         $startDate = $request->input('start_date', now()->subDays(7)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
 
-        if (is_string($startDate))
-            $startDate = Carbon::parse($startDate)->startOfDay();  // Include full start day
-        if (is_string($endDate))
-            $endDate = Carbon::parse($endDate)->endOfDay();  // Include full end day
+        if (is_string($startDate)) {
+            $startDate = Carbon::parse($startDate)->startOfDay();
+        }  // Include full start day
+        if (is_string($endDate)) {
+            $endDate = Carbon::parse($endDate)->endOfDay();
+        }  // Include full end day
 
         if ($request->input('tab') === 'item_sales') {
             $query = $request->input('q');
@@ -548,9 +557,9 @@ class DashboardController extends Controller
                         $query->withTrashed()->with([
                             'category' => function ($q) {
                                 $q->withTrashed();
-                            }
+                            },
                         ]);
-                    }
+                    },
                 ])
                 ->get();
 
@@ -563,7 +572,7 @@ class DashboardController extends Controller
                         $quantity = $item->quantity;
                         $total = (float) ($item->total_price ?? 0);
 
-                        if (!isset($itemStats[$id])) {
+                        if (! isset($itemStats[$id])) {
                             // Priority 1: Fetch from the Menu Items table (Source of Truth)
                             if ($item->menuItem) {
                                 $name = $item->menuItem->name;
@@ -582,7 +591,7 @@ class DashboardController extends Controller
 
                             // Check if deleted
                             if ($item->menuItem && $item->menuItem->trashed()) {
-                                $name .= ' (Deleted - ' . $item->menuItem->deleted_at->format('d-m-Y') . ')';
+                                $name .= ' (Deleted - '.$item->menuItem->deleted_at->format('d-m-Y').')';
                             }
 
                             // Calculate Category
@@ -598,7 +607,7 @@ class DashboardController extends Controller
                                 }
 
                                 if ($item->menuItem->category->trashed()) {
-                                    $categoryName .= ' (Deleted - ' . $item->menuItem->category->deleted_at->format('d-m-Y') . ')';
+                                    $categoryName .= ' (Deleted - '.$item->menuItem->category->deleted_at->format('d-m-Y').')';
                                 }
                             }
 
@@ -664,7 +673,7 @@ class DashboardController extends Controller
                 ],
                 'filters' => [
                     'q' => $query,
-                    'sort' => $sortBy
+                    'sort' => $sortBy,
                 ],
                 'date_range' => [
                     'start_date' => $startDate->format('Y-m-d'),
@@ -731,7 +740,7 @@ class DashboardController extends Controller
 
         // 3. Visits/Orders Chart
         $dailyVisits = $allOrders
-            ->groupBy(fn($date) => $date->created_at->format('Y-m-d'))
+            ->groupBy(fn ($date) => $date->created_at->format('Y-m-d'))
             ->map->count();
 
         $visitsChartData = [];
@@ -760,26 +769,31 @@ class DashboardController extends Controller
             ->whereNotNull('dob')
             ->get()
             ->filter(function ($customer) {
-                if (!$customer->dob)
+                if (! $customer->dob) {
                     return false;
+                }
                 $dob = Carbon::parse($customer->dob)->setYear(now()->year);
-                if ($dob->isPast())
+                if ($dob->isPast()) {
                     $dob->addYear();
+                }
+
                 return $dob->between(now(), now()->addDays(30));
             })
             ->sortBy(function ($customer) {
                 $dob = Carbon::parse($customer->dob)->setYear(now()->year);
-                if ($dob->isPast())
+                if ($dob->isPast()) {
                     $dob->addYear();
+                }
+
                 return $dob->timestamp;
             })
             ->take(5)
             ->values()
-            ->map(fn($c) => [
+            ->map(fn ($c) => [
                 'id' => $c->id,
                 'name' => $c->name,
                 'dob' => $c->dob,
-                'type' => 'Birthday'
+                'type' => 'Birthday',
             ]);
 
         // 6. Top Insights & Pareto (Period-Based)
@@ -790,7 +804,7 @@ class DashboardController extends Controller
 
         if ($top20PercentCount > 0) {
             $top20Revenue = $periodCustomerVisits
-                ->map(fn($orders) => collect($orders)->sum(fn($o) => (float) (string) $o->total))
+                ->map(fn ($orders) => collect($orders)->sum(fn ($o) => (float) (string) $o->total))
                 ->sortDesc()
                 ->take($top20PercentCount)
                 ->sum();
@@ -805,21 +819,22 @@ class DashboardController extends Controller
         $avgOrderValue = $totalOrdersCount > 0 ? round($periodRevenue / $totalOrdersCount, 2) : 0;
 
         // Avg Items Per Order (Period)
-        $totalItemsCount = $allOrders->sum(fn($o) => $o->items ? $o->items->sum('quantity') : 0);
+        $totalItemsCount = $allOrders->sum(fn ($o) => $o->items ? $o->items->sum('quantity') : 0);
         $avgItemsPerOrder = $totalOrdersCount > 0 ? round($totalItemsCount / $totalOrdersCount, 1) : 0;
 
         // 7. Popular Times
         $popularTimes = $allOrders
             ->groupBy(function ($order) {
-                return $order->created_at->format('l') . '|' . $order->created_at->format('H');
+                return $order->created_at->format('l').'|'.$order->created_at->format('H');
             })
             ->map(function ($group) {
                 $first = $group->first();
+
                 return [
                     'day' => $first->created_at->format('l'),
                     'hour' => (int) $first->created_at->format('H'),
                     'count' => $group->count(),
-                    'revenue' => $group->sum(fn($o) => (float) (string) $o->total)
+                    'revenue' => $group->sum(fn ($o) => (float) (string) $o->total),
                 ];
             })
             ->sortByDesc('count')
@@ -829,17 +844,20 @@ class DashboardController extends Controller
         $leastPopularTime = $popularTimes->sortBy('count')->first();
 
         $formatTimePeriod = function ($day, $hour) {
-            if ($day === null)
+            if ($day === null) {
                 return ['day' => 'unknown', 'period' => 'unknown'];
+            }
             $dayKey = strtolower($day); // e.g. "monday", "tuesday"
-            if ($hour >= 5 && $hour < 12)
+            if ($hour >= 5 && $hour < 12) {
                 $period = 'morning';
-            elseif ($hour >= 12 && $hour < 17)
+            } elseif ($hour >= 12 && $hour < 17) {
                 $period = 'afternoon';
-            elseif ($hour >= 17 && $hour < 21)
+            } elseif ($hour >= 17 && $hour < 21) {
                 $period = 'evening';
-            else
+            } else {
                 $period = 'night';
+            }
+
             return ['day' => $dayKey, 'period' => $period];
         };
 
@@ -850,10 +868,10 @@ class DashboardController extends Controller
             ->map->count();
 
         $freqStats = [
-            '1' => $customerVisitCounts->filter(fn($c) => $c === 1)->count(),
-            '2' => $customerVisitCounts->filter(fn($c) => $c === 2)->count(),
-            '3-5' => $customerVisitCounts->filter(fn($c) => $c >= 3 && $c <= 5)->count(),
-            '6+' => $customerVisitCounts->filter(fn($c) => $c >= 6)->count(),
+            '1' => $customerVisitCounts->filter(fn ($c) => $c === 1)->count(),
+            '2' => $customerVisitCounts->filter(fn ($c) => $c === 2)->count(),
+            '3-5' => $customerVisitCounts->filter(fn ($c) => $c >= 3 && $c <= 5)->count(),
+            '6+' => $customerVisitCounts->filter(fn ($c) => $c >= 6)->count(),
         ];
 
         // 9. Top Rewards
@@ -868,10 +886,11 @@ class DashboardController extends Controller
                 if (is_array($name)) {
                     $name = $name[app()->getLocale()] ?? $name['en'] ?? $name['ar'] ?? 'Unknown';
                 }
+
                 return [
                     'name' => $name,
                     'description' => $first->reward ? $first->reward->description : '',
-                    'count' => $group->count()
+                    'count' => $group->count(),
                 ];
             })
             ->sortByDesc('count')
@@ -897,7 +916,7 @@ class DashboardController extends Controller
                 foreach ($order->items as $item) {
                     $id = $item->menu_item_id;
                     $menuItemIds[] = $id;
-                    if (!isset($allItems[$id])) {
+                    if (! isset($allItems[$id])) {
                         $name = $item->name;
                         if (is_string($name) && str_starts_with($name, '{')) {
                             $decoded = json_decode($name, true);
@@ -910,7 +929,7 @@ class DashboardController extends Controller
                 }
             }
         }
-        usort($allItems, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
+        usort($allItems, fn ($a, $b) => $b['quantity'] <=> $a['quantity']);
         $topMenuItems = array_slice($allItems, 0, 5);
 
         $menuItemsWithCategories = \App\Models\MenuItem::whereIn('id', array_unique($menuItemIds))
@@ -926,14 +945,15 @@ class DashboardController extends Controller
                         $locale = app()->getLocale();
                         $catName = $decoded[$locale] ?? $decoded['en'] ?? 'Uncategorized';
                     }
-                    if (!isset($categorySales[$catName]))
+                    if (! isset($categorySales[$catName])) {
                         $categorySales[$catName] = 0;
+                    }
                     $categorySales[$catName] += (float) ($item->total_price ?? 0);
                 }
             }
         }
         $topCategories = collect($categorySales)
-            ->map(fn($v, $k) => ['name' => $k, 'value' => $v])
+            ->map(fn ($v, $k) => ['name' => $k, 'value' => $v])
             ->sortByDesc('value')->values()->take(5)->toArray();
 
         // 10. Status Distribution
@@ -948,12 +968,12 @@ class DashboardController extends Controller
 
         // 11. Payment Distribution
         $paymentDistribution = $revenueOrders
-            ->groupBy(fn($o) => strtolower((string) ($o->payment_method ?: 'cash')))
+            ->groupBy(fn ($o) => strtolower((string) ($o->payment_method ?: 'cash')))
             ->map(function ($group, $method) {
                 return [
                     'method' => ucwords(str_replace('_', ' ', (string) $method)),
                     'value' => (float) (string) $group->sum('total'),
-                    'count' => $group->count()
+                    'count' => $group->count(),
                 ];
             })->values();
 
@@ -987,22 +1007,25 @@ class DashboardController extends Controller
         $customerVisits = $revenueOrders
             ->whereNotNull('customer_id')
             ->groupBy('customer_id')
-            ->map(fn($o) => $o->count());
+            ->map(fn ($o) => $o->count());
 
         $totalCustomers = $customerVisits->count();
         $retentionStats = [];
         for ($i = 1; $i <= 5; $i++) {
-            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i . match ($i) { 2 => 'nd', 3 => 'rd', default => 'th'} . ' Visit');
+            $label = $i === 5 ? '5th+ Visit' : ($i === 1 ? '1st Visit' : $i.match ($i) {
+                2 => 'nd', 3 => 'rd', default => 'th'
+            }.' Visit');
             if ($totalCustomers === 0) {
                 $retentionStats[] = ['label' => $label, 'percentage' => 0, 'count' => 0];
+
                 continue;
             }
-            $countAtLeast = $customerVisits->filter(fn($visits) => $visits >= $i)->count();
+            $countAtLeast = $customerVisits->filter(fn ($visits) => $visits >= $i)->count();
             $percentage = ($countAtLeast / $totalCustomers) * 100;
             $retentionStats[] = [
                 'label' => $label,
                 'percentage' => round($percentage, 1),
-                'count' => $countAtLeast
+                'count' => $countAtLeast,
             ];
         }
 
@@ -1020,16 +1043,16 @@ class DashboardController extends Controller
                 'total' => $totalSalesPeriod,
                 'valid_count' => $validOrdersCount,
                 'blocked_count' => $cancelledOrdersCount,
-                'chart' => $revenueChart
+                'chart' => $revenueChart,
             ],
             'period_visits' => [
                 'total' => $validOrdersCount,
-                'chart' => $visitsChartData
+                'chart' => $visitsChartData,
             ],
             'customer_insights' => [
                 'total' => $totalCustomersCount,
                 'active' => $activeCustomersCount,
-                'inactive' => $inactiveCustomersCount
+                'inactive' => $inactiveCustomersCount,
             ],
             'upcoming_celebrations' => $upcomingCelebrations,
             'top_insights' => [
@@ -1045,7 +1068,7 @@ class DashboardController extends Controller
                 'least_popular' => $leastPopularTime ? array_merge(
                     $formatTimePeriod($leastPopularTime['day'], $leastPopularTime['hour']),
                     ['orders' => $leastPopularTime['count'], 'revenue' => $leastPopularTime['revenue']]
-                ) : null
+                ) : null,
             ],
             'customer_frequency' => $freqStats,
             'top_rewards' => $topRewards,
@@ -1075,6 +1098,7 @@ class DashboardController extends Controller
             $avgMinutes = $dayOrders->avg(function ($order) {
                 $start = Carbon::parse($order->created_at);
                 $from = Carbon::parse($order->completed_at);
+
                 return $from->diffInMinutes($start, true);
             });
 
@@ -1117,6 +1141,7 @@ class DashboardController extends Controller
         return $ingredients->filter(function ($item) use ($blockingIds) {
             $isBelowReorder = $item->current_stock <= $item->reorder_level;
             $isBlocking = in_array((string) $item->id, $blockingIds);
+
             return $isBelowReorder || $isBlocking;
         });
     }
@@ -1133,10 +1158,12 @@ class DashboardController extends Controller
             app()->setLocale($locale);
         }
 
-        if (is_string($startDate))
+        if (is_string($startDate)) {
             $startDate = Carbon::parse($startDate)->startOfDay();
-        if (is_string($endDate))
+        }
+        if (is_string($endDate)) {
             $endDate = Carbon::parse($endDate)->endOfDay();
+        }
 
         $columns = [];
         $data = [];
@@ -1218,11 +1245,11 @@ class DashboardController extends Controller
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->orderByDesc('created_at')
                     ->get()
-                    ->map(fn($c) => [
+                    ->map(fn ($c) => [
                         'name' => $c->name,
                         'phone' => $c->phone,
                         'email' => $c->email,
-                        'joined_at' => $c->created_at->toIso8601String()
+                        'joined_at' => $c->created_at->toIso8601String(),
                     ]);
                 break;
 
@@ -1259,7 +1286,7 @@ class DashboardController extends Controller
                             'name' => $c->name,
                             'phone' => $c->phone,
                             'visit_count' => $periodOrders->count(),
-                            'total_spent' => (float) $periodOrders->sum('total')
+                            'total_spent' => (float) $periodOrders->sum('total'),
                         ];
                     })->values();
                 break;
@@ -1288,7 +1315,7 @@ class DashboardController extends Controller
                             'customer_name' => $customerName,
                             'reward_name' => $rewardName,
                             'points_cost' => $redemption->points_used,
-                            'redeemed_at' => \Carbon\Carbon::parse($redemption->created_at)->toIso8601String()
+                            'redeemed_at' => \Carbon\Carbon::parse($redemption->created_at)->toIso8601String(),
                         ];
                     });
                 break;
@@ -1408,13 +1435,13 @@ class DashboardController extends Controller
 
                     $affected = array_unique($dependencyMap[(string) $item->id] ?? []);
                     $blocked = array_unique($blockingMap[(string) $item->id] ?? []);
-                    $affectedStr = !empty($affected) ? implode(', ', $affected) : 'None';
+                    $affectedStr = ! empty($affected) ? implode(', ', $affected) : 'None';
 
                     $statusParts = [];
                     if ($item->current_stock <= $item->reorder_level) {
                         $statusParts[] = __('dashboard.low_stock_status');
                     }
-                    if (!empty($blocked)) {
+                    if (! empty($blocked)) {
                         $statusParts[] = __('dashboard.critical_status', ['items' => implode(', ', $blocked)]);
                     }
 
@@ -1424,7 +1451,7 @@ class DashboardController extends Controller
                         'current_stock' => $item->current_stock,
                         'reorder_level' => $item->reorder_level,
                         'unit' => $item->unit,
-                        'status_message' => !empty($statusParts) ? implode(' | ', $statusParts) : 'Attention Needed',
+                        'status_message' => ! empty($statusParts) ? implode(' | ', $statusParts) : 'Attention Needed',
                     ];
                 })->values();
                 break;
@@ -1495,7 +1522,7 @@ class DashboardController extends Controller
                     ['key' => 'quantity', 'label' => __('dashboard.col_qty')],
                     ['key' => 'loss', 'label' => __('dashboard.col_loss'), 'format' => 'currency'],
                     ['key' => 'reason', 'label' => __('dashboard.col_reason')],
-                    ['key' => 'time', 'label' => __('dashboard.col_time'), 'format' => 'datetime']
+                    ['key' => 'time', 'label' => __('dashboard.col_time'), 'format' => 'datetime'],
                 ];
 
                 $start = Carbon::parse($date)->startOfDay();
@@ -1522,10 +1549,10 @@ class DashboardController extends Controller
 
                         return [
                             'item_name' => $name,
-                            'quantity' => $log->quantity . ' ' . $log->unit,
+                            'quantity' => $log->quantity.' '.$log->unit,
                             'loss' => $log->total_loss,
                             'reason' => $log->reason,
-                            'time' => $log->created_at->toIso8601String()
+                            'time' => $log->created_at->toIso8601String(),
                         ];
                     });
                 break;
@@ -1552,19 +1579,22 @@ class DashboardController extends Controller
                         $count = $orders->count();
 
                         $match = false;
-                        if ($range === '1' && $count === 1)
+                        if ($range === '1' && $count === 1) {
                             $match = true;
-                        elseif ($range === '2' && $count === 2)
+                        } elseif ($range === '2' && $count === 2) {
                             $match = true;
-                        elseif ($range === '3-5' && $count >= 3 && $count <= 5)
+                        } elseif ($range === '3-5' && $count >= 3 && $count <= 5) {
                             $match = true;
-                        elseif ($range === '6+' && $count >= 6)
+                        } elseif ($range === '6+' && $count >= 6) {
                             $match = true;
+                        }
 
-                        if (!$match)
+                        if (! $match) {
                             return null;
+                        }
 
                         $customer = $orders->first()->customer;
+
                         return [
                             'name' => $customer ? $customer->name : 'Unknown',
                             'phone' => $customer ? $customer->phone : 'N/A',
@@ -1581,7 +1611,7 @@ class DashboardController extends Controller
         return response()->json([
             'title' => $title,
             'columns' => $columns,
-            'data' => $data
+            'data' => $data,
         ]);
     }
 }

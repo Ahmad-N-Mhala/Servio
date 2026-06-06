@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\DeliveryProvider;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class DeliveryProviderController extends Controller
@@ -14,7 +14,7 @@ class DeliveryProviderController extends Controller
         $query = \App\Models\DeliveryProvider::query();
 
         if ($request->input('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%');
+            $query->where('name', 'like', '%'.$request->input('search').'%');
         }
 
         $providers = $query->latest()
@@ -23,6 +23,7 @@ class DeliveryProviderController extends Controller
             ->through(function ($provider) {
                 // Manually map count
                 $provider->integrations_count = $provider->integrations()->count();
+
                 return $provider;
             });
 
@@ -101,7 +102,7 @@ class DeliveryProviderController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:delivery_providers,slug,' . $deliveryProvider->id,
+            'slug' => 'required|string|max:255|unique:delivery_providers,slug,'.$deliveryProvider->id,
             'description' => 'nullable|string',
             'logo' => 'nullable|image|max:2048', // Allow file upload
             'logo_url' => 'nullable|string|max:500', // Allow keeping existing URL
@@ -155,7 +156,7 @@ class DeliveryProviderController extends Controller
     public function toggleStatus(DeliveryProvider $deliveryProvider)
     {
         $deliveryProvider->update([
-            'is_active' => !$deliveryProvider->is_active
+            'is_active' => ! $deliveryProvider->is_active,
         ]);
 
         $status = $deliveryProvider->is_active ? 'activated' : 'deactivated';

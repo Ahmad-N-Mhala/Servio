@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
 use App\Models\Reward;
 use App\Services\LoyaltyService;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +14,7 @@ class PublicLoyaltyController extends Controller
 {
     public function __construct(
         protected LoyaltyService $loyaltyService
-    ) {
-    }
+    ) {}
 
     public function checkPoints(Request $request): JsonResponse
     {
@@ -27,7 +25,7 @@ class PublicLoyaltyController extends Controller
         $restaurant = \App\Models\Restaurant::first();
         $customer = $this->loyaltyService->getCustomerByPhone($restaurant, $request->phone);
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json([
                 'exists' => false,
                 'message' => 'Customer not found',
@@ -92,7 +90,7 @@ class PublicLoyaltyController extends Controller
         $restaurant = \App\Models\Restaurant::first();
         $customer = $this->loyaltyService->getCustomerByPhone($restaurant, $validated['phone']);
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json([
                 'success' => false,
                 'message' => 'Customer not found',
@@ -129,7 +127,7 @@ class PublicLoyaltyController extends Controller
         $restaurant = \App\Models\Restaurant::first();
         $customer = $this->loyaltyService->getCustomerByPhone($restaurant, $request->phone);
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json([
                 'success' => false,
                 'message' => 'Customer not found',
@@ -174,4 +172,3 @@ class PublicLoyaltyController extends Controller
         ]);
     }
 }
-

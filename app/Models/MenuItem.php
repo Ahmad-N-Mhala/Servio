@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Translatable\HasTranslations;
-
 use App\Traits\HasRestaurant;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use MongoDB\Laravel\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class MenuItem extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant, SoftDeletes;
+    use HasFactory, HasRestaurant, HasTranslations, SoftDeletes;
 
     public $translatable = ['name'];
 
@@ -79,6 +77,7 @@ class MenuItem extends Model
             ->withPivot('quantity')
             ->withTimestamps();
     }
+
     protected $appends = ['inventory_status'];
 
     public function getInventoryStatusAttribute()
@@ -103,6 +102,7 @@ class MenuItem extends Model
                     }
                 }
             }
+
             // Extras don't usually block availability unless critical, but usually optional.
             return $status;
         }
@@ -114,7 +114,7 @@ class MenuItem extends Model
             $recipe = $this->recipe ?? [];
 
             // A. Check Recipe (New Way)
-            if (!empty($recipe)) {
+            if (! empty($recipe)) {
                 foreach ($recipe as $component) {
                     $ingId = $component['ingredient_id'] ?? null;
                     $qtyNeeded = (float) ($component['quantity'] ?? 0);
@@ -149,4 +149,3 @@ class MenuItem extends Model
         return $status;
     }
 }
-

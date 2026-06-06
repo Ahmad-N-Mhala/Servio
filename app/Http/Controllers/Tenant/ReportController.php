@@ -3,31 +3,34 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
     public function index(Request $request)
     {
         $restaurantId = session('active_restaurant_id');
-        if (!$restaurantId && auth()->user()->is_super_admin && request()->has('restaurant_id')) {
+        if (! $restaurantId && auth()->user()->is_super_admin && request()->has('restaurant_id')) {
             $restaurantId = request()->input('restaurant_id');
         }
 
-        if (!$restaurantId)
+        if (! $restaurantId) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Date Range (Default: Last 30 Days)
         $startDate = $request->input('start_date', now()->subDays(30)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
 
         // Normalize dates - make range inclusive
-        if (is_string($startDate))
-            $startDate = Carbon::parse($startDate)->startOfDay();  // Include full start day (00:00:00)
-        if (is_string($endDate))
-            $endDate = Carbon::parse($endDate)->endOfDay();  // Include full end day (23:59:59)
+        if (is_string($startDate)) {
+            $startDate = Carbon::parse($startDate)->startOfDay();
+        }  // Include full start day (00:00:00)
+        if (is_string($endDate)) {
+            $endDate = Carbon::parse($endDate)->endOfDay();
+        }  // Include full end day (23:59:59)
 
         // Daily Sales Chart Data - Process in PHP
         $orders = Order::where('restaurant_id', $restaurantId)
@@ -124,19 +127,20 @@ class ReportController extends Controller
                 'payment_method' => $request->payment_method ?? null,
                 'sort_field' => $sortField,
                 'sort_direction' => $sortDirection,
-            ]
+            ],
         ]);
     }
 
     public function export(Request $request)
     {
         $restaurantId = session('active_restaurant_id');
-        if (!$restaurantId && auth()->user()->is_super_admin && request()->has('restaurant_id')) {
+        if (! $restaurantId && auth()->user()->is_super_admin && request()->has('restaurant_id')) {
             $restaurantId = request()->input('restaurant_id');
         }
 
-        if (!$restaurantId)
+        if (! $restaurantId) {
             abort(404, 'Restaurant context not found');
+        }
 
         $restaurant = \App\Models\Restaurant::find($restaurantId);
 
@@ -144,10 +148,12 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', now()->subDays(30)->startOfDay());
         $endDate = $request->input('end_date', now()->endOfDay());
 
-        if (is_string($startDate))
+        if (is_string($startDate)) {
             $startDate = Carbon::parse($startDate)->startOfDay();
-        if (is_string($endDate))
+        }
+        if (is_string($endDate)) {
             $endDate = Carbon::parse($endDate)->endOfDay();
+        }
 
         $type = $request->input('type', 'sales'); // 'sales' or 'payments'
 
@@ -156,11 +162,11 @@ class ReportController extends Controller
         $timezone = $country && $country->timezone ? $country->timezone : config('app.timezone');
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename={$type}_report_" . now()->format('Y-m-d') . ".csv",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$type}_report_".now()->format('Y-m-d').'.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($restaurantId, $startDate, $endDate, $type, $timezone) {
@@ -171,7 +177,7 @@ class ReportController extends Controller
                 fputcsv($file, [
                     __('reports.date'),
                     __('reports.total_orders'),
-                    __('reports.total_revenue')
+                    __('reports.total_revenue'),
                 ]);
 
                 $orders = Order::where('restaurant_id', $restaurantId)
@@ -188,19 +194,19 @@ class ReportController extends Controller
                     fputcsv($file, [
                         $date,
                         $dayOrders->count(),
-                        $dayOrders->sum('total')
+                        $dayOrders->sum('total'),
                     ]);
                 }
             } else {
                 // Payment History Report
                 fputcsv($file, [
                     __('reports.date_time'),
-                    __('reports.order') . ' #',
+                    __('reports.order').' #',
                     __('pos.table'),
                     __('orders.customer'),
                     __('reports.waiter'),
                     __('reports.payment_methods'),
-                    __('reports.amount')
+                    __('reports.amount'),
                 ]);
 
                 Order::where('restaurant_id', $restaurantId)
@@ -218,8 +224,8 @@ class ReportController extends Controller
                                 $order->table ? $order->table->name : __('reports.takeaway'),
                                 $order->customer_name ?: __('reports.guest'),
                                 $order->waiter ? $order->waiter->name : '-',
-                                __('reports.' . strtolower($order->payment_method ?? 'unknown')) ?: ucfirst($order->payment_method),
-                                $order->total
+                                __('reports.'.strtolower($order->payment_method ?? 'unknown')) ?: ucfirst($order->payment_method),
+                                $order->total,
                             ]);
                         }
                     });

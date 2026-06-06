@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Restaurant;
 use App\Models\Plan;
+use App\Models\Restaurant;
 use App\Models\RestaurantSubscription;
 use Illuminate\Http\Request;
 
@@ -17,8 +17,8 @@ class SubscriptionController extends Controller
         if ($request->input('search')) {
             $search = $request->input('search');
             $query->whereHas('restaurant', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%');
             });
         }
 
@@ -60,7 +60,7 @@ class SubscriptionController extends Controller
             'starts_at' => 'required|date',
             'ends_at' => 'nullable|date',
             'status' => 'required|in:active,cancelled,expired,trial',
-            'billing_cycle' => 'nullable|in:monthly,yearly'
+            'billing_cycle' => 'nullable|in:monthly,yearly',
         ]);
 
         RestaurantSubscription::create($validated);
@@ -92,7 +92,7 @@ class SubscriptionController extends Controller
             'starts_at' => 'required|date',
             'ends_at' => 'nullable|date', // Removed after:starts_at constraint to allow flexibility
             'status' => 'required|in:active,cancelled,expired,trial',
-            'billing_cycle' => 'nullable|in:monthly,yearly'
+            'billing_cycle' => 'nullable|in:monthly,yearly',
         ]);
 
         // To preserve history (logs), we create a new record instead of overwriting the old one.

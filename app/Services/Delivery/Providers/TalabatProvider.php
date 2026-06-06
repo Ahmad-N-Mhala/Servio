@@ -2,8 +2,8 @@
 
 namespace App\Services\Delivery\Providers;
 
-use App\Services\Delivery\DeliveryProviderInterface;
 use App\Models\DeliveryIntegration;
+use App\Services\Delivery\DeliveryProviderInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -60,7 +60,8 @@ class TalabatProvider implements DeliveryProviderInterface
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error('Talabat Menu Push Error: ' . $e->getMessage());
+            Log::error('Talabat Menu Push Error: '.$e->getMessage());
+
             return false;
         }
     }

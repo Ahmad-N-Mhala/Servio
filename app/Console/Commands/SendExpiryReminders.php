@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Mail\ExpiryWarningMail;
 use App\Models\IngredientBatch;
 use App\Models\User;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ExpiryWarningMail;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class SendExpiryReminders extends Command
 {
@@ -67,7 +67,7 @@ class SendExpiryReminders extends Command
                 }
 
                 // Fallback: Restaurant Notification Email
-                if (!$recipient && $restaurant && !empty($restaurant->notification_email)) {
+                if (! $recipient && $restaurant && ! empty($restaurant->notification_email)) {
                     $recipient = $restaurant->notification_email;
                     $this->info("Sending reminder for Batch {$batch->batch_number} (Item: {$batch->ingredient_id}) to Restaurant Email: {$recipient}");
                 }
@@ -79,7 +79,7 @@ class SendExpiryReminders extends Command
                             'batch_number' => $batch->batch_number,
                             'ingredient_name_en' => $batch->ingredient->name['en'] ?? '',
                             'ingredient_name_ar' => $batch->ingredient->name['ar'] ?? ($batch->ingredient->name['en'] ?? ''),
-                            'quantity_remaining' => $batch->quantity_remaining . ' ' . ($batch->ingredient->unit ?? ''), // Fixed access to unit
+                            'quantity_remaining' => $batch->quantity_remaining.' '.($batch->ingredient->unit ?? ''), // Fixed access to unit
                             'days_remaining' => $batch->reminder_days_before,
                             'expiry_date' => Carbon::parse($batch->expiration_date)->format('Y-m-d'),
                             'restaurant_id' => $restaurant ? $restaurant->id : null, // Pass context if string recipient
@@ -88,7 +88,7 @@ class SendExpiryReminders extends Command
                         $commService = app(\App\Services\CommunicationService::class);
                         $sent = $commService->sendNotification('inventory_expiry_warning', $recipient, $data);
 
-                        if (!$sent) {
+                        if (! $sent) {
                             $emailTarget = ($recipient instanceof User) ? $recipient->email : $recipient;
                             // Fallback to hardcoded Mailable
                             Mail::to($emailTarget)->send(new ExpiryWarningMail($batch, $batch->reminder_days_before));
@@ -107,7 +107,7 @@ class SendExpiryReminders extends Command
                         $count++;
                     } catch (\Exception $e) {
                         $emailTarget = ($recipient instanceof User) ? $recipient->email : $recipient;
-                        $this->error("Failed to mail {$emailTarget}: " . $e->getMessage());
+                        $this->error("Failed to mail {$emailTarget}: ".$e->getMessage());
 
                         // Log Failure
                         \App\Services\CommunicationService::log([

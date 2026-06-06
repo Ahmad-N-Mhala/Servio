@@ -27,15 +27,16 @@ class OrderObserver
 
         // Revert loyalty points if order is no longer in "Paid" state
         $isEligible = $order->payment_status === 'paid';
-        if ($order->points_earned > 0 && !$isEligible) {
+        if ($order->points_earned > 0 && ! $isEligible) {
             app(\App\Services\LoyaltyService::class)->revertOrderPoints($order);
         }
     }
 
     private function processTriggers(Order $order, string $event)
     {
-        if (!$order->customer_id)
+        if (! $order->customer_id) {
             return;
+        }
 
         $restaurant = $order->restaurant;
 
@@ -47,7 +48,7 @@ class OrderObserver
 
         foreach ($rules as $rule) {
             // Check Conditions
-            if (!$this->checkConditions($rule, $order)) {
+            if (! $this->checkConditions($rule, $order)) {
                 continue;
             }
 
@@ -55,14 +56,14 @@ class OrderObserver
             $feedbackLink = route('public.feedback.create', [
                 'identifier' => $restaurant->slug,
                 'order_id' => $order->id,
-                'customer_id' => $order->customer_id
+                'customer_id' => $order->customer_id,
             ]);
 
             $variables = [
                 'feedback_link' => $feedbackLink,
                 'order_number' => $order->order_number,
                 'customer_name' => $order->customer->name ?? $order->customer_name,
-                'restaurant_name' => $restaurant->name
+                'restaurant_name' => $restaurant->name,
             ];
 
             // Determine Timing and Dispatch
@@ -89,7 +90,7 @@ class OrderObserver
             }
             $delay = $delayDate;
 
-        } elseif ($rule->timing_type === 'custom_delay' && !empty($rule->conditions['delay_unit'])) {
+        } elseif ($rule->timing_type === 'custom_delay' && ! empty($rule->conditions['delay_unit'])) {
             $delayVal = (int) ($rule->conditions['delay_val'] ?? 1);
             $unit = $rule->conditions['delay_unit'];
             $delayDate = now();
@@ -114,11 +115,11 @@ class OrderObserver
     {
         $conditions = $rule->conditions ?? [];
 
-        if (!empty($conditions['min_order_amount']) && $order->total_amount < $conditions['min_order_amount']) {
+        if (! empty($conditions['min_order_amount']) && $order->total_amount < $conditions['min_order_amount']) {
             return false;
         }
 
-        if (!empty($conditions['min_orders_count'])) {
+        if (! empty($conditions['min_orders_count'])) {
             // Count past orders
             $count = \App\Models\Order::where('customer_id', $order->customer_id)
                 ->where('restaurant_id', $order->restaurant_id)
@@ -130,7 +131,7 @@ class OrderObserver
             }
         }
 
-        if (!empty($conditions['loyalty_tier'])) {
+        if (! empty($conditions['loyalty_tier'])) {
             if ($order->customer->loyalty_tier !== $conditions['loyalty_tier']) {
                 return false;
             }

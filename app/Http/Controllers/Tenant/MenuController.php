@@ -10,7 +10,6 @@ use App\Models\MenuItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Validation\ValidationException;
 use MongoDB\BSON\ObjectId;
 
 class MenuController extends Controller
@@ -20,15 +19,16 @@ class MenuController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('view_menu');
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $categories = MenuCategory::where('restaurant_id', $restaurant->id)
             ->with([
                 'items' => function ($query) {
                     $query->with(['ingredients', 'extras', 'bundles.childItem'])
                         ->orderBy('sort_order');
-                }
+                },
             ])
             ->orderBy('sort_order')
             ->orderBy('created_at', 'desc')
@@ -60,20 +60,21 @@ class MenuController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Check for duplicate names (EN and AR)
         $duplicate = MenuCategory::where('restaurant_id', $restaurant->id)
             ->where(function ($query) use ($validated) {
                 // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
-                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
-                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
+                $query->where('name', 'like', '%"en":"'.$validated['name']['en'].'"%')
+                    ->orWhere('name', 'like', '%"ar":"'.$validated['name']['ar'].'"%');
             })->exists();
 
         if ($duplicate) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'name' => [__('menu.duplicate_name')]
+                'name' => [__('menu.duplicate_name')],
             ]);
         }
 
@@ -88,8 +89,8 @@ class MenuController extends Controller
         return redirect()->back()->with('message', __('menu.category_created'));
     }
 
-    // updateCategory relies on model binding which is generally safe if policies are good, 
-    // but the model binding doesn't enforce tenancy by itself unless scoped. 
+    // updateCategory relies on model binding which is generally safe if policies are good,
+    // but the model binding doesn't enforce tenancy by itself unless scoped.
     // However, the update method uses $category->restaurant_id for duplicate check, which is okay.
     // Ideally we should verify $category->restaurant_id === session('active_restaurant_id') but
     // let's stick to replacing the manual lookups for now.
@@ -115,13 +116,13 @@ class MenuController extends Controller
             ->where('_id', '!=', $category->id)
             ->where(function ($query) use ($validated) {
                 // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
-                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
-                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
+                $query->where('name', 'like', '%"en":"'.$validated['name']['en'].'"%')
+                    ->orWhere('name', 'like', '%"ar":"'.$validated['name']['ar'].'"%');
             })->exists();
 
         if ($duplicate) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'name' => [__('menu.duplicate_name')]
+                'name' => [__('menu.duplicate_name')],
             ]);
         }
 
@@ -174,20 +175,21 @@ class MenuController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Check for duplicate names (EN and AR) within the same category
         $duplicate = MenuItem::where('restaurant_id', $restaurant->id)
             ->where('menu_category_id', $validated['menu_category_id'])
             ->where(function ($query) use ($validated) {
-                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
-                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
+                $query->where('name', 'like', '%"en":"'.$validated['name']['en'].'"%')
+                    ->orWhere('name', 'like', '%"ar":"'.$validated['name']['ar'].'"%');
             })->exists();
 
         if ($duplicate) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'name' => [__('menu.duplicate_name_item')]
+                'name' => [__('menu.duplicate_name_item')],
             ]);
         }
 
@@ -233,7 +235,7 @@ class MenuController extends Controller
                         \App\Models\MenuItemIngredient::create([
                             'menu_item_id' => new ObjectId((string) $item->id),
                             'ingredient_id' => new ObjectId((string) $ing['id']),
-                            'quantity' => (float) $ing['quantity']
+                            'quantity' => (float) $ing['quantity'],
                         ]);
                     }
                 }
@@ -243,12 +245,13 @@ class MenuController extends Controller
         }
 
         // Extras Logic
-        if (!empty($validated['extras'])) {
+        if (! empty($validated['extras'])) {
             // Expecting extras to serve as array of objects
             foreach ($validated['extras'] as $extra) {
                 // Decode if string (from FormData)
-                if (is_string($extra))
+                if (is_string($extra)) {
                     $extra = json_decode($extra, true);
+                }
 
                 \App\Models\MenuItemExtra::create([
                     'menu_item_id' => $item->id,
@@ -262,10 +265,11 @@ class MenuController extends Controller
         }
 
         // Bundles Logic
-        if (!empty($validated['bundles']) && ($validated['type'] ?? 'item') === 'meal') {
+        if (! empty($validated['bundles']) && ($validated['type'] ?? 'item') === 'meal') {
             foreach ($validated['bundles'] as $bundle) {
-                if (is_string($bundle))
+                if (is_string($bundle)) {
                     $bundle = json_decode($bundle, true);
+                }
 
                 \App\Models\MenuItemBundle::create([
                     'parent_menu_item_id' => $item->id,
@@ -311,13 +315,13 @@ class MenuController extends Controller
             ->where('_id', '!=', $item->id)
             ->where('menu_category_id', $validated['menu_category_id'])
             ->where(function ($query) use ($validated) {
-                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
-                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
+                $query->where('name', 'like', '%"en":"'.$validated['name']['en'].'"%')
+                    ->orWhere('name', 'like', '%"ar":"'.$validated['name']['ar'].'"%');
             })->exists();
 
         if ($duplicate) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'name' => [__('menu.duplicate_name_item')]
+                'name' => [__('menu.duplicate_name_item')],
             ]);
         }
 
@@ -361,7 +365,7 @@ class MenuController extends Controller
                         \App\Models\MenuItemIngredient::create([
                             'menu_item_id' => new ObjectId((string) $item->id),
                             'ingredient_id' => new ObjectId((string) $ing['id']),
-                            'quantity' => (float) $ing['quantity']
+                            'quantity' => (float) $ing['quantity'],
                         ]);
                     }
                 }
@@ -373,10 +377,11 @@ class MenuController extends Controller
 
         // Extras Logic
         \App\Models\MenuItemExtra::where('menu_item_id', $item->id)->delete();
-        if (!empty($validated['extras'])) {
+        if (! empty($validated['extras'])) {
             foreach ($validated['extras'] as $extra) {
-                if (is_string($extra))
+                if (is_string($extra)) {
                     $extra = json_decode($extra, true);
+                }
                 \App\Models\MenuItemExtra::create([
                     'menu_item_id' => $item->id,
                     'name' => $extra['name'],
@@ -390,10 +395,11 @@ class MenuController extends Controller
 
         // Bundles Logic
         \App\Models\MenuItemBundle::where('parent_menu_item_id', $item->id)->delete();
-        if (!empty($validated['bundles']) && ($item->type === 'meal')) {
+        if (! empty($validated['bundles']) && ($item->type === 'meal')) {
             foreach ($validated['bundles'] as $bundle) {
-                if (is_string($bundle))
+                if (is_string($bundle)) {
                     $bundle = json_decode($bundle, true);
+                }
                 \App\Models\MenuItemBundle::create([
                     'parent_menu_item_id' => $item->id,
                     'child_menu_item_id' => $bundle['child_menu_item_id'],
@@ -430,11 +436,12 @@ class MenuController extends Controller
 
         try {
             \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\MenuItemsImport, $request->file('file'));
+
             return redirect()->back()->with('message', 'Menu items imported successfully.');
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Import Error: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['file' => 'Error importing file: ' . $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('Import Error: '.$e->getMessage());
+
+            return redirect()->back()->withErrors(['file' => 'Error importing file: '.$e->getMessage()]);
         }
     }
 }
-

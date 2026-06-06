@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Models\Customer;
-use App\Models\CommunicationTemplate;
 use App\Jobs\SendCustomerCommunicationJob;
+use App\Models\CommunicationTemplate;
+use App\Models\Customer;
 
 class CustomerObserver
 {

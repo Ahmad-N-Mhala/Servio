@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Translatable\HasTranslations;
-
 use App\Traits\HasRestaurant;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use MongoDB\Laravel\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Reward extends Model
 {
-    use HasFactory, HasTranslations, HasRestaurant;
+    use HasFactory, HasRestaurant, HasTranslations;
 
     public $translatable = ['name'];
 
@@ -73,7 +72,7 @@ class Reward extends Model
 
     public function isAvailable(): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 
@@ -93,4 +92,3 @@ class Reward extends Model
         return true;
     }
 }
-

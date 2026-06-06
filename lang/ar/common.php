@@ -104,4 +104,6 @@ return [
     'cancelled' => 'ملغي',
     'deleted' => 'محذوف',
     'in_progress' => 'قيد التنفيذ',
+    'no_details' => 'No details available',
+    'done' => 'Done',
 ];

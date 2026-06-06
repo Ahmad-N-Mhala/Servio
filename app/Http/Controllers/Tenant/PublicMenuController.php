@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\MenuCategory;
-use App\Models\MenuItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +19,7 @@ class PublicMenuController extends Controller
 
         $restaurant = \App\Models\Restaurant::first();
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return response()->json(['error' => 'Restaurant not found'], 404);
         }
 
@@ -29,7 +28,7 @@ class PublicMenuController extends Controller
                 'items' => function ($query) {
                     $query->with('extras')
                         ->orderBy('sort_order');
-                }
+                },
             ])
             ->orderBy('sort_order')
             ->get()
@@ -42,7 +41,7 @@ class PublicMenuController extends Controller
                     'id' => $category->id,
                     'name' => $this->getTranslatedName($category->name, $locale),
                     'description' => $category->description,
-                    'items' => $category->items->filter(fn($item) => (bool) $item->is_available)->map(function ($item) use ($locale) {
+                    'items' => $category->items->filter(fn ($item) => (bool) $item->is_available)->map(function ($item) use ($locale) {
                         return [
                             'id' => $item->id,
                             'name' => $this->getTranslatedName($item->name, $locale),
@@ -83,4 +82,3 @@ class PublicMenuController extends Controller
         return reset($name) ?: '';
     }
 }
-

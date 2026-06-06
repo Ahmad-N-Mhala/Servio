@@ -5,16 +5,15 @@ namespace App\Services;
 use App\Models\CommunicationTemplate;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class CommunicationService
 {
     /**
      * Send a notification based on a trigger event or specific template.
      *
-     * @param string|CommunicationTemplate $trigger Notification event or specific template
-     * @param User|string $recipient User object or email string
-     * @param array $data Additional data for replacement (e.g., link, restaurant_name)
+     * @param  string|CommunicationTemplate  $trigger  Notification event or specific template
+     * @param  User|string  $recipient  User object or email string
+     * @param  array  $data  Additional data for replacement (e.g., link, restaurant_name)
      * @return bool True if a custom template was used, False if fallback logic should be used.
      */
     public function sendNotification(string|CommunicationTemplate $trigger, User|string $recipient, array $data = []): bool
@@ -35,7 +34,7 @@ class CommunicationService
                 ->first();
         }
 
-        if (!$template) {
+        if (! $template) {
             return false; // Let caller handle fallback (standard Hardcoded Mailable)
         }
 
@@ -69,7 +68,7 @@ class CommunicationService
             // Combine Subject: "English / Arabic"
             $subject = $subjectEn;
             if ($subjectAr && $subjectAr !== $subjectEn) {
-                $subject .= ' / ' . $subjectAr;
+                $subject .= ' / '.$subjectAr;
             }
 
             // Combine Content: English <hr> Arabic
@@ -78,7 +77,7 @@ class CommunicationService
 
             $content = $contentEn;
             if ($contentAr && $contentAr !== $contentEn) {
-                $content .= "<hr style='border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;'>" . $contentAr;
+                $content .= "<hr style='border: 0; border-top: 1px solid #e5e7eb; margin: 32px 0;'>".$contentAr;
             }
 
             // Do replacements on the combined string
@@ -91,13 +90,13 @@ class CommunicationService
             // Process Content Variables
             // Pick Subject
             $subjectText = $template->{"subject_{$locale}"} ?? $template->subject ?? '';
-            if (!$subjectText && $locale !== 'en') {
+            if (! $subjectText && $locale !== 'en') {
                 $subjectText = $template->subject_en ?? $template->subject ?? '';
             }
 
             // Pick Content
             $contentText = $template->{"content_{$locale}"} ?? $template->content ?? '';
-            if (!$contentText && $locale !== 'en') {
+            if (! $contentText && $locale !== 'en') {
                 $contentText = $template->content_en ?? $template->content ?? '';
             }
 
@@ -122,7 +121,7 @@ class CommunicationService
 
             return true;
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("System Email failed: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('System Email failed: '.$e->getMessage());
 
             self::log([
                 'restaurant_id' => $restaurant ? (string) $restaurant->id : null,

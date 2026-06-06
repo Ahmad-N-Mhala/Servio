@@ -73,25 +73,25 @@ class LandingPageController extends Controller
             'dash_widget_1_title' => ['en' => '360° Financial Analytics', 'ar' => 'تحليلات مالية شاملة 360 درجة'],
             'dash_widget_1_desc' => [
                 'en' => 'Real-time Profit & Loss tracking. Monitor Revenue, Monthly Expenses, and Net Profit instantly. Deep dive into "Item Sales" and "Payment Method" breakdowns to master your cash flow.',
-                'ar' => 'تتبع الأرباح والخسائر في الوقت الفعلي. راقب الإيرادات والمصروفات الشهرية وصافي الربح فوراً. تعمق في تفاصيل "مبيعات الأصناف" و"طرق الدفع" لإتقان التدفق النقدي لديك.'
+                'ar' => 'تتبع الأرباح والخسائر في الوقت الفعلي. راقب الإيرادات والمصروفات الشهرية وصافي الربح فوراً. تعمق في تفاصيل "مبيعات الأصناف" و"طرق الدفع" لإتقان التدفق النقدي لديك.',
             ],
 
             'dash_widget_2_title' => ['en' => 'Operational Efficiency & Waste', 'ar' => 'الكفاءة التشغيلية والتحكم بالهدر'],
             'dash_widget_2_desc' => [
                 'en' => 'Optimize staff scheduling with "Peak Hours" analysis. Track "Average Dining Time" for table turnover. Monitor "Waste Logs" daily to significantly reduce food costs and kitchen errors.',
-                'ar' => 'حسن جداول الموظفين مع تحليل "ساعات الذروة". تتبع "متوسط وقت تناول الطعام" لزيادة دوران الطاولات. راقب "سجلات الهدر" يومياً لتقليل تكاليف الطعام وأخطاء المطبخ بشكل كبير.'
+                'ar' => 'حسن جداول الموظفين مع تحليل "ساعات الذروة". تتبع "متوسط وقت تناول الطعام" لزيادة دوران الطاولات. راقب "سجلات الهدر" يومياً لتقليل تكاليف الطعام وأخطاء المطبخ بشكل كبير.',
             ],
 
             'dash_widget_3_title' => ['en' => 'Advanced CRM & Retention', 'ar' => 'إدارة علاقات عملاء متقدمة'],
             'dash_widget_3_desc' => [
                 'en' => 'Identify "Top Customers" by total spend. Track retention rates from 1st to 5th+ visit with our specialized funnel. Automate "Win-back" SMS campaigns for customers who haven\'t visited in 30 days.',
-                'ar' => 'تعرف على "أهم العملاء" حسب إجمالي الإنفاق. تتبع معدلات الاحتفاظ من الزيارة الأولى حتى الخامسة فأكثر. أتمتة حملات الرسائل النصية لاستعادة العملاء الذين لم يزوروا المطعم منذ 30 يوماً.'
+                'ar' => 'تعرف على "أهم العملاء" حسب إجمالي الإنفاق. تتبع معدلات الاحتفاظ من الزيارة الأولى حتى الخامسة فأكثر. أتمتة حملات الرسائل النصية لاستعادة العملاء الذين لم يزوروا المطعم منذ 30 يوماً.',
             ],
 
             'dash_widget_4_title' => ['en' => 'Smart Menu Intelligence', 'ar' => 'ذكاء القوائم المتقدم'],
             'dash_widget_4_desc' => [
                 'en' => 'Rankings for "Top Categories" and "Best Sellers" by quantity and revenue. Filter stats by "Delivery Provider" (UberEats, Talabat) to see which high-margin items perform best on each platform.',
-                'ar' => 'تصنيفات لـ "أعلى الفئات" و"الأكثر مبيعاً" حسب الكمية والإيرادات. صفي الإحصائيات حسب "مزود التوصيل" (UberEats, Talabat) لمعرفة العناصر ذات الهامش الربحي العالي الأفضل أداءً على كل منصة.'
+                'ar' => 'تصنيفات لـ "أعلى الفئات" و"الأكثر مبيعاً" حسب الكمية والإيرادات. صفي الإحصائيات حسب "مزود التوصيل" (UberEats, Talabat) لمعرفة العناصر ذات الهامش الربحي العالي الأفضل أداءً على كل منصة.',
             ],
 
             'contact_email' => __('landing.connect_via_email', [], 'en'),
@@ -100,7 +100,7 @@ class LandingPageController extends Controller
         // Merge defaults into settings ONLY if key doesn't exist
         $settings = $dbSettings->toArray();
         foreach ($defaults as $key => $defaultVal) {
-            if (!isset($settings[$key])) {
+            if (! isset($settings[$key])) {
                 $settings[$key] = $defaultVal;
             }
         }
@@ -139,15 +139,16 @@ class LandingPageController extends Controller
                 if (is_array($fileOrFiles)) {
                     $newPaths = [];
                     foreach ($fileOrFiles as $file) {
-                        $newPaths[] = '/storage/' . $file->store('landing/images', 'public');
+                        $newPaths[] = '/storage/'.$file->store('landing/images', 'public');
                     }
 
                     // Check for _new suffix to merge with existing
                     if (str_ends_with($key, '_new')) {
                         $baseKey = substr($key, 0, -4); // remove _new
                         $existing = LandingSetting::get($baseKey, []);
-                        if (!is_array($existing))
-                            $existing = $existing ? [$existing] : []; // Ensure array
+                        if (! is_array($existing)) {
+                            $existing = $existing ? [$existing] : [];
+                        } // Ensure array
 
                         $merged = array_merge($existing, $newPaths);
                         LandingSetting::set($baseKey, $merged);
@@ -158,7 +159,7 @@ class LandingPageController extends Controller
                 } else {
                     // Single File
                     $path = $fileOrFiles->store('landing/images', 'public');
-                    LandingSetting::set($key, '/storage/' . $path);
+                    LandingSetting::set($key, '/storage/'.$path);
                 }
             }
         }
@@ -223,7 +224,7 @@ class LandingPageController extends Controller
             $path = $request->file('image')->store('landing/screenshots', 'public');
 
             \App\Models\LandingScreenshot::create([
-                'image_path' => '/storage/' . $path,
+                'image_path' => '/storage/'.$path,
                 'sort_order' => $request->integer('sort_order', 0),
                 'is_active' => true,
             ]);

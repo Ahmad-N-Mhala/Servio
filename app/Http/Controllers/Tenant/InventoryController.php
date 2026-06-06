@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Ingredient;
-use Inertia\Inertia;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 use MongoDB\BSON\ObjectId;
 
 class InventoryController extends Controller
@@ -19,14 +18,14 @@ class InventoryController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         // Enforce strict context - removed implicit fallback for super admin
-        if (!$restaurant && $request->user()->is_super_admin) {
+        if (! $restaurant && $request->user()->is_super_admin) {
             // Check if there's a session ID first (fallback to manual lookup if helper fails)
             if (session('active_restaurant_id')) {
                 $restaurant = auth()->user()->currentRestaurant();
             }
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return Inertia::render('Inventory/Index', ['ingredients' => [], 'filters' => []]);
         }
 
@@ -35,7 +34,7 @@ class InventoryController extends Controller
                 'batches' => function ($query) {
                     $query->orderBy('created_at', 'asc');
                 },
-                'menuItems'
+                'menuItems',
             ])
             ->when($request->search, function ($query, $search) {
                 $query->where('name.en', 'like', "%{$search}%")
@@ -50,14 +49,14 @@ class InventoryController extends Controller
 
         // Ensure owner is in the list
         if ($owner) {
-            if (!$users->contains('id', $owner->id)) {
+            if (! $users->contains('id', $owner->id)) {
                 $users->push($owner);
             }
         }
 
         // Also ensure CURRENT USER is in the list (often the one setting up)
         $currentUser = $request->user();
-        if ($currentUser && !$users->contains('id', $currentUser->id)) {
+        if ($currentUser && ! $users->contains('id', $currentUser->id)) {
             $users->push($currentUser);
         }
 
@@ -74,11 +73,11 @@ class InventoryController extends Controller
         $restaurant = $request->user()->currentRestaurant();
 
         // Enforce strict context - removed implicit fallback for super admin
-        if (!$restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
+        if (! $restaurant && $request->user()->is_super_admin && session('active_restaurant_id')) {
             $restaurant = auth()->user()->currentRestaurant();
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             return redirect()->back()->with('error', 'No active restaurant found.');
         }
 
@@ -106,10 +105,12 @@ class InventoryController extends Controller
                 $en = $nameVal['en'] ?? null;
                 $ar = $nameVal['ar'] ?? null;
                 // Fallback if one is empty
-                if (empty($en) && !empty($ar))
+                if (empty($en) && ! empty($ar)) {
                     $en = $ar;
-                if (empty($ar) && !empty($en))
+                }
+                if (empty($ar) && ! empty($en)) {
                     $ar = $en;
+                }
 
                 $validated['name'] = ['en' => $en, 'ar' => $ar];
             }
@@ -122,13 +123,13 @@ class InventoryController extends Controller
         $duplicate = Ingredient::where('restaurant_id', $restaurant->id)
             ->where(function ($query) use ($validated) {
                 // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
-                $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
-                    ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
+                $query->where('name', 'like', '%"en":"'.$validated['name']['en'].'"%')
+                    ->orWhere('name', 'like', '%"ar":"'.$validated['name']['ar'].'"%');
             })->exists();
 
         if ($duplicate) {
             throw ValidationException::withMessages([
-                'name' => [__('inventory.duplicate_name')]
+                'name' => [__('inventory.duplicate_name')],
             ]);
         }
 
@@ -161,8 +162,8 @@ class InventoryController extends Controller
 
         // Log the creation of new ingredient with initial stock
         $logNotes = "New ingredient created with initial stock: {$validated['current_stock']} {$validated['unit']} @ {$validated['cost']}";
-        if (!empty($validated['notes'])) {
-            $logNotes .= "\nUser Notes: " . $validated['notes'];
+        if (! empty($validated['notes'])) {
+            $logNotes .= "\nUser Notes: ".$validated['notes'];
         }
 
         \App\Models\InventoryLog::create([
@@ -187,7 +188,7 @@ class InventoryController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('add_stock');
 
         $restaurant = $request->user()->currentRestaurant();
-        if (!$restaurant && $request->user()->is_super_admin) {
+        if (! $restaurant && $request->user()->is_super_admin) {
             $restaurant = \App\Models\Restaurant::orderBy('created_at', 'desc')->first();
         }
 
@@ -201,7 +202,7 @@ class InventoryController extends Controller
                 ->where('restaurant_id', (string) $ingredient->restaurant_id)
                 ->exists();
 
-            if (!$hasAccess) {
+            if (! $hasAccess) {
                 abort(403, 'You do not have permission to modify this item.');
             }
         }
@@ -229,10 +230,12 @@ class InventoryController extends Controller
                 $en = $nameVal['en'] ?? null;
                 $ar = $nameVal['ar'] ?? null;
                 // Fallback if one is empty
-                if (empty($en) && !empty($ar))
+                if (empty($en) && ! empty($ar)) {
                     $en = $ar;
-                if (empty($ar) && !empty($en))
+                }
+                if (empty($ar) && ! empty($en)) {
                     $ar = $en;
+                }
 
                 $validated['name'] = ['en' => $en, 'ar' => $ar];
             }
@@ -249,13 +252,13 @@ class InventoryController extends Controller
                 ->where('_id', '!=', $ingredient->id)
                 ->where(function ($query) use ($validated) {
                     // Since spatie/laravel-translatable stores as JSON string in MongoDB, we use 'like'
-                    $query->where('name', 'like', '%"en":"' . $validated['name']['en'] . '"%')
-                        ->orWhere('name', 'like', '%"ar":"' . $validated['name']['ar'] . '"%');
+                    $query->where('name', 'like', '%"en":"'.$validated['name']['en'].'"%')
+                        ->orWhere('name', 'like', '%"ar":"'.$validated['name']['ar'].'"%');
                 })->exists();
 
             if ($duplicate) {
                 throw ValidationException::withMessages([
-                    'name' => [__('inventory.duplicate_name')]
+                    'name' => [__('inventory.duplicate_name')],
                 ]);
             }
         }
@@ -269,7 +272,7 @@ class InventoryController extends Controller
 
             // Generate Batch Number
             $existingBatchesCount = \App\Models\IngredientBatch::where('ingredient_id', $ingredient->id)->count();
-            $nextBatchNumber = 'Batch ' . ($existingBatchesCount + 1);
+            $nextBatchNumber = 'Batch '.($existingBatchesCount + 1);
 
             // Create a new Batch
             \App\Models\IngredientBatch::create([
@@ -308,8 +311,8 @@ class InventoryController extends Controller
 
             // Log the action
             $logNotes = "Added {$addedQty} {$ingredient->unit} @ {$incomingCost} [{$nextBatchNumber}]";
-            if (!empty($validated['notes'])) {
-                $logNotes .= "\nUser Notes: " . $validated['notes'];
+            if (! empty($validated['notes'])) {
+                $logNotes .= "\nUser Notes: ".$validated['notes'];
             }
 
             \App\Models\InventoryLog::create([
@@ -323,7 +326,7 @@ class InventoryController extends Controller
                 'bill_path' => $billPath,
             ]);
 
-            // Unset fields 
+            // Unset fields
             unset($validated['add_stock']);
             unset($validated['added_cost']);
             unset($validated['cost']);
@@ -354,13 +357,13 @@ class InventoryController extends Controller
     public function export(Request $request)
     {
         $restaurant = $request->user()->currentRestaurant();
-        if (!$restaurant && $request->user()->is_super_admin) {
+        if (! $restaurant && $request->user()->is_super_admin) {
             if (session('active_restaurant_id')) {
                 $restaurant = auth()->user()->currentRestaurant();
             }
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
         }
 
@@ -386,14 +389,14 @@ class InventoryController extends Controller
 
         // Current time in restaurant timezone for filename
         $now = \Carbon\Carbon::now($timezone);
-        $filename = "inventory_report_" . $now->format('Y-m-d_H-i') . ".csv";
+        $filename = 'inventory_report_'.$now->format('Y-m-d_H-i').'.csv';
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=" . $filename,
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename='.$filename,
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = [
@@ -403,7 +406,7 @@ class InventoryController extends Controller
             __('reports.quantity_change'),
             __('reports.new_stock_level'),
             __('reports.user'),
-            __('reports.notes')
+            __('reports.notes'),
         ];
 
         $callback = function () use ($logs, $columns, $timezone) {
@@ -420,7 +423,7 @@ class InventoryController extends Controller
                     $logDate,
                     $ingredientName,
                     ucfirst(str_replace('_', ' ', $log->action)),
-                    $log->quantity_change > 0 ? '+' . $log->quantity_change : $log->quantity_change,
+                    $log->quantity_change > 0 ? '+'.$log->quantity_change : $log->quantity_change,
                     $log->new_stock_level,
                     $log->user ? $log->user->name : 'System',
                     $log->notes,
@@ -442,13 +445,13 @@ class InventoryController extends Controller
         $ingredient = Ingredient::findOrFail($id);
 
         // Authorization Logic
-        if (!request()->user()->is_super_admin) {
+        if (! request()->user()->is_super_admin) {
             $hasAccess = \Illuminate\Support\Facades\DB::table('restaurant_user')
                 ->where('email', request()->user()->email)
                 ->where('restaurant_id', (string) $ingredient->restaurant_id)
                 ->exists();
 
-            if (!$hasAccess) {
+            if (! $hasAccess) {
                 abort(403, 'You do not have permission to delete this item.');
             }
         }
@@ -458,7 +461,7 @@ class InventoryController extends Controller
         $pivotItemIds = \Illuminate\Support\Facades\DB::table('menu_item_ingredients')
             ->where('ingredient_id', new ObjectId($id))
             ->pluck('menu_item_id')
-            ->map(fn($id) => (string) $id)
+            ->map(fn ($id) => (string) $id)
             ->toArray();
 
         // 2. Find MenuItems linked via pivot or embedded recipe

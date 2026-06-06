@@ -77,25 +77,25 @@ class LandingPageController extends Controller
             'dash_widget_1_title' => ['en' => '360° Financial Analytics', 'ar' => 'تحليلات مالية شاملة 360 درجة'],
             'dash_widget_1_desc' => [
                 'en' => 'Real-time Profit & Loss tracking. Monitor Revenue, Monthly Expenses, and Net Profit instantly. Deep dive into "Item Sales" and "Payment Method" breakdowns to master your cash flow.',
-                'ar' => 'تتبع الأرباح والخسائر في الوقت الفعلي. راقب الإيرادات والمصروفات الشهرية وصافي الربح فوراً. تعمق في تفاصيل "مبيعات الأصناف" و"طرق الدفع" لإتقان التدفق النقدي لديك.'
+                'ar' => 'تتبع الأرباح والخسائر في الوقت الفعلي. راقب الإيرادات والمصروفات الشهرية وصافي الربح فوراً. تعمق في تفاصيل "مبيعات الأصناف" و"طرق الدفع" لإتقان التدفق النقدي لديك.',
             ],
 
             'dash_widget_2_title' => ['en' => 'Operational Efficiency & Waste', 'ar' => 'الكفاءة التشغيلية والتحكم بالهدر'],
             'dash_widget_2_desc' => [
                 'en' => 'Optimize staff scheduling with "Peak Hours" analysis. Track "Average Dining Time" for table turnover. Monitor "Waste Logs" daily to significantly reduce food costs and kitchen errors.',
-                'ar' => 'حسن جداول الموظفين مع تحليل "ساعات الذروة". تتبع "متوسط وقت تناول الطعام" لزيادة دوران الطاولات. راقب "سجلات الهدر" يومياً لتقليل تكاليف الطعام وأخطاء المطبخ بشكل كبير.'
+                'ar' => 'حسن جداول الموظفين مع تحليل "ساعات الذروة". تتبع "متوسط وقت تناول الطعام" لزيادة دوران الطاولات. راقب "سجلات الهدر" يومياً لتقليل تكاليف الطعام وأخطاء المطبخ بشكل كبير.',
             ],
 
             'dash_widget_3_title' => ['en' => 'Advanced CRM & Retention', 'ar' => 'إدارة علاقات عملاء متقدمة'],
             'dash_widget_3_desc' => [
                 'en' => 'Identify "Top Customers" by total spend. Track retention rates from 1st to 5th+ visit with our specialized funnel. Automate "Win-back" SMS campaigns for customers who haven\'t visited in 30 days.',
-                'ar' => 'تعرف على "أهم العملاء" حسب إجمالي الإنفاق. تتبع معدلات الاحتفاظ من الزيارة الأولى حتى الخامسة فأكثر. أتمتة حملات الرسائل النصية لاستعادة العملاء الذين لم يزوروا المطعم منذ 30 يوماً.'
+                'ar' => 'تعرف على "أهم العملاء" حسب إجمالي الإنفاق. تتبع معدلات الاحتفاظ من الزيارة الأولى حتى الخامسة فأكثر. أتمتة حملات الرسائل النصية لاستعادة العملاء الذين لم يزوروا المطعم منذ 30 يوماً.',
             ],
 
             'dash_widget_4_title' => ['en' => 'Smart Menu Intelligence', 'ar' => 'ذكاء القوائم المتقدم'],
             'dash_widget_4_desc' => [
                 'en' => 'Rankings for "Top Categories" and "Best Sellers" by quantity and revenue. Filter stats by "Delivery Provider" (UberEats, Talabat) to see which high-margin items perform best on each platform.',
-                'ar' => 'تصنيفات لـ "أعلى الفئات" و"الأكثر مبيعاً" حسب الكمية والإيرادات. صفي الإحصائيات حسب "مزود التوصيل" (UberEats, Talabat) لمعرفة العناصر ذات الهامش الربحي العالي الأفضل أداءً على كل منصة.'
+                'ar' => 'تصنيفات لـ "أعلى الفئات" و"الأكثر مبيعاً" حسب الكمية والإيرادات. صفي الإحصائيات حسب "مزود التوصيل" (UberEats, Talabat) لمعرفة العناصر ذات الهامش الربحي العالي الأفضل أداءً على كل منصة.',
             ],
 
             // Features Defaults
@@ -129,7 +129,7 @@ class LandingPageController extends Controller
             'feedback_feature_1_title' => ['en' => __('landing.collect_feedback', [], 'en'), 'ar' => __('landing.collect_feedback', [], 'ar')],
             'feedback_feature_1_desc' => ['en' => __('landing.collect_feedback_desc', [], 'en'), 'ar' => __('landing.collect_feedback_desc', [], 'ar')],
             'feedback_feature_2_title' => ['en' => __('landing.google_maps_boost', [], 'en'), 'ar' => __('landing.google_maps_boost', [], 'ar')],
-            'feedback_feature_2_desc' => ['en' => __('landing.google_maps_feature', [], 'en') . ' ' . __('landing.google_maps_desc', [], 'en'), 'ar' => __('landing.google_maps_feature', [], 'ar') . ' ' . __('landing.google_maps_desc', [], 'ar')],
+            'feedback_feature_2_desc' => ['en' => __('landing.google_maps_feature', [], 'en').' '.__('landing.google_maps_desc', [], 'en'), 'ar' => __('landing.google_maps_feature', [], 'ar').' '.__('landing.google_maps_desc', [], 'ar')],
             'feedback_feature_3_title' => ['en' => __('landing.insights', [], 'en'), 'ar' => __('landing.insights', [], 'ar')],
             'feedback_feature_3_desc' => ['en' => __('landing.insights_desc', [], 'en'), 'ar' => __('landing.insights_desc', [], 'ar')],
         ];
@@ -139,7 +139,7 @@ class LandingPageController extends Controller
         // Convert DB settings to array first
         $settings = $dbSettings->toArray();
         foreach ($defaults as $key => $defaultVal) {
-            if (!isset($settings[$key])) {
+            if (! isset($settings[$key])) {
                 $settings[$key] = $defaultVal;
             }
         }
@@ -178,7 +178,7 @@ class LandingPageController extends Controller
         try {
             \App\Models\PlanInterest::create($request->all());
         } catch (\Exception $e) {
-            \Log::error('Registration Interest Database Error: ' . $e->getMessage());
+            \Log::error('Registration Interest Database Error: '.$e->getMessage());
         }
 
         $contactEmail = \App\Models\SystemConfiguration::get('registration_email')
@@ -187,7 +187,7 @@ class LandingPageController extends Controller
 
         // Send Email
         try {
-            \Log::info("Attempting to send Registration Interest email to: " . $contactEmail);
+            \Log::info('Attempting to send Registration Interest email to: '.$contactEmail);
             Mail::to($contactEmail)->send(new RegistrationInterest($request->all()));
 
             // MANUAL LOG
@@ -199,9 +199,9 @@ class LandingPageController extends Controller
                 'message' => "New lead from {$request->restaurant_name} ({$request->name})",
             ]);
 
-            \Log::info("Registration Interest email sent successfully.");
+            \Log::info('Registration Interest email sent successfully.');
         } catch (\Exception $e) {
-            \Log::error('Registration Interest Email Error: ' . $e->getMessage());
+            \Log::error('Registration Interest Email Error: '.$e->getMessage());
 
             // MANUAL LOG FAILURE
             \App\Services\CommunicationService::log([

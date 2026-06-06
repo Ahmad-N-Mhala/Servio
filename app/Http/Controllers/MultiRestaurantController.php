@@ -4,12 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class MultiRestaurantController extends Controller
 {
-
     /**
      * Display a listing of the user's restaurants.
      */
@@ -38,10 +37,10 @@ class MultiRestaurantController extends Controller
                 $planName = $restaurant->subscription && $restaurant->subscription->plan
                     ? $restaurant->subscription->plan->name
                     : 'Free'; // Default to Free if no subscription
-    
+
                 // Domain logic is deprecated in single-DB, so we can return null or a logical ID
                 $domain = request()->getHost(); // Just current host since we are single domain now
-    
+
                 return [
                     'id' => $restaurant->id,
                     'name' => $restaurant->name,
@@ -65,7 +64,7 @@ class MultiRestaurantController extends Controller
             ->pluck('restaurant_id')
             ->toArray();
 
-        $firstRestaurant = !empty($ownerRestaurantIds)
+        $firstRestaurant = ! empty($ownerRestaurantIds)
             ? Restaurant::with(['subscription.plan'])->whereIn('id', $ownerRestaurantIds)->first()
             : null;
 
@@ -99,7 +98,7 @@ class MultiRestaurantController extends Controller
             ->where('email', $request->user()->email)
             ->exists();
 
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             abort(403, 'Access denied to this restaurant.');
         }
 
@@ -113,6 +112,7 @@ class MultiRestaurantController extends Controller
 
         return redirect($request->user()->getLandingRoute());
     }
+
     public function create()
     {
         $defaultCountry = $this->getCountryFromIp(request()->ip());
@@ -127,7 +127,7 @@ class MultiRestaurantController extends Controller
             ->toArray();
 
         $planFeatures = [];
-        if (!empty($existingRestaurantIds)) {
+        if (! empty($existingRestaurantIds)) {
             $existingRestaurant = Restaurant::with('subscription.plan')->whereIn('id', $existingRestaurantIds)->first();
             if ($existingRestaurant && $existingRestaurant->subscription && $existingRestaurant->subscription->plan) {
                 $plan = $existingRestaurant->subscription->plan;
@@ -150,7 +150,7 @@ class MultiRestaurantController extends Controller
      */
     private function getCountryFromIp(?string $ip): string
     {
-        if (!$ip || in_array($ip, ['127.0.0.1', '::1'])) {
+        if (! $ip || in_array($ip, ['127.0.0.1', '::1'])) {
             return 'United Arab Emirates';
         }
 
@@ -209,7 +209,7 @@ class MultiRestaurantController extends Controller
 
         $existingRestaurant = Restaurant::with('subscription.plan')->whereIn('id', $existingRestaurantIds)->first();
 
-        if (!$existingRestaurant || !$existingRestaurant->subscription) {
+        if (! $existingRestaurant || ! $existingRestaurant->subscription) {
             return back()->withErrors(['error' => 'No active subscription found. Please contact support.']);
         }
 
@@ -249,7 +249,7 @@ class MultiRestaurantController extends Controller
 
             $restaurant = Restaurant::create([
                 'name' => $validated['restaurant_name'],
-                'slug' => \Illuminate\Support\Str::slug($validated['restaurant_name']) . '-' . \Illuminate\Support\Str::random(6),
+                'slug' => \Illuminate\Support\Str::slug($validated['restaurant_name']).'-'.\Illuminate\Support\Str::random(6),
                 'currency' => $currency,
                 'locale' => 'en',
                 'country' => $validated['country'],
@@ -276,7 +276,7 @@ class MultiRestaurantController extends Controller
             ]);
 
             // 3. Create Staff Record
-            $staff = new \App\Models\Staff();
+            $staff = new \App\Models\Staff;
             $staff->restaurant_id = $restaurant->id;
             $staff->user_id = $user->id;
             $staff->role = 'owner';
@@ -285,7 +285,7 @@ class MultiRestaurantController extends Controller
             $staff->save();
 
             // 4. Create Default Earning Method (Only if Loyalty is enabled)
-            if ($hasLoyalty && !empty($validated['earning_method_type'])) {
+            if ($hasLoyalty && ! empty($validated['earning_method_type'])) {
                 \App\Models\EarningMethod::create([
                     'restaurant_id' => $restaurant->id,
                     'name' => ['en' => 'Standard Loyalty', 'ar' => 'نقاط الولاء'],
@@ -325,8 +325,9 @@ class MultiRestaurantController extends Controller
                 \Illuminate\Support\Facades\DB::rollBack();
             }
             */
-            \Log::error('Restaurant Creation failed: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Creation failed: ' . $e->getMessage()]);
+            \Log::error('Restaurant Creation failed: '.$e->getMessage());
+
+            return back()->withErrors(['error' => 'Creation failed: '.$e->getMessage()]);
         }
     }
 
@@ -339,7 +340,7 @@ class MultiRestaurantController extends Controller
             ->where('role', 'owner')
             ->exists();
 
-        if (!$isOwner && !$request->user()->can('edit_restaurant')) {
+        if (! $isOwner && ! $request->user()->can('edit_restaurant')) {
             abort(403);
         }
 
@@ -376,7 +377,7 @@ class MultiRestaurantController extends Controller
             ->where('role', 'owner')
             ->exists();
 
-        if (!$isOwner && !$request->user()->can('edit_restaurant')) {
+        if (! $isOwner && ! $request->user()->can('edit_restaurant')) {
             abort(403);
         }
 
@@ -418,7 +419,7 @@ class MultiRestaurantController extends Controller
         // 4. Update Loyalty Earning Method
         // Only update if data is provided. If empty, field might be hidden in UI so ignore.
         // We only check earning_method_type presence to decide
-        if ($request->has('earning_method_type') && !empty($validated['earning_method_type'])) {
+        if ($request->has('earning_method_type') && ! empty($validated['earning_method_type'])) {
             \App\Models\EarningMethod::updateOrCreate(
                 ['restaurant_id' => $restaurant->id],
                 [

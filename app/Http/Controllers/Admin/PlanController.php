@@ -13,8 +13,8 @@ class PlanController extends Controller
         $query = Plan::query();
 
         if ($request->input('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%')
-                ->orWhere('slug', 'like', '%' . $request->input('search') . '%');
+            $query->where('name', 'like', '%'.$request->input('search').'%')
+                ->orWhere('slug', 'like', '%'.$request->input('search').'%');
         }
 
         $plans = $query->orderBy('order')->orderBy('price_monthly')->paginate(20)->withQueryString();
@@ -77,7 +77,7 @@ class PlanController extends Controller
                 'name_ar' => $plan->name_ar ?? (trans($nameKey, [], 'ar') !== $nameKey ? trans($nameKey, [], 'ar') : $plan->name),
                 'description_en' => $plan->description_en ?? (trans($descKey, [], 'en') !== $descKey ? trans($descKey, [], 'en') : $plan->description),
                 'description_ar' => $plan->description_ar ?? (trans($descKey, [], 'ar') !== $descKey ? trans($descKey, [], 'ar') : $plan->description),
-            ]
+            ],
         ]);
     }
 
@@ -86,7 +86,7 @@ class PlanController extends Controller
         $validated = $request->validate([
             'name_en' => 'required|string|max:255',
             'name_ar' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:plans,slug,' . $plan->id,
+            'slug' => 'required|string|max:255|unique:plans,slug,'.$plan->id,
             'description_en' => 'nullable|string',
             'description_ar' => 'nullable|string',
             'price_monthly' => 'required|numeric|min:0',

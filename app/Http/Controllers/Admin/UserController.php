@@ -18,9 +18,9 @@ class UserController extends Controller
 
         if ($request->input('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->input('search') . '%')
-                    ->orWhere('email', 'like', '%' . $request->input('search') . '%')
-                    ->orWhere('phone', 'like', '%' . $request->input('search') . '%');
+                $q->where('name', 'like', '%'.$request->input('search').'%')
+                    ->orWhere('email', 'like', '%'.$request->input('search').'%')
+                    ->orWhere('phone', 'like', '%'.$request->input('search').'%');
             });
         }
 
@@ -43,7 +43,7 @@ class UserController extends Controller
             $restaurantIds = collect($pivotRows)->pluck('restaurant_id')->toArray();
 
             $restaurantNames = [];
-            if (!empty($restaurantIds)) {
+            if (! empty($restaurantIds)) {
                 $restaurantNames = \App\Models\Restaurant::whereIn('id', $restaurantIds)
                     ->pluck('name')
                     ->toArray();
@@ -81,7 +81,7 @@ class UserController extends Controller
 
                 $restaurantIds = collect($pivotRows)->pluck('restaurant_id')->toArray();
                 $restaurantNames = [];
-                if (!empty($restaurantIds)) {
+                if (! empty($restaurantIds)) {
                     $restaurantNames = \App\Models\Restaurant::whereIn('id', $restaurantIds)
                         ->pluck('name')
                         ->toArray();
@@ -96,18 +96,18 @@ class UserController extends Controller
                     $user->created_at->format('Y-m-d'),
                     $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : 'Never',
                     implode(', ', $restaurantNames),
-                    implode(', ', $roles)
+                    implode(', ', $roles),
                 ]);
             }
             fclose($file);
         };
 
         return response()->stream($callback, 200, [
-            "Content-Type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=users_export_" . date('Y-m-d') . ".csv",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=users_export_'.date('Y-m-d').'.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ]);
     }
 

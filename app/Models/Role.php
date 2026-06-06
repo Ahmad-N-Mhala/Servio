@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Config;
 use MongoDB\Laravel\Eloquent\Model;
 use Spatie\Permission\Contracts\Role as RoleContract;
-use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
-use Illuminate\Support\Facades\Config;
+use Spatie\Permission\Traits\HasPermissions;
 
 class Role extends Model implements RoleContract
 {
@@ -25,7 +25,7 @@ class Role extends Model implements RoleContract
         $guardName = $guardName ?? Config::get('auth.defaults.guard');
         $role = static::where('id', $id)->where('guard_name', $guardName)->first();
 
-        if (!$role) {
+        if (! $role) {
             throw RoleDoesNotExist::withId((string) $id, $guardName);
         }
 
@@ -37,7 +37,7 @@ class Role extends Model implements RoleContract
         $guardName = $guardName ?? Config::get('auth.defaults.guard');
         $role = static::where('name', $name)->where('guard_name', $guardName)->first();
 
-        if (!$role) {
+        if (! $role) {
             throw RoleDoesNotExist::named($name, $guardName);
         }
 
@@ -49,7 +49,7 @@ class Role extends Model implements RoleContract
         $guardName = $guardName ?? Config::get('auth.defaults.guard');
         $role = static::where('name', $name)->where('guard_name', $guardName)->first();
 
-        if (!$role) {
+        if (! $role) {
             return static::create(['name' => $name, 'guard_name' => $guardName]);
         }
 

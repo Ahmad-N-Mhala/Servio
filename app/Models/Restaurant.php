@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
 class Restaurant extends Model
 {
-    use HasFactory, HasTranslations, SoftDeletes, \App\Traits\TracksDeletes;
+    use \App\Traits\TracksDeletes, HasFactory, HasTranslations, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -47,12 +47,14 @@ class Restaurant extends Model
     public function getPhoneCodeAttribute($value = null)
     {
         $country = \App\Models\Country::where('name', $this->country)->first();
+
         return $country ? $country->dial_code : '+971';
     }
 
     public function getCurrencyRateAttribute($value = null)
     {
         $country = \App\Models\Country::where('name', $this->country)->first();
+
         return $country ? (float) $country->rate : 1.0;
     }
 
@@ -61,8 +63,10 @@ class Restaurant extends Model
         // Fix for legacy data: if currency is AED but country is not UAE, derive from country
         if ($value === 'AED' && $this->country && $this->country !== 'United Arab Emirates') {
             $country = \App\Models\Country::where('name', $this->country)->first();
+
             return $country ? $country->currency : $value;
         }
+
         return $value;
     }
 
@@ -79,7 +83,7 @@ class Restaurant extends Model
         }
 
         // Otherwise, prepend the storage path
-        return asset('storage/' . $value);
+        return asset('storage/'.$value);
     }
 
     public function staff(): HasMany
@@ -127,7 +131,6 @@ class Restaurant extends Model
     {
         return $this->hasOne(RestaurantSubscription::class)->latest();
     }
-
 
     public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
@@ -199,7 +202,7 @@ class Restaurant extends Model
             // If they belong to others, just detach.
             foreach ($restaurant->users as $user) {
                 // Check if user has other restaurants
-                // Note: We use raw query or relationship count. 
+                // Note: We use raw query or relationship count.
                 // Since this restaurant is not deleted yet (deleting event), count should include it.
                 // So if count <= 1, it's the only one.
                 if ($user->restaurants()->count() <= 1) {

@@ -13,7 +13,7 @@ trait HasRestaurant
         static::addGlobalScope(new RestaurantScope);
 
         static::creating(function ($model) {
-            if (!array_key_exists('restaurant_id', $model->getAttributes()) && session()->has('active_restaurant_id')) {
+            if (! array_key_exists('restaurant_id', $model->getAttributes()) && session()->has('active_restaurant_id')) {
                 $model->restaurant_id = session('active_restaurant_id');
             }
         });

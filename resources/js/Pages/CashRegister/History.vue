@@ -129,57 +129,54 @@
                     <div v-if="expandedRegisters.includes(register.id)" class="p-6">
                         <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-4">{{ $t('cash_register.transaction_history') }}</h4>
                         
-                        <div v-if="register.transactions && register.transactions.length > 0" class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.time') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.type') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('common.amount') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('cash_register.balance_after') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('kitchen.notes') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="transaction in register.transactions" :key="transaction.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                            {{ formatDateTime(transaction.created_at) }}
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <span class="px-2 py-1 rounded-full text-xs font-bold capitalize" :class="{
-                                                'bg-green-100 text-green-700': transaction.type === 'sale' || transaction.type === 'deposit',
-                                                'bg-red-100 text-red-700': transaction.type === 'withdrawal',
-                                                'bg-blue-100 text-blue-700': transaction.type === 'opening',
-                                                'bg-gray-100 text-gray-700': transaction.type === 'closing'
-                                            }">
-                                                {{ transaction.type }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-medium" :class="{
-                                            'text-green-600': transaction.amount > 0,
-                                            'text-red-600': transaction.amount < 0,
-                                            'text-gray-600': transaction.amount === 0
-                                        }">
-                                            {{ transaction.amount > 0 ? '+' : '' }}{{ formatCurrency(transaction.amount) }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">
-                                            {{ formatCurrency(transaction.balance_after) }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">
-                                            <div v-if="transaction.order">
-                                                <span class="font-medium text-gray-900 dark:text-gray-100">Order #{{ transaction.order.order_number }}</span>
-                                            </div>
-                                            <div v-else>
-                                                {{ transaction.notes || '-' }}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div v-else class="text-center py-8 text-gray-500">
-                            {{ $t('cash_register.no_transactions') }}
-                        </div>
+                        <Table
+                            :columns="columns"
+                            :data="register.transactions || []"
+                            :emptyMessage="$t('cash_register.no_transactions')"
+                            :currency="currency"
+                        >
+                            <template #cell-created_at="{ row }">
+                                <span class="font-mono text-xs text-gray-500">
+                                    {{ formatDateTime(row.created_at) }}
+                                </span>
+                            </template>
+                            
+                            <template #cell-type="{ row }">
+                                <span class="px-2 py-1 rounded-full text-xs font-bold capitalize" :class="{
+                                    'bg-green-100 text-green-700': row.type === 'sale' || row.type === 'deposit',
+                                    'bg-red-100 text-red-700': row.type === 'withdrawal',
+                                    'bg-blue-100 text-blue-700': row.type === 'opening',
+                                    'bg-gray-100 text-gray-700': row.type === 'closing'
+                                }">
+                                    {{ row.type }}
+                                </span>
+                            </template>
+                            
+                            <template #cell-amount="{ row }">
+                                <span class="font-bold font-mono text-sm" :class="{
+                                    'text-green-600': row.amount > 0,
+                                    'text-red-600': row.amount < 0,
+                                    'text-gray-600': row.amount === 0
+                                }">
+                                    {{ row.amount > 0 ? '+' : '' }}{{ formatCurrency(row.amount) }}
+                                </span>
+                            </template>
+                            
+                            <template #cell-balance_after="{ row }">
+                                <span class="font-bold font-mono text-sm text-gray-900 dark:text-white">
+                                    {{ formatCurrency(row.balance_after) }}
+                                </span>
+                            </template>
+                            
+                            <template #cell-notes="{ row }">
+                                <div v-if="row.order">
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">Order #{{ row.order.order_number }}</span>
+                                </div>
+                                <div v-else class="text-gray-500 text-sm">
+                                    {{ row.notes || '-' }}
+                                </div>
+                            </template>
+                        </Table>
                     </div>
                 </div>
             </div>
@@ -219,13 +216,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router, Link, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import Table from '@/Components/Table.vue';
 import { formatDate, formatDateTime } from '@/Utils/dateHelper';
 
 const page = usePage();
 const route = (window as any).route;
+const { t } = useI18n();
 
 const props = defineProps<{
     registers: any;
@@ -234,6 +234,16 @@ const props = defineProps<{
         end_date: string | null;
     };
 }>();
+
+const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');
+
+const columns = computed(() => [
+    { key: 'created_at', label: t('common.time'), sortable: true },
+    { key: 'type', label: t('common.type'), sortable: true },
+    { key: 'amount', label: t('common.amount'), sortable: true },
+    { key: 'balance_after', label: t('cash_register.balance_after'), sortable: true },
+    { key: 'notes', label: t('kitchen.notes'), sortable: true }
+]);
 
 const filters = ref({
     start_date: props.filters.start_date || '',

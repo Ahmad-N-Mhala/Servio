@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,21 +26,28 @@ class AppServiceProvider extends ServiceProvider
                 $overrides = [];
 
                 // Email
-                if ($configs->has('mail_host'))
+                if ($configs->has('mail_host')) {
                     $overrides['mail.mailers.smtp.host'] = $configs['mail_host'];
-                if ($configs->has('mail_port'))
+                }
+                if ($configs->has('mail_port')) {
                     $overrides['mail.mailers.smtp.port'] = $configs['mail_port'];
-                if ($configs->has('mail_username'))
+                }
+                if ($configs->has('mail_username')) {
                     $overrides['mail.mailers.smtp.username'] = $configs['mail_username'];
-                if ($configs->has('mail_password'))
+                }
+                if ($configs->has('mail_password')) {
                     $overrides['mail.mailers.smtp.password'] = $configs['mail_password'];
-                if ($configs->has('mail_encryption'))
+                }
+                if ($configs->has('mail_encryption')) {
                     $overrides['mail.mailers.smtp.encryption'] = $configs['mail_encryption'];
+                }
 
-                if ($configs->has('mail_from_address'))
+                if ($configs->has('mail_from_address')) {
                     $overrides['mail.from.address'] = $configs['mail_from_address'];
-                if ($configs->has('mail_from_name'))
+                }
+                if ($configs->has('mail_from_name')) {
                     $overrides['mail.from.name'] = $configs['mail_from_name'];
+                }
 
                 // SMS Mapping
                 if ($configs->has('sms_provider')) {
@@ -48,23 +55,29 @@ class AppServiceProvider extends ServiceProvider
                     $overrides['services.sms.driver'] = $provider;
 
                     if ($provider === 'twilio') {
-                        if ($configs->has('sms_sid'))
+                        if ($configs->has('sms_sid')) {
                             $overrides['services.twilio.sid'] = $configs['sms_sid'];
-                        if ($configs->has('sms_token'))
+                        }
+                        if ($configs->has('sms_token')) {
                             $overrides['services.twilio.token'] = $configs['sms_token'];
-                        if ($configs->has('sms_from'))
+                        }
+                        if ($configs->has('sms_from')) {
                             $overrides['services.twilio.from'] = $configs['sms_from'];
+                        }
                     } elseif ($provider === 'nexmo') {
-                        if ($configs->has('sms_sid'))
+                        if ($configs->has('sms_sid')) {
                             $overrides['services.nexmo.key'] = $configs['sms_sid'];
-                        if ($configs->has('sms_token'))
+                        }
+                        if ($configs->has('sms_token')) {
                             $overrides['services.nexmo.secret'] = $configs['sms_token'];
-                        if ($configs->has('sms_from'))
+                        }
+                        if ($configs->has('sms_from')) {
                             $overrides['services.nexmo.sms_from'] = $configs['sms_from'];
+                        }
                     }
                 }
 
-                if (!empty($overrides)) {
+                if (! empty($overrides)) {
                     config($overrides);
                 }
             }
@@ -83,7 +96,7 @@ class AppServiceProvider extends ServiceProvider
 
             // Get Current Context (Restaurant)
             $restaurant = $user->currentRestaurant();
-            if (!$restaurant) {
+            if (! $restaurant) {
                 return null;
             }
 
@@ -93,7 +106,7 @@ class AppServiceProvider extends ServiceProvider
                 static $roleCache = [];
                 $cacheKey = "user_role_{$user->id}_{$targetId}";
 
-                if (!isset($roleCache[$cacheKey])) {
+                if (! isset($roleCache[$cacheKey])) {
                     $pivot = \Illuminate\Support\Facades\DB::connection('mongodb')
                         ->table('restaurant_user')
                         ->where('email', $user->email)
@@ -103,12 +116,12 @@ class AppServiceProvider extends ServiceProvider
                 }
                 $pivotRole = $roleCache[$cacheKey];
 
-                if (!$pivotRole) {
+                if (! $pivotRole) {
                     return null; // No role context
                 }
 
                 $role = \App\Models\Role::findByName($pivotRole, 'web');
-                if (!$role || !$role->hasPermissionTo($ability)) {
+                if (! $role || ! $role->hasPermissionTo($ability)) {
                     return null; // Role doesn't have it, let other gates decide (usually deny)
                 }
 
@@ -150,7 +163,7 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // If this permission is NOT in the map, it's either Core or unmapped. Allow it.
-                if (!isset($permToFeatureMap[$ability])) {
+                if (! isset($permToFeatureMap[$ability])) {
                     return true;
                 }
 
@@ -158,7 +171,7 @@ class AppServiceProvider extends ServiceProvider
 
                 // 3. Check if Feature is Enabled in Plan
                 static $subscriptionCache = [];
-                if (!isset($subscriptionCache[$targetId])) {
+                if (! isset($subscriptionCache[$targetId])) {
                     $subscription = \App\Models\RestaurantSubscription::where('restaurant_id', $targetId)
                         ->where('status', 'active')
                         ->with('plan')
@@ -204,7 +217,7 @@ class AppServiceProvider extends ServiceProvider
 
                     // 2. Get the current restaurant context
                     $restaurant = $user->currentRestaurant();
-                    if (!$restaurant) {
+                    if (! $restaurant) {
                         return false;
                     }
 
@@ -212,7 +225,7 @@ class AppServiceProvider extends ServiceProvider
                     // We use a simple static cache to avoid repeated DB queries within the same request
                     static $subscriptionCache = [];
 
-                    if (!array_key_exists($restaurant->id, $subscriptionCache)) {
+                    if (! array_key_exists($restaurant->id, $subscriptionCache)) {
                         $subscription = \App\Models\RestaurantSubscription::where('restaurant_id', $restaurant->id)
                             ->where('status', 'active')
                             ->with('plan') // Eager load plan
@@ -224,7 +237,7 @@ class AppServiceProvider extends ServiceProvider
                             $planFeatures = $subscription->plan->enabled_features;
                             if (is_string($planFeatures)) {
                                 $planFeatures = json_decode($planFeatures, true) ?? [];
-                            } elseif (!is_array($planFeatures)) {
+                            } elseif (! is_array($planFeatures)) {
                                 $planFeatures = [];
                             }
                             $subscriptionCache[$restaurant->id] = is_array($planFeatures) ? $planFeatures : [];
@@ -241,7 +254,7 @@ class AppServiceProvider extends ServiceProvider
             }
         } catch (\Exception $e) {
             // Fallback during migrations or if table doesn't exist yet
-            \Log::error('AppServiceProvider Gate Error: ' . $e->getMessage());
+            \Log::error('AppServiceProvider Gate Error: '.$e->getMessage());
         }
 
         \App\Models\Order::observe(\App\Observers\OrderObserver::class);
@@ -249,4 +262,3 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Customer::observe(\App\Observers\CustomerObserver::class);
     }
 }
-

@@ -13,8 +13,9 @@ class DeliveryIntegrationController extends Controller
     public function index()
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Get existing integrations
         $integrations = DeliveryIntegration::where('restaurant_id', $restaurant->id)->get();
@@ -61,22 +62,30 @@ class DeliveryIntegrationController extends Controller
             'is_enabled' => 'boolean',
         ];
 
-        if ($providerDef->requires_store_id)
+        if ($providerDef->requires_store_id) {
             $rules['store_id'] = 'required|string';
-        if ($providerDef->requires_api_key)
+        }
+        if ($providerDef->requires_api_key) {
             $rules['api_key'] = 'required|string';
-        if ($providerDef->requires_api_secret)
+        }
+        if ($providerDef->requires_api_secret) {
             $rules['api_secret'] = 'required|string';
-        if ($providerDef->requires_client_id)
+        }
+        if ($providerDef->requires_client_id) {
             $rules['client_id'] = 'required|string';
-        if ($providerDef->requires_client_secret)
+        }
+        if ($providerDef->requires_client_secret) {
             $rules['client_secret'] = 'required|string';
-        if ($providerDef->requires_username)
+        }
+        if ($providerDef->requires_username) {
             $rules['username'] = 'required|string';
-        if ($providerDef->requires_password)
+        }
+        if ($providerDef->requires_password) {
             $rules['password'] = 'required|string';
-        if ($providerDef->requires_webhook_secret)
-            $rules['webhook_secret'] = 'nullable|string'; // Often provided BY the platform, so might be input or output
+        }
+        if ($providerDef->requires_webhook_secret) {
+            $rules['webhook_secret'] = 'nullable|string';
+        } // Often provided BY the platform, so might be input or output
 
         $validated = $request->validate($rules);
 
@@ -85,14 +94,15 @@ class DeliveryIntegrationController extends Controller
         if ($request->is_enabled) {
             $verificationResult = $this->verifyProviderCredentials($providerDef, $request->all());
 
-            if (!$verificationResult['success']) {
-                return back()->withErrors(['api_key' => 'Connection failed: ' . $verificationResult['message']]);
+            if (! $verificationResult['success']) {
+                return back()->withErrors(['api_key' => 'Connection failed: '.$verificationResult['message']]);
             }
         }
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $integration = DeliveryIntegration::updateOrCreate(
             [
@@ -142,8 +152,9 @@ class DeliveryIntegrationController extends Controller
     public function destroy(Request $request, $provider)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $integration = DeliveryIntegration::where('restaurant_id', $restaurant->id)
             ->where('provider', $provider)
@@ -151,22 +162,25 @@ class DeliveryIntegrationController extends Controller
 
         if ($integration) {
             $integration->delete();
+
             return back()->with('success', 'Integration disconnected successfully.');
         }
 
         return back()->with('error', 'Integration not found.');
     }
+
     public function pushMenu(Request $request, $provider)
     {
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         $integration = DeliveryIntegration::where('restaurant_id', $restaurant->id)
             ->where('provider', $provider)
             ->first();
 
-        if (!$integration || !$integration->is_enabled) {
+        if (! $integration || ! $integration->is_enabled) {
             return back()->with('error', 'Integration is not active.');
         }
 
@@ -177,7 +191,7 @@ class DeliveryIntegrationController extends Controller
             // Construct Menu Data (Simplified for Demo / Implementation)
             // In a real app, you'd fetch the restaurant's menu structure:
             $menuData = [
-                'name' => $restaurant->name . ' Menu',
+                'name' => $restaurant->name.' Menu',
                 'categories' => $restaurant->menuCategories()->with('items')->get()->map(function ($cat) {
                     return [
                         'id' => $cat->id,
@@ -189,11 +203,11 @@ class DeliveryIntegrationController extends Controller
                                 'price' => $item->price,
                                 'description' => $item->description,
                                 'image' => $item->image,
-                                'is_available' => $item->is_available
+                                'is_available' => $item->is_available,
                             ];
-                        })
+                        }),
                     ];
-                })
+                }),
             ];
 
             $success = $service->pushMenu($integration, $menuData);
@@ -211,7 +225,7 @@ class DeliveryIntegrationController extends Controller
             }
 
         } catch (\Exception $e) {
-            return back()->with('error', "System Error pushing menu: " . $e->getMessage());
+            return back()->with('error', 'System Error pushing menu: '.$e->getMessage());
         }
     }
 }

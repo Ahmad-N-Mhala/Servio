@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Tenant;
 
+use App\Events\OrderUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Services\LoyaltyService;
 use App\Services\InventoryService;
-use App\Events\OrderUpdated;
+use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Gate;
 
 class PosOrderController extends Controller
 {
     public function __construct(
         protected LoyaltyService $loyaltyService,
         protected InventoryService $inventoryService
-    ) {
-    }
+    ) {}
 
     public function create(): Response
     {
@@ -30,8 +29,9 @@ class PosOrderController extends Controller
         // The middleware 'permission:create_delivery_order' handles it.
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Reuse data fetching logic from OrderController::create but optimized/simplified where possible
 
@@ -40,7 +40,7 @@ class PosOrderController extends Controller
             ->with([
                 'items' => function ($query) {
                     $query->with(['ingredients', 'extras', 'bundles.childItem']);
-                }
+                },
             ])
             ->orderBy('sort_order')
             ->get()
@@ -49,8 +49,9 @@ class PosOrderController extends Controller
             })
             ->values()
             ->map(function ($category) {
-                $sortedItems = $category->items->filter(fn($item) => (bool) $item->is_available)->sortBy(function ($item) {
+                $sortedItems = $category->items->filter(fn ($item) => (bool) $item->is_available)->sortBy(function ($item) {
                     $name = $item->name;
+
                     return is_array($name) ? ($name['en'] ?? $name['ar'] ?? '') : $name;
                 })->each(function ($item) {
                     $item->append('inventory_status');
@@ -136,7 +137,7 @@ class PosOrderController extends Controller
                     'capacity' => $table->capacity,
                     'location' => $table->location,
                     'status' => $table->status,
-                    'is_available' => !$hasActiveOrder,
+                    'is_available' => ! $hasActiveOrder,
                 ];
             });
 
@@ -147,8 +148,8 @@ class PosOrderController extends Controller
                 return [
                     $ing->id => [
                         'current_stock' => (float) $ing->current_stock,
-                        'name' => $ing->name
-                    ]
+                        'name' => $ing->name,
+                    ],
                 ];
             });
 
@@ -157,7 +158,7 @@ class PosOrderController extends Controller
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => collect($batches)->sum('quantity_remaining'));
+            ->map(fn ($batches) => collect($batches)->sum('quantity_remaining'));
 
         $menuItemStockInfo = [];
         $menuItemsWithIngredients = \App\Models\MenuItem::where('restaurant_id', $restaurant->id)->with('ingredients')->get();
@@ -175,8 +176,9 @@ class PosOrderController extends Controller
                     }
                 }
             }
-            if ($maxServings === PHP_INT_MAX)
+            if ($maxServings === PHP_INT_MAX) {
                 $maxServings = 999;
+            }
 
             $menuItemStockInfo[$menuItem->id] = [
                 'max_quantity' => (int) $maxServings,
@@ -227,11 +229,12 @@ class PosOrderController extends Controller
         ]);
 
         $restaurant = auth()->user()->currentRestaurant();
-        if (!$restaurant)
+        if (! $restaurant) {
             abort(404, 'Restaurant context not found');
+        }
 
         // Update table status if dine-in
-        if (($validated['type'] ?? 'dine_in') === 'dine_in' && !empty($validated['table_id'])) {
+        if (($validated['type'] ?? 'dine_in') === 'dine_in' && ! empty($validated['table_id'])) {
             $table = \App\Models\Table::find($validated['table_id']);
             if ($table && $table->restaurant_id == $restaurant->id) {
                 $table->update(['status' => 'occupied']);
@@ -240,22 +243,22 @@ class PosOrderController extends Controller
 
         // Find or create customer
         $customer = null;
-        if (!empty($validated['customer_id'])) {
+        if (! empty($validated['customer_id'])) {
             $customer = \App\Models\Customer::find($validated['customer_id']);
         }
 
-        if (!$customer && !empty($validated['customer_phone'])) {
+        if (! $customer && ! empty($validated['customer_phone'])) {
             $phone = $validated['customer_phone'];
             $customer = \App\Models\Customer::where('restaurant_id', $restaurant->id)
                 ->where(function ($q) use ($phone) {
                     $q->where('phone', $phone)
-                        ->orWhere('phone', '+' . ltrim($phone, '+'))
+                        ->orWhere('phone', '+'.ltrim($phone, '+'))
                         ->orWhere('phone', str_replace('+971', '', $phone))
-                        ->orWhere('phone', '+971' . ltrim($phone, '0'));
+                        ->orWhere('phone', '+971'.ltrim($phone, '0'));
                 })->first();
         }
 
-        if (!$customer && !empty($validated['customer_phone'])) {
+        if (! $customer && ! empty($validated['customer_phone'])) {
             $customer = $this->loyaltyService->findOrCreateCustomer(
                 $restaurant,
                 $validated['customer_phone'],
@@ -282,14 +285,15 @@ class PosOrderController extends Controller
             ->where('quantity_remaining', '>', 0)
             ->get()
             ->groupBy('ingredient_id')
-            ->map(fn($batches) => $batches->sum('quantity_remaining'));
+            ->map(fn ($batches) => $batches->sum('quantity_remaining'));
 
         foreach ($validated['items'] as $item) {
             $menuItem = $menuItems[$item['menu_item_id']] ?? null;
             if ($menuItem && $menuItem->ingredients->isNotEmpty()) {
                 foreach ($menuItem->ingredients as $ingredient) {
-                    if (!$ingredient->pivot || !isset($ingredient->pivot->quantity))
+                    if (! $ingredient->pivot || ! isset($ingredient->pivot->quantity)) {
                         continue;
+                    }
                     $neededQty = $ingredient->pivot->quantity * $item['quantity'];
                     $availableStock = $allBatches[(string) $ingredient->id] ?? 0;
 
@@ -300,7 +304,7 @@ class PosOrderController extends Controller
                 }
             }
         }
-        if (!empty($stockErrors)) {
+        if (! empty($stockErrors)) {
             throw \Illuminate\Validation\ValidationException::withMessages(['items' => $stockErrors]);
         }
         // ====== END STOCK VALIDATION ======
@@ -311,7 +315,7 @@ class PosOrderController extends Controller
 
         for ($i = 0; $i < $maxRetries; $i++) {
             $transactionNumber = $restaurant->next_order_number ?? 1;
-            $orderNumber = 'ORD-' . $transactionNumber;
+            $orderNumber = 'ORD-'.$transactionNumber;
 
             try {
                 $orderType = $validated['type'] ?? 'dine_in';
@@ -344,25 +348,29 @@ class PosOrderController extends Controller
                 if (str_contains($e->getMessage(), 'E11000 duplicate key error')) {
                     $restaurant->increment('next_order_number');
                     $restaurant->refresh();
+
                     continue;
                 }
                 throw $e;
             }
         }
 
-        if (!$order)
-            throw new \Exception("Failed to generate order number.");
+        if (! $order) {
+            throw new \Exception('Failed to generate order number.');
+        }
 
         // Create items
         foreach ($validated['items'] as $item) {
             $menuItem = $menuItems[$item['menu_item_id']] ?? null;
-            if (!$menuItem)
+            if (! $menuItem) {
                 continue;
+            }
 
             $extrasCost = 0;
-            if (!empty($item['extras'])) {
-                foreach ($item['extras'] as $extra)
+            if (! empty($item['extras'])) {
+                foreach ($item['extras'] as $extra) {
                     $extrasCost += (float) ($extra['price'] ?? 0);
+                }
             }
 
             $itemName = is_array($menuItem->name) ? ($menuItem->name['en'] ?? reset($menuItem->name)) : $menuItem->name;
@@ -379,18 +387,18 @@ class PosOrderController extends Controller
         }
 
         // Handle Reward Redemption
-        if (!empty($validated['reward_id']) && $customer) {
+        if (! empty($validated['reward_id']) && $customer) {
             try {
                 if (empty($validated['otp'])) {
                     throw \Illuminate\Validation\ValidationException::withMessages(['otp' => ['OTP is required.']]);
                 }
-                if (!$this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
+                if (! $this->loyaltyService->verifyOtp($customer, $validated['otp'])) {
                     throw \Illuminate\Validation\ValidationException::withMessages(['otp' => ['Invalid OTP.']]);
                 }
                 $redemption = $this->loyaltyService->redeemReward($customer, (string) $validated['reward_id']);
                 $redemption->markAsUsed((string) $order->id);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("PosOrderController: Reward Redemption FAILED: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('PosOrderController: Reward Redemption FAILED: '.$e->getMessage());
             }
         }
 
@@ -398,7 +406,7 @@ class PosOrderController extends Controller
         try {
             broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'created'))->toOthers();
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("PosOrderController: Broadcasting failed: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('PosOrderController: Broadcasting failed: '.$e->getMessage());
         }
 
         $order->refresh();
