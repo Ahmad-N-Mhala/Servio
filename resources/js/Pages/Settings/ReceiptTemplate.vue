@@ -218,7 +218,7 @@
 
                     <!-- Paper Size -->
                     <div class="glass-card rounded-2xl p-6 border border-gray-200">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('nav.settings') }}</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('auth.settings') }}</h3>
                         
                         <div class="space-y-4">
                             <div>

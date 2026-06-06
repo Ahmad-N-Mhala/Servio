@@ -6,10 +6,15 @@
         </label>
         <div 
             dir="ltr"
-            class="flex flex-row rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 bg-white dark:bg-slate-800 dark:ring-slate-700" 
-            :class="{'opacity-60 cursor-not-allowed bg-gray-50': disabled}"
+            class="relative flex flex-row rounded-xl border bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm transition-all" 
+            :class="[
+                error 
+                    ? 'border-rose-300 focus-within:border-rose-500 focus-within:ring-4 focus-within:ring-rose-500/10' 
+                    : 'border-slate-200 dark:border-slate-700 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 hover:border-slate-300 dark:hover:border-slate-600',
+                disabled ? 'opacity-60 cursor-not-allowed bg-slate-100' : ''
+            ]"
         >
-            <span class="flex select-none items-center text-gray-500 dark:text-slate-400 sm:text-sm bg-gray-50 dark:bg-slate-900 rounded-l-xl border-r dark:border-slate-700 px-3 min-w-[60px] justify-center font-mono">
+            <span class="flex select-none items-center text-gray-500 dark:text-slate-400 sm:text-sm bg-slate-50 dark:bg-slate-900/50 rounded-l-xl border-r border-slate-200 dark:border-slate-700 px-3 min-w-[60px] justify-center font-mono">
                 {{ prefix }}
             </span>
             <input
@@ -18,13 +23,20 @@
                 type="tel"
                 v-model="localValue"
                 class="block flex-1 border-0 bg-transparent py-3 pl-3 text-gray-900 dark:text-slate-200 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 rounded-r-xl"
+                :class="[error ? 'pr-10' : 'pr-4']"
                 :placeholder="placeholder"
                 :disabled="disabled"
                 @input="emitUpdate"
                 @blur="$emit('blur', $event)"
             />
+
+            <div v-if="error" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
         </div>
-        <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
+        <p v-if="error" class="mt-1 text-sm text-rose-600">{{ error }}</p>
         <p v-if="help" class="mt-1 text-sm text-gray-500">{{ help }}</p>
     </div>
 </template>
