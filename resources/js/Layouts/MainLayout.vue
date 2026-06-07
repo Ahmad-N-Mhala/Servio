@@ -56,6 +56,8 @@
                     <Link 
                         v-if="hasPermission('view_dashboard')"
                         :href="route('dashboard')" 
+                        @mouseenter="handleMouseEnter($event, $t('nav.dashboard'))"
+                        @mouseleave="handleMouseLeave"
                         :class="[
                             'group flex items-center rounded-lg transition-all duration-200',
                             isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -63,7 +65,6 @@
                                 ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                         ]"
-                        :title="isSidebarCollapsed ? $t('nav.dashboard') : ''"
                     >
                         <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -98,6 +99,8 @@
                             <button 
                                 v-if="hasAnyPermission(['view_orders', 'create_order', 'view_kitchen'])"
                                 @click="toggleMenu('operations.orders')"
+                                @mouseenter="handleMouseEnter($event, $t('nav.orders'))"
+                                @mouseleave="handleMouseLeave"
                                 :class="[
                                     'w-full group flex items-center rounded-lg transition-all duration-200',
                                     isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
@@ -172,12 +175,13 @@
                                 <Link 
                                     v-if="hasPermission('view_inventory') && hasFeature('inventory')"
                                     :href="route('inventory.index')"
+                                    @mouseenter="handleMouseEnter($event, $t('nav.inventory'))"
+                                    @mouseleave="handleMouseLeave"
                                     :class="[
                                         'flex items-center rounded-lg transition-all duration-200',
                                         isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2',
                                         $page.url.includes('/inventory') ? 'text-primary font-medium bg-primary/5' : 'text-gray-500 hover:text-primary hover:bg-primary/5'
                                     ]"
-                                    :title="isSidebarCollapsed ? 'Inventory' : ''"
                                 >
                                     <svg class="w-4 h-4" :class="!isSidebarCollapsed ? 'mr-2' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -187,12 +191,13 @@
                                 <Link 
                                     v-if="hasPermission('view_waste') && hasFeature('inventory')"
                                     :href="route('waste.index')"
+                                    @mouseenter="handleMouseEnter($event, $t('nav.waste_management'))"
+                                    @mouseleave="handleMouseLeave"
                                     :class="[
                                         'flex items-center rounded-lg transition-all duration-200',
                                         isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2',
                                         $page.url.includes('/waste') ? 'text-primary font-medium bg-primary/5' : 'text-gray-500 hover:text-primary hover:bg-primary/5'
                                     ]"
-                                    :title="isSidebarCollapsed ? 'Waste Management' : ''"
                                 >
                                     <svg class="w-4 h-4" :class="!isSidebarCollapsed ? 'mr-2' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -202,12 +207,13 @@
                                 <Link 
                                     v-if="hasPermission('view_inventory_reminders') && hasFeature('inventory')"
                                     :href="route('inventory.reminders')"
+                                    @mouseenter="handleMouseEnter($event, $t('inventory.reminders', 'Reminders'))"
+                                    @mouseleave="handleMouseLeave"
                                     :class="[
                                         'flex items-center rounded-lg transition-all duration-200',
                                         isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2',
                                         $page.url.includes('/inventory/reminders') ? 'text-primary font-medium bg-primary/5' : 'text-gray-500 hover:text-primary hover:bg-primary/5'
                                     ]"
-                                    :title="isSidebarCollapsed ? 'Reminders' : ''"
                                 >
                                     <svg class="w-4 h-4" :class="!isSidebarCollapsed ? 'mr-2' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -220,6 +226,8 @@
                         <Link 
                             v-if="hasPermission('view_pos') && hasFeature('pos')"
                             :href="route('pos.index')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.pos'))"
+                            @mouseleave="handleMouseLeave"
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -227,7 +235,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? $t('nav.pos') : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -239,6 +246,8 @@
                         <Link 
                             v-if="hasPermission('deliver_orders')"
                             :href="route('service.delivery')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.order_delivery'))"
+                            @mouseleave="handleMouseLeave"
                             :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -246,7 +255,6 @@
                                     ? 'bg-green-100 text-green-700 font-medium dark:bg-green-900/30 dark:text-green-400 sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? 'Order Delivery' : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -258,6 +266,8 @@
                         <Link 
                             v-if="hasPermission('view_order_status_screen') && hasFeature('kds')"
                             :href="route('orders.status-screen')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.status_screen'))"
+                            @mouseleave="handleMouseLeave"
                             :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -265,7 +275,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? 'Status Screen' : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -300,12 +309,13 @@
                         <div class="space-y-0.5" v-if="hasAnyPermission(['view_menu', 'view_tables'])">
                              <button 
                                 @click="toggleMenu('management.restaurant')"
+                                @mouseenter="handleMouseEnter($event, $t('nav.restaurant'))"
+                                @mouseleave="handleMouseLeave"
                                 :class="[
                                     'w-full group flex items-center rounded-lg transition-all duration-200',
                                     isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
                                     ($page.url.includes('/menu') || $page.url.includes('/tables')) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 ]"
-                                :title="isSidebarCollapsed ? 'Restaurant' : ''"
                             >
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -365,6 +375,8 @@
                         <Link 
                             v-if="hasPermission('view_staff')"
                             :href="route('staff.index')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.staff'))"
+                            @mouseleave="handleMouseLeave"
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -372,7 +384,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? $t('nav.staff') : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -407,6 +418,8 @@
                         <Link 
                             v-if="hasPermission('view_customers')"
                             :href="route('customers.index')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.customers'))"
+                            @mouseleave="handleMouseLeave"
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -414,7 +427,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? 'Customers' : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -426,12 +438,13 @@
                         <div class="space-y-0.5" v-if="hasPermission('view_loyalty') && hasFeature('loyalty')">
                              <button 
                                 @click="toggleMenu('growth.loyalty')"
+                                @mouseenter="handleMouseEnter($event, $t('nav.loyalty'))"
+                                @mouseleave="handleMouseLeave"
                                 :class="[
                                     'w-full group flex items-center rounded-lg transition-all duration-200',
                                     isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
                                     $page.url.includes('/loyalty') ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 ]"
-                                :title="isSidebarCollapsed ? $t('nav.loyalty') : ''"
                             >
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -491,6 +504,8 @@
                         <Link 
                             v-if="hasPermission('view_delivery_settings') && hasFeature('delivery')"
                             :href="route('integrations.delivery.index')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.delivery_integrations'))"
+                            @mouseleave="handleMouseLeave"
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -498,7 +513,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? 'Delivery Integrations' : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -510,6 +524,8 @@
                         <Link 
                             v-if="hasPermission('view_feedback') && hasFeature('feedback')"
                             :href="route('feedback.index')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.feedback'))"
+                            @mouseleave="handleMouseLeave"
                             :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -517,7 +533,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? 'Feedback' : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363 1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -529,6 +544,8 @@
                         <Link 
                             v-if="hasPermission('view_communication') && hasFeature('marketing')"
                             :href="route('communication.index')" 
+                            @mouseenter="handleMouseEnter($event, $t('nav.communication'))"
+                            @mouseleave="handleMouseLeave"
                            :class="[
                                 'group flex items-center rounded-lg transition-all duration-200',
                                 isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -536,7 +553,6 @@
                                     ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                             ]"
-                            :title="isSidebarCollapsed ? 'Communication' : ''"
                         >
                             <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -548,12 +564,13 @@
                         <div class="space-y-0.5" v-if="hasAnyPermission(['view_sales_reports', 'view_expense_reports']) && hasFeature('analytics')">
                             <button 
                                 @click="toggleMenu('growth.financial')"
+                                @mouseenter="handleMouseEnter($event, $t('nav.financial'))"
+                                @mouseleave="handleMouseLeave"
                                 :class="[
                                     'w-full group flex items-center rounded-lg transition-all duration-200',
                                     isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 justify-between',
                                     ($page.url.includes('/reports') || $page.url.includes('/monthly-expenses')) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                                 ]"
-                                :title="isSidebarCollapsed ? 'Financial' : ''"
                             >
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -612,6 +629,8 @@
                             <Link 
                                 v-if="hasPermission('manage_billing')"
                                 :href="route('plans.index')"
+                                @mouseenter="handleMouseEnter($event, $t('nav.billing'))"
+                                @mouseleave="handleMouseLeave"
                                 :class="[
                                     'group flex items-center rounded-lg transition-all duration-200',
                                     isSidebarCollapsed ? 'justify-center p-2' : 'px-3 py-2.5',
@@ -619,7 +638,6 @@
                                         ? 'bg-primary/10 text-primary font-medium sidebar-active-indicator sidebar-active-glow' 
                                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
                                 ]"
-                                :title="isSidebarCollapsed ? 'Billing' : ''"
                             >
                                 <svg class="w-5 h-5 flex-shrink-0" :class="!isSidebarCollapsed ? 'mr-3' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -680,16 +698,15 @@
                          <button 
                             v-else
                             @click="isSidebarCollapsed = false; toggleMenu('support')"
+                            @mouseenter="handleMouseEnter($event, $t('landing.contact_us'))"
+                            @mouseleave="handleMouseLeave"
                             class="w-full flex justify-center p-2 text-gray-400 hover:text-primary transition-colors"
-                            :title="$t('landing.contact_us')"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         </button>
                     </div>
                 </div>
             </nav>
-
-
         </aside>
 
         <!-- Main Content -->
@@ -994,6 +1011,15 @@
                 class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 lg:hidden"
             ></div>
         </Transition>
+
+        <!-- Sidebar Hover Tooltip -->
+        <div 
+            v-if="isSidebarCollapsed && showTooltip"
+            :style="tooltipStyle"
+            class="fixed z-[9999] px-3 py-2 bg-gray-900/95 dark:bg-gray-800/95 text-white text-xs font-semibold rounded-lg shadow-xl pointer-events-none transition-all duration-150 whitespace-nowrap border border-gray-800 dark:border-gray-700 backdrop-blur-sm animate-fade-in-quick"
+        >
+            {{ hoveredItemText }}
+        </div>
     </div>
 </template>
 
@@ -1061,15 +1087,52 @@ const isRestaurantMenuOpen = globalIsRestaurantMenuOpen;
 const openMenus = globalOpenMenus;
 const sidebarNav = ref<HTMLElement | null>(null);
 
+// Collapsed Sidebar Tooltip State & Handlers
+const hoveredItemText = ref('');
+const tooltipStyle = ref<Record<string, string>>({});
+const showTooltip = ref(false);
+
+const handleMouseEnter = (event: MouseEvent, text: string) => {
+    if (!isSidebarCollapsed.value) return;
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const top = `${rect.top + rect.height / 2}px`;
+    
+    if (currentLocale.value === 'ar') {
+        tooltipStyle.value = {
+            top: top,
+            left: 'auto',
+            right: `${window.innerWidth - rect.left + 12}px`,
+            transform: 'translateY(-50%)'
+        };
+    } else {
+        tooltipStyle.value = {
+            top: top,
+            left: `${rect.right + 12}px`,
+            right: 'auto',
+            transform: 'translateY(-50%)'
+        };
+    }
+    
+    hoveredItemText.value = text;
+    showTooltip.value = true;
+};
+
+const handleMouseLeave = () => {
+    showTooltip.value = false;
+};
+
 router.on('start', () => {
     // Close temporary dropdowns/modals on navigation to maintain clean UI state
     userMenuOpen.value = false;
     isRestaurantMenuOpen.value = false;
     isSidebarOpen.value = false; // Close mobile sidebar
+    showTooltip.value = false;
 });
 
 const onSidebarScroll = (e: any) => {
     globalSidebarScroll.value = e.target.scrollTop;
+    showTooltip.value = false;
 };
 
 const page = usePage();
