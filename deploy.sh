@@ -12,6 +12,9 @@
 # state. Instead, we handle critical steps manually.
 
 DEPLOY_DIR="/var/www/servio"
+PHP_VERSION="8.4"
+PHP_BIN="php${PHP_VERSION}"
+COMPOSER_BIN=$(which composer)
 
 echo ""
 echo "========================================"
@@ -54,8 +57,8 @@ echo "   ✅ Code updated"
 # (a dev-only class not installed in prod) — causing the 500 error.
 # We run our OWN controlled package discovery in step 6 instead.
 echo ""
-echo "➡️  [4/9] Installing PHP dependencies (no-dev, no-scripts)..."
-if ! composer install --no-dev --optimize-autoloader --no-scripts; then
+echo "➡️  [4/9] Installing PHP dependencies (no-dev, no-scripts) using $PHP_BIN..."
+if ! $PHP_BIN $COMPOSER_BIN install --no-dev --optimize-autoloader --no-scripts; then
     echo "   ❌ FATAL: composer install failed. Aborting."
     exit 1
 fi
@@ -72,7 +75,7 @@ echo "   ✅ Cache cleared"
 # Reads dont-discover from composer.json — collision is excluded.
 echo ""
 echo "➡️  [6/9] Running package discovery (with dont-discover list)..."
-if ! php artisan package:discover --ansi; then
+if ! $PHP_BIN artisan package:discover --ansi; then
     echo "   ❌ FATAL: package:discover failed. Aborting."
     exit 1
 fi
@@ -97,8 +100,8 @@ echo "   ✅ Frontend built"
 # ── Step 8: Rebuild Laravel caches ───────────────────────────────────────────
 echo ""
 echo "➡️  [8/9] Rebuilding Laravel caches..."
-php artisan optimize:clear
-php artisan view:cache
+$PHP_BIN artisan optimize:clear
+$PHP_BIN artisan view:cache
 echo "   ✅ Caches rebuilt"
 
 # ── Step 9: Restore permissions and restart PHP ───────────────────────────────
@@ -107,7 +110,7 @@ echo "➡️  [9/9] Restoring permissions and restarting PHP..."
 sudo chown -R www-data:www-data $DEPLOY_DIR
 sudo chmod -R 775 $DEPLOY_DIR/storage
 sudo chmod -R 775 $DEPLOY_DIR/bootstrap/cache
-sudo systemctl restart php8.2-fpm
+sudo systemctl restart php${PHP_VERSION}-fpm
 echo "   ✅ Done"
 
 echo ""
