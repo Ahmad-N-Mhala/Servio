@@ -15,6 +15,8 @@ use Stancl\Tenancy\Database\Models\Domain;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
 
+use App\Rules\ValidPhone;
+
 class OnboardingController extends Controller
 {
     public function show(): Response
@@ -86,8 +88,8 @@ class OnboardingController extends Controller
             'plan_id' => ['required', 'exists:plans,id'],
             'billing_cycle' => ['required', 'in:monthly,yearly'],
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['required', 'string', new ValidPhone],
+            'email' => ['required', 'email:rfc', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'earning_method_type' => ['nullable', 'in:order_total,visit'],
             'earning_points' => ['nullable', 'integer', 'min:1'],

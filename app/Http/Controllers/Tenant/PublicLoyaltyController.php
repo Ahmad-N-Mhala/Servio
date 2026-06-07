@@ -9,6 +9,7 @@ use App\Models\Reward;
 use App\Services\LoyaltyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Rules\ValidPhone;
 
 class PublicLoyaltyController extends Controller
 {
@@ -19,7 +20,7 @@ class PublicLoyaltyController extends Controller
     public function checkPoints(Request $request): JsonResponse
     {
         $request->validate([
-            'phone' => ['required', 'string'],
+            'phone' => ['required', 'string', new ValidPhone],
         ]);
 
         $restaurant = \App\Models\Restaurant::first();
@@ -83,7 +84,7 @@ class PublicLoyaltyController extends Controller
     public function redeemReward(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'phone' => ['required', 'string'],
+            'phone' => ['required', 'string', new ValidPhone],
             'reward_id' => ['required', 'exists:rewards,id'],
         ]);
 
@@ -121,7 +122,7 @@ class PublicLoyaltyController extends Controller
     public function getHistory(Request $request): JsonResponse
     {
         $request->validate([
-            'phone' => ['required', 'string'],
+            'phone' => ['required', 'string', new ValidPhone],
         ]);
 
         $restaurant = \App\Models\Restaurant::first();

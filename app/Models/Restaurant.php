@@ -36,6 +36,7 @@ class Restaurant extends Model
         'next_order_number',
         'service_type',
         'has_cash_drawer',
+        'last_order_date',
     ];
 
     protected $casts = [
@@ -182,6 +183,26 @@ class Restaurant extends Model
     public function hasFeedbackFeature(): bool
     {
         return $this->hasFeature('feedback');
+    }
+
+    /**
+     * Check if the order counter needs to be reset for a new day in UAE time.
+     * If so, resets next_order_number to 1 and updates last_order_date.
+     * Returns the next transaction number to use.
+     */
+    public function checkAndResetOrderCounter(): int
+    {
+        $today = \Carbon\Carbon::now('Asia/Dubai')->format('Y-m-d');
+        
+        if (($this->last_order_date ?? null) !== $today) {
+            $this->update([
+                'next_order_number' => 1,
+                'last_order_date' => $today
+            ]);
+            $this->refresh();
+        }
+        
+        return (int) ($this->next_order_number ?? 1);
     }
 
     protected static function booted()

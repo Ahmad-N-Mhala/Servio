@@ -279,6 +279,24 @@ class MenuController extends Controller
             }
         }
 
+        // Log Menu Item Creation
+        $staff = \App\Models\Staff::where('user_id', auth()->id())
+            ->where('restaurant_id', $restaurant->id)
+            ->first();
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => auth()->id(),
+            'action' => 'Menu Item Created',
+            'changes' => [
+                'name' => ['old' => null, 'new' => is_array($item->name) ? ($item->name['en'] ?? reset($item->name)) : $item->name],
+                'price' => ['old' => null, 'new' => $item->price]
+            ],
+            'causer_id' => auth()->id(),
+            'causer_name' => auth()->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         return redirect()->back()->with('message', __('menu.item_created'));
     }
 
@@ -373,6 +391,19 @@ class MenuController extends Controller
             $itemData['recipe'] = $recipe;
         }
 
+        $changes = [];
+        $oldName = is_array($item->name) ? ($item->name['en'] ?? reset($item->name)) : $item->name;
+        $newName = is_array($itemData['name']) ? ($itemData['name']['en'] ?? reset($itemData['name'])) : $itemData['name'];
+        if ($oldName !== $newName) {
+            $changes['name'] = ['old' => $oldName, 'new' => $newName];
+        }
+        if (isset($itemData['price']) && $item->price != $itemData['price']) {
+            $changes['price'] = ['old' => $item->price, 'new' => $itemData['price']];
+        }
+        if (isset($itemData['is_available']) && $item->is_available != $itemData['is_available']) {
+            $changes['is_available'] = ['old' => $item->is_available, 'new' => $itemData['is_available']];
+        }
+
         $item->update($itemData);
 
         // Extras Logic
@@ -408,6 +439,23 @@ class MenuController extends Controller
             }
         }
 
+        // Log Menu Item Update
+        if (!empty($changes)) {
+            $staff = \App\Models\Staff::where('user_id', auth()->id())
+                ->where('restaurant_id', $item->restaurant_id)
+                ->first();
+            \App\Models\StaffLog::create([
+                'staff_id' => $staff ? $staff->id : null,
+                'user_id' => auth()->id(),
+                'action' => 'Menu Item Updated',
+                'changes' => $changes,
+                'causer_id' => auth()->id(),
+                'causer_name' => auth()->user()->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
+
         return redirect()->back()->with('message', __('menu.item_updated'));
     }
 
@@ -416,6 +464,23 @@ class MenuController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('delete_item');
         // Delete pivot associations
         \App\Models\MenuItemIngredient::where('menu_item_id', $item->id)->delete();
+
+        // Log Menu Item Deletion
+        $staff = \App\Models\Staff::where('user_id', auth()->id())
+            ->where('restaurant_id', $item->restaurant_id)
+            ->first();
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => auth()->id(),
+            'action' => 'Menu Item Deleted',
+            'changes' => [
+                'name' => ['old' => is_array($item->name) ? ($item->name['en'] ?? reset($item->name)) : $item->name, 'new' => null]
+            ],
+            'causer_id' => auth()->id(),
+            'causer_name' => auth()->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         $item->delete();
 

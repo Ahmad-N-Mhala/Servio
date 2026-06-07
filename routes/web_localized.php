@@ -362,6 +362,9 @@ Route::middleware(['auth'])->group(function () {
         // Deleted Data
         Route::get('deleted-data', [\App\Http\Controllers\Admin\DeletedDataController::class, 'index'])->name('deleted-data.index');
 
+        // Activity Logs
+        Route::get('activity-logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-logs.index');
+
         // Delivery Providers Management
         Route::get('delivery-providers', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'index'])->name('delivery-providers.index');
         Route::get('delivery-providers/create', [\App\Http\Controllers\Admin\DeliveryProviderController::class, 'create'])->name('delivery-providers.create');

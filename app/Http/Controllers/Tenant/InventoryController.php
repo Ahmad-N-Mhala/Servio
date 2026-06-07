@@ -177,6 +177,24 @@ class InventoryController extends Controller
             'bill_path' => $billPath,
         ]);
 
+        // Log Stock Added/Ingredient Created to StaffLog
+        $staff = \App\Models\Staff::where('user_id', $request->user()->id)
+            ->where('restaurant_id', $restaurant->id)
+            ->first();
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => $request->user()->id,
+            'action' => 'Stock Added',
+            'changes' => [
+                'ingredient_name' => ['old' => null, 'new' => is_array($ingredient->name) ? ($ingredient->name['en'] ?? ($ingredient->name['ar'] ?? '')) : $ingredient->name],
+                'stock_level' => ['old' => null, 'new' => $validated['current_stock'] . ' ' . $validated['unit']]
+            ],
+            'causer_id' => $request->user()->id,
+            'causer_name' => $request->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         return redirect()->back()->with('message', 'Ingredient added successfully.');
     }
 
@@ -326,6 +344,25 @@ class InventoryController extends Controller
                 'bill_path' => $billPath,
             ]);
 
+            // Log Stock Added to StaffLog
+            $staff = \App\Models\Staff::where('user_id', $request->user()->id)
+                ->where('restaurant_id', $ingredient->restaurant_id)
+                ->first();
+            \App\Models\StaffLog::create([
+                'staff_id' => $staff ? $staff->id : null,
+                'user_id' => $request->user()->id,
+                'action' => 'Stock Added',
+                'changes' => [
+                    'ingredient_name' => ['old' => null, 'new' => is_array($ingredient->name) ? ($ingredient->name['en'] ?? ($ingredient->name['ar'] ?? '')) : $ingredient->name],
+                    'added_quantity' => ['old' => null, 'new' => $addedQty . ' ' . $ingredient->unit],
+                    'new_stock_level' => ['old' => $ingredient->current_stock - $addedQty, 'new' => $ingredient->current_stock]
+                ],
+                'causer_id' => $request->user()->id,
+                'causer_name' => $request->user()->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             // Unset fields
             unset($validated['add_stock']);
             unset($validated['added_cost']);
@@ -335,6 +372,37 @@ class InventoryController extends Controller
 
         // Standard update for other fields (name, reorder_level, etc.)
         // If 'cost' is sent WITHOUT 'add_stock', it allows manual price correction.
+        $changes = [];
+        if (isset($validated['name'])) {
+            $newName = is_array($validated['name']) ? ($validated['name']['en'] ?? reset($validated['name'])) : $validated['name'];
+            $changes['name'] = [
+                'old' => is_array($ingredient->name) ? ($ingredient->name['en'] ?? ($ingredient->name['ar'] ?? '')) : $ingredient->name,
+                'new' => $newName
+            ];
+        }
+        if (array_key_exists('reorder_level', $validated) && $ingredient->reorder_level != $validated['reorder_level']) {
+            $changes['reorder_level'] = ['old' => $ingredient->reorder_level, 'new' => $validated['reorder_level']];
+        }
+        if (array_key_exists('cost', $validated) && !isset($validated['add_stock']) && $ingredient->cost != $validated['cost']) {
+            $changes['cost'] = ['old' => $ingredient->cost, 'new' => $validated['cost']];
+        }
+
+        if (!empty($changes)) {
+            $staff = \App\Models\Staff::where('user_id', $request->user()->id)
+                ->where('restaurant_id', $ingredient->restaurant_id)
+                ->first();
+            \App\Models\StaffLog::create([
+                'staff_id' => $staff ? $staff->id : null,
+                'user_id' => $request->user()->id,
+                'action' => 'Ingredient Updated',
+                'changes' => $changes,
+                'causer_id' => $request->user()->id,
+                'causer_name' => $request->user()->name,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
+
         $ingredient->update($validated);
 
         return redirect()->back()->with('message', 'Ingredient updated successfully.');
@@ -481,6 +549,23 @@ class InventoryController extends Controller
         // Delete associated records from DB
         \App\Models\IngredientBatch::where('ingredient_id', $id)->delete();
         \App\Models\InventoryLog::where('ingredient_id', $id)->delete();
+
+        // Log Ingredient Deletion to StaffLog
+        $staff = \App\Models\Staff::where('user_id', request()->user()->id)
+            ->where('restaurant_id', $ingredient->restaurant_id)
+            ->first();
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => request()->user()->id,
+            'action' => 'Ingredient Deleted',
+            'changes' => [
+                'name' => ['old' => is_array($ingredient->name) ? ($ingredient->name['en'] ?? ($ingredient->name['ar'] ?? '')) : $ingredient->name, 'new' => null]
+            ],
+            'causer_id' => request()->user()->id,
+            'causer_name' => request()->user()->name,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
 
         $ingredient->delete();
 

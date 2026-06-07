@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Rules\ValidPhone;
 
 class StaffController extends Controller
 {
@@ -210,8 +211,8 @@ class StaffController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'phone' => ['required', 'string', 'max:20'], // Ask for phone
+            'email' => ['required', 'email:rfc', 'unique:users,email'],
+            'phone' => ['required', 'string', new ValidPhone], // Ask for phone
             'role' => [
                 'required',
                 'string',
@@ -299,8 +300,8 @@ class StaffController extends Controller
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'unique:users,email,'.$staff->user_id],
-            'phone' => ['sometimes', 'string', 'max:20'],
+            'email' => ['sometimes', 'email:rfc', 'unique:users,email,'.$staff->user_id],
+            'phone' => ['sometimes', 'string', new ValidPhone],
             'role' => [
                 'sometimes',
                 'string',

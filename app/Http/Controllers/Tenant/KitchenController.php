@@ -109,6 +109,30 @@ class KitchenController extends Controller
 
         $order->update($updateData);
 
+        // Log status update to StaffLog
+        $staff = \App\Models\Staff::where('user_id', auth()->id())
+            ->where('restaurant_id', $order->restaurant_id)
+            ->first();
+        
+        $changes = [
+            'order_number' => ['old' => null, 'new' => $order->order_number],
+            'status' => ['old' => $oldStatus, 'new' => $status],
+        ];
+        if ($status === 'cancelled' && $cancellationReason) {
+            $changes['cancellation_reason'] = ['old' => null, 'new' => $cancellationReason];
+        }
+
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => auth()->id(),
+            'action' => 'Order Status Updated',
+            'changes' => $changes,
+            'causer_id' => auth()->id(),
+            'causer_name' => auth()->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         // Note: Loyalty points are automatically processed by Order model observer
         // when status changes to 'completed'
 

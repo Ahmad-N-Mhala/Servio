@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Rules\ValidPhone;
 
 class RestaurantController extends Controller
 {
@@ -76,25 +77,25 @@ class RestaurantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:restaurants',
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255', 'unique:restaurants'],
             // Owner Details (required for creation)
-            'owner_name' => 'required|string|max:255',
-            'owner_email' => 'required|email|unique:users,email',
-            'owner_phone' => 'required|string',
+            'owner_name' => ['required', 'string', 'max:255'],
+            'owner_email' => ['required', 'email:rfc', 'unique:users,email'],
+            'owner_phone' => ['required', 'string', new ValidPhone],
             // 'owner_password' validation removed
 
             // Location & Details
-            'phone' => 'nullable|string', // Restaurant Phone
-            'email' => 'required|email', // Restaurant Email
-            'currency' => 'required|string|size:3',
-            'address' => 'nullable|string',
-            'city' => 'nullable|string',
-            'state' => 'nullable|string',
-            'zip_code' => 'nullable|string',
-            'country' => 'nullable|string',
-            'google_map_location' => 'nullable|url',
-            'notification_email' => 'required|email', // Reminders Receiver
+            'phone' => ['nullable', 'string', new ValidPhone], // Restaurant Phone
+            'email' => ['required', 'email:rfc'], // Restaurant Email
+            'currency' => ['required', 'string', 'size:3'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string'],
+            'state' => ['nullable', 'string'],
+            'zip_code' => ['nullable', 'string'],
+            'country' => ['nullable', 'string'],
+            'google_map_location' => ['nullable', 'url'],
+            'notification_email' => ['required', 'email:rfc'], // Reminders Receiver
 
             // Loyalty
             'earning_method_type' => 'nullable|string|in:order_total,visit',
@@ -255,38 +256,38 @@ class RestaurantController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255|unique:restaurants,slug,'.$restaurant->id,
-                'email' => 'required|email',
-                'phone' => 'nullable|string',
-                'currency' => 'required|string|size:3',
-                'status' => 'required|string|in:active,suspended',
-                'address' => 'nullable|string',
-                'city' => 'nullable|string',
-                'state' => 'nullable|string',
-                'zip_code' => 'nullable|string',
-                'country' => 'nullable|string',
-                'google_map_location' => 'nullable|url',
-                'notification_email' => 'required|email',
-                'service_type' => 'required|string|in:self_service,table_service,both',
-                'has_cash_drawer' => 'boolean',
+                'name' => ['required', 'string', 'max:255'],
+                'slug' => ['required', 'string', 'max:255', 'unique:restaurants,slug,'.$restaurant->id],
+                'email' => ['required', 'email:rfc'],
+                'phone' => ['nullable', 'string', new ValidPhone],
+                'currency' => ['required', 'string', 'size:3'],
+                'status' => ['required', 'string', 'in:active,suspended'],
+                'address' => ['nullable', 'string'],
+                'city' => ['nullable', 'string'],
+                'state' => ['nullable', 'string'],
+                'zip_code' => ['nullable', 'string'],
+                'country' => ['nullable', 'string'],
+                'google_map_location' => ['nullable', 'url'],
+                'notification_email' => ['required', 'email:rfc'],
+                'service_type' => ['required', 'string', 'in:self_service,table_service,both'],
+                'has_cash_drawer' => ['boolean'],
 
                 // Loyalty
-                'earning_method_type' => 'nullable|string|in:order_total,visit',
-                'earning_points' => 'nullable|numeric|min:1',
-                'earning_method_name_en' => 'nullable|string|max:255',
-                'earning_method_name_ar' => 'nullable|string|max:255',
-                'earning_method_description' => 'nullable|string',
-                'earning_currency_amount' => 'nullable|numeric|min:0.01',
-                'earning_min_spent' => 'nullable|numeric|min:0',
-                'earning_max_points' => 'nullable|numeric|min:1',
-                'earning_is_active' => 'nullable|boolean',
+                'earning_method_type' => ['nullable', 'string', 'in:order_total,visit'],
+                'earning_points' => ['nullable', 'numeric', 'min:1'],
+                'earning_method_name_en' => ['nullable', 'string', 'max:255'],
+                'earning_method_name_ar' => ['nullable', 'string', 'max:255'],
+                'earning_method_description' => ['nullable', 'string'],
+                'earning_currency_amount' => ['nullable', 'numeric', 'min:0.01'],
+                'earning_min_spent' => ['nullable', 'numeric', 'min:0'],
+                'earning_max_points' => ['nullable', 'numeric', 'min:1'],
+                'earning_is_active' => ['nullable', 'boolean'],
 
                 // Owner Updates
-                'new_owner_name' => 'nullable|string|max:255',
-                'new_owner_email' => 'nullable|email|unique:users,email',
-                'new_owner_phone' => 'nullable|string',
-                'new_owner_password' => 'nullable|string|min:8',
+                'new_owner_name' => ['nullable', 'string', 'max:255'],
+                'new_owner_email' => ['nullable', 'email:rfc', 'unique:users,email'],
+                'new_owner_phone' => ['nullable', 'string', new ValidPhone],
+                'new_owner_password' => ['nullable', 'string', 'min:8'],
             ]);
 
             // \DB::beginTransaction();

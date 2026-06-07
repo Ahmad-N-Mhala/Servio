@@ -10,6 +10,7 @@ use App\Models\Table;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Rules\ValidPhone;
 
 class POSController extends Controller
 {
@@ -133,6 +134,25 @@ class POSController extends Controller
             }
         }
 
+        // Log Bill Settlement to StaffLog
+        $staff = \App\Models\Staff::where('user_id', auth()->id())
+            ->where('restaurant_id', $order->restaurant_id)
+            ->first();
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => auth()->id(),
+            'action' => 'Bill Settled',
+            'changes' => [
+                'order_number' => ['old' => null, 'new' => $order->order_number],
+                'payment_method' => ['old' => null, 'new' => $validated['payment_method']],
+                'total' => ['old' => null, 'new' => $order->total],
+            ],
+            'causer_id' => auth()->id(),
+            'causer_name' => auth()->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
         return redirect()->back()->with('message', 'Order settled and table marked available.');
     }
 
@@ -151,7 +171,7 @@ class POSController extends Controller
             'additional_charge_value' => ['required', 'numeric', 'min:0'],
             // Customer details
             'customer_name' => ['sometimes', 'string', 'nullable'],
-            'customer_phone' => ['sometimes', 'string', 'nullable'],
+            'customer_phone' => ['sometimes', 'nullable', 'string', new ValidPhone],
             'customer_birth_date' => ['sometimes', 'date', 'nullable'],
             // Order type and table
             'type' => ['sometimes', 'string', 'in:dine_in,takeaway'],

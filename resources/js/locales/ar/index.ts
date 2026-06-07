@@ -33,6 +33,7 @@ export default {
         receipt_template: 'قالب الإيصال',
         overview: 'نظرة عامة',
         kitchen: 'المطبخ',
+        activity_logs: 'سجلات النشاط',
     },
     inventory: {
         title: 'إدارة المخزون',
@@ -333,6 +334,8 @@ export default {
         content: 'المحتوى',
     },
     common: {
+        unknown: 'غير معروف',
+        unknown_item: 'عنصر غير معروف',
         ok: 'موافق',
         or: 'أو',
         name_en: 'الاسم (إنجليزي)',
@@ -885,5 +888,21 @@ export default {
         restore_confirm: 'Are you sure you want to restore this waste record? This will deduct the stock from inventory again.',
         restore: 'Restore',
         deleted: 'Deleted',
+    },
+    activity_logs: {
+        title: 'سجلات النشاط',
+        user_email: 'البريد الإلكتروني',
+        restaurant_name: 'المطعم',
+        action: 'الإجراء',
+        old_value: 'القيمة السابقة',
+        new_value: 'القيمة الجديدة',
+        timestamp: 'التاريخ والوقت (توقيت الإمارات)',
+        search_placeholder: 'ابحث بالبريد الإلكتروني أو الإجراء...',
+        no_changes: 'لا توجد تغييرات',
+        filter_restaurant: 'تصفية حسب المطعم',
+        all_restaurants: 'جميع المطاعم',
+        filter_action: 'تصفية حسب الإجراء',
+        all_actions: 'جميع الإجراءات',
+        target_user: 'المستهدف',
     },
 };

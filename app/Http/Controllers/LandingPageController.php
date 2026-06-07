@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use App\Rules\ValidPhone;
 
 class LandingPageController extends Controller
 {
@@ -164,8 +165,8 @@ class LandingPageController extends Controller
             'plan_id' => 'required', // ID or slug
             'plan_name' => 'required|string',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'email' => ['required', 'email:rfc', 'max:255'],
+            'phone' => ['required', 'string', new ValidPhone],
             'restaurant_name' => 'required|string|max:255',
             'message' => 'nullable|string',
         ]);

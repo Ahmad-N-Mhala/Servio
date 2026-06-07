@@ -309,6 +309,9 @@ class PosOrderController extends Controller
         }
         // ====== END STOCK VALIDATION ======
 
+        // Reset counter if new day (UAE time)
+        $restaurant->checkAndResetOrderCounter();
+
         // Generate Order Number with Fallback/Retry Logic
         $maxRetries = 5;
         $order = null;

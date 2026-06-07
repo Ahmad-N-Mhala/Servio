@@ -1428,7 +1428,7 @@ class DashboardController extends Controller
                 }
 
                 $data = $criticalIngredients->map(function ($item) use ($dependencyMap, $blockingMap) {
-                    $name = $item->getTranslation('name', app()->getLocale()) ?: $item->name;
+                    $name = $item->name;
                     if (is_array($name)) {
                         $name = $name[app()->getLocale()] ?? $name['en'] ?? $name['ar'] ?? 'Unknown';
                     }

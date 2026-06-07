@@ -6,6 +6,7 @@ use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Rules\ValidPhone;
 
 class MultiRestaurantController extends Controller
 {
@@ -187,9 +188,9 @@ class MultiRestaurantController extends Controller
             'zip_code' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'max:2048'], // 2MB Max
             // New Fields for Alignment
-            'email' => ['required', 'email'],
-            'notification_email' => ['required', 'email'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['required', 'email:rfc'],
+            'notification_email' => ['required', 'email:rfc'],
+            'phone' => ['nullable', 'string', new ValidPhone],
             'service_type' => ['required', 'in:self_service,table_service,both'],
             'google_map_location' => ['nullable', 'url'],
         ]);
@@ -384,9 +385,9 @@ class MultiRestaurantController extends Controller
         // 2. Validation
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'notification_email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', new ValidPhone],
+            'email' => ['nullable', 'email:rfc', 'max:255'],
+            'notification_email' => ['required', 'email:rfc', 'max:255'],
             'country' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
             'city' => ['required', 'string', 'max:100'],

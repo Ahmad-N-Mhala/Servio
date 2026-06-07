@@ -33,6 +33,7 @@ export default {
         receipt_template: 'Receipt Template',
         overview: 'Overview',
         kitchen: 'Kitchen',
+        activity_logs: 'Activity Logs',
     },
     inventory: {
         title: 'Inventory Management',
@@ -334,6 +335,8 @@ export default {
         content: 'Content',
     },
     common: {
+        unknown: 'Unknown',
+        unknown_item: 'Unknown Item',
         ok: 'OK',
         or: 'or',
         name_en: 'Name (English)',
@@ -884,9 +887,23 @@ export default {
         pts_required: '{pts} pts required',
         keep_ordering: 'Keep ordering to unlock exciting rewards!',
         no_loyalty_found: 'No loyalty account found for this number.',
-        preparing_discount: 'Preparing Discount...',
-        placing_order: 'Placing Order...',
         order_number: 'Order Number',
+    },
+    activity_logs: {
+        title: 'Activity Logs',
+        user_email: 'User Email',
+        restaurant_name: 'Restaurant',
+        action: 'Action',
+        old_value: 'Old Value',
+        new_value: 'New Value',
+        timestamp: 'Date & Time (UAE)',
+        search_placeholder: 'Search email or action...',
+        no_changes: 'No changes',
+        filter_restaurant: 'Filter by Restaurant',
+        all_restaurants: 'All Restaurants',
+        filter_action: 'Filter by Action',
+        all_actions: 'All Actions',
+        target_user: 'Target User',
     },
 };
 

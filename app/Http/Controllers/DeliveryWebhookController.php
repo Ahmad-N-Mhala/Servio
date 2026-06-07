@@ -72,6 +72,9 @@ class DeliveryWebhookController extends Controller
 
         $restaurant = $integration->restaurant;
 
+        // Reset counter if new day (UAE time)
+        $restaurant->checkAndResetOrderCounter();
+
         // Generate Sequential Transaction Number
         $transactionNumber = $restaurant->next_order_number ?? 1;
         try {

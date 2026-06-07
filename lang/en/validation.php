@@ -7,5 +7,6 @@ return [
         'string' => 'The :attribute must be at least :min characters.',
     ],
     'confirmed' => 'The :attribute confirmation does not match.',
+    'phone_invalid' => 'The :attribute must be a valid phone number with country prefix (e.g. +971501234567).',
 ];
 

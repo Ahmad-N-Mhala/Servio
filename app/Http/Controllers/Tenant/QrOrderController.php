@@ -15,6 +15,7 @@ use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Rules\ValidPhone;
 
 class QrOrderController extends Controller
 {
@@ -288,6 +289,9 @@ class QrOrderController extends Controller
             $discountAmount = min($discountAmount, $subtotal);
         }
 
+        // Reset counter if new day (UAE time)
+        $restaurant->checkAndResetOrderCounter();
+
         // Generate Order Number with Retries
         $order = null;
         $maxRetries = 5;
@@ -394,7 +398,7 @@ class QrOrderController extends Controller
     public function checkLoyalty(Request $request, string $token)
     {
         $validated = $request->validate([
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', new ValidPhone],
         ]);
 
         $table = Table::where('qr_code_token', $token)->firstOrFail();
@@ -473,7 +477,7 @@ class QrOrderController extends Controller
     public function requestRedemptionOtp(Request $request, string $token)
     {
         $validated = $request->validate([
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', new ValidPhone],
             'reward_id' => ['required', 'string', 'exists:rewards,id'],
         ]);
 

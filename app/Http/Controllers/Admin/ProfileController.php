@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Rules\ValidPhone;
 
 class ProfileController extends Controller
 {
@@ -26,9 +27,9 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$request->user()->id,
-            'phone' => 'nullable|string|max:20',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email:rfc', 'max:255', 'unique:users,email,'.$request->user()->id],
+            'phone' => ['nullable', 'string', new ValidPhone],
         ]);
 
         $request->user()->fill($validated);

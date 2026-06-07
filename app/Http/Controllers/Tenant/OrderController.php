@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Rules\ValidPhone;
 
 class OrderController extends Controller
 {
@@ -418,7 +419,7 @@ class OrderController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('pos_system');
 
         $validated = $request->validate([
-            'customer_phone' => ['nullable', 'string'],
+            'customer_phone' => ['nullable', 'string', new ValidPhone],
             'customer_id' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
             'customer_birth_date' => ['nullable', 'date'],
@@ -616,6 +617,9 @@ class OrderController extends Controller
         }
         // ====== END STOCK VALIDATION ======
 
+        // Reset counter if new day (UAE time)
+        $restaurant->checkAndResetOrderCounter();
+
         // Generate Order Number with Fallback/Retry Logic
         $maxRetries = 5;
         $order = null;
@@ -651,6 +655,25 @@ class OrderController extends Controller
                 // If creation succeeded, increment for NEXT order and break
                 $restaurant->increment('next_order_number');
                 \Illuminate\Support\Facades\Log::info("Order created successfully: {$orderNumber}");
+
+                // Log order creation to StaffLog
+                $staff = \App\Models\Staff::where('user_id', auth()->id())
+                    ->where('restaurant_id', $restaurant->id)
+                    ->first();
+                \App\Models\StaffLog::create([
+                    'staff_id' => $staff ? $staff->id : null,
+                    'user_id' => auth()->id(),
+                    'action' => 'Order Created',
+                    'changes' => [
+                        'order_number' => ['old' => null, 'new' => $order->order_number],
+                        'total' => ['old' => null, 'new' => $order->total]
+                    ],
+                    'causer_id' => auth()->id(),
+                    'causer_name' => auth()->user()->name,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+
                 break;
 
             } catch (\Exception $e) {
@@ -818,6 +841,25 @@ class OrderController extends Controller
             ]);
         }
         // ====== END INVENTORY DEDUCTION ======
+
+        // Log status update to StaffLog
+        $staff = \App\Models\Staff::where('user_id', auth()->id())
+            ->where('restaurant_id', $order->restaurant_id)
+            ->first();
+
+        \App\Models\StaffLog::create([
+            'staff_id' => $staff ? $staff->id : null,
+            'user_id' => auth()->id(),
+            'action' => 'Order Status Updated',
+            'changes' => [
+                'order_number' => ['old' => null, 'new' => $order->order_number],
+                'status' => ['old' => $oldStatus, 'new' => $validated['status']],
+            ],
+            'causer_id' => auth()->id(),
+            'causer_name' => auth()->user()->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         // Broadcast order status changed event for real-time updates
         broadcast(new OrderUpdated($order->load(['items.menuItem', 'customer', 'table']), 'status_changed'))->toOthers();

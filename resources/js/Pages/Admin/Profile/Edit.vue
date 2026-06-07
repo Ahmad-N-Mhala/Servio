@@ -18,23 +18,32 @@
                         </header>
 
                         <form @submit.prevent="form.patch(route('admin.profile.update'))" class="mt-6 space-y-6">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">{{ $t('common.name') }}</label>
-                                <input v-model="form.name" type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required autocomplete="name">
-                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
-                            </div>
+                            <Input
+                                v-model="form.name"
+                                :label="$t('common.name')"
+                                type="text"
+                                required
+                                autocomplete="name"
+                                :error="form.errors.name"
+                            />
 
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <input v-model="form.phone" type="tel" id="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" autocomplete="tel">
-                                <div v-if="form.errors.phone" class="text-red-500 text-xs mt-1">{{ form.errors.phone }}</div>
-                            </div>
+                            <PhoneInput
+                                v-model="form.phone"
+                                :country="country"
+                                id="phone"
+                                label="Phone Number"
+                                autocomplete="tel"
+                                :error="form.errors.phone"
+                            />
 
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                <input v-model="form.email" type="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required autocomplete="username">
-                                <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</div>
-                            </div>
+                            <Input
+                                v-model="form.email"
+                                label="Email"
+                                type="email"
+                                required
+                                autocomplete="username"
+                                :error="form.errors.email"
+                            />
 
                             <div class="flex items-center gap-4">
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="form.processing">{{ $t('common.save') }}</button>
@@ -57,23 +66,32 @@
                         </header>
 
                         <form @submit.prevent="passwordForm.put(route('admin.password.update'))" class="mt-6 space-y-6">
-                            <div>
-                                <label for="current_password" class="block text-sm font-medium text-gray-700">Current Password</label>
-                                <input v-model="passwordForm.current_password" type="password" id="current_password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" autocomplete="current-password">
-                                <div v-if="passwordForm.errors.current_password" class="text-red-500 text-xs mt-1">{{ passwordForm.errors.current_password }}</div>
-                            </div>
+                            <Input
+                                v-model="passwordForm.current_password"
+                                type="password"
+                                id="current_password"
+                                label="Current Password"
+                                autocomplete="current-password"
+                                :error="passwordForm.errors.current_password"
+                            />
 
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
-                                <input v-model="passwordForm.password" type="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" autocomplete="new-password">
-                                <div v-if="passwordForm.errors.password" class="text-red-500 text-xs mt-1">{{ passwordForm.errors.password }}</div>
-                            </div>
+                            <Input
+                                v-model="passwordForm.password"
+                                type="password"
+                                id="password"
+                                label="New Password"
+                                autocomplete="new-password"
+                                :error="passwordForm.errors.password"
+                            />
 
-                            <div>
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                                <input v-model="passwordForm.password_confirmation" type="password" id="password_confirmation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" autocomplete="new-password">
-                                <div v-if="passwordForm.errors.password_confirmation" class="text-red-500 text-xs mt-1">{{ passwordForm.errors.password_confirmation }}</div>
-                            </div>
+                            <Input
+                                v-model="passwordForm.password_confirmation"
+                                type="password"
+                                id="password_confirmation"
+                                label="Confirm Password"
+                                autocomplete="new-password"
+                                :error="passwordForm.errors.password_confirmation"
+                            />
 
                             <div class="flex items-center gap-4">
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" :disabled="passwordForm.processing">{{ $t('common.save') }}</button>
@@ -92,8 +110,11 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import PhoneInput from '@/Components/PhoneInput.vue';
+import Input from '@/Components/Input.vue';
 
 const user: any = usePage().props.auth.user;
+const country = 'United Arab Emirates'; // Default country for Super Admin profile
 
 const form = useForm({
     name: user.name,
