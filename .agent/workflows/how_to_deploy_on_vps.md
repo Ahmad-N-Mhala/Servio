@@ -163,12 +163,8 @@ php artisan config:clear
 php artisan view:clear
 ```
 
-Rebuild Production Cache:
-```bash
-php artisan optimize
-php artisan route:cache
-php artisan view:cache
-```
+> [!WARNING]
+> Do NOT run `php artisan optimize` or `php artisan route:cache` as caching routes is incompatible with dynamic translation mappings and triggers a `404 Not Found` error.
 
 Set Permissions:
 ```bash
@@ -235,3 +231,31 @@ supervisorctl start servio-worker:*
 ```
 
 Done! Your app should be live.
+
+## 11. Updating an Existing Deployment
+
+To update the application to the latest version as the standard `servioadmin` user without switching to `root`, run the following commands:
+
+```bash
+# 1. Re-assign folder ownership back to servioadmin
+sudo chown -R servioadmin:www-data /var/www/servio
+sudo chmod -R 775 /var/www/servio
+
+# 2. Allow Git to run in this folder as servioadmin
+git config --global --add safe.directory /var/www/servio
+
+# 3. Discard any local conflicts and pull latest changes
+git fetch origin
+git reset --hard origin/main
+
+# 4. Build the latest frontend assets
+npm run build
+
+# 5. Clear caches (Warning: Do NOT use php artisan optimize or route:cache)
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+rm -rf bootstrap/cache/*.php
+rm -rf storage/framework/views/*.php
+```
