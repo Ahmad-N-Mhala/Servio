@@ -70,7 +70,7 @@ class UserController extends Controller
         // Generate CSV stream
         $callback = function () use ($users) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Name', 'Email', 'Phone', 'Joined', 'Last Login', 'Restaurants', 'Roles']);
+            fputcsv($file, ['User ID', 'Name', 'Email', 'Phone', 'Joined', 'Last Login', 'Restaurants', 'Roles']);
 
             foreach ($users as $user) {
                 // Fetch Restaurants & Roles (Replicate Logic)
@@ -90,6 +90,7 @@ class UserController extends Controller
                 $roles = collect($pivotRows)->pluck('role')->filter()->unique()->toArray();
 
                 fputcsv($file, [
+                    $user->id,
                     $user->name,
                     $user->email,
                     $user->phone,

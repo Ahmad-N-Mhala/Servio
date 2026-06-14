@@ -22,6 +22,7 @@
                         <button @click="scrollTo('services')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ getSetting('services_title') || $t('landing.our_services_title') || 'Our Services' }}</button>
                         <button @click="scrollTo('modules')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.features') }}</button>
                         <button @click="scrollTo('pricing')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ $t('landing.plans_pricing') }}</button>
+                        <button v-if="getSetting('journey_maps_visible') !== false && getSetting('journey_maps_visible') !== '0' && getSetting('journey_maps_visible') !== 'false'" @click="scrollTo('journeys')" class="text-sm font-semibold text-gray-600 hover:text-emerald-600 px-3 py-2 rounded-lg transition-all duration-200">{{ getSetting('journey_title') || $t('landing.journey_title') || 'Journey Maps' }}</button>
                         
                         <div class="flex items-center gap-4 border-l border-gray-200 pl-6 rtl:border-r rtl:border-l-0 rtl:pr-6 rtl:pl-0">
                             <!-- Language Switcher -->
@@ -68,6 +69,7 @@
                 <button @click="scrollTo('services')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ getSetting('services_title') || $t('landing.our_services_title') || 'Our Services' }}</button>
                 <button @click="scrollTo('modules')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.features') }}</button>
                 <button @click="scrollTo('pricing')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ $t('landing.plans_pricing') }}</button>
+                <button v-if="getSetting('journey_maps_visible') !== false && getSetting('journey_maps_visible') !== '0' && getSetting('journey_maps_visible') !== 'false'" @click="scrollTo('journeys')" class="block w-full text-left rtl:text-right text-gray-600 font-semibold hover:text-emerald-600 transition-colors">{{ getSetting('journey_title') || $t('landing.journey_title') || 'Journey Maps' }}</button>
                 <div class="pt-2 border-t border-gray-100 flex flex-col gap-3">
                     <a :href="route('login')" class="block w-full text-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 border border-gray-200 font-bold rounded-xl transition-colors">{{ $t('landing.login') || 'Log in' }}</a>
                     <button @click.prevent="openRegisterModal()" class="block w-full text-center px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30">{{ $t('landing.get_started') }}</button>
@@ -80,16 +82,17 @@
 
         <!-- Hero Section -->
         <section class="relative pt-32 pb-40 overflow-hidden min-h-screen flex items-center z-10">
-             <!-- Video Background -->
-
+             <!-- Ambient Background Glows -->
+             <div class="absolute top-1/4 left-1/10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse duration-[8000ms]"></div>
+             <div class="absolute bottom-1/4 right-1/10 w-[30rem] h-[30rem] bg-teal-500/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse duration-[10000ms]"></div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 
-                <h1 class="text-6xl md:text-8xl font-black text-gray-900 tracking-tight leading-none mb-8 animate-fade-in-up animation-delay-100">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6 animate-fade-in-up animation-delay-100">
                     {{ getSetting('hero_title') || $t('landing.hero_title') }}
                 </h1>
                 
-                <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200 font-medium">
+                <p class="text-lg md:text-xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
                     {{ getSetting('hero_subtitle') || $t('landing.hero_subtitle') }}
                 </p>
                 
@@ -104,6 +107,8 @@
                     </div>
                     <p class="text-sm text-gray-500 font-medium">{{ $t('landing.no_credit_card') }}</p>
                 </div>
+
+
             </div>
         </section>
 
@@ -116,16 +121,13 @@
                     <div :class="locale === 'ar' ? 'lg:order-2' : ''" class="relative group">
                         
                         <div class="relative">
-                            <div class="absolute inset-0 bg-gray-900 rounded-[2rem] transform rotate-1 transition-transform duration-500 group-hover:rotate-0"></div>
-                             
                             <!-- Dynamic Screenshot Container -->
-                            <div class="relative w-full aspect-[4/3] bg-gray-900 rounded-[2rem] overflow-hidden shadow-2xl border-4 border-gray-900 transform -rotate-1 transition-all duration-500 hover:rotate-0 group hover:shadow-emerald-500/20">
+                            <div class="relative w-full aspect-[4/3] bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-850 transition-all duration-500 hover:shadow-emerald-500/10">
                                 <!-- Browser UI Header -->
                                 <div class="h-8 bg-gray-800 flex items-center gap-2 px-4 border-b border-gray-700">
                                     <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                                     <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                                     <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                                    <div class="hidden sm:block mx-auto px-3 py-0.5 rounded-md bg-gray-900 text-[10px] text-gray-500 font-mono tracking-wide">servio.app/dashboard</div>
                                 </div>
 
                                 <template v-if="screenshots && screenshots.length > 0">
@@ -209,31 +211,31 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                     <!-- Software Solutions Card -->
-                    <div class="bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 border border-gray-100 group">
-                        <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-2xl p-8 md:p-10 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-slate-100 group">
+                        <div class="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                        <h3 class="text-xl font-bold text-slate-800 mb-3">
                             {{ getSetting('software_services_title') || $t('landing.software_services_title') || 'Software Solutions' }}
                         </h3>
-                        <p class="text-gray-600 leading-relaxed">
+                        <p class="text-sm text-slate-500 leading-relaxed">
                             {{ getSetting('software_services_desc') || $t('landing.software_services_desc') || 'Our POS software solutions provide comprehensive system management tools, advanced reporting features, seamless integrations, and reliable ongoing support services.' }}
                         </p>
                     </div>
 
                     <!-- Hardware Installation Card -->
-                    <div class="bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 border border-gray-100 group">
-                        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-8 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-2xl p-8 md:p-10 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-slate-100 group">
+                        <div class="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                        <h3 class="text-xl font-bold text-slate-800 mb-3">
                             {{ getSetting('hardware_services_title') || $t('landing.hardware_services_title') || 'Hardware Installation' }}
                         </h3>
-                        <p class="text-gray-600 leading-relaxed">
+                        <p class="text-sm text-slate-500 leading-relaxed">
                             {{ getSetting('hardware_services_desc') || $t('landing.hardware_services_desc') || 'We install and configure POS machines, bill printers, tablets, cash drawers, barcode scanners, and all required hardware to ensure a complete and ready-to-use setup.' }}
                         </p>
                     </div>
@@ -315,14 +317,13 @@
                     <!-- Visual -->
                     <div :class="locale === 'ar' ? 'lg:order-2' : ''" class="relative">
                         <!-- Dashboard Preview Card -->
-                        <div class="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 transform rotate-2 hover:rotate-0 transition-all duration-500">
+                        <div class="relative bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-100 transition-all duration-300 hover:shadow-xl">
                              <div class="bg-gray-50 border-b border-gray-100 p-4 flex items-center gap-2">
                                 <div class="flex gap-1.5">
                                     <div class="w-3 h-3 rounded-full bg-red-400"></div>
                                     <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
                                     <div class="w-3 h-3 rounded-full bg-green-400"></div>
                                 </div>
-                                <div class="flex-grow text-center text-xs text-gray-400 font-mono">dashboard.servio.app</div>
                              </div>
                              <!-- Use existing screenshot if available, else placeholder -->
                              <div class="aspect-[16/10] bg-gray-50 relative group">
@@ -351,89 +352,91 @@
                 </div>
 
                 <!-- Detailed Widget Explanations Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-20 pt-10 border-t border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16 pt-10 border-t border-slate-100">
                     <!-- Widget 1 -->
-                    <div class="group hover:-translate-y-1 transition-transform duration-300">
-                        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4 text-green-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="group transition-all duration-300">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center mb-4 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_1_title') || 'Revenue Analytics' }}</h3>
-                        <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_1_desc') }}</p>
+                        <h3 class="font-bold text-base text-slate-800 mb-1.5">{{ getSetting('dash_widget_1_title') || 'Revenue Analytics' }}</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">{{ getSetting('dash_widget_1_desc') }}</p>
                     </div>
 
                     <!-- Widget 2 -->
-                    <div class="group hover:-translate-y-1 transition-transform duration-300">
-                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4 text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    <div class="group transition-all duration-300">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center mb-4 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_2_title') || 'Live Order Tracking' }}</h3>
-                         <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_2_desc') }}</p>
+                        <h3 class="font-bold text-base text-slate-800 mb-1.5">{{ getSetting('dash_widget_2_title') || 'Live Order Tracking' }}</h3>
+                         <p class="text-xs text-slate-500 leading-relaxed">{{ getSetting('dash_widget_2_desc') }}</p>
                     </div>
 
                     <!-- Widget 3 -->
-                    <div class="group hover:-translate-y-1 transition-transform duration-300">
-                        <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4 text-purple-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                    <div class="group transition-all duration-300">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center mb-4 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_3_title') || 'Best Sellers' }}</h3>
-                         <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_3_desc') }}</p>
+                        <h3 class="font-bold text-base text-slate-800 mb-1.5">{{ getSetting('dash_widget_3_title') || 'Best Sellers' }}</h3>
+                         <p class="text-xs text-slate-500 leading-relaxed">{{ getSetting('dash_widget_3_desc') }}</p>
                     </div>
 
                     <!-- Widget 4 -->
-                    <div class="group hover:-translate-y-1 transition-transform duration-300">
-                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4 text-orange-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                    <div class="group transition-all duration-300">
+                        <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center mb-4 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ getSetting('dash_widget_4_title') || 'Payment Insights' }}</h3>
-                         <p class="text-sm text-gray-500 leading-relaxed">{{ getSetting('dash_widget_4_desc') }}</p>
+                        <h3 class="font-bold text-base text-slate-800 mb-1.5">{{ getSetting('dash_widget_4_title') || 'Payment Insights' }}</h3>
+                         <p class="text-xs text-slate-500 leading-relaxed">{{ getSetting('dash_widget_4_desc') }}</p>
                     </div>
                 </div>
             </div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <!-- How It Works Section -->
-                <div class="text-center mb-20 mt-32">
-                     <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                        <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.how_it_works_title') }}</span>
+                <template v-if="getSetting('how_it_works_visible') === true || getSetting('how_it_works_visible') === 1 || getSetting('how_it_works_visible') === '1' || getSetting('how_it_works_visible') === 'true'">
+                    <div class="text-center mb-20 mt-32">
+                         <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.how_it_works_title') }}</span>
+                        </div>
+                        <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ getSetting('how_it_works_title') || $t('landing.how_it_works_title') }}</h2>
+                        <p class="text-xl text-gray-500 max-w-2xl mx-auto">{{ getSetting('how_it_works_subtitle') || $t('landing.how_it_works_subtitle') }}</p>
                     </div>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ getSetting('how_it_works_title') || $t('landing.how_it_works_title') }}</h2>
-                    <p class="text-xl text-gray-500 max-w-2xl mx-auto">{{ getSetting('how_it_works_subtitle') || $t('landing.how_it_works_subtitle') }}</p>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 relative">
-                    <!-- Connector Lines (Desktop) -->
-                    <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-gray-200 via-emerald-200 to-gray-200 z-0"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 relative">
+                        <!-- Connector Lines (Desktop) -->
+                        <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-gray-200 via-emerald-200 to-gray-200 z-0"></div>
 
-                    <!-- Step 1 -->
-                    <div class="relative z-10 group">
-                        <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
-                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center text-3xl font-black mb-6 shadow-lg shadow-gray-900/20 group-hover:scale-110 transition-transform duration-300">1</div>
-                            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_1_title') || $t('landing.step_1_title') }}</h3>
-                            <p class="text-gray-500 leading-relaxed">{{ getSetting('step_1_desc') || $t('landing.step_1_desc') }}</p>
+                        <!-- Step 1 -->
+                        <div class="relative z-10 group">
+                            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
+                                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center text-3xl font-black mb-6 shadow-lg shadow-gray-900/20 group-hover:scale-110 transition-transform duration-300">1</div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_1_title') || $t('landing.step_1_title') }}</h3>
+                                <p class="text-gray-500 leading-relaxed">{{ getSetting('step_1_desc') || $t('landing.step_1_desc') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="relative z-10 group">
+                             <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
+                                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 text-white flex items-center justify-center text-3xl font-black mb-6 shadow-lg shadow-emerald-600/30 group-hover:scale-110 transition-transform duration-300">2</div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_2_title') || $t('landing.step_2_title') }}</h3>
+                                <p class="text-gray-500 leading-relaxed">{{ getSetting('step_2_desc') || $t('landing.step_2_desc') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="relative z-10 group">
+                             <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
+                                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-400 text-white flex items-center justify-center text-3xl font-black mb-6 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">3</div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_3_title') || $t('landing.step_3_title') }}</h3>
+                                <p class="text-gray-500 leading-relaxed">{{ getSetting('step_3_desc') || $t('landing.step_3_desc') }}</p>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Step 2 -->
-                    <div class="relative z-10 group">
-                         <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
-                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 text-white flex items-center justify-center text-3xl font-black mb-6 shadow-lg shadow-emerald-600/30 group-hover:scale-110 transition-transform duration-300">2</div>
-                            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_2_title') || $t('landing.step_2_title') }}</h3>
-                            <p class="text-gray-500 leading-relaxed">{{ getSetting('step_2_desc') || $t('landing.step_2_desc') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="relative z-10 group">
-                         <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/40 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
-                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-400 text-white flex items-center justify-center text-3xl font-black mb-6 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">3</div>
-                            <h3 class="text-xl font-bold text-gray-900 mb-3">{{ getSetting('step_3_title') || $t('landing.step_3_title') }}</h3>
-                            <p class="text-gray-500 leading-relaxed">{{ getSetting('step_3_desc') || $t('landing.step_3_desc') }}</p>
-                        </div>
-                    </div>
-                </div>
+                </template>
 
                 <!-- Modules Grid -->
-                <div id="modules" class="scroll-mt-24" v-if="modules && modules.length > 0">
+                <div id="modules" class="scroll-mt-24 mt-24" v-if="modules && modules.length > 0">
                     <div class="flex items-center gap-4 mb-12">
                          <span class="h-px bg-gray-200 flex-grow"></span>
                          <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">{{ $t('landing.our_modules') }}</span>
@@ -444,20 +447,316 @@
                         <div 
                             v-for="module in modules" 
                             :key="module.id" 
-                            class="group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-lg hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                            class="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-100/85 transition-all duration-300 hover:bg-white hover:shadow-md hover:border-emerald-500/20"
                         >
-                            <!-- Hover Gradient Background - Updated to Green -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
                             <div class="relative z-10 flex flex-col items-center text-center">
-                                <div class="text-4xl mb-4 transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">{{ module.icon }}</div>
-                                <h4 class="font-bold text-gray-900 mb-2">{{ getLocaleText(module.title) }}</h4>
-                                <p class="text-xs text-gray-500 leading-relaxed opacity-0 group-hover:opacity-100 transition-all duration-300 h-0 group-hover:h-auto overflow-hidden whitespace-normal">
+                                <div class="text-4xl mb-3 transform transition-transform duration-300 group-hover:scale-115">{{ module.icon }}</div>
+                                <h4 class="font-bold text-slate-800 mb-1.5 text-base">{{ getLocaleText(module.title) }}</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed max-w-[200px]">
                                     {{ getLocaleText(module.description) }}
                                 </p>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- User Journeys Section -->
+        <section id="journeys" v-if="getSetting('journey_maps_visible') !== false && getSetting('journey_maps_visible') !== '0' && getSetting('journey_maps_visible') !== 'false'" class="py-24 relative overflow-hidden z-10 bg-slate-50/30">
+            <!-- Ambient backgrounds -->
+            <div class="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <!-- Section Header -->
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        <span class="text-xs font-bold uppercase tracking-widest">{{ getSetting('journey_title') || $t('landing.journey_title') || 'Journey Maps' }}</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-4">
+                        {{ getSetting('journey_header') || $t('landing.journey_header') || 'See How Servio Empowers Every Step' }}
+                    </h2>
+                    <p class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                        {{ getSetting('journey_subheader') || $t('landing.journey_subheader') || 'Explore the step-by-step journey of restaurant staff managing operations and customers experiencing loyalty rewards.' }}
+                    </p>
+                </div>
+
+
+                <!-- Tab switcher -->
+                <div class="flex justify-center mb-16">
+                    <div class="inline-flex bg-slate-100/80 p-1 rounded-2xl border border-slate-200/50 relative">
+                        <!-- Switch buttons -->
+                        <button 
+                            @click="activeJourneyTab = 'staff'" 
+                            class="px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 relative z-10 focus:outline-none"
+                            :class="activeJourneyTab === 'staff' ? 'bg-white text-slate-800 shadow-md' : 'text-slate-500 hover:text-slate-800'"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            {{ $t('landing.journey_tab_staff') || 'Restaurant Staff Journey' }}
+                        </button>
+                        <button 
+                            @click="activeJourneyTab = 'customer'" 
+                            class="px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 relative z-10 focus:outline-none"
+                            :class="activeJourneyTab === 'customer' ? 'bg-white text-slate-800 shadow-md' : 'text-slate-500 hover:text-slate-800'"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            {{ $t('landing.journey_tab_customer') || 'Customer & Diner Journey' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Timelines Container -->
+                <div class="relative min-h-[460px] md:min-h-[380px]">
+                    
+                    <!-- 1. Staff Journey Timeline -->
+                    <Transition
+                        enter-active-class="transition-all duration-500 ease-out"
+                        enter-from-class="opacity-0 translate-y-8"
+                        enter-to-class="opacity-100 translate-y-0"
+                        leave-active-class="transition-all duration-300 ease-in absolute inset-x-0"
+                        leave-from-class="opacity-100 translate-y-0"
+                        leave-to-class="opacity-0 -translate-y-8"
+                    >
+                        <div v-if="activeJourneyTab === 'staff'" class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+                            <!-- Horizontal dashed connector line on desktop -->
+                            <div class="hidden md:block absolute top-16 left-[12.5%] right-[12.5%] h-0.5 border-t-2 border-dashed border-slate-200 z-0"></div>
+
+                            <!-- Step 1 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 01
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.staff_step_1_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.staff_step_1_desc') }}</p>
+                                <ul v-if="$t('landing.staff_step_1_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.staff_step_1_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-850 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 02
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.staff_step_2_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.staff_step_2_desc') }}</p>
+                                <ul v-if="$t('landing.staff_step_2_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.staff_step_2_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-850 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 03
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.staff_step_3_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.staff_step_3_desc') }}</p>
+                                <ul v-if="$t('landing.staff_step_3_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.staff_step_3_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-850 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 04
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.staff_step_4_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.staff_step_4_desc') }}</p>
+                                <ul v-if="$t('landing.staff_step_4_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.staff_step_4_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-855 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </Transition>
+
+                    <!-- 2. Customer Journey Timeline -->
+                    <Transition
+                        enter-active-class="transition-all duration-500 ease-out"
+                        enter-from-class="opacity-0 translate-y-8"
+                        enter-to-class="opacity-100 translate-y-0"
+                        leave-active-class="transition-all duration-300 ease-in absolute inset-x-0"
+                        leave-from-class="opacity-100 translate-y-0"
+                        leave-to-class="opacity-0 -translate-y-8"
+                    >
+                        <div v-if="activeJourneyTab === 'customer'" class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+                            <!-- Horizontal dashed connector line on desktop -->
+                            <div class="hidden md:block absolute top-16 left-[12.5%] right-[12.5%] h-0.5 border-t-2 border-dashed border-slate-200 z-0"></div>
+
+                            <!-- Step 1 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125H18c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-3.375a1.125 1.125 0 01-1.125-1.125v-4.5z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 01
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.customer_step_1_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.customer_step_1_desc') }}</p>
+                                <ul v-if="$t('landing.customer_step_1_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.customer_step_1_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-850 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.25 10.5h7.5" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 02
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.customer_step_2_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.customer_step_2_desc') }}</p>
+                                <ul v-if="$t('landing.customer_step_2_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.customer_step_2_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-850 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 03
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.customer_step_3_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.customer_step_3_desc') }}</p>
+                                <ul v-if="$t('landing.customer_step_3_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.customer_step_3_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-855 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="relative z-10 bg-white rounded-3xl p-6 border border-slate-100 shadow-lg shadow-slate-100/40 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden group flex flex-col h-full items-center text-center">
+                                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rtl:origin-right"></div>
+                                <div class="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 relative z-10 transition-colors duration-300 group-hover:bg-emerald-500/5">
+                                    <div class="w-14 h-14 rounded-xl bg-white shadow-sm text-emerald-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-6 group-hover:scale-105 border border-slate-100">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span class="inline-block text-[10px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/50 rounded-full px-2.5 py-1 uppercase tracking-wider mb-4">
+                                    {{ $t('landing.journey_step') || 'Step' }} 04
+                                </span>
+                                <h3 class="text-base font-bold text-slate-800 mb-3 group-hover:text-emerald-700 transition-colors">{{ $t('landing.customer_step_4_title') }}</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-5 flex-grow max-w-[220px]">{{ $t('landing.customer_step_4_desc') }}</p>
+                                <ul v-if="$t('landing.customer_step_4_features')" class="w-full space-y-2 text-left rtl:text-right border-t border-slate-100 pt-4 mt-auto">
+                                    <li v-for="(feat, idx) in $t('landing.customer_step_4_features').split('|')" :key="idx" class="flex items-center gap-2 text-[10px] font-medium text-slate-650">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100/40">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <span class="group-hover:text-slate-855 transition-colors duration-200">{{ feat }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </Transition>
                 </div>
             </div>
         </section>
@@ -510,7 +809,7 @@
                             <!-- Background shapes -->
                             <div class="absolute inset-0 bg-gradient-to-br from-orange-200 to-green-200 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-500"></div>
                             
-                            <div class="relative z-10 w-full h-full bg-white rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 flex flex-col items-center justify-center transform group-hover:scale-105 transition-transform duration-500">
+                            <div class="relative z-10 w-full h-full bg-white rounded-2xl p-8 shadow-lg border border-slate-100 flex flex-col items-center justify-center transform group-hover:scale-[1.02] transition-transform duration-300">
                                 <!-- Mock UI of Waste/Inventory -->
                                 <div class="w-full space-y-4">
                                     <!-- Stock bar -->
@@ -624,7 +923,7 @@
                         
                         
                         <!-- Main visual card -->
-                        <div class="relative bg-white rounded-[2.5rem] p-8 shadow-2xl border border-gray-100">
+                        <div class="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-100 transition-all duration-300 hover:shadow-xl transform group-hover:scale-[1.02]">
                             <!-- Star ratings display -->
                             <div class="flex items-center justify-center gap-3 mb-8">
                                 <svg v-for="i in 5" :key="i" class="w-12 h-12" :class="i <= 4 ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
@@ -661,80 +960,96 @@
 
         <!-- Pricing Section -->
         <section id="pricing" class="py-24 relative overflow-hidden z-10">
+             <!-- Ambient decorative glow -->
+             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="text-center max-w-3xl mx-auto mb-20">
-                     <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-white text-emerald-700 border border-gray-100 shadow-sm">
+                      <div class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100/50 shadow-sm">
                         <span class="text-xs font-bold uppercase tracking-widest">{{ $t('landing.plans_pricing') || 'Flexible Pricing' }}</span>
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-8">{{ $t('landing.choose_plan') || 'Choose Your Plan' }}</h2>
-                    <p class="text-xl text-gray-500 mb-8">{{ $t('landing.choose_plan_desc') }}</p>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">{{ $t('landing.choose_plan') || 'Choose Your Plan' }}</h2>
+                    <p class="text-xl text-slate-500 leading-relaxed max-w-xl mx-auto">{{ $t('landing.choose_plan_desc') }}</p>
 
-                      <!-- Billing Toggle -->
-                     <div class="inline-flex items-center p-1.5 rounded-2xl bg-white border border-gray-200 shadow-lg shadow-gray-200/50 mx-auto">
+                       <!-- Billing Toggle -->
+                     <div class="inline-flex items-center p-1.5 rounded-2xl bg-white border border-slate-200/80 shadow-lg shadow-slate-100/50 mx-auto mt-8">
                         <button 
                             @click="billingCycle = 'monthly'"
-                            :class="billingCycle === 'monthly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
+                            :class="billingCycle === 'monthly' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'"
                             class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
                         >
                             {{ $t('landing.monthly') }}
                         </button>
                         <button 
                              @click="billingCycle = 'yearly'"
-                            :class="billingCycle === 'yearly' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'"
-                            class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2"
+                            :class="billingCycle === 'yearly' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'"
+                            class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 relative"
                         >
                             {{ $t('landing.yearly') }}
+                            <span 
+                                :class="billingCycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'" 
+                                class="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider transition-all duration-300 scale-95"
+                            >
+                                {{ $t('landing.discount_20') || 'Save 20%' }}
+                            </span>
                         </button>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 items-stretch">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                     <div 
                         v-for="plan in plans" 
                         :key="plan.id"
-                        class="p-8 md:p-10 rounded-[2.5rem] transition-all duration-300 flex flex-col border w-full bg-white relative group hover:-translate-y-2 h-full"
-                        :class="plan.is_featured ? 'border-2 border-emerald-500 shadow-2xl shadow-emerald-500/10 z-10 scale-105 md:scale-105' : 'border-gray-100 shadow-xl shadow-gray-200/50 opacity-90 hover:opacity-100'"
+                        class="p-8 md:p-10 rounded-[2.5rem] transition-all duration-500 flex flex-col border w-full bg-white relative group hover:-translate-y-3 hover:scale-[1.02] h-full"
+                        :class="plan.is_featured 
+                            ? 'border-emerald-500 shadow-2xl shadow-emerald-500/15 z-10 scale-105 hover:scale-[1.06] ring-1 ring-emerald-500' 
+                            : 'border-slate-100 shadow-xl shadow-slate-100/40 opacity-95 hover:opacity-100 hover:border-slate-200'"
                     >
                         <!-- Featured Badge -->
-                        <div v-if="plan.is_featured" class="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg shadow-emerald-500/40">
+                        <div v-if="plan.is_featured" class="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                            </span>
                             {{ $t('landing.most_popular') }}
                         </div>
 
-                        <div class="mb-5">
-                            <h3 class="text-3xl font-black text-gray-900 mb-3">
+                        <div class="mb-6">
+                            <h3 class="text-3xl font-black text-slate-900 mb-2">
                                 {{ getPlanName(plan) }}
                             </h3>
-                            <p class="text-base text-gray-600 font-medium leading-relaxed">
+                            <p class="text-sm text-slate-500 font-medium leading-relaxed">
                                 {{ getPlanDescription(plan) }}
                             </p>
                         </div>
 
                         <div class="mb-8 flex items-baseline gap-1 flex-wrap">
-                             <span class="text-5xl font-black text-gray-900 tracking-tight">
+                             <span class="text-5xl font-black text-slate-900 tracking-tight">
                                 {{ plan.currency || $t('landing.currency') }}{{ formatPrice(billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly) }}
                              </span>
-                             <span class="text-gray-400 font-medium whitespace-nowrap">
+                             <span class="text-slate-400 font-bold whitespace-nowrap text-sm ml-1">
                                 {{ billingCycle === 'monthly' ? $t('landing.per_month') : $t('landing.per_year') }}
                              </span>
                         </div>
 
                         <div class="space-y-4 mb-8 flex-grow">
                              <!-- Features List -->
-                            <div v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start gap-3 text-base text-gray-600 font-medium">
-                                <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                             <div v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                <div class="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-emerald-100/50">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <span class="group-hover:text-gray-900 transition-colors">{{ $t(feature) !== feature ? $t(feature) : feature }}</span>
+                                <span class="group-hover:text-slate-900 transition-colors duration-300 leading-normal">{{ translateFeature(feature) }}</span>
                             </div>
                         </div>
 
                         <button 
                             @click="openRegisterModal(plan)"
-                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-base"
-                            :class="plan.is_featured ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-xl shadow-gray-900/10' : 'bg-gray-50 text-gray-900 hover:bg-gray-100 hover:scale-[1.02]'"
+                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-base transform duration-300 active:scale-[0.98]"
+                            :class="plan.is_featured 
+                                ? 'btn-shimmer bg-gradient-to-r from-emerald-600 to-teal-500 text-white hover:from-emerald-500 hover:to-teal-600 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30' 
+                                : 'bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-100 hover:border-slate-200'"
                         >
                             {{ $t('landing.select_plan') }}
                         </button>
@@ -742,11 +1057,11 @@
 
                     <!-- Custom Plan Card -->
                     <div 
-                        class="p-[2px] rounded-[2.6rem] transition-all duration-300 relative group h-full opacity-90 hover:opacity-100 hover:-translate-y-2 bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 shadow-xl shadow-emerald-500/20 w-full flex flex-col"
+                        class="p-[2px] rounded-[2.6rem] transition-all duration-500 relative group h-full opacity-95 hover:opacity-100 hover:-translate-y-3 hover:scale-[1.02] bg-gradient-to-br from-emerald-500 via-teal-500 to-indigo-600 shadow-xl shadow-emerald-500/20 hover:shadow-indigo-500/30 w-full flex flex-col"
                     >
                         <div class="p-8 md:p-10 rounded-[2.5rem] bg-white h-full flex flex-col relative overflow-hidden">
                             <!-- Exclusive pattern background overlay -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/30 to-white/10 pointer-events-none"></div>
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/20 to-white/10 pointer-events-none"></div>
                             
                             <!-- Premium badge -->
                             <div class="absolute top-0 right-0">
@@ -754,62 +1069,62 @@
                             </div>
 
                             <div class="mb-5 relative z-10">
-                                <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 mb-3">
+                                <h3 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 mb-2">
                                     {{ $t('landing.custom_plan_title') }}
                                 </h3>
-                                <p class="text-base text-gray-600 font-medium leading-relaxed">
+                                <p class="text-sm text-slate-500 font-medium leading-relaxed">
                                     {{ $t('landing.custom_plan_card_desc') }}
                                 </p>
                             </div>
 
                             <div class="mb-8 flex items-baseline gap-1 flex-wrap relative z-10 mt-2">
-                                 <span class="text-4xl font-black text-gray-900 tracking-tight">
+                                 <span class="text-4xl font-black text-slate-900 tracking-tight">
                                     {{ $t('landing.lets_talk') }}
                                  </span>
                             </div>
 
-                        <div class="space-y-4 mb-8 flex-grow">
-                             <!-- Features List -->
-                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
-                                <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                    </svg>
+                            <div class="space-y-4 mb-8 flex-grow">
+                                 <!-- Features List -->
+                                 <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                    <div class="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-emerald-100/50">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span class="group-hover:text-slate-900 transition-colors duration-300 leading-normal">{{ $t('landing.custom_feature_1') }}</span>
                                 </div>
-                                <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_1') }}</span>
-                            </div>
-                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
-                                <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                    </svg>
+                                <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                    <div class="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-emerald-100/50">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span class="group-hover:text-slate-900 transition-colors duration-300 leading-normal">{{ $t('landing.custom_feature_2') }}</span>
                                 </div>
-                                <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_2') }}</span>
-                            </div>
-                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
-                                <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                    </svg>
+                                <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                    <div class="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-emerald-100/50">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span class="group-hover:text-slate-900 transition-colors duration-300 leading-normal">{{ $t('landing.custom_feature_3') }}</span>
                                 </div>
-                                <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_3') }}</span>
-                            </div>
-                            <div class="flex items-start gap-3 text-base text-gray-600 font-medium">
-                                <div class="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                    </svg>
+                                <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                    <div class="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-emerald-100/50">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span class="group-hover:text-slate-900 transition-colors duration-300 leading-normal">{{ $t('landing.custom_feature_4') }}</span>
                                 </div>
-                                <span class="group-hover:text-gray-900 transition-colors">{{ $t('landing.custom_feature_4') }}</span>
                             </div>
-                        </div>
 
-                        <button 
-                            @click="openRegisterModal()"
-                            class="w-full py-4 rounded-xl font-bold transition-all text-center text-base bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg shadow-gray-900/20 hover:shadow-gray-900/30 hover:-translate-y-0.5 mt-auto relative z-10"
-                        >
-                            {{ $t('landing.contact_us') }}
-                        </button>
+                            <button 
+                                @click="openRegisterModal()"
+                                class="w-full py-4 rounded-xl font-bold transition-all text-center text-base bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/10 hover:shadow-xl hover:shadow-slate-900/25 active:scale-[0.98] mt-auto relative z-10 transform duration-300"
+                            >
+                                {{ $t('landing.contact_us') }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1010,6 +1325,27 @@
             </div>
         </Transition>
 
+        <!-- Scroll to Top Button -->
+        <Transition
+            enter-active-class="transition ease-out duration-300 transform"
+            enter-from-class="translate-y-10 opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition ease-in duration-200 transform"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="translate-y-10 opacity-0"
+        >
+            <button 
+                v-if="showScrollTop"
+                @click="scrollToTop"
+                class="fixed bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 p-3.5 rounded-full bg-emerald-600 text-white shadow-2xl hover:bg-emerald-500 hover:scale-110 active:scale-95 transition-all duration-300 focus:outline-none"
+                aria-label="Scroll to Top"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+                </svg>
+            </button>
+        </Transition>
+
     </div>
 </template>
 
@@ -1068,6 +1404,60 @@ const getSetting = (key: string) => {
     return val;
 };
 
+const parseStatValue = (val: any) => {
+    if (val === undefined || val === null) return { number: 0, prefix: '', suffix: '' };
+    let strVal = String(val).trim();
+    
+    let prefix = '';
+    const prefixMatch = strVal.match(/^([<>=~]+)\s*/);
+    if (prefixMatch) {
+        prefix = prefixMatch[1];
+        strVal = strVal.slice(prefixMatch[0].length);
+    }
+    
+    let suffix = '';
+    const suffixMatch = strVal.match(/\s*([+%KMkm]+)$/);
+    if (suffixMatch) {
+        suffix = suffixMatch[1];
+        strVal = strVal.slice(0, strVal.length - suffixMatch[0].length);
+    }
+    
+    const numStr = strVal.replace(/,/g, '');
+    let number = parseFloat(numStr);
+    if (isNaN(number)) {
+        number = 0;
+    } else {
+        const lowerSuffix = suffix.toLowerCase();
+        if (lowerSuffix.includes('m')) {
+            number = number * 1000000;
+            suffix = suffix.replace(/[Mm]/g, '');
+        } else if (lowerSuffix.includes('k')) {
+            number = number * 1000;
+            suffix = suffix.replace(/[Kk]/g, '');
+        }
+    }
+    
+    return { number, prefix, suffix };
+};
+
+const statsConfig = ref({
+    restaurants: { prefix: '', suffix: '+' },
+    orders: { prefix: '', suffix: '+' }
+});
+
+const translateFeature = (feature: string) => {
+    if (!feature) return '';
+    if (feature.startsWith('plan_features.')) {
+        const parts = feature.split(':');
+        if (parts.length > 1) {
+            const key = parts[0];
+            const val = parts[1];
+            return t(key, { count: val });
+        }
+    }
+    return t(feature) !== feature ? t(feature) : feature;
+};
+
 const mobileMenuOpen = ref(false);
 const billingCycle = ref<'monthly' | 'yearly'>('monthly');
 const scrollTo = (id: string) => {
@@ -1082,12 +1472,22 @@ const showRegisterModal = ref(false);
 const selectedPlan = ref<any>(null);
 const successMessage = ref('');
 const currentScreenshotIndex = ref(0);
+const activeJourneyTab = ref<'staff' | 'customer'>('staff');
 const visitorCount = ref(0);
 const activeRestaurants = ref(0);
 let screenshotInterval: any = null;
 
+const showScrollTop = ref(false);
+const handleScroll = () => {
+    showScrollTop.value = window.scrollY > 400;
+};
+const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 // Animate visitor count on mount
 onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
     if (props.screenshots && props.screenshots.length > 1) {
         screenshotInterval = setInterval(() => {
             currentScreenshotIndex.value = (currentScreenshotIndex.value + 1) % props.screenshots.length;
@@ -1095,8 +1495,16 @@ onMounted(() => {
     }
     
     // Animate visitor count
-    const targetVisitors = 12547; // You can make this dynamic from backend
-    const targetRestaurants = 250;
+    const parsedRestaurants = parseStatValue(getSetting('stats_restaurants') || '500+');
+    const parsedOrders = parseStatValue(getSetting('stats_orders') || '1M+');
+
+    statsConfig.value.restaurants.prefix = parsedRestaurants.prefix;
+    statsConfig.value.restaurants.suffix = parsedRestaurants.suffix || '+';
+    statsConfig.value.orders.prefix = parsedOrders.prefix;
+    statsConfig.value.orders.suffix = parsedOrders.suffix || '+';
+
+    const targetVisitors = parsedOrders.number || 1000000;
+    const targetRestaurants = parsedRestaurants.number || 500;
     const duration = 2000; // 2 seconds
     const steps = 60;
     const visitorIncrement = targetVisitors / steps;
@@ -1114,8 +1522,10 @@ onMounted(() => {
     }, duration / steps);
 });
 
+
 onUnmounted(() => {
     if (screenshotInterval) clearInterval(screenshotInterval);
+    window.removeEventListener('scroll', handleScroll);
 });
 
 const nextScreenshot = () => {
@@ -1249,5 +1659,34 @@ const submitInterest = async () => {
 <style scoped>
 html {
     scroll-behavior: smooth;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.btn-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shimmer::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.25) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 3s infinite;
+    content: '';
 }
 </style>

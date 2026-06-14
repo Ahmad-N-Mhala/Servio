@@ -32,6 +32,20 @@
                             />
                         </div>
 
+                        <!-- Billing Cycle -->
+                        <div class="mb-4">
+                            <Select
+                                v-model="form.billing_cycle"
+                                label="Billing Cycle *"
+                                :options="[
+                                    { label: 'Monthly', value: 'monthly' },
+                                    { label: 'Yearly', value: 'yearly' }
+                                ]"
+                                placeholder="Select Billing Cycle"
+                                :error="form.errors.billing_cycle"
+                            />
+                        </div>
+
                         <!-- Start Date -->
                         <div class="mb-4">
                             <Input
@@ -100,6 +114,7 @@ const form = useForm({
     starts_at: new Date().toISOString().split('T')[0],
     ends_at: '',
     status: 'active',
+    billing_cycle: 'monthly',
 });
 
 const restaurantOptions = computed(() => {
@@ -114,6 +129,7 @@ const statusOptions = computed(() => [
     { label: t('common.active'), value: 'active' },
     { label: 'Cancelled', value: 'cancelled' },
     { label: 'Expired', value: 'expired' },
+    { label: 'Trial', value: 'trial' },
 ]);
 
 const submit = () => {

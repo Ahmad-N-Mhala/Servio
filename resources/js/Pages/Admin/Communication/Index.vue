@@ -101,31 +101,64 @@
                     />
 
                     <!-- Content Fields -->
-                    <div class="space-y-4">
-                        <div v-if="type === 'email'">
-                            <Input 
-                                id="subject_en" 
-                                label="Subject" 
-                                v-model="form.subject_en" 
-                                :error="form.errors.subject_en" 
-                                required 
-                            />
-                        </div>
-                        
-                        <div>
+                    <div class="space-y-6">
+                        <!-- English Content -->
+                        <div class="border-b border-slate-100 pb-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">English Translation</h4>
+                            <div v-if="type === 'email'" class="mb-4">
+                                <Input 
+                                    id="subject_en" 
+                                    label="Subject (English)" 
+                                    v-model="form.subject_en" 
+                                    :error="form.errors.subject_en" 
+                                    required 
+                                />
+                            </div>
+                            
                             <div>
                                 <label for="content_en" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
-                                    Content{{ type === 'email' ? ' (HTML)' : '' }}
+                                    Content (English){{ type === 'email' ? ' (HTML)' : '' }}
                                 </label>
                                 <textarea 
                                     id="content_en" 
                                     v-model="form.content_en" 
-                                    :rows="type === 'email' ? 12 : 5" 
+                                    :rows="type === 'email' ? 8 : 4" 
                                     class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all font-mono text-sm"
                                     :class="{'border-rose-300 focus:border-rose-500': form.errors.content_en}"
                                     required
                                 ></textarea>
                                 <p v-if="form.errors.content_en" class="mt-1 text-sm text-red-600">{{ form.errors.content_en }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Arabic Content -->
+                        <div class="pb-2">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Arabic Translation (العربية)</h4>
+                            <div v-if="type === 'email'" class="mb-4">
+                                <Input 
+                                    id="subject_ar" 
+                                    label="Subject (Arabic)" 
+                                    v-model="form.subject_ar" 
+                                    :error="form.errors.subject_ar" 
+                                    dir="rtl"
+                                    required 
+                                />
+                            </div>
+                            
+                            <div>
+                                <label for="content_ar" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 ml-1">
+                                    Content (Arabic){{ type === 'email' ? ' (HTML)' : '' }}
+                                </label>
+                                <textarea 
+                                    id="content_ar" 
+                                    v-model="form.content_ar" 
+                                    :rows="type === 'email' ? 8 : 4" 
+                                    class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 py-3 px-4 transition-all font-mono text-sm"
+                                    :class="{'border-rose-300 focus:border-rose-500': form.errors.content_ar}"
+                                    dir="rtl"
+                                    required
+                                ></textarea>
+                                <p v-if="form.errors.content_ar" class="mt-1 text-sm text-red-600">{{ form.errors.content_ar }}</p>
                             </div>
                         </div>
                     </div>
@@ -298,9 +331,22 @@ const editTemplate = (template: any) => {
     form.content_ar = template.content_ar;
     form.is_active = !!template.is_active;
     form.timing_type = template.timing_type || 'immediately';
+    form.timing_days = template.timing_days !== undefined && template.timing_days !== null ? template.timing_days : 0;
+    form.timing_time = template.timing_time ? template.timing_time.substring(0, 5) : '09:00';
     
     // Check custom trigger
-    const standardTriggers = ['user_registered', 'password_reset', 'subscription_created', 'subscription_expired', 'restaurant_created'];
+    const standardTriggers = [
+        'registration_otp',
+        'loyalty_otp',
+        'user_registered',
+        'password_reset',
+        'subscription_created',
+        'subscription_warning',
+        'subscription_expired',
+        'restaurant_created',
+        'inventory_expiry_warning',
+        'inventory_low_stock_warning'
+    ];
     if (!standardTriggers.includes(template.trigger_event)) {
         form.trigger_event = 'custom';
         customTrigger.value = template.trigger_event;
@@ -320,9 +366,13 @@ const submit = () => {
         form.trigger_event = customTrigger.value;
     }
 
-    // Auto-copy EN to AR fields
-    form.subject_ar = form.subject_en;
-    form.content_ar = form.content_en;
+    // Auto-copy EN to AR fields as fallback if Arabic fields are left blank
+    if (!form.subject_ar && form.subject_en) {
+        form.subject_ar = form.subject_en;
+    }
+    if (!form.content_ar && form.content_en) {
+        form.content_ar = form.content_en;
+    }
 
     if (isEditing.value) {
         form.put(route('admin.communication.update', form.id), {

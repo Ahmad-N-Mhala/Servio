@@ -124,19 +124,43 @@
                                             {{ module.label }}
                                         </h5>
                                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 ml-7">
-                                            <label 
+                                            <div 
                                                 v-for="permission in module.permissions" 
                                                 :key="permission"
-                                                class="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                                                class="group relative flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
                                             >
                                                 <input 
                                                     type="checkbox" 
+                                                    :id="'permission-' + permission"
                                                     :value="permission"
                                                     v-model="selectedPermissions"
                                                     class="rounded border-gray-300 text-primary focus:ring-primary"
                                                 >
-                                                <span class="text-sm text-gray-700">{{ formatPermission(permission) }}</span>
-                                            </label>
+                                                <label :for="'permission-' + permission" class="text-sm text-gray-700 cursor-pointer select-none">
+                                                    {{ formatPermission(permission) }}
+                                                </label>
+
+                                                <!-- Premium Metadata Tooltip -->
+                                                <div 
+                                                    v-if="module.descriptions?.[permission] || module.links?.[permission]"
+                                                    class="absolute bottom-full left-0 pb-2 w-64 hidden group-hover:block z-50 transition-all duration-200"
+                                                >
+                                                    <div class="bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl relative">
+                                                        <div class="font-semibold text-primary mb-1">{{ formatPermission(permission) }}</div>
+                                                        <p class="text-gray-300 leading-relaxed">{{ module.descriptions[permission] }}</p>
+                                                        <div v-if="module.links?.[permission]" class="mt-2 pt-1.5 border-t border-gray-800 text-[10px] text-gray-400 flex items-center gap-1.5">
+                                                            <svg class="w-3.5 h-3.5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                            </svg>
+                                                            <Link :href="module.links[permission]" class="truncate text-primary hover:underline font-semibold pointer-events-auto">
+                                                                Go to: {{ module.links[permission].replace('/en/servio/', '') }}
+                                                            </Link>
+                                                        </div>
+                                                        <!-- Tooltip Arrow -->
+                                                        <div class="absolute top-full left-4 border-4 border-transparent border-t-gray-900"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -272,7 +296,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Select from '@/Components/Select.vue';
 import Input from '@/Components/Input.vue';

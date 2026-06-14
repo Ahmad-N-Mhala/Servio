@@ -18,6 +18,10 @@
                 v-model:search="search"
                 title="All Users"
             >
+                <template #cell-id="{ value }">
+                    <span class="font-mono text-xs text-gray-500" :title="value">{{ value }}</span>
+                </template>
+
                 <template #cell-name="{ row }">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
@@ -77,6 +81,7 @@ import Button from '@/Components/Button.vue';
 import { debounce } from 'lodash';
 
 const columns = [
+    { key: 'id', label: 'User ID', sortable: true },
     { key: 'name', label: 'Name', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
     { key: 'phone', label: 'Phone', sortable: true },

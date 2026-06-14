@@ -429,8 +429,15 @@
 
                         <!-- How It Works Config -->
                         <div class="border-t pt-6 mt-6">
-                            <h4 class="text-lg font-bold text-gray-900 mb-4">How It Works Section</h4>
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-bold text-gray-900">How It Works Section</h4>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="settingsForm.settings.how_it_works_visible" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4">
+                                    <span class="ml-2 text-sm text-gray-700">Show How It Works Section</span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" :class="{ 'opacity-50 pointer-events-none': !settingsForm.settings.how_it_works_visible }">
                                 <div>
                                     <Input v-model="settingsForm.settings.how_it_works_title.en" label="Section Title (English)" />
                                 </div>
@@ -439,7 +446,7 @@
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" :class="{ 'opacity-50 pointer-events-none': !settingsForm.settings.how_it_works_visible }">
                                 <!-- Step 1 -->
                                 <div class="bg-gray-50 p-3 rounded-lg">
                                     <h6 class="font-bold mb-2">Step 1</h6>
@@ -463,6 +470,40 @@
                                     <Input v-model="settingsForm.settings.step_3_title.ar" label="Title (AR)" dir="rtl" class="mb-2" />
                                     <textarea v-model="settingsForm.settings.step_3_desc.en" rows="2" class="w-full rounded border-gray-300 text-sm mb-2" placeholder="Desc (EN)"></textarea>
                                     <textarea v-model="settingsForm.settings.step_3_desc.ar" rows="2" class="w-full rounded border-gray-300 text-sm text-right" placeholder="Desc (AR)" dir="rtl"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Journey Maps Config -->
+                        <div class="border-t pt-6 mt-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-bold text-gray-900">Journey Maps Section</h4>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="settingsForm.settings.journey_maps_visible" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4">
+                                    <span class="ml-2 text-sm text-gray-700">Show Journey Maps Section</span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" :class="{ 'opacity-50 pointer-events-none': !settingsForm.settings.journey_maps_visible }">
+                                <div>
+                                    <Input v-model="settingsForm.settings.journey_title.en" label="Badge/Title (English)" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.journey_title.ar" label="Badge/Title (Arabic)" dir="rtl" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.journey_header.en" label="Heading (English)" />
+                                </div>
+                                <div>
+                                    <Input v-model="settingsForm.settings.journey_header.ar" label="Heading (Arabic)" dir="rtl" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Subheading (English)</label>
+                                    <textarea v-model="settingsForm.settings.journey_subheader.en" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary"></textarea>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Subheading (Arabic)</label>
+                                    <textarea v-model="settingsForm.settings.journey_subheader.ar" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-right" dir="rtl"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -848,9 +889,25 @@ const settingsForm = useForm({
         },
 
         // How It Works
+        how_it_works_visible: props.landingSettings.how_it_works_visible !== undefined ? Boolean(props.landingSettings.how_it_works_visible) : false,
         how_it_works_title: {
             en: props.landingSettings.how_it_works_title?.en || 'How It Works',
             ar: props.landingSettings.how_it_works_title?.ar || 'كيف يعمل النظام'
+        },
+        
+        // Journey Maps
+        journey_maps_visible: props.landingSettings.journey_maps_visible !== undefined ? Boolean(props.landingSettings.journey_maps_visible) : true,
+        journey_title: {
+            en: props.landingSettings.journey_title?.en || 'Journey Maps',
+            ar: props.landingSettings.journey_title?.ar || 'خرائط الرحلة'
+        },
+        journey_header: {
+            en: props.landingSettings.journey_header?.en || 'See How Servio Empowers Every Step',
+            ar: props.landingSettings.journey_header?.ar || 'شاهد كيف يمكّن سيرفيو كل خطوة'
+        },
+        journey_subheader: {
+            en: props.landingSettings.journey_subheader?.en || 'Explore the step-by-step journey of restaurant staff managing operations and customers experiencing loyalty rewards.',
+            ar: props.landingSettings.journey_subheader?.ar || 'اكتشف رحلة موظفي المطعم خطوة بخطوة في إدارة العمليات والعملاء الذين يستفيدون من برنامج الولاء.'
         },
         step_1_title: {
             en: props.landingSettings.step_1_title?.en || 'Create Account',

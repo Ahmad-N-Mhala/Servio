@@ -44,6 +44,15 @@ class LandingPageController extends Controller
             'loyalty_bullet_1' => ['en' => __('landing.loyalty_bullet_1', [], 'en'), 'ar' => __('landing.loyalty_bullet_1', [], 'ar')],
             'loyalty_bullet_2' => ['en' => __('landing.loyalty_bullet_2', [], 'en'), 'ar' => __('landing.loyalty_bullet_2', [], 'ar')],
 
+            'how_it_works_visible' => false,
+            'journey_maps_visible' => true,
+            'journey_title' => ['en' => 'Journey Maps', 'ar' => 'خرائط الرحلة'],
+            'journey_header' => ['en' => 'See How Servio Empowers Every Step', 'ar' => 'شاهد كيف يمكّن سيرفيو كل خطوة'],
+            'journey_subheader' => [
+                'en' => 'Explore the step-by-step journey of restaurant staff managing operations and customers experiencing loyalty rewards.',
+                'ar' => 'اكتشف رحلة موظفي المطعم خطوة بخطوة في إدارة العمليات والعملاء الذين يستفيدون من برنامج الولاء.'
+            ],
+
             'how_it_works_title' => ['en' => __('landing.how_it_works_title', [], 'en'), 'ar' => __('landing.how_it_works_title', [], 'ar')],
             'step_1_title' => ['en' => __('landing.step_1_title', [], 'en'), 'ar' => __('landing.step_1_title', [], 'ar')],
             'step_1_desc' => ['en' => __('landing.step_1_desc', [], 'en'), 'ar' => __('landing.step_1_desc', [], 'ar')],

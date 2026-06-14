@@ -17,6 +17,14 @@
                 v-model:search="search"
                 :title="$t('customers.all_customers')"
             >
+                <template #header-actions>
+                    <Button @click="exportExcel" variant="secondary" class="font-semibold flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        {{ $t('common.export') || 'Export' }}
+                    </Button>
+                </template>
                 <!-- Customer Column -->
                 <template #cell-name="{ row }">
                     <div class="flex items-center">
@@ -66,6 +74,7 @@ import { ref, watch, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Table from '@/Components/Table.vue';
+import Button from '@/Components/Button.vue';
 import { useI18n } from 'vue-i18n';
 import debounce from 'lodash/debounce';
 
@@ -90,6 +99,13 @@ const search = ref(props.filters.search || '');
 watch(search, debounce((value) => {
     router.get(route('customers.index'), { search: value }, { preserveState: true, replace: true });
 }, 300));
+
+const exportExcel = () => {
+    window.location.href = route('customers.index', {
+        search: search.value,
+        export: 'excel'
+    });
+};
 
 
 const { t, locale } = useI18n();

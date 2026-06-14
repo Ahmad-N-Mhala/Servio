@@ -35,7 +35,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-2xl font-bold text-gray-900">{{ currency }} {{ convertPrice(plan.price_monthly) }}</p>
-                            <p class="text-xs text-gray-400">/6 months</p>
+                            <p class="text-xs text-gray-400">/month</p>
                         </div>
                     </div>
                     
@@ -44,7 +44,7 @@
                         <ul v-if="planFeatures(plan).length > 0" class="text-sm text-gray-500 space-y-1">
                             <li v-for="(feature, idx) in planFeatures(plan).slice(0, 4)" :key="idx" class="flex items-center gap-2">
                                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                {{ $t(feature) }}
+                                {{ translateFeature(feature) }}
                             </li>
                              <li v-if="planFeatures(plan).length > 4">
                                 <button 
@@ -82,7 +82,7 @@
                 <div class="space-y-6">
                     <div class="bg-primary-50 rounded-xl p-6 text-center">
                         <p class="text-4xl font-extrabold text-primary">{{ currency }} {{ convertPrice(selectedPlan.price_monthly) }}</p>
-                        <p class="text-sm text-primary-600 font-medium">per 6 months</p>
+                        <p class="text-sm text-primary-600 font-medium">per month</p>
                         <div class="mt-2 text-sm text-gray-500">
                             or {{ currency }} {{ convertPrice(selectedPlan.price_yearly) }} / year
                         </div>
@@ -100,7 +100,7 @@
                                 <div class="flex-shrink-0 mt-0.5">
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="text-sm text-gray-700 font-medium">{{ $t(feature) }}</span>
+                                <span class="text-sm text-gray-700 font-medium">{{ translateFeature(feature) }}</span>
                             </div>
                         </div>
                     </div>
@@ -119,10 +119,26 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
 import Modal from '@/Components/Modal.vue';
+
+const { t } = useI18n();
+
+const translateFeature = (feature: string) => {
+    if (!feature) return '';
+    if (feature.startsWith('plan_features.')) {
+        const parts = feature.split(':');
+        if (parts.length > 1) {
+            const key = parts[0];
+            const val = parts[1];
+            return t(key, { count: val });
+        }
+    }
+    return t(feature);
+};
 
 const page = usePage();
 const currency = computed(() => (page.props.current_restaurant as any)?.currency || 'AED');

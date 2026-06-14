@@ -110,7 +110,7 @@
                                     <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <span class="text-gray-700 text-sm">{{ $t(feature) !== feature ? $t(feature) : feature }}</span>
+                                    <span class="text-gray-700 text-sm">{{ translateFeature(feature) }}</span>
                                 </div>
                             </div>
 
@@ -262,6 +262,19 @@ import Button from '@/Components/Button.vue';
 const page = usePage();
 const { t } = useI18n();
 const route = (window as any).route;
+
+const translateFeature = (feature: string) => {
+    if (!feature) return '';
+    if (feature.startsWith('plan_features.')) {
+        const parts = feature.split(':');
+        if (parts.length > 1) {
+            const key = parts[0];
+            const val = parts[1];
+            return t(key, { count: val });
+        }
+    }
+    return t(feature) !== feature ? t(feature) : feature;
+};
 
 const props = defineProps<{
     plans: any[];

@@ -124,6 +124,19 @@ class LandingPageController extends Controller
             'step_3_title' => ['en' => __('landing.step_3_title', [], 'en'), 'ar' => __('landing.step_3_title', [], 'ar')],
             'step_3_desc' => ['en' => __('landing.step_3_desc', [], 'en'), 'ar' => __('landing.step_3_desc', [], 'ar')],
 
+            'how_it_works_visible' => false,
+            'journey_maps_visible' => true,
+            'journey_title' => ['en' => 'Journey Maps', 'ar' => 'خرائط الرحلة'],
+            'journey_header' => ['en' => 'See How Servio Empowers Every Step', 'ar' => 'شاهد كيف يمكّن سيرفيو كل خطوة'],
+            'journey_subheader' => [
+                'en' => 'Explore the step-by-step journey of restaurant staff managing operations and customers experiencing loyalty rewards.',
+                'ar' => 'اكتشف رحلة موظفي المطعم خطوة بخطوة في إدارة العمليات والعملاء الذين يستفيدون من برنامج الولاء.'
+            ],
+            'stats_visible' => true,
+            'stats_restaurants' => '500+',
+            'stats_orders' => '1M+',
+            'stats_uptime' => '99.9%',
+
             // Feedback Defaults
             'feedback_title' => ['en' => __('landing.feedback_title', [], 'en'), 'ar' => __('landing.feedback_title', [], 'ar')],
             'feedback_desc' => ['en' => __('landing.feedback_desc', [], 'en'), 'ar' => __('landing.feedback_desc', [], 'ar')],

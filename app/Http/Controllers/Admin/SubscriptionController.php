@@ -65,7 +65,7 @@ class SubscriptionController extends Controller
 
         RestaurantSubscription::create($validated);
 
-        return redirect()->back()
+        return redirect()->route('admin.subscriptions.index')
             ->with('success', 'Subscription created successfully');
     }
 
@@ -99,7 +99,7 @@ class SubscriptionController extends Controller
         // The Restaurant model's subscription() relation uses latest(), so the new one becomes active.
         RestaurantSubscription::create($validated);
 
-        return redirect()->back()
+        return redirect()->route('admin.subscriptions.index')
             ->with('success', 'Subscription updated (new history record created).');
     }
 

@@ -16,6 +16,14 @@
                     v-model:search="search"
                     title="Subscription History"
                 >
+                    <template #header-actions>
+                        <Link 
+                            :href="route('admin.subscriptions.create')" 
+                            class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                        >
+                            Assign Subscription
+                        </Link>
+                    </template>
                     <!-- Restaurant Column -->
                     <template #cell-restaurant="{ row }">
                         <div v-if="row.restaurant" class="flex flex-col">
@@ -50,6 +58,7 @@
                             class="px-2 py-1 rounded text-xs font-bold capitalize"
                             :class="{
                                 'bg-green-100 text-green-700': row.status === 'active',
+                                'bg-blue-100 text-blue-700': row.status === 'trial',
                                 'bg-red-100 text-red-700': row.status === 'expired' || row.status === 'cancelled',
                                 'bg-gray-100 text-gray-700': !row.status
                             }"
@@ -112,7 +121,7 @@
                                 v-model="form.billing_cycle"
                                 label="Billing Cycle"
                                 :options="[
-                                    { label: 'Half Year', value: 'monthly' },
+                                    { label: 'Monthly', value: 'monthly' },
                                     { label: 'Yearly', value: 'yearly' }
                                 ]"
                                 :error="form.errors.billing_cycle"
@@ -148,7 +157,8 @@
                                 :options="[
                                     { label: $t('common.active'), value: 'active' },
                                     { label: 'Cancelled', value: 'cancelled' },
-                                    { label: 'Expired', value: 'expired' }
+                                    { label: 'Expired', value: 'expired' },
+                                    { label: 'Trial', value: 'trial' }
                                 ]"
                                 :error="form.errors.status"
                             />
@@ -170,7 +180,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Table from '@/Components/Table.vue';
 import Select from '@/Components/Select.vue';
