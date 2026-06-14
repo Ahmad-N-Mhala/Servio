@@ -279,6 +279,11 @@
                                         <div v-if="settingsForm.settings.feature_pos_images && settingsForm.settings.feature_pos_images.length > 0" class="flex flex-wrap gap-4 mb-3">
                                             <div v-for="(img, idx) in settingsForm.settings.feature_pos_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
                                                 <img :src="img" class="w-full h-full object-cover">
+                                                <a :href="img" download class="absolute top-0 left-0 bg-emerald-500 text-white p-1 rounded-br opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" target="_blank" title="Download">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                    </svg>
+                                                </a>
                                                 <button type="button" @click="removeImage('feature_pos_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
@@ -319,6 +324,11 @@
                                         <div v-if="settingsForm.settings.feature_kds_images && settingsForm.settings.feature_kds_images.length > 0" class="flex flex-wrap gap-4 mb-3">
                                             <div v-for="(img, idx) in settingsForm.settings.feature_kds_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
                                                 <img :src="img" class="w-full h-full object-cover">
+                                                <a :href="img" download class="absolute top-0 left-0 bg-emerald-500 text-white p-1 rounded-br opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" target="_blank" title="Download">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                    </svg>
+                                                </a>
                                                 <button type="button" @click="removeImage('feature_kds_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
@@ -357,6 +367,11 @@
                                         <div v-if="settingsForm.settings.feature_inventory_images && settingsForm.settings.feature_inventory_images.length > 0" class="flex flex-wrap gap-4 mb-3">
                                             <div v-for="(img, idx) in settingsForm.settings.feature_inventory_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
                                                 <img :src="img" class="w-full h-full object-cover">
+                                                <a :href="img" download class="absolute top-0 left-0 bg-emerald-500 text-white p-1 rounded-br opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" target="_blank" title="Download">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                    </svg>
+                                                </a>
                                                 <button type="button" @click="removeImage('feature_inventory_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
@@ -402,6 +417,11 @@
                                         <div v-if="settingsForm.settings.feature_loyalty_images && settingsForm.settings.feature_loyalty_images.length > 0" class="flex flex-wrap gap-4 mb-3">
                                             <div v-for="(img, idx) in settingsForm.settings.feature_loyalty_images" :key="idx" class="relative group w-24 h-24 rounded overflow-hidden bg-gray-200 border">
                                                 <img :src="img" class="w-full h-full object-cover">
+                                                <a :href="img" download class="absolute top-0 left-0 bg-emerald-500 text-white p-1 rounded-br opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" target="_blank" title="Download">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                    </svg>
+                                                </a>
                                                 <button type="button" @click="removeImage('feature_loyalty_images', idx)" class="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
@@ -688,6 +708,11 @@
                 <div v-for="shot in screenshots" :key="shot.id" class="relative group rounded-lg overflow-hidden border border-gray-200">
                     <img :src="shot.image_path" class="w-full h-48 object-cover" />
                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <a :href="shot.image_path" download class="bg-emerald-600 text-white p-2 rounded-full hover:bg-emerald-700 flex items-center justify-center" target="_blank" title="Download Image">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                        </a>
                         <button @click="deleteScreenshot(shot)" class="bg-red-600 text-white p-2 rounded-full hover:bg-red-700">
                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
