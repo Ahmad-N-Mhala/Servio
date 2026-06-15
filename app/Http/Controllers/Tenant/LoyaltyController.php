@@ -283,6 +283,8 @@ class LoyaltyController extends Controller
             // Basic file validation, in real app would handle storage proper
             'loyalty_logo' => ['nullable', 'image', 'max:2048'],
             'loyalty_banner' => ['nullable', 'image', 'max:5120'],
+            'delete_logo' => ['nullable', 'boolean'],
+            'delete_banner' => ['nullable', 'boolean'],
 
             // Earning Method Fields
             'earning_method_type' => ['nullable', 'string', 'in:order_total,visit'],
@@ -302,11 +304,15 @@ class LoyaltyController extends Controller
         if ($request->hasFile('loyalty_logo')) {
             $path = $request->file('loyalty_logo')->store('loyalty/logos', 'public');
             $currentSettings['loyalty_logo'] = '/storage/'.$path;
+        } elseif ($request->boolean('delete_logo')) {
+            $currentSettings['loyalty_logo'] = null;
         }
 
         if ($request->hasFile('loyalty_banner')) {
             $path = $request->file('loyalty_banner')->store('loyalty/banners', 'public');
             $currentSettings['loyalty_banner'] = '/storage/'.$path;
+        } elseif ($request->boolean('delete_banner')) {
+            $currentSettings['loyalty_banner'] = null;
         }
 
         // Update other fields
@@ -353,6 +359,8 @@ class LoyaltyController extends Controller
             'loyalty_qr_link' => ['nullable', 'url', 'max:255'],
             'loyalty_logo' => ['nullable', 'image', 'max:2048'],
             'loyalty_banner' => ['nullable', 'image', 'max:5120'],
+            'delete_logo' => ['nullable', 'boolean'],
+            'delete_banner' => ['nullable', 'boolean'],
         ]);
 
         $currentDesign = $reward->design ?? [];
@@ -361,11 +369,15 @@ class LoyaltyController extends Controller
         if ($request->hasFile('loyalty_logo')) {
             $path = $request->file('loyalty_logo')->store('loyalty/rewards/logos', 'public');
             $currentDesign['loyalty_logo'] = '/storage/'.$path;
+        } elseif ($request->boolean('delete_logo')) {
+            $currentDesign['loyalty_logo'] = null;
         }
 
         if ($request->hasFile('loyalty_banner')) {
             $path = $request->file('loyalty_banner')->store('loyalty/rewards/banners', 'public');
             $currentDesign['loyalty_banner'] = '/storage/'.$path;
+        } elseif ($request->boolean('delete_banner')) {
+            $currentDesign['loyalty_banner'] = null;
         }
 
         // Update generic fields

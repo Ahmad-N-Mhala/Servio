@@ -273,4 +273,16 @@ return [
             'reply_feedback' => '/en/servio/feedback'
         ]
     ],
+    'user_manual' => [
+        'label' => 'User Manual',
+        'permissions' => ['view_user_manual', 'manage_user_manual'],
+        'descriptions' => [
+            'view_user_manual' => 'View the system User Manual and FAQ pages.',
+            'manage_user_manual' => 'Allows editing the User Manual and FAQ content.'
+        ],
+        'links' => [
+            'view_user_manual' => '/en/servio/user-manual',
+            'manage_user_manual' => '/en/servio/user-manual'
+        ]
+    ],
 ];

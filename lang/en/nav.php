@@ -38,4 +38,5 @@ return [
     'pos_screen' => 'POS Screen',
     'multi_store' => 'Multi-Store Overview',
     'settings' => 'Settings',
+    'user_manual' => 'User Manual',
 ];

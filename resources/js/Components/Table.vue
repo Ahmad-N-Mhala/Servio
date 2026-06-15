@@ -41,10 +41,11 @@
                             v-for="column in columns"
                             :key="column.key"
                             :class="[
-                                'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
-                                column.sortable ? 'cursor-pointer hover:bg-gray-100 transition-colors group select-none' : '',
+                                'px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider',
+                                !column.align || column.align === 'left' ? 'text-left' : '',
                                 column.align === 'center' ? 'text-center' : '',
-                                column.align === 'right' ? 'text-right' : ''
+                                column.align === 'right' ? 'text-right' : '',
+                                column.sortable ? 'cursor-pointer hover:bg-gray-100 transition-colors group select-none' : ''
                             ]"
                             @click="column.sortable ? handleSort(column.key) : null"
                         >

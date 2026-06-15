@@ -452,7 +452,7 @@
                             <div class="relative z-10 flex flex-col items-center text-center">
                                 <div class="text-4xl mb-3 transform transition-transform duration-300 group-hover:scale-115">{{ module.icon }}</div>
                                 <h4 class="font-bold text-slate-800 mb-1.5 text-base">{{ getLocaleText(module.title) }}</h4>
-                                <p class="text-xs text-slate-500 leading-relaxed max-w-[200px]">
+                                <p class="text-xs text-slate-500 leading-relaxed max-w-[200px] transition-all duration-350 ease-in-out max-h-0 opacity-0 overflow-hidden group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2">
                                     {{ getLocaleText(module.description) }}
                                 </p>
                             </div>

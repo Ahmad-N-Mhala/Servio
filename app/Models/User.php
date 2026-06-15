@@ -144,7 +144,7 @@ class User extends Authenticatable
 
         // 3. Define Map & Core
         // Essential features that are included in ANY plan
-        $coreGroups = ['dashboard', 'orders', 'menu', 'tables', 'customers', 'staff', 'settings', 'service'];
+        $coreGroups = ['dashboard', 'orders', 'menu', 'tables', 'customers', 'staff', 'settings', 'service', 'user_manual'];
 
         // Premium features mapped to permission groups
         $featureMap = [

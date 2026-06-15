@@ -75,34 +75,46 @@ class DeliveryWebhookController extends Controller
         // Reset counter if new day (UAE time)
         $restaurant->checkAndResetOrderCounter();
 
-        // Generate Sequential Transaction Number
-        $transactionNumber = $restaurant->next_order_number ?? 1;
-        try {
-            $restaurant->increment('next_order_number');
-        } catch (\Exception $e) {
-            $restaurant->next_order_number = (int) ($restaurant->next_order_number ?? 1);
-            $restaurant->save();
-            $restaurant->increment('next_order_number');
+        $maxRetries = 5;
+        $order = null;
+
+        for ($i = 0; $i < $maxRetries; $i++) {
+            $transactionNumber = $restaurant->next_order_number ?? 1;
+            $orderNumber = ucfirst($provider).'-'.$transactionNumber;
+
+            try {
+                // 4. Create Order
+                $order = Order::create([
+                    'restaurant_id' => $restaurant->id,
+                    'order_number' => $orderNumber,
+                    'transaction_number' => $transactionNumber,
+                    'delivery_provider' => $provider,
+                    'delivery_order_id' => $orderData['external_id'],
+                    'status' => 'pending_approval',
+                    'total' => $orderData['total'],
+                    'currency' => $orderData['currency'] ?? 'AED',
+                    'customer_name' => $orderData['customer']['name'] ?? 'Guest',
+                    'customer_phone' => $orderData['customer']['phone'] ?? '',
+                    'items' => $orderData['items'] ?? [],
+                    'raw_payload' => $request->all(),
+                    'notes' => $orderData['notes'] ?? '',
+                ]);
+
+                $restaurant->increment('next_order_number');
+                break;
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'E11000 duplicate key error') || str_contains($e->getMessage(), 'duplicate key error')) {
+                    $restaurant->increment('next_order_number');
+                    $restaurant->refresh();
+                    continue;
+                }
+                throw $e;
+            }
         }
 
-        $orderNumber = ucfirst($provider).'-'.$transactionNumber;
-
-        // 4. Create Order
-        $order = Order::create([
-            'restaurant_id' => $restaurant->id,
-            'order_number' => $orderNumber,
-            'transaction_number' => $transactionNumber,
-            'delivery_provider' => $provider,
-            'delivery_order_id' => $orderData['external_id'],
-            'status' => 'pending_approval',
-            'total' => $orderData['total'],
-            'currency' => $orderData['currency'] ?? 'AED',
-            'customer_name' => $orderData['customer']['name'] ?? 'Guest',
-            'customer_phone' => $orderData['customer']['phone'] ?? '',
-            'items' => $orderData['items'] ?? [],
-            'raw_payload' => $request->all(),
-            'notes' => $orderData['notes'] ?? '',
-        ]);
+        if (! $order) {
+            throw new \Exception('Failed to generate order number.');
+        }
 
         // 5. Create Order Items (Link to Menu & Inventory)
         foreach ($orderData['items'] as $item) {

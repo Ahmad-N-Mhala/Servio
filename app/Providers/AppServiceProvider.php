@@ -128,7 +128,7 @@ class AppServiceProvider extends ServiceProvider
                 // 2. Role HAS permission. Now Check Plan Features.
                 static $permToFeatureMap = null;
                 if ($permToFeatureMap === null) {
-                    $coreGroups = ['dashboard', 'orders', 'menu', 'tables', 'customers', 'staff', 'settings', 'service'];
+                    $coreGroups = ['dashboard', 'orders', 'menu', 'tables', 'customers', 'staff', 'settings', 'service', 'user_manual'];
 
                     // Map Permission Groups to Feature Keys where they differ
                     $groupMapping = [
