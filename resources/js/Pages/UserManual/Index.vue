@@ -14,8 +14,8 @@
                         {{ isEditing ? $t('user_manual.edit_description') : $t('user_manual.view_description') }}
                     </p>
                 </div>
-                <!-- Super Admin Inline Edit Actions -->
-                <div v-if="isSuperAdmin" class="flex items-center gap-3">
+                <!-- Inline Edit Actions -->
+                <div v-if="isSuperAdmin || hasPermission('manage_user_manual')" class="flex items-center gap-3">
                     <button 
                         @click="toggleEditMode" 
                         class="px-4 py-2 text-sm font-medium border rounded-xl transition-all"
@@ -323,6 +323,7 @@
 import { computed, ref, watch } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import { usePermissions } from '@/Composables/usePermissions';
 
 interface Translation {
     en: string;
@@ -356,6 +357,7 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
+const { hasPermission } = usePermissions();
 const currentLocale = computed(() => page.props.locale as string);
 const isRtl = computed(() => page.props.isRtl as boolean);
 
