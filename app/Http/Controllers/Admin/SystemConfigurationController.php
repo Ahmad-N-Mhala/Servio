@@ -94,4 +94,69 @@ class SystemConfigurationController extends Controller
             return back()->with('error', 'Test SMS Failed: '.$e->getMessage());
         }
     }
+
+    /**
+     * Download database backup as a gzipped archive.
+     */
+    public function downloadBackup()
+    {
+        $connection = config('database.default');
+
+        if ($connection !== 'mongodb') {
+            return back()->with('error', 'Database backup is only supported for MongoDB.');
+        }
+
+        $config = config('database.connections.mongodb');
+        $host = $config['host'] ?? '127.0.0.1';
+        $port = $config['port'] ?? 27017;
+        $database = $config['database'] ?? 'servio';
+        $username = $config['username'] ?? '';
+        $password = $config['password'] ?? '';
+        $authDatabase = $config['options']['database'] ?? 'admin';
+
+        $cmd = ['mongodump', '--host=' . $host, '--port=' . $port, '--db=' . $database];
+
+        if (!empty($username)) {
+            $cmd[] = '--username=' . $username;
+            if (!empty($password)) {
+                $cmd[] = '--password=' . $password;
+            }
+            if (!empty($authDatabase)) {
+                $cmd[] = '--authenticationDatabase=' . $authDatabase;
+            }
+        }
+
+        $cmd[] = '--archive';
+        $cmd[] = '--gzip';
+
+        try {
+            return response()->stream(function () use ($cmd) {
+                $process = new \Symfony\Component\Process\Process($cmd);
+                $process->setTimeout(600); // 10 minutes timeout
+                $process->start();
+
+                foreach ($process->getIterator(\Symfony\Component\Process\Process::ITER_SKIP_ERR) as $buffer) {
+                    echo $buffer;
+                    if (ob_get_level() > 0) {
+                        ob_flush();
+                    }
+                    flush();
+                }
+
+                if (!$process->isSuccessful()) {
+                    Log::error('Database backup execution failed: ' . $process->getErrorOutput());
+                }
+            }, 200, [
+                'Content-Type' => 'application/gzip',
+                'Content-Disposition' => 'attachment; filename="servio_backup_' . date('Y-m-d_H-i-s') . '.gz"',
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Database backup initialization failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to start backup: ' . $e->getMessage());
+        }
+    }
 }
+

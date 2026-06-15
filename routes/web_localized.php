@@ -407,6 +407,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('settings/system', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'update'])->name('settings.system.update');
         Route::post('settings/system/test-email', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'testEmail'])->name('settings.system.test-email');
         Route::post('settings/system/test-sms', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'testSms'])->name('settings.system.test-sms');
+        Route::get('settings/system/backup', [\App\Http\Controllers\Admin\SystemConfigurationController::class, 'downloadBackup'])->name('settings.system.backup');
         Route::post('landing-page/settings', [\App\Http\Controllers\Admin\LandingPageController::class, 'updateSettings'])->name('landing.settings.update');
         Route::post('landing-page/modules', [\App\Http\Controllers\Admin\LandingPageController::class, 'storeModule'])->name('landing.modules.store');
         Route::put('landing-page/modules/{landingModule}', [\App\Http\Controllers\Admin\LandingPageController::class, 'updateModule'])->name('landing.modules.update');

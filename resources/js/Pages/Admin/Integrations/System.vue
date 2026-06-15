@@ -213,6 +213,38 @@
                      />
                 </div>
             </div>
+
+            <!-- Database Backup Section -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-100/50 overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:shadow-gray-200/50">
+                <div class="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center gap-4">
+                        <div class="p-3 bg-purple-100 rounded-2xl text-purple-600 shadow-sm">
+                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.58 4 8 4s8-1.79 8-4M4 7c0-2.21 3.58-4 8-4s8 1.79 8 4m0 5c0 2.21-3.58 4-8 4s-8-1.79-8-4"/></svg>
+                        </div>
+                        <div>
+                            {{ $t('settings.db_backup') }}
+                            <p class="mt-1 text-gray-500 text-sm font-normal">{{ $t('settings.db_backup_desc') }}</p>
+                        </div>
+                    </h3>
+                </div>
+                <div class="p-8 flex flex-col md:flex-row items-center justify-between gap-6 bg-purple-50/10">
+                     <div class="space-y-1">
+                         <span class="text-sm font-medium text-purple-900 flex items-center gap-2">
+                             <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
+                             Database Engine: MongoDB
+                         </span>
+                         <p class="text-xs text-gray-400">Compressed gzip archive streams directly to browser</p>
+                     </div>
+                     <a 
+                        :href="route('admin.settings.system.backup')" 
+                        download
+                        class="inline-flex items-center justify-center px-6 py-3 border border-purple-200 rounded-2xl shadow-sm text-sm font-bold text-purple-700 bg-white hover:bg-purple-50 hover:text-purple-800 transition-all duration-200 cursor-pointer whitespace-nowrap"
+                     >
+                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                         {{ $t('settings.download_backup') }}
+                     </a>
+                </div>
+            </div>
             
             <!-- Inline Save Button -->
             <div class="flex justify-end pt-4">
