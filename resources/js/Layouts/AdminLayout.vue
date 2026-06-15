@@ -8,7 +8,7 @@
         />
         <!-- Sidebar -->
         <aside 
-            class="fixed inset-y-0 z-50 glass-sidebar shadow-lifted transform transition-all duration-300 ease-in-out lg:translate-x-0" 
+            class="fixed inset-y-0 z-50 glass-sidebar shadow-lifted transform transition-all duration-300 ease-in-out lg:translate-x-0 flex flex-col" 
             :class="[
                 currentLocale === 'ar' ? 'right-0' : 'left-0',
                 isSidebarCollapsed ? 'w-20' : 'w-64',
@@ -367,7 +367,7 @@
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100/50 dark:border-gray-700/50">
+            <div class="p-4 border-t border-gray-100/50 dark:border-gray-700/50 mt-auto">
                 <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10">
                     <div class="p-2 bg-primary/10 rounded-lg">
                         <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
