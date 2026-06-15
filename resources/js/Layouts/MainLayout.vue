@@ -855,30 +855,12 @@
                                         </div>
                                     </div>
 
-                                    <!-- Cohesive Active Restaurant & ID Badge -->
-                                    <div v-if="currentRestaurant" class="p-3 rounded-xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 space-y-2">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="text-[10px] font-black text-primary uppercase tracking-widest truncate">{{ currentRestaurant.name }}</span>
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-200/50 dark:bg-gray-700/50 text-gray-500 font-bold uppercase tracking-wider flex-shrink-0">Active</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-800 rounded-lg p-1.5 pl-2 shadow-inner">
-                                            <span class="font-mono text-[10px] text-gray-600 dark:text-gray-300 select-all truncate flex-1 min-w-0" :title="currentRestaurant.id">{{ currentRestaurant.id }}</span>
-                                            <button 
-                                                @click.stop="copyRestaurantId" 
-                                                class="flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 hover:bg-primary/5 dark:hover:bg-primary/5 hover:text-primary border border-gray-200/60 dark:border-gray-700/60 text-gray-500 hover:border-primary/30 transition-all cursor-pointer shadow-sm active:scale-95 flex-shrink-0"
-                                                :title="$t('auth.restaurant_id')"
-                                            >
-                                                <svg v-if="!isCopied" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                                </svg>
-                                                <svg v-else class="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                <span class="text-[9px] font-black tracking-wide uppercase" :class="isCopied ? 'text-primary' : 'text-gray-500'">
-                                                    {{ isCopied ? $t('auth.copied') : $t('auth.copy') }}
-                                                </span>
-                                            </button>
-                                        </div>
+                                    <!-- Cohesive Active Restaurant Banner -->
+                                    <div v-if="currentRestaurant" class="p-3 rounded-xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                         <div class="flex items-center justify-between gap-2">
+                                             <span class="text-[10px] font-black text-primary uppercase tracking-widest truncate">{{ currentRestaurant.name }}</span>
+                                             <span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-200/50 dark:bg-gray-700/50 text-gray-500 font-bold uppercase tracking-wider flex-shrink-0">{{ $t('plans.active') }}</span>
+                                         </div>
                                     </div>
                                 </div>
 
@@ -907,12 +889,12 @@
                                                         </svg>
                                                     </div>
                                                     <div class="min-w-0">
-                                                        <p class="text-xs font-black text-gray-900 dark:text-white truncate uppercase tracking-wide">{{ currentSubscription.plan?.name || 'No Plan' }}</p>
-                                                        <p class="text-[10px] text-gray-500 mt-0.5 font-medium">Expires {{ formatExpiryDate(currentSubscription.ends_at) }}</p>
+                                                        <p class="text-xs font-black text-gray-900 dark:text-white truncate uppercase tracking-wide">{{ translatePlanName(currentSubscription.plan) }}</p>
+                                                        <p class="text-[10px] text-gray-500 mt-0.5 font-medium">{{ $t('plans.expires') }} {{ formatExpiryDate(currentSubscription.ends_at) }}</p>
                                                     </div>
                                                 </div>
                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800">
-                                                    {{ subscriptionStatus }}
+                                                    {{ translateStatus(subscriptionStatus) }}
                                                 </span>
                                             </div>
                                         </div>
@@ -920,8 +902,8 @@
                                             v-else
                                             class="px-3 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100/80 border border-gray-200/40 text-center transition-colors cursor-pointer"
                                         >
-                                            <p class="text-xs font-bold text-gray-900 dark:text-white">No Active Plan</p>
-                                            <p class="text-[10px] text-primary mt-1 font-black">Click to choose a plan</p>
+                                            <p class="text-xs font-bold text-gray-900 dark:text-white">{{ $t('plans.no_active_plan') }}</p>
+                                            <p class="text-[10px] text-primary mt-1 font-black">{{ locale === 'ar' ? 'انقر لاختيار خطة' : 'Click to choose a plan' }}</p>
                                         </div>
                                     </Link>
                                 </div>
@@ -1138,7 +1120,7 @@ const onSidebarScroll = (e: any) => {
 
 const page = usePage();
 const route = (window as any).route;
-const { locale } = useI18n();
+const { locale, t, te } = useI18n();
 
 const toggleMenu = (key: string) => {
     openMenus.value[key] = !openMenus.value[key];
@@ -1290,17 +1272,33 @@ const subscriptionStatus = computed(() => {
     return 'Active';
 });
 
+const translatePlanName = (plan: any) => {
+    if (!plan) return t('plans.no_active_plan');
+    const slug = plan.slug ? plan.slug.toLowerCase() : '';
+    if (slug && te(`plans.${slug}`)) {
+        return t(`plans.${slug}`);
+    }
+    return plan.name || t('plans.no_active_plan');
+};
+
+const translateStatus = (status: string) => {
+    if (status === 'Active') return t('plans.active');
+    if (status === 'Expired') return t('plans.expired');
+    if (status === 'Expiring soon') return t('plans.expiring_soon');
+    return t('plans.no_active_plan');
+};
+
 const formatExpiryDate = (date: string) => {
     const expiryDate = new Date(date);
     const now = new Date();
     const diffDays = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return 'Expired';
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
-    if (diffDays <= 7) return `in ${diffDays} days`;
+    if (diffDays < 0) return t('plans.expired');
+    if (diffDays === 0) return t('plans.today');
+    if (diffDays === 1) return t('plans.tomorrow');
+    if (diffDays <= 7) return t('plans.in_days', { days: diffDays });
     
-    return expiryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return expiryDate.toLocaleDateString(locale.value === 'ar' ? 'ar-AE' : 'en-US', { month: 'short', day: 'numeric' });
 };
 
 const daysUntilExpiry = (endDate: string) => {
