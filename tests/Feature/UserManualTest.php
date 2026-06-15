@@ -110,30 +110,24 @@ class UserManualTest extends TestCase
 
     public function test_guest_is_redirected_to_login(): void
     {
-        $response = $this->get(route('user-manual.index'));
+        $response = $this->get(route('admin.user-manual.index'));
         $response->assertRedirect(route('login'));
     }
 
     public function test_unauthorized_user_cannot_view_user_manual(): void
     {
-        $managerRole = Role::findByName('manager', 'web');
-        $managerRole->revokePermissionTo('view_user_manual');
-
         $response = $this->actingAs($this->user)
             ->withSession(['active_restaurant_id' => (string) $this->restaurant->id])
-            ->get(route('user-manual.index'));
+            ->get(route('admin.user-manual.index'));
 
         $response->assertStatus(403);
     }
 
-    public function test_authorized_user_can_view_user_manual(): void
+    public function test_super_admin_can_view_user_manual_without_explicit_role_permissions(): void
     {
-        $managerRole = Role::findByName('manager', 'web');
-        $managerRole->givePermissionTo('view_user_manual');
-
-        $response = $this->actingAs($this->user)
+        $response = $this->actingAs($this->superAdmin)
             ->withSession(['active_restaurant_id' => (string) $this->restaurant->id])
-            ->get(route('user-manual.index'));
+            ->get(route('admin.user-manual.index'));
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
@@ -142,23 +136,11 @@ class UserManualTest extends TestCase
         );
     }
 
-    public function test_super_admin_can_view_user_manual_without_explicit_role_permissions(): void
-    {
-        $response = $this->actingAs($this->superAdmin)
-            ->withSession(['active_restaurant_id' => (string) $this->restaurant->id])
-            ->get(route('user-manual.index'));
-
-        $response->assertStatus(200);
-    }
-
     public function test_unauthorized_user_cannot_update_user_manual(): void
     {
-        $managerRole = Role::findByName('manager', 'web');
-        $managerRole->revokePermissionTo('manage_user_manual');
-
         $response = $this->actingAs($this->user)
             ->withSession(['active_restaurant_id' => (string) $this->restaurant->id])
-            ->post(route('user-manual.update'), [
+            ->post(route('admin.user-manual.update'), [
                 'sections' => [],
                 'faqs' => [],
             ]);
@@ -204,7 +186,7 @@ class UserManualTest extends TestCase
 
         $response = $this->actingAs($this->superAdmin)
             ->withSession(['active_restaurant_id' => (string) $this->restaurant->id])
-            ->post(route('user-manual.update'), $testData);
+            ->post(route('admin.user-manual.update'), $testData);
 
         $response->assertRedirect();
         $response->assertSessionHasNoErrors();

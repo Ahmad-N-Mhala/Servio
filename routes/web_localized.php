@@ -330,11 +330,6 @@ Route::middleware(['auth'])->group(function () {
                 ->middleware('permission:customize_receipt_template');
         });
 
-        // User Manual
-        Route::get('/user-manual', [\App\Http\Controllers\Tenant\UserManualController::class, 'index'])->name('user-manual.index')
-            ->middleware('permission:view_user_manual');
-        Route::post('/user-manual', [\App\Http\Controllers\Tenant\UserManualController::class, 'update'])->name('user-manual.update')
-            ->middleware('permission:manage_user_manual');
 
         // Feedback (Admin)
         Route::prefix('feedback')->name('feedback.')->middleware('feature.access:feedback')->group(function () {
