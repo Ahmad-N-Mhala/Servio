@@ -1,5 +1,5 @@
 <template>
-    <MainLayout>
+    <component :is="layoutComponent">
         <div class="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto">
             <!-- Header Section -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -316,13 +316,14 @@
                 </div>
             </div>
         </div>
-    </MainLayout>
+    </component>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { usePermissions } from '@/Composables/usePermissions';
 
 interface Translation {
@@ -360,6 +361,14 @@ const page = usePage();
 const { hasPermission } = usePermissions();
 const currentLocale = computed(() => page.props.locale as string);
 const isRtl = computed(() => page.props.isRtl as boolean);
+
+const layoutComponent = computed(() => {
+    return page.url.includes('/admin') ? AdminLayout : MainLayout;
+});
+
+const saveRouteName = computed(() => {
+    return page.url.includes('/admin') ? 'admin.user-manual.update' : 'user-manual.update';
+});
 
 // Super Admin authorization checks
 const isSuperAdmin = computed(() => {
@@ -448,7 +457,7 @@ const removeFaq = (index: number) => {
 
 // Save updated manual configuration back to DB
 const saveChanges = () => {
-    form.post(route('user-manual.update'), {
+    form.post(route(saveRouteName.value), {
         preserveScroll: true,
         onSuccess: () => {
             isEditing.value = false;
